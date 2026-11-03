@@ -1601,7 +1601,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.51.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.51.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -8975,6 +8975,9 @@ function probBar(p) { return h("div", { class: "pbar" }, p.map((v, i) => v > 0 ?
 /* 아이템 아이콘: 둥근 색 바탕 위에 그림 (목록 왼쪽 · 진열대) */
 const ICON_BG = { bait: ["#ffe9d6", "#ffd2b0"], rod: ["#e2f0f8", "#c6e0ef"], reel: ["#ece6fa", "#d6ccf2"], line: ["#e0f6f3", "#bfe9e3"], tackle: ["#fff3cf", "#ffe4a0"], tool: ["#e6f3dc", "#cde7bb"] };
 const iconCache = new Map();
+// 미끼 그림 (v1.50 · 사용자가 준 일러스트에서 배경을 따낸 그림 a/bait-*.png). 불러오기 전엔 직접 그린 아이콘을 보여 줘요
+const BAIT_PIC = new Map();
+["worm", "shrimp", "krill", "paste", "squid", "lure", "legend"].forEach(id => { const im = new Image(); im.onload = () => { BAIT_PIC.set(id, im); for (const k of [...iconCache.keys()]) if (k.startsWith("bait|")) iconCache.delete(k); try { refreshSheet(); } catch {} }; im.src = "a/bait-" + id + ".png"; });
 function itemIcon(cat, it, size) {
   size = size || 96; const key = cat + "|" + it.id + "|" + size;
   if (iconCache.has(key)) return iconCache.get(key);
@@ -8983,7 +8986,9 @@ function itemIcon(cat, it, size) {
   g.fillStyle = "rgba(255,255,255,.45)"; g.beginPath(); g.ellipse(x, s * .28, s * .42, s * .2, 0, 0, 7); g.fill();
   const hex = (n) => "#" + n.toString(16).padStart(6, "0");
   const S2 = s * .78;
-  if (cat === "bait") {
+  if (cat === "bait" && BAIT_PIC.has(it.id)) {
+    g.drawImage(BAIT_PIC.get(it.id), s * .04, s * .04, s * .92, s * .92);
+  } else if (cat === "bait") {
     if (it.id === "worm") { g.lineCap = "round"; const p = () => { g.beginPath(); for (let i = 0; i <= 30; i++) { const t = i / 30, px = s * .2 + t * s * .6, py = y + Math.sin(t * Math.PI * 2.4) * s * .14; i ? g.lineTo(px, py) : g.moveTo(px, py); } }; p(); g.lineWidth = s * .14; g.strokeStyle = OL; g.stroke(); p(); g.lineWidth = s * .1; g.strokeStyle = "#f08aa0"; g.stroke(); g.fillStyle = "#3a2416"; g.beginPath(); g.arc(s * .79, y - s * .1, s * .02, 0, 7); g.fill(); }
     else if (it.id === "shrimp" || it.id === "krill") {
       const sh = (cx, cy, k, col) => { g.save(); g.translate(cx, cy); g.scale(k, k); g.lineCap = "round";
