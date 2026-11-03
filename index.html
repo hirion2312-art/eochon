@@ -1191,7 +1191,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.33.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.34.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -5850,8 +5850,246 @@ function swimMat(map) {
   };
   return m;
 }
+/* ---------- 직접 만든 3D 물고기 (v1.34) ----------
+   그림(2D)으로만 있던 물고기 50종 + 갯벌 생물 3종을 코드로 깎은 3D 모델로 바꿔요.
+   몸통은 단면 고리를 이어 붙인 관(머리 +z), 지느러미는 얇은 판, 무늬는 물고기마다 그린 텍스처 한 장(몸통 · 지느러미 · 눈 색이 한 장에 다 있음).
+   에셋 모델과 똑같이 길이 1로 맞춰서 FISH3D에 넣으면 손에 들기 · 대물 연출 · 도감 사진 · 수족관이 모두 3D가 돼요 */
+const SHELL_ART = {
+  "s-bajirak": { shape: "clam", body: "#b8a58a", belly: "#efe4d0", fin: "#8a7a62", pattern: "waves", pc: "#6a5a46" },
+  "s-matjogae": { shape: "razor", body: "#d8b878", belly: "#f4e8cc", fin: "#a88a52", pattern: "stripes", pc: "#9a7a46" },
+  "s-kkotge": { shape: "crab", body: "#c25a3a", belly: "#f2dccc", fin: "#a8402a", pattern: "spots", pc: "#e8a080" },
+};
+const PF_UV = { white: [.9, .012], black: [.65, .012], fin: (u, k) => [.02 + .96 * clamp(u, 0, 1), .04 + .16 * clamp(k, 0, 1)] };
+function pfShade(hex, k) { const c = new T3.Color(hex); if (k < 0) c.lerp(new T3.Color(0x000000), -k); else c.lerp(new T3.Color(0xffffff), k); return "#" + c.getHexString(); }
+function pfTexture(a, seed) {
+  const c = document.createElement("canvas"); c.width = c.height = 256; const g = c.getContext("2d");
+  // 몸통 (위 3/4): 등 → 배 그라데이션, 머리는 오른쪽
+  const gr = g.createLinearGradient(0, 0, 0, 192);
+  gr.addColorStop(0, pfShade(a.body, -.18)); gr.addColorStop(.36, a.body); gr.addColorStop(.62, pfShade(a.body, .12)); gr.addColorStop(.78, a.belly); gr.addColorStop(1, a.belly);
+  g.fillStyle = gr; g.fillRect(0, 0, 256, 196);
+  let s = seed || 7; const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
+  const pc = a.pc || pfShade(a.body, -.35);
+  g.save(); g.fillStyle = pc; g.strokeStyle = pc;
+  if (a.pattern === "stripes") { g.globalAlpha = .62; const n = 6; for (let i = 0; i < n; i++) { const x = 30 + i * 34; g.beginPath(); g.moveTo(x - 6, 0); g.lineTo(x + 8, 0); g.lineTo(x + 4 + 3, 128); g.lineTo(x - 9, 128); g.closePath(); g.fill(); } }
+  if (a.pattern === "spots") { g.globalAlpha = .85; const n = a.dense ? 90 : 26; for (let i = 0; i < n; i++) { const r = a.dense ? 2 + rnd() * 3 : 4 + rnd() * 6; g.beginPath(); g.arc(14 + rnd() * 228, 6 + rnd() * (a.dense ? 170 : 120), r, 0, 7); g.fill(); } }
+  if (a.pattern === "waves") { g.globalAlpha = .75; g.lineWidth = 3.5; for (let i = 0; i < 7; i++) { g.beginPath(); for (let x = 0; x <= 236; x += 6) { const y = 8 + i * 11 + Math.sin(x / 13 + i * 1.7) * 6; x ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); } }
+  if (a.pattern === "finlets") { g.globalAlpha = .95; g.fillRect(0, 84, 240, 12); }
+  g.restore();
+  // 옆줄 · 아가미 · 입
+  g.save(); g.globalAlpha = .22; g.strokeStyle = "#ffffff"; g.lineWidth = 2; g.beginPath(); g.moveTo(10, 78); g.quadraticCurveTo(128, 70, 214, 64); g.stroke();
+  g.globalAlpha = .38; g.strokeStyle = pfShade(a.body, -.5); g.lineWidth = 3; g.beginPath(); g.arc(240, 96, 44, Math.PI * .62, Math.PI * 1.38); g.stroke();
+  g.globalAlpha = .6; g.lineWidth = 2.5; g.beginPath(); g.moveTo(256, 118); g.lineTo(242, 122); g.stroke(); g.restore();
+  if (a.shine) { g.save(); const mg = g.createLinearGradient(0, 0, 0, 192); mg.addColorStop(0, "#6f8496"); mg.addColorStop(.35, "#b9c6d0"); mg.addColorStop(.55, "#eef3f6"); mg.addColorStop(.7, "#c3ced6"); mg.addColorStop(1, "#e8eef2"); g.fillStyle = mg; g.fillRect(0, 0, 256, 196);
+    g.globalAlpha = .35; g.strokeStyle = "#ffffff"; g.lineWidth = 2; for (let x = 6; x < 250; x += 10) { g.beginPath(); g.moveTo(x, 40); g.lineTo(x + 6, 150); g.stroke(); } g.restore(); }
+  if (a.shimmer) { g.save(); const sg = g.createLinearGradient(0, 0, 256, 192); sg.addColorStop(.2, "rgba(255,255,255,0)"); sg.addColorStop(.5, "rgba(255,255,255,.45)"); sg.addColorStop(.8, "rgba(255,255,255,0)"); g.fillStyle = sg; g.fillRect(0, 0, 256, 192); g.restore(); }
+  // 지느러미 띠 (아래): 지느러미 색 + 살 무늬, 끝으로 갈수록 밝게
+  const fg = g.createLinearGradient(0, 246, 0, 200); fg.addColorStop(0, pfShade(a.fin, -.12)); fg.addColorStop(1, pfShade(a.fin, .28));
+  g.fillStyle = fg; g.fillRect(0, 196, 256, 54);
+  g.save(); g.globalAlpha = .28; g.strokeStyle = pfShade(a.fin, -.45); g.lineWidth = 1.5; for (let x = 4; x < 256; x += 9) { g.beginPath(); g.moveTo(x, 248); g.lineTo(x + 3, 198); g.stroke(); } g.restore();
+  // 눈 색 칸
+  g.fillStyle = "#151515"; g.fillRect(140, 250, 56, 6); g.fillStyle = "#ffffff"; g.fillRect(200, 250, 56, 6);
+  const tex = new T3.CanvasTexture(c); tex.anisotropy = 4; return tex;
+}
+// 기하 도우미: 점 · uv · 삼각형을 모아서 마지막에 한 덩어리로
+function pfB() { return { p: [], uv: [], ix: [] }; }
+function pfV(b, x, y, z, u, v) { b.p.push(x, y, z); b.uv.push(u, v); return b.p.length / 3 - 1; }
+// 3D 경로를 따라 단면 타원(rx 옆 · ry 위아래, ryB 아래쪽)을 이어 붙인 관
+function pfTube(b, pts, rx, ry, o) {
+  o = o || {}; const N = o.N || 18, up = new T3.Vector3(0, 1, 0), n = new T3.Vector3(), bn = new T3.Vector3(), t = new T3.Vector3(), start = b.p.length / 3;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[Math.max(0, i - 1)], c = pts[Math.min(pts.length - 1, i + 1)]; t.subVectors(c, a).normalize();
+    n.crossVectors(t, Math.abs(t.y) > .9 ? new T3.Vector3(1, 0, 0) : up).normalize(); bn.crossVectors(n, t).normalize();   // bn ≈ 위쪽
+    const u = pts.length > 1 ? i / (pts.length - 1) : 0;
+    for (let k = 0; k <= N; k++) {
+      const th = k / N * Math.PI * 2, cs = Math.cos(th), sn = Math.sin(th), yv = cs;
+      const rY = yv >= 0 ? ry[i] : (o.ryB ? o.ryB[i] : ry[i]);
+      const P = pts[i].clone().addScaledVector(n, rx[i] * sn).addScaledVector(bn, rY * yv);
+      const uv = o.uv ? o.uv(u, (yv + 1) / 2, sn) : [o.u0 + (o.u1 - o.u0) * u, .25 + .75 * (yv + 1) / 2];
+      pfV(b, P.x, P.y, P.z, uv[0], uv[1]);
+    }
+  }
+  const R = N + 1;
+  for (let i = 0; i < pts.length - 1; i++) for (let k = 0; k < N; k++) { const a = start + i * R + k, c = a + R; b.ix.push(a, c, a + 1, a + 1, c, c + 1); }
+  const cap = (i, uvp) => { if (rx[i] < 1e-4 && ry[i] < 1e-4) return; const ce = pfV(b, pts[i].x, pts[i].y, pts[i].z, uvp[0], uvp[1]); for (let k = 0; k < N; k++) b.ix.push(ce, start + i * R + k, start + i * R + k + 1); };
+  if (o.capA) cap(0, o.capA); if (o.capB) cap(pts.length - 1, o.capB);
+}
+// 지느러미: 밑변 점들과 끝 점들을 잇는 띠
+function pfFin(b, base, tip) {
+  const s = b.p.length / 3, n = base.length;
+  for (let i = 0; i < n; i++) { const u = n > 1 ? i / (n - 1) : 0, A = PF_UV.fin(u, 0), B = PF_UV.fin(u, 1); pfV(b, base[i].x, base[i].y, base[i].z, A[0], A[1]); pfV(b, tip[i].x, tip[i].y, tip[i].z, B[0], B[1]); }
+  for (let i = 0; i < n - 1; i++) { const a = s + i * 2; b.ix.push(a, a + 1, a + 2, a + 2, a + 1, a + 3); }
+}
+// 부채꼴 (꼬리 · 가슴지느러미): 중심점 + 바깥 테두리
+function pfFan(b, ce, rim) {
+  const s = pfV(b, ce.x, ce.y, ce.z, ...PF_UV.fin(.5, 0));
+  rim.forEach((p, i) => pfV(b, p.x, p.y, p.z, ...PF_UV.fin(i / Math.max(1, rim.length - 1), 1)));
+  for (let i = 0; i < rim.length - 1; i++) b.ix.push(s, s + 1 + i, s + 2 + i);
+}
+function pfBall(b, c, r, uv, sy) {
+  const s = b.p.length / 3, W = 10, H = 7;
+  for (let j = 0; j <= H; j++) for (let i = 0; i <= W; i++) { const th = j / H * Math.PI, ph = i / W * Math.PI * 2; pfV(b, c.x + r * Math.sin(th) * Math.cos(ph), c.y + r * (sy || 1) * Math.cos(th), c.z + r * Math.sin(th) * Math.sin(ph), uv[0], uv[1]); }
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { const a = s + j * (W + 1) + i, c2 = a + W + 1; b.ix.push(a, c2, a + 1, a + 1, c2, c2 + 1); }
+}
+function pfEye(b, x, y, z, r, side) { pfBall(b, new T3.Vector3(x, y, z), r, PF_UV.white); pfBall(b, new T3.Vector3(x + side * r * .5, y + r * .05, z + r * .18), r * .62, PF_UV.black); }
+const V3 = (x, y, z) => new T3.Vector3(x, y, z);
+const pfLine = (n, f) => Array.from({ length: n }, (_, i) => f(i / (n - 1)));
+// ── 보통 물고기 ──
+function pfFish(b, a) {
+  const len = a.len || 1, th = a.th || 1, puffer = th >= 1.4 && len < .85, H = .118 * th / len;
+  const wr = puffer ? .86 : th >= 1.4 ? .32 : a.eel ? .9 : .44;
+  const z0 = -.36, z1 = .5, M = 30;
+  const f = (u) => Math.pow(u, .6) * Math.pow(1 - u, .38), up = .6 / .98, fmax = f(up);
+  const hp = (u) => u < up ? .17 + .83 * f(u) / fmax : Math.max(.0, f(u) / fmax);
+  const hump = (u) => a.hump ? .55 * Math.exp(-Math.pow((u - .8) / .07, 2)) : 0;
+  const pts = [], rx = [], ry = [], ryB = [];
+  for (let i = 0; i < M; i++) { const u = i / (M - 1), z = z0 + (z1 - z0) * u, h = H * hp(u); pts.push(V3(0, -H * .06 * Math.sin(Math.PI * u), z)); ry.push(h * (1 + hump(u) * (u > .7 ? 1 : 0)) + (a.hump ? H * hump(u) : 0)); ryB.push(h * .92); rx.push(h * wr * (.55 + .45 * Math.min(1, u * 2.4))); }
+  pfTube(b, pts, rx, ry, { ryB, u0: .02, u1: .98, capA: PF_UV.fin(0, 0) });
+  const topAt = (u) => { const i = Math.round(u * (M - 1)); return { z: pts[i].z, y: pts[i].y + ry[i] * .96 }; }, botAt = (u) => { const i = Math.round(u * (M - 1)); return { z: pts[i].z, y: pts[i].y - ryB[i] * .96 }; };
+  // 꼬리지느러미 (갈래)
+  const T = H * (puffer ? .8 : 1.15), yb = H * .15, fork = a.round ? -.56 : -.5;
+  pfFan(b, V3(0, 0, z0 + .01), [V3(0, yb, z0), V3(0, T * .7, z0 - .12), V3(0, T, z0 - .22), V3(0, T * .3, fork + .02), V3(0, 0, fork), V3(0, -T * .3, fork + .02), V3(0, -T, z0 - .22), V3(0, -T * .7, z0 - .12), V3(0, -yb, z0)]);
+  // 등지느러미
+  const dor = a.sail ? [.22, .86, H * 2.1] : a.crest ? [.08, .92, H * .5] : [.36, .74, H * .62];
+  { const base = [], tip = []; for (let i = 0; i < 14; i++) { const t2 = i / 13, u = dor[0] + (dor[1] - dor[0]) * t2, p = topAt(u), pr = a.crest ? (.7 + .3 * Math.sin(Math.PI * t2)) : Math.pow(Math.sin(Math.PI * t2), .7) * (.55 + .7 * t2); base.push(V3(0, p.y - .004, p.z)); tip.push(V3(0, p.y + dor[2] * pr, p.z - dor[2] * pr * .35)); } pfFin(b, base, tip); }
+  // 뒷지느러미
+  { const base = [], tip = []; for (let i = 0; i < 8; i++) { const t2 = i / 7, u = .16 + .22 * t2, p = botAt(u), pr = Math.sin(Math.PI * t2) * (.6 + .5 * t2); base.push(V3(0, p.y + .004, p.z)); tip.push(V3(0, p.y - H * .5 * pr, p.z - H * .2 * pr)); } pfFin(b, base, tip); }
+  // 토막지느러미(방어 · 고등어류)
+  if (a.pattern === "finlets") for (let k = 0; k < 4; k++) { const u = .03 + k * .05; for (const s of [1, -1]) { const p = s > 0 ? topAt(u) : botAt(u); pfFan(b, V3(0, p.y, p.z + .012), [V3(0, p.y, p.z + .012), V3(0, p.y + s * H * .16, p.z - .01), V3(0, p.y, p.z - .02)]); } }
+  // 가슴 · 배지느러미 (양쪽)
+  for (const s of [1, -1]) {
+    const i = Math.round(.76 * (M - 1)), p = pts[i], x = rx[i] * s * .92, y = p.y - ry[i] * .28, L2 = H * (puffer ? .6 : .85);
+    pfFan(b, V3(x, y, p.z), [V3(x, y + .012, p.z + .01), V3(x + s * L2 * .5, y + L2 * .15, p.z - L2 * .7), V3(x + s * L2 * .55, y - L2 * .2, p.z - L2 * .9), V3(x + s * L2 * .2, y - L2 * .3, p.z - L2 * .5), V3(x, y - .012, p.z)]);
+    const j = Math.round(.58 * (M - 1)), q = pts[j], yq = q.y - ryB[j] * .85, xq = rx[j] * s * .5;
+    pfFan(b, V3(xq, yq, q.z), [V3(xq, yq, q.z + .01), V3(xq + s * H * .2, yq - H * .45, q.z - H * .35), V3(xq, yq, q.z - .03)]);
+  }
+  // 주둥이(청새치 · 학꽁치 · 꽁치)
+  if (a.bill) { const bl = a.len > 1.2 ? .16 : .26, bp = pfLine(6, (t2) => V3(0, -H * .02, z1 - .01 + bl * t2)), r = pfLine(6, (t2) => H * .1 * (1 - t2) + .001); pfTube(b, bp, r, r, { N: 8, uv: () => [.97, .5] }); }
+  // 눈
+  { const i = Math.round(.87 * (M - 1)), p = pts[i], r = H * .15 * (a.eye || 1) * (puffer ? 1.2 : 1); for (const s of [1, -1]) pfEye(b, s * rx[i] * .9, p.y + ry[i] * .26, p.z, r, s); }
+}
+// ── 장어형 (갈치 · 붕장어) ──
+function pfEel(b, a) {
+  const H = .048 * (a.th || 1), M = 46, wr = a.taper ? .26 : .9, pts = [], rx = [], ry = [];
+  for (let i = 0; i < M; i++) { const u = i / (M - 1), z = -.5 + u, prof = Math.min(1, Math.pow(u / .35, .8)) * Math.pow(1 - Math.pow(u, 6), .5); pts.push(V3(0, 0, z)); ry.push(H * Math.max(a.taper ? .03 : .2, prof)); rx.push(H * wr * Math.max(a.taper ? .1 : .2, prof)); }
+  pfTube(b, pts, rx, ry, { u0: .02, u1: .98, capA: PF_UV.fin(0, 0) });
+  const base = [], tip = [], base2 = [], tip2 = [];
+  for (let i = 2; i < M - 6; i++) { const p = pts[i]; base.push(V3(0, p.y + ry[i] * .9, p.z)); tip.push(V3(0, p.y + ry[i] + H * (a.taper ? .7 : .6), p.z - .01)); if (!a.taper && i < M * .55) { base2.push(V3(0, p.y - ry[i] * .9, p.z)); tip2.push(V3(0, p.y - ry[i] - H * .5, p.z - .01)); } }
+  pfFin(b, base, tip); if (base2.length) pfFin(b, base2, tip2);
+  for (const s of [1, -1]) { const i = M - 9, p = pts[i]; pfFan(b, V3(s * rx[i], p.y - ry[i] * .2, p.z), [V3(s * rx[i], p.y, p.z + .01), V3(s * (rx[i] + H * .6), p.y - H * .2, p.z - H * .6), V3(s * rx[i], p.y - ry[i] * .5, p.z - .01)]); }
+  if (a.bill || a.taper) { const bp = pfLine(5, (t2) => V3(0, -H * .1, .49 + .04 * t2)), r = pfLine(5, (t2) => H * .35 * (1 - t2) + .001); pfTube(b, bp, r, r, { N: 8, uv: () => [.97, .6] }); }
+  const i = M - 4, p = pts[i]; for (const s of [1, -1]) pfEye(b, s * rx[i] * .85, p.y + ry[i] * .3, p.z, H * (a.taper ? .42 : .3), s);
+}
+// ── 넙치형 (광어 · 도다리): 납작하게 누워 헤엄, 눈은 위쪽 ──
+function pfFlat(b, a) {
+  const M = 26, pts = [], rx = [], ry = [], W = .27 * (a.th || 1);
+  for (let i = 0; i < M; i++) { const u = i / (M - 1), z = -.32 + .82 * u, prof = Math.pow(Math.sin(Math.PI * Math.min(1, .08 + u * .92)), .55); pts.push(V3(0, 0, z)); rx.push(W * Math.max(.12, prof)); ry.push(.035 * Math.max(.3, prof)); }
+  pfTube(b, pts, rx, ry, { ryB: ry.map(v => v * .6), u0: .02, u1: .98, capA: PF_UV.fin(0, 0), uv: (u, yv, sn) => [.02 + .96 * (.5 + .5 * sn * .9) * 0 + .02 + .94 * u, yv > .5 ? .25 + .75 * (.35 + .65 * (.5 + .5 * Math.abs(sn))) : .27] });
+  for (const s of [1, -1]) { const base = [], tip = []; for (let i = 1; i < M - 3; i++) { const p = pts[i], wv = Math.sin(i * .9) * .006; base.push(V3(s * rx[i] * .96, p.y, p.z)); tip.push(V3(s * (rx[i] + .045 + wv), p.y + wv, p.z - .01)); } pfFin(b, base, tip); }
+  pfFan(b, V3(0, 0, -.31), [V3(.03, 0, -.32), V3(.1, 0, -.45), V3(0, 0, -.5), V3(-.1, 0, -.45), V3(-.03, 0, -.32)]);
+  const i = M - 5, p = pts[i]; for (const s of [1, -1]) pfEye(b, s * .028, p.y + ry[i] + .012, p.z + s * .015, .022, s * .3);
+}
+// ── 가오리 ──
+function pfRay(b, a) {
+  const M = 24, pts = [], rx = [], ry = [];
+  for (let i = 0; i < M; i++) { const u = i / (M - 1), z = -.16 + .66 * u, w = u < .5 ? Math.pow(u / .5, .8) : Math.pow((1 - u) / .5, .9); pts.push(V3(0, .01 * Math.sin(Math.PI * u), z)); rx.push(.035 + .47 * w); ry.push(.03 + .025 * Math.sin(Math.PI * u)); }
+  pfTube(b, pts, rx, ry, { ryB: ry.map(v => v * .5), u0: .02, u1: .98, capA: PF_UV.fin(0, 0), capB: [.98, .9] });
+  const tp = pfLine(12, (t2) => V3(0, .005, -.16 - .62 * t2)), tr = pfLine(12, (t2) => .016 * (1 - t2) + .002);
+  pfTube(b, tp, tr, tr, { N: 8, uv: () => PF_UV.fin(.3, .3) });
+  pfFin(b, [V3(0, .02, -.3), V3(0, .02, -.36)], [V3(0, .06, -.33), V3(0, .05, -.38)]);
+  const i = M - 6, p = pts[i]; for (const s of [1, -1]) pfEye(b, s * .05, p.y + ry[i] + .005, p.z, .018, s * .4);
+}
+// ── 문어 · 주꾸미 ──
+function pfOcto(b, a, big) {
+  const M = 16, pts = [], rx = [], ry = [];
+  for (let i = 0; i < M; i++) { const u = i / (M - 1), z = .02 + .48 * u, prof = Math.pow(Math.sin(Math.PI * (.12 + .88 * u)), .55); pts.push(V3(0, .05 * u, z)); rx.push(.15 * prof); ry.push(.16 * prof); }
+  pfTube(b, pts, rx, ry, { u0: .1, u1: .98, capA: PF_UV.fin(.5, .2) });
+  for (let k = 0; k < 8; k++) {
+    const ph = k / 8 * Math.PI * 2 + .2, cx = Math.cos(ph), cy = Math.sin(ph), L = big ? 1 : .8, curl = (k % 2 ? 1 : -1);
+    const curve = new T3.CatmullRomCurve3([V3(cx * .07, cy * .07 - .02, .06), V3(cx * .16, cy * .12 - .05, -.06), V3(cx * .2, cy * .14 - .06, -.25 * L), V3(cx * .17 + curl * .05, cy * .1 - .04, -.45 * L), V3(cx * .1 + curl * .1, cy * .06, -.55 * L)]);
+    const cp = curve.getPoints(18), r = cp.map((_, i) => .036 * (1 - i / cp.length) + .004);
+    pfTube(b, cp, r, r, { N: 8, uv: (u, yv) => [.05 + .3 * u, .3 + .45 * yv] });
+  }
+  for (const s of [1, -1]) pfEye(b, s * .1, .07, .1, .035, s);
+}
+// ── 오징어 (무늬오징어) ──
+function pfSquid(b, a) {
+  const M = 22, pts = [], rx = [], ry = [];
+  for (let i = 0; i < M; i++) { const u = i / (M - 1), z = -.02 + .52 * u, prof = Math.pow(Math.sin(Math.PI * (.06 + .94 * (1 - u) * .5 + .0)), .6) * (u > .8 ? Math.pow((1 - u) / .2, .6) : 1); pts.push(V3(0, 0, z)); rx.push(.09 * prof + .004); ry.push(.08 * prof + .004); }
+  pfTube(b, pts, rx, ry, { u0: .1, u1: .98, capA: PF_UV.fin(.5, .2) });
+  for (const s of [1, -1]) { const base = [], tip = []; for (let i = 2; i < M - 1; i++) { const u = i / (M - 1), w = Math.sin(Math.PI * (u - .08) / .92) * .09; base.push(V3(s * rx[i] * .9, 0, pts[i].z)); tip.push(V3(s * (rx[i] + Math.max(.004, w)), .004, pts[i].z)); } pfFin(b, base, tip); }
+  const hp = pfLine(5, (t2) => V3(0, 0, -.02 - .08 * t2)), hr = pfLine(5, (t2) => .07 - .02 * t2); pfTube(b, hp, hr, hr, { N: 14, u0: .05, u1: .1 });
+  for (let k = 0; k < 10; k++) {
+    const ph = k / 10 * Math.PI * 2, cx = Math.cos(ph), cy = Math.sin(ph), L = k === 0 || k === 5 ? .52 : .3;
+    const curve = new T3.CatmullRomCurve3([V3(cx * .04, cy * .04, -.1), V3(cx * .07, cy * .06, -.1 - L * .4), V3(cx * .05 + Math.sin(k) * .03, cy * .05, -.1 - L)]);
+    const cp = curve.getPoints(10), r = cp.map((_, i) => .016 * (1 - i / cp.length) + .003); pfTube(b, cp, r, r, { N: 6, uv: (u, yv) => [.05 + .2 * u, .4 + .4 * yv] });
+  }
+  for (const s of [1, -1]) pfEye(b, s * .065, .02, -.06, .03, s);
+}
+// ── 바다의 용 ──
+function pfDragon(b, a) {
+  const M = 56, pts = [], rx = [], ry = [];
+  for (let i = 0; i < M; i++) { const u = i / (M - 1), z = -.5 + u * .86, wob = Math.sin(u * Math.PI * 3.2) * .07 * (1 - u * .6); pts.push(V3(wob, Math.sin(u * Math.PI * 2.2) * .03, z)); const r = .026 + .05 * Math.pow(Math.sin(Math.PI * Math.min(1, .15 + u * .9)), .7); rx.push(r); ry.push(r * 1.05); }
+  pfTube(b, pts, rx, ry, { u0: .02, u1: .8, capA: PF_UV.fin(0, 0) });
+  // 머리
+  const hp = pfLine(10, (t2) => V3(pts[M - 1].x, pts[M - 1].y + .01, .36 + .15 * t2)), hr = pfLine(10, (t2) => .085 * Math.pow(Math.sin(Math.PI * (.25 + .75 * t2)), .5) + .004), hry = hr.map((v, i) => v * (i > 6 ? .7 : 1));
+  pfTube(b, hp, hr, hry, { u0: .8, u1: .98, capA: [.85, .6] });
+  // 갈기 (등을 따라 금빛 가시)
+  for (let i = 4; i < M - 1; i += 4) { const p = pts[i], h2 = ry[i] * .9 + .012; pfFan(b, V3(p.x, p.y + ry[i] * .9, p.z), [V3(p.x, p.y + ry[i] * .9, p.z + .014), V3(p.x, p.y + ry[i] + h2, p.z - .02), V3(p.x, p.y + ry[i] * .9, p.z - .022)]); }
+  // 뿔 · 수염 · 꼬리 지느러미
+  for (const s of [1, -1]) {
+    const hc = new T3.CatmullRomCurve3([V3(s * .03, .05, .42), V3(s * .05, .1, .37), V3(s * .06, .12, .3)]).getPoints(8), r = hc.map((_, i) => .014 * (1 - i / hc.length) + .002);
+    pfTube(b, hc, r, r, { N: 6, uv: () => PF_UV.fin(.7, .9) });
+    const wc = new T3.CatmullRomCurve3([V3(s * .03, -.01, .5), V3(s * .1, -.03, .45), V3(s * .14, -.06, .33), V3(s * .12, -.1, .22)]).getPoints(12), wr2 = wc.map(() => .004);
+    pfTube(b, wc, wr2, wr2, { N: 5, uv: () => PF_UV.fin(.6, .8) });
+    pfEye(b, s * .05, .035, .45, .018, s);
+    const lp = pts[Math.round(M * .7)]; pfFan(b, V3(lp.x + s * .03, lp.y - .03, lp.z), [V3(lp.x + s * .03, lp.y - .03, lp.z + .01), V3(lp.x + s * .09, lp.y - .09, lp.z - .02), V3(lp.x + s * .05, lp.y - .1, lp.z - .05), V3(lp.x + s * .03, lp.y - .03, lp.z - .02)]);
+  }
+  const tp = pts[0]; pfFan(b, V3(tp.x, tp.y, tp.z + .01), [V3(tp.x, tp.y + .01, tp.z), V3(tp.x, tp.y + .09, tp.z - .07), V3(tp.x, tp.y, tp.z - .04), V3(tp.x, tp.y - .09, tp.z - .07), V3(tp.x, tp.y - .01, tp.z)]);
+}
+// ── 갯벌 생물 ──
+function pfClam(b, a) {
+  for (const s of [1, -1]) { const M = 14, pts = [], rx = [], ry = []; for (let i = 0; i < M; i++) { const u = i / (M - 1), prof = Math.pow(Math.sin(Math.PI * u), .6); pts.push(V3(0, s * .02, -.45 + .9 * u)); rx.push(.38 * prof * (1 - .25 * u)); ry.push(.14 * prof); }
+    pfTube(b, pts, rx, ry, { ryB: ry.map(() => .002), u0: .02, u1: .98 }); }
+}
+function pfRazor(b, a) {
+  const pts = pfLine(16, (t2) => V3(0, 0, -.5 + t2)), r = pts.map((_, i) => (i === 0 || i === 15) ? .03 : .075), ry = r.map(v => v * .7);
+  pfTube(b, pts, r, ry, { u0: .02, u1: .98, capA: PF_UV.fin(.2, .3), capB: PF_UV.fin(.8, .3) });
+  const fp = pfLine(5, (t2) => V3(0, -.01, .5 + .1 * t2)), fr = pfLine(5, (t2) => .04 * (1 - t2 * .6)); pfTube(b, fp, fr, fr, { N: 10, uv: () => [.5, .27], capB: [.5, .27] });
+}
+function pfCrab(b, a) {
+  const pts = pfLine(14, (t2) => V3(0, .02 * Math.sin(Math.PI * t2), -.22 + .44 * t2)), rx = pts.map((_, i) => .32 * Math.pow(Math.sin(Math.PI * (.08 + .84 * i / 13)), .5)), ry = rx.map(v => v * .3);
+  pfTube(b, pts, rx, ry, { ryB: ry.map(v => v * .4), u0: .02, u1: .98 });
+  for (const s of [1, -1]) {
+    for (let k = 0; k < 4; k++) { const z = -.12 + k * .08, lc = new T3.CatmullRomCurve3([V3(s * .25, 0, z), V3(s * .38, .06, z - .03), V3(s * .48, -.04, z - .06), V3(s * .52, -.12, z - .08)]).getPoints(10), r = lc.map((_, i) => .022 * (1 - i / 12)); pfTube(b, lc, r, r, { N: 6, uv: () => PF_UV.fin(.4, .5) }); }
+    const ac = new T3.CatmullRomCurve3([V3(s * .2, 0, .15), V3(s * .3, .05, .26), V3(s * .24, .06, .38)]).getPoints(8), ar = ac.map(() => .03); pfTube(b, ac, ar, ar, { N: 8, uv: () => [.5, .7] });
+    pfBall(b, V3(s * .2, .06, .44), .075, [.5, .75], .8);
+    const pc = [V3(s * .18, .06, .5), V3(s * .14, .05, .58)], pr = [.03, .006]; pfTube(b, pc, pr, pr, { N: 6, uv: () => PF_UV.fin(.9, .9) });
+    const st = [V3(s * .06, .04, .2), V3(s * .07, .1, .23)], sr = [.012, .012]; pfTube(b, st, sr, sr, { N: 6, uv: () => [.5, .7] }); pfBall(b, V3(s * .07, .11, .23), .022, PF_UV.black);
+  }
+}
+const PF_SHAPES = { eel: pfEel, flat: pfFlat, ray: pfRay, octo: pfOcto, squid: pfSquid, dragon: pfDragon, clam: pfClam, razor: pfRazor, crab: pfCrab };
+function buildProcFish() {
+  if (!T3) return;
+  const todo = BUILTIN.filter(f => !f.model && f.art).map(f => [f.id, f.art]).concat(Object.entries(SHELL_ART));
+  for (const [id, a] of todo) {
+    if (FISH3D.has(id)) continue;
+    try {
+      const b = pfB(); (PF_SHAPES[a.shape] || pfFish)(b, a, id === "b-daewangmuneo");
+      const geo = new T3.BufferGeometry();
+      geo.setAttribute("position", new T3.Float32BufferAttribute(b.p, 3)); geo.setAttribute("uv", new T3.Float32BufferAttribute(b.uv, 2)); geo.setIndex(b.ix);
+      geo.computeBoundingBox(); const bb = geo.boundingBox, c = new T3.Vector3(); bb.getCenter(c); geo.translate(-c.x, -c.y, -c.z);
+      const len = Math.max(bb.max.z - bb.min.z, bb.max.x - bb.min.x, .01); geo.scale(1 / len, 1 / len, 1 / len);
+      geo.computeVertexNormals(); geo.computeBoundingBox();
+      const mat = swimMat(pfTexture(a, hashStr(id) % 233280));
+      if (a.glow) { mat.emissive = new T3.Color(a.shape === "ray" ? 0x5a6aff : 0xffd84d); mat.emissiveIntensity = .22; }
+      FISH3D.set(id, { geo, mat, proc: true, top: ["flat", "ray", "crab", "clam"].includes(a.shape) });
+    } catch (e) { console.warn("procfish", id, e); }
+  }
+}
 function loadFishModels() {
-  if (!T3 || !T3.GLTFLoader) return;
+  if (!T3) return;
+  buildProcFish(); makeThumbs();   // 직접 만든 3D 물고기는 바로 · 에셋 모델은 불러온 다음
+  if (!T3.GLTFLoader) return;
   const loader = new T3.GLTFLoader();
   // 1묶음(models.json)을 먼저, v1.23 새 물고기 2묶음(models2.json, 약 4MB)은 그다음에 불러와요. 오기 전엔 그림 물고기로 보여요
   const loadPack = (file, list) => fetch(file).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((pack) => Promise.all(list.map((f) => new Promise((done) => {
@@ -5892,8 +6130,8 @@ function makeThumbs() {
       if (artCache.has(id) && artCache.get(id).model) continue;   // 앞 묶음에서 이미 만든 사진
       const mesh = new T3.Mesh(m.geo, new T3.MeshToonMaterial({ map: m.mat.map, gradientMap: toonGrad(), side: T3.DoubleSide, vertexColors: !!m.geo.attributes.color }));
       const bb = m.geo.boundingBox;
-      if (id === "b-manta") mesh.rotation.z = -Math.PI / 2.4;
-      const hgt = id === "b-manta" ? 0.7 : bb.max.y - bb.min.y;
+      if (id === "b-manta" || m.top) mesh.rotation.z = -Math.PI / 2.4;   // 납작한 것은 위에서 본 모습으로
+      const hgt = id === "b-manta" ? 0.7 : m.top ? Math.max(.3, (bb.max.x - bb.min.x) * .98) : bb.max.y - bb.min.y;
       mesh.scale.setScalar(Math.min(1, .56 / hgt) * .94);
       sc.add(mesh); tr.render(sc, cam); sc.remove(mesh); mesh.material.dispose();
       const c = document.createElement("canvas"); c.width = W; c.height = H; c.getContext("2d").drawImage(tr.domElement, 0, 0);
@@ -5905,7 +6143,7 @@ function makeThumbs() {
 }
 function fishMesh(id) { const m = FISH3D.get(id); return m ? new T3.Mesh(m.geo, m.mat) : null; }
 function decorateStalls() {
-  const ids = [...FISH3D.keys()]; if (!ids.length) return;
+  const ids = [...FISH3D.keys()].filter(id => !isShell(id)); if (!ids.length) return;
   for (const s of STALLS) {
     const m = fishMesh(ids[(s.i * 7 + 3) % ids.length]); if (!m) continue;
     m.scale.setScalar(1.0); m.position.set(s.x + STALL_DECO.x, STALL_DECO.y, s.z); m.rotation.set(0, Math.PI / 2 + .3, Math.PI / 2);
@@ -5917,7 +6155,7 @@ const JUMPS = [];
 let nextJump = 3;
 function updateJumps(dt, t) {
   nextJump -= dt;
-  const ids = [...FISH3D.keys()];
+  const ids = [...FISH3D.keys()].filter(id => !isShell(id));
   if (nextJump <= 0 && ids.length) {
     nextJump = rnd(2.5, 7);
     let x, z, tries = 0;
@@ -8590,7 +8828,9 @@ function buildFurn(it, G, hostFace) {
     case "chest": B(.8, .55, .6, 0x9a6a40, 0, .3, 0); B(.84, .1, .64, 0x6a4a2a, 0, .6, 0); B(.14, .14, .04, 0xf2c230, 0, .45, .31); break;
     case "tank": { B(W - .2, .5, D - .3, 0x3a3a44, 0, .25, 0); const gl = new T3.Mesh(new T3.BoxGeometry(W - .3, .8, D - .4), new T3.MeshPhongMaterial({ color: 0x8fd6e8, transparent: true, opacity: .45 })); gl.position.set(0, .9, 0); g.add(gl);
       B(W - .32, .08, D - .42, 0xe8d8a8, 0, .54, 0); const fid = (S.homeDoc && S.homeDoc.tanks && S.homeDoc.tanks[it.id]) || null, fish = fid && findFish(fid);
-      if (fish) { const pl = new T3.Mesh(new T3.PlaneGeometry(1, .5), new T3.MeshBasicMaterial({ map: fishTexture(fish), transparent: true, side: T3.DoubleSide })); pl.position.set(0, .92, 0); g.add(pl); g.userData.swim = pl; }
+      const fm3 = fish && fishMesh(fish.id);
+      if (fm3) { fm3.scale.setScalar(.9); fm3.rotation.y = Math.PI / 2; fm3.position.set(0, .92, 0); g.add(fm3); }
+      else if (fish) { const pl = new T3.Mesh(new T3.PlaneGeometry(1, .5), new T3.MeshBasicMaterial({ map: fishTexture(fish), transparent: true, side: T3.DoubleSide })); pl.position.set(0, .92, 0); g.add(pl); g.userData.swim = pl; }
       for (let k = 0; k < 3; k++) C(.03, .05, .3, 5, 0x3f9a5a, -.5 + k * .5, .7, -.05); break; }
     case "easel": { C(.03, .03, 1.5, 5, 0x8a5a3a, -.2, .75, -.1); C(.03, .03, 1.5, 5, 0x8a5a3a, .2, .75, -.1); B(.8, .8, .06, 0xf2c230, 0, 1.15, 0);
       const pic = new T3.Mesh(new T3.PlaneGeometry(.64, .64), new T3.MeshBasicMaterial({ map: faceTexture(hostFace), transparent: true })); pic.position.set(0, 1.15, .04); g.add(pic);

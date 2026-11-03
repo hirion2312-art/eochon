@@ -116,6 +116,7 @@ node tools/test/fight_sim.js
 - **물고기 값** (v1.31): `TIERS[].base` 25/75/300/1400/6000/22000. 팔 때 `curPrice(it)`로 예전 물고기도 새 값 이상으로 쳐 줘요.
 - **퀵바** (v1.32): `QUICK_ITEMS`(넣을 수 있는 칸) · `P.quick`(id 배열, 최대 `QUICK_MAX`=6) · `applyQuick()`가 `.dock` 버튼을 숨기고 CSS `order`로 정렬해요. 원래 있던 5개 버튼은 그대로 두고 `data-q`만 붙이고, 나머지는 `quickBtnFor`가 만들어요. 새 칸을 만들려면 `QUICK_ITEMS`에 `open`(시트) 또는 `run`과 `QSVG` 아이콘을 넣어요.
 - **초보 수첩 · 도움말** (v1.32): `GUIDE_STEPS`(done · go · reward), `P.guide`(받은 단계). 오른쪽 `#guideBtn`. 시트 머리의 `#sheetHelp`는 `TUTS["sheet_" + 이름]`이 있으면 보이고 `showHelp`로 그 카드를 다시 띄워요. 새 화면을 만들면 `TUTS`에 `sheet_이름` 설명을 꼭 넣어요.
+- **직접 만든 3D 물고기** (v1.34): `buildProcFish()`가 `model`이 없는 BUILTIN과 `SHELL_ART`를 `art` 값으로 깎아서 `FISH3D`에 넣어요(`proc: true`, 납작한 것은 `top: true` → 사진은 위에서 본 모습). 모양별 함수 `pfFish` · `pfEel` · `pfFlat` · `pfRay` · `pfOcto` · `pfSquid` · `pfDragon` · `pfClam` · `pfRazor` · `pfCrab`, 텍스처 `pfTexture`(위 3/4 몸통 · 아래 지느러미 띠 · 눈 색 칸). 새 물고기는 `art`만 적으면 자동으로 3D가 돼요(`shape`으로 모양 고르기).
   - 잠긴 기능의 도전과제(집 · `job1`)는 `ACH`에서 빠져요.
 - **돈이 과하게 풀리지 않게** (v1.23.0): 공짜 돈(출석 · 보물 상자 · 초대 · 예금 이자 · 도전과제)은 낚시 벌이(초반 한 시간 ≈ 27만원)를 넘지 않게 맞췄어요. 새 보상을 넣을 때도 이 기준으로 봐요.
 - **물고기 시세** (v1.26): 물고기를 파는 곳은 모두 `fishSell(item)`을 써요(= `sellValue(price × fishMul(fishId))`). 새로 파는 곳을 만들면 이걸 써요. 시세는 `rawFishMul`(날짜 + 물고기 해시), 오늘의 생선은 `todayFish()` ×1.5. 조개 · 회(노점)는 시세와 따로예요.
