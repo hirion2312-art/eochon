@@ -1461,6 +1461,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .rb-tag{font-size:12px;font-weight:800;color:#2fae7f}
 @media (max-width:560px){.rb-ledger{grid-template-columns:repeat(2,1fr)}}
 .rm-open{display:flex;gap:12px;align-items:center;padding:14px;border-radius:16px;border:1.5px solid var(--line);background:var(--bg)}.rm-open.on{border-color:#2fae7f;background:rgba(47,174,127,.12)}.rm-open small{display:block;font-size:12px;color:var(--muted)}.rm-open .grow{flex:1;min-width:0}
+.rm-fund{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:12px;border-radius:14px;border:1.5px solid rgba(242,194,48,.45);background:rgba(242,194,48,.08)}.rm-fund .grow{flex:1;min-width:200px}.rm-fund small{display:block;font-size:12px;color:var(--muted)}
 .rm-menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
 .rm-dish{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 8px;border-radius:14px;border:1.5px dashed var(--line);background:transparent;color:inherit;font:inherit;cursor:pointer;opacity:.6}
 .rm-dish.on{border-style:solid;border-color:#e2952c;background:rgba(226,149,44,.12);opacity:1}.rm-dish .rm-di{font-size:26px}.rm-dish b{font-size:13.5px}.rm-dish small{font-size:12px;color:var(--muted)}
@@ -1614,7 +1615,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.56.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.57.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -2258,8 +2259,9 @@ function normRest(r) {
   const pl = k.plate && typeof k.plate === "object" ? k.plate : {};
   return {
     lv: clamp(Math.floor(Number(r.lv) || 0), 0, REST_LV.length - 1), mig: r.mig ? 1 : 0,
-    off: (Array.isArray(r.off) ? r.off : []).filter(id => RECIPE[id]),   // 해금했지만 주문은 안 받는 메뉴 (가게 관리)
-    staff: (Array.isArray(r.staff) ? r.staff : []).filter(x => x && REST_STAFF_KEYS.includes(x.g)).slice(0, 4).map(x => ({ id: str(x.id, 16) || uid4(), g: x.g, post: ["prep", "run", "cook"].includes(x.post) ? x.post : "prep", name: str(x.name, 8) || "알바", since: str(x.since, 10) })),
+    off: (Array.isArray(r.off) ? r.off : []).filter(id => RECIPE[id]),
+    fund: clamp(Math.floor(Number(r.fund) || 0), 0, 1e10), autoBuy: !!r.autoBuy,   // 가게 금고 · 재료 자동 구매 (v1.57)   // 해금했지만 주문은 안 받는 메뉴 (가게 관리)
+    staff: (Array.isArray(r.staff) ? r.staff : []).filter(x => x && REST_STAFF_KEYS.includes(x.g)).slice(0, 4).map(x => ({ id: str(x.id, 16) || uid4(), g: x.g, post: ["all", "prep", "run", "cook"].includes(x.post) ? x.post : "all", name: str(x.name, 8) || "알바", since: str(x.since, 10) })),
     last: r.last && typeof r.last === "object" && typeof r.last.d === "string" ? { d: r.last.d, sales: Number(r.last.sales) || 0, tips: Number(r.last.tips) || 0, plates: Number(r.last.plates) || 0, wages: Number(r.last.wages) || 0, opex: Number(r.last.opex) || 0, net: Number(r.last.net) || 0, short: Number(r.last.short) || 0, closed: !!r.last.closed } : null,
     unlocked: (Array.isArray(r.unlocked) ? r.unlocked : []).filter(id => RECIPE[id]),
     plates: clamp(Math.floor(Number(r.plates) || 0), 0, 1e8), sales: clamp(Math.floor(Number(r.sales) || 0), 0, 1e12), tips: clamp(Math.floor(Number(r.tips) || 0), 0, 1e12),
@@ -5159,7 +5161,7 @@ function restRenderStations(force) {
 S.restGuests = []; S.restTickets = []; S.restSlot = -1;
 function pickTicketRecipe() {
   const un = RECIPES.filter(restOnMenu); if (!un.length) return null;
-  const have = (id, n) => P.bag.filter(it => it.fishId === id).length + kitchenCount(id) >= n;
+  const have = (id, n) => P.bag.filter(it => it.fishId === id).length + kitchenCount(id) >= n || (P.rest.staff.length && canAutoBuy(id));
   const ok = un.filter(r => r.ing.every(([id, n]) => have(id, n)));
   const pool = ok.length && Math.random() < .8 ? ok : un;   // 대부분은 지금 만들 수 있는 메뉴로 와요
   return pick(pool);
@@ -5346,12 +5348,13 @@ function restActions(consider) {
    알바는 고용비(한 번) + 일당(장사한 날마다, 다음 날 정산). 역할: 손질(냉장고→도마→썰기) · 운반·서빙(도마→조리/접시, 다 익은 것→접시, 완성 요리→서빙) · 조리(완벽 구간에 꺼내기).
    단계가 오르면 고용 상한 · 동시 티켓 · 팁이 늘어요(외관은 다음 단계). 수치는 REST_LV · REST_STAFF 표만 바꾸면 돼요 */
 const REST_STAFF = {
-  hs: { name: "동네 고등학생", ico: "🧒", hire: 300, wage: 100, speed: .6, can: ["prep"], perfect: 0, up: 0 },
-  uni: { name: "대학생 알바", ico: "🎒", hire: 800, wage: 250, speed: .85, can: ["prep", "run"], perfect: .35, up: 0 },
-  pro: { name: "경력 조리 알바", ico: "👨‍🍳", hire: 2500, wage: 600, speed: 1.1, can: ["prep", "run", "cook"], perfect: .7, up: 0 },
-  chef: { name: "전문 셰프", ico: "⭐", hire: 8000, wage: 1500, speed: 1.4, can: ["prep", "run", "cook"], perfect: .9, up: .25 },
+  // v1.57: 모든 알바가 혼자 요리를 다 만들 수 있어요 · 등급마다 속도가 크게 달라요 (셰프는 고등학생의 8배)
+  hs: { name: "동네 고등학생", ico: "🧒", hire: 300, wage: 100, speed: .3, can: ["all", "prep", "run", "cook"], perfect: .15, up: 0 },
+  uni: { name: "대학생 알바", ico: "🎒", hire: 800, wage: 250, speed: .65, can: ["all", "prep", "run", "cook"], perfect: .4, up: 0 },
+  pro: { name: "경력 조리 알바", ico: "👨‍🍳", hire: 2500, wage: 600, speed: 1.25, can: ["all", "prep", "run", "cook"], perfect: .75, up: 0 },
+  chef: { name: "전문 셰프", ico: "⭐", hire: 8000, wage: 1500, speed: 2.4, can: ["all", "prep", "run", "cook"], perfect: .95, up: .25 },
 };
-const STAFF_POST = { prep: { name: "손질", ico: "🔪", stand: "board" }, run: { name: "운반 · 서빙", ico: "🛎", stand: "pass" }, cook: { name: "조리", ico: "🔥", stand: "grill" } };
+const STAFF_POST = { all: { name: "혼자 다", ico: "🧑‍🍳", stand: "board" }, prep: { name: "손질", ico: "🔪", stand: "board" }, run: { name: "운반 · 서빙", ico: "🛎", stand: "pass" }, cook: { name: "조리", ico: "🔥", stand: "grill" } };
 const STAFF_NAMES = ["민지", "준호", "서연", "도윤", "하은", "지호", "수아", "건우", "예린", "태민", "다은", "현우"];
 const restStaffCap = () => REST_LV[P.rest.lv].hire;
 function hireStaff(g) {
@@ -5360,7 +5363,7 @@ function hireStaff(g) {
   if (P.gold < G.hire) { toast("고용비가 모자라요 (" + won(G.hire) + ")"); return; }
   P.gold -= G.hire;
   const used = new Set(P.rest.staff.map(s => s.name)), name = STAFF_NAMES.find(n => !used.has(n)) || "알바";
-  P.rest.staff.push({ id: uid4(), g, post: G.can[G.can.length - 1] === "cook" && !P.rest.staff.some(s => s.post === "cook") ? "cook" : G.can.includes("run") && !P.rest.staff.some(s => s.post === "run") ? "run" : "prep", name, since: kstDay() });
+  P.rest.staff.push({ id: uid4(), g, post: "all", name, since: kstDay() });
   markDirty(); sfx("coins", .45); toast(G.ico + " " + name + "(" + G.name + ")을 고용했어요 · 일당 " + won(G.wage) + "은 장사한 날마다 다음 날 정산돼요"); restStaffSync(); refreshSheet(true);
 }
 function fireStaff(id) { P.rest.staff = P.rest.staff.filter(s => s.id !== id); markDirty(); restStaffSync(); refreshSheet(true); toast("알바를 내보냈어요"); }
@@ -5417,7 +5420,7 @@ function staffNeed() {   // 주문에 필요한데 주방에 아직 없는 어�
   for (const tk of tks) for (const [id, n] of RECIPE[tk.r].ing) {
     const inK = kitchenCount(id) + (have.get(id) || 0);
     let need = 0; for (const t2 of tks) for (const [id2, n2] of RECIPE[t2.r].ing) if (id2 === id) need += n2;
-    if (need > inK && P.bag.some(b => b.fishId === id)) return { id, r: RECIPE[tk.r] };
+    if (need > inK && (P.bag.some(b => b.fishId === id) || canAutoBuy(id))) return { id, r: RECIPE[tk.r] };
   }
   return null;
 }
@@ -5434,8 +5437,9 @@ function staffStep(s, sb) {   // 할 일 하나를 고르고 끝내요 (시간�
     }
     return false;
   };
-  if (s.post === "cook" && can("cook") && cookTake(true)) return;
-  if (s.post === "run" || s.post === "cook") {
+  const all = s.post === "all";
+  if ((s.post === "cook" || all) && cookTake(true)) return;
+  if (s.post === "run" || s.post === "cook" || all) {
     if (k.plate.dish) { const tk = (S.restTickets || []).find(t => t.r === k.plate.dish.id && !t.served); if (tk) { doIt(1300, "pass", "서빙", () => { const pd = k.plate.dish; if (!pd) return; k.plate.dish = null; serveDish({ dish: pd.id, q: pd.q, items: pd.items }, true); }); return; } }
     if (cookTake(false)) return;
     const b = k.board[0];
@@ -5447,11 +5451,18 @@ function staffStep(s, sb) {   // 할 일 하나를 고르고 끝내요 (시간�
   if (can("prep")) {
     const b = k.board[0];
     if (b && !b.it.chopped) { doIt(330, "board", "썰기", () => { if (k.board[0] !== b) return; b.it.hits++; restSnd("chop_" + (1 + (b.it.hits % 4)), .25); if (b.it.hits >= chopHitsFor(b.it.fish)) b.it.chopped = true; }); return; }
-    if (s.post !== "prep") return;
+    if (s.post !== "prep" && !all) return;
     const nd = staffNeed(); if (!nd) return;
-    if (nd.r.chop) { if (k.board.length) return; doIt(1400, "fridge", "재료 꺼내기", () => { if (k.board.length) return; const it = takeFromBag(nd.id); if (it) k.board = [{ it, t0: 0 }]; }); return; }
-    const st = nd.r.cook; if (st && k[st].length < REST_CFG.stationCap[st]) doIt(1400, "fridge", "재료 꺼내기", () => { const it = takeFromBag(nd.id); if (it) { k[st].push({ it, t0: Date.now(), cook0: st }); restSnd("fry_1", .3); } });
+    if (nd.r.chop) { if (k.board.length) return; doIt(1400, "fridge", "재료 꺼내기", () => { if (k.board.length) return; const it = staffTake(nd.id); if (it) k.board = [{ it, t0: 0 }]; }); return; }
+    const st = nd.r.cook; if (st && k[st].length < REST_CFG.stationCap[st]) doIt(1400, "fridge", "재료 꺼내기", () => { const it = staffTake(nd.id); if (it) { k[st].push({ it, t0: Date.now(), cook0: st }); restSnd("fry_1", .3); } });
   }
+}
+const canAutoBuy = (id) => { const f = findFish(id); return !!(P.rest.autoBuy && f && P.rest.fund >= mktBuyPrice(f)); };
+function staffTake(id) {   // 알바가 재료를 가져와요: 내 가방 먼저, 없으면 자동 구매(가게 금고)
+  const it = takeFromBag(id); if (it) return it;
+  if (!canAutoBuy(id)) return null;
+  const f = findFish(id), price = mktBuyPrice(f); P.rest.fund -= price; const d = restDay(); d.buy = (d.buy || 0) + price; markDirty();
+  return { id: uid4(), fish: id, chopped: false, hits: 0, cook: null, q: null, src: null, bought: true };
 }
 function tryPlateDry(it) { const pl = restK().plate; return !pl.dish && plateCompatible(pl.items.concat(it)); }
 function restStaffTick(t, dt) {
@@ -5480,6 +5491,14 @@ function restManageSheet(body) {
   body.append(h("div", { class: "rm-open" + (S.restOpen ? " on" : "") }, h("span", { class: "rm-i", text: S.restOpen ? "🏮" : "💤" }),
     h("div", { class: "grow" }, h("b", { text: S.restOpen ? "영업 중이에요" : "준비 중이에요" }), h("small", { text: S.restOpen ? "손님이 들어와요 · 알바는 내가 포차 근처에 있을 때 일해요" : "장사를 시작해야 손님이 와요" })),
     h("button", { class: "btn " + (S.restOpen ? "" : "pri"), onclick: () => { setRestOpen(!S.restOpen); setTimeout(() => refreshSheet(true), 0); }, text: S.restOpen ? "🌙 장사 종료" : "🏮 장사 시작" })));
+  // 가게 금고 · 재료 자동 구매
+  { const dep = (v) => { const n = v === "all" ? P.gold : Math.min(P.gold, v); if (n <= 0) { toast("돈이 없어요"); return; } P.gold -= n; P.rest.fund += n; markDirty(); sfx("coins", .4); refreshSheet(true); };
+    const wd = () => { if (!P.rest.fund) return; P.gold += P.rest.fund; P.rest.fund = 0; markDirty(); sfx("coins", .4); refreshSheet(true); };
+    body.append(h("div", { class: "sec", text: "💰 가게 금고 · 재료 자동 구매" }), h("div", { class: "rm-fund" },
+      h("div", { class: "grow" }, h("b", { class: "num", text: "금고 " + won(P.rest.fund) }), h("small", { text: "자동 구매를 켜면, 가방에 재료가 없을 때 알바가 이 돈으로 수산시장 값(오늘 시세 × 1.3)에 사 와서 요리해요 · 사 온 재료는 남는 게 적어요(특히 티어1) — 직접 낚은 재료가 제일 이득 · 오늘 산 재료 " + won(restDay().buy || 0) })),
+      h("button", { class: "btn sm", onclick: () => dep(1000), text: "+10만" }), h("button", { class: "btn sm", onclick: () => dep(10000), text: "+100만" }), h("button", { class: "btn sm", onclick: () => dep("all"), text: "전부" }),
+      h("button", { class: "btn sm ghost", disabled: !P.rest.fund, onclick: wd, text: "빼기" }),
+      h("button", { class: "btn sm " + (P.rest.autoBuy ? "pri" : ""), onclick: () => { P.rest.autoBuy = !P.rest.autoBuy; markDirty(); refreshSheet(true); }, text: P.rest.autoBuy ? "자동 구매 켬" : "자동 구매 끔" }))); }
   // 메뉴: 해금한 레시피 중 주문 받을 것 고르기
   const opened = RECIPES.filter(restUnlocked), onN = opened.filter(restOnMenu).length;
   body.append(h("div", { class: "sec", text: "🍽 오늘의 메뉴 · 주문 받는 요리 " + onN + " / " + opened.length }));
