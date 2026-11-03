@@ -1376,7 +1376,7 @@ body.mlock .xhair{display:block}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.37.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.38.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -6272,8 +6272,78 @@ function buildProcFish() {
     } catch (e) { console.warn("procfish", id, e); }
   }
 }
+/* ---------- 낚싯대 3D 모델 14종 (v1.38): a/rods.json — 손에 든 낚싯대 · 상점/가방 그림 ----------
+   tools/rods_pack.py가 OBJ 팩을 줄여 담은 묶음. 오기 전에는 예전처럼 막대 낚싯대 · 그린 그림으로 보여요 */
+const ROD3D = new Map();   // 낚싯대 id → { geo, parts, top, reel }
+const ROD_PIC = new Map(); // 낚싯대 id → 그림(캔버스)
+const ROD_HOLD = 1.45;     // 손에 들 때 배율 (모델 1 = 약 1m, 막대 낚싯대 2.6과 비슷하게)
+let rodPackP = null;
+function loadRodModels() {
+  if (!T3 || rodPackP) return;
+  const dec = (b, Arr) => { const s = atob(b), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return new Arr(u.buffer); };
+  rodPackP = fetch("a/rods.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((pack) => {
+    for (const [id, m] of Object.entries(pack)) {
+      const q = dec(m.v, Int16Array), pos = new Float32Array(q.length);
+      for (let i = 0; i < q.length; i++) { const k = i % 3; pos[i] = m.lo[k] + (q[i] + 32767) * m.sc[k]; }
+      const idx = [], geo = new T3.BufferGeometry();
+      m.g.forEach((g, k) => { const a = dec(g.i, Uint16Array); geo.addGroup(idx.length, a.length, k); for (let i = 0; i < a.length; i++) idx.push(a[i]); });
+      geo.setAttribute("position", new T3.BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+      ROD3D.set(id, { geo, parts: m.g, top: m.lo[1] + m.len, reel: m.reel || null });
+    }
+    makeRodPics();
+    for (const k of [...iconCache.keys()]) if (k.startsWith("rod|")) iconCache.delete(k);
+    refreshSheet();
+  }).catch((e) => console.warn("rods.json", e));
+}
+// 재질: 부품마다 색 · 빛(발광) · 투명. noReel이면 모델의 릴은 숨겨요(내가 고른 릴을 대신 달아요)
+const rodMatCache = new Map();
+function rodMats(id, noReel) {
+  const key = id + (noReel ? "|n" : ""); if (rodMatCache.has(key)) return rodMatCache.get(key);
+  const m = ROD3D.get(id), arr = m.parts.map(p => {
+    const mt = phong(new T3.Color(p.c).getHex(), { side: T3.DoubleSide });
+    if (p.e) { mt.emissive = new T3.Color(p.e); mt.emissiveIntensity = 1.3; }
+    if (p.o) { mt.transparent = true; mt.opacity = p.o; }
+    if (p.s) mt.color.offsetHSL(0, 0, .06);   // 금속 · 유리는 조금 밝게
+    if (noReel && p.reel) mt.visible = false;
+    return mt;
+  });
+  rodMatCache.set(key, arr); return arr;
+}
+function rodMesh(id, noReel) { const m = ROD3D.get(id); return m ? new T3.Mesh(m.geo, rodMats(id, noReel)) : null; }
+// 상점 · 가방 그림: 낚싯대를 비스듬히 눕혀 한 장씩 찍어요 (가는 낚싯대가 잘 보이게 굵기는 2.4배)
+function makeRodPics() {
+  try {
+    const W = 192, tr = new T3.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+    tr.setPixelRatio(1); tr.setSize(W, W, false);
+    const sc = new T3.Scene(); sc.add(new T3.HemisphereLight(0xffffff, 0x8a7a6a, 1.05));
+    const dl = new T3.DirectionalLight(0xffffff, .55); dl.position.set(2, 3, 4); sc.add(dl);
+    const cam = new T3.OrthographicCamera(-.5, .5, .5, -.5, .1, 10); cam.position.set(0, 0, 3); cam.lookAt(0, 0, 0);
+    for (const [id, m] of ROD3D) {
+      const mesh = rodMesh(id, false), k = 1.08 / m.top;
+      mesh.scale.set(k * 2.4, k, k * 2.4); mesh.position.y = -m.top * k / 2; mesh.rotation.y = -.5;
+      const holder = new T3.Group(); holder.add(mesh); holder.rotation.z = -Math.PI / 4; sc.add(holder);
+      tr.render(sc, cam); sc.remove(holder);
+      const c = document.createElement("canvas"); c.width = c.height = W; c.getContext("2d").drawImage(tr.domElement, 0, 0);
+      ROD_PIC.set(id, c);
+    }
+    tr.dispose(); if (tr.forceContextLoss) tr.forceContextLoss();
+  } catch (e) { console.warn("rod pics", e); }
+}
+// 캐릭터 손의 낚싯대를 그 낚싯대 모델로 (모델이 없으면 막대 낚싯대 그대로)
+function fitHeldRod(F, rd) {
+  const m = ROD3D.get(rd.id), rod = F.tip.parent;
+  if (F.rodModel) { rod.remove(F.rodModel); F.rodModel = null; }
+  F.rodMat.visible = !m; if (F.grip) F.grip.visible = !m;
+  if (!m) { F.tip.position.set(0, 2.6, 0); F.reelM.position.set(.07, .42, 0); return; }
+  const mesh = rodMesh(rd.id, true); mesh.scale.setScalar(ROD_HOLD); mesh.castShadow = true;
+  rod.add(mesh); F.rodModel = mesh;
+  F.tip.position.set(0, m.top * ROD_HOLD, 0);
+  if (m.reel) F.reelM.position.set(m.reel[0] * ROD_HOLD, m.reel[1] * ROD_HOLD, m.reel[2] * ROD_HOLD + .02);
+  else F.reelM.position.set(.07, .42, 0);
+}
 function loadFishModels() {
   if (!T3) return;
+  loadRodModels();
   buildProcFish(); makeThumbs();   // 직접 만든 3D 물고기는 바로 · 에셋 모델은 불러온 다음
   if (!T3.GLTFLoader) return;
   const loader = new T3.GLTFLoader();
@@ -6922,7 +6992,7 @@ function makeChar(faceKey) {
   const card = new T3.Mesh(GEO.card || (GEO.card = new T3.PlaneGeometry(.58, .36)), new T3.MeshBasicMaterial({ side: T3.DoubleSide })); card.visible = false; rig.add(card);
   const cardL = makeText(); cardL.visible = false; g.add(cardL);
   const ols = []; rig.traverse(o => { if (o.material === OUTLINE_MAT) { o.userData.k = o.scale.x; ols.push(o); } else if (o.isMesh && o.material && o.material.isMeshToonMaterial) o.castShadow = true; });
-  return { g, rig, body, head, shirt, skinM, shoeM, out: [], outKey: null, faceMat, emoL, card, cardL, ols, hl: false, rodMat, reelMat, feet, hands, pivot, tip, hit, bob, line, ring, excl, label, bubble, clabel, fish,
+  return { g, rig, body, head, shirt, skinM, shoeM, out: [], outKey: null, faceMat, emoL, card, cardL, ols, hl: false, rodMat, reelMat, reelM, grip, feet, hands, pivot, tip, hit, bob, line, ring, excl, label, bubble, clabel, fish,
     fishId: null, color: null, skinC: null, model: null, faceKey: null, px: null, pz: null, walkT: 0 };
 }
 function removeChar(F) {
@@ -6995,7 +7065,7 @@ function updateChar(F, f, t, dt, now) {
   if (f.st === "dig") { const q = Math.sin(t * 11); F.rig.rotation.x = .38 + q * .08; F.hands[0].position.set(-.16, .32 + q * .08, .5); F.hands[1].position.set(.16, .32 + q * .08, .5); }
   F.head.rotation.z = Math.sin(t * .9 + F.px) * .05;
   F.pivot.visible = !!fishing && f.phase !== "idle";
-  { const rk = (f.rod || "bamboo") + "|" + (f.reel || "basic"); if (F.rodKey !== rk) { F.rodKey = rk; const rd = RODS.find(r => r.id === f.rod) || RODS[0], prem = rd.lv >= 25;
+  { const rk = (f.rod || "bamboo") + "|" + (f.reel || "basic") + "|" + ROD3D.size; if (F.rodKey !== rk) { F.rodKey = rk; const rd = RODS.find(r => r.id === f.rod) || RODS[0], prem = rd.lv >= 25; fitHeldRod(F, rd);
       F.rodMat.color.setHex(rd.color); F.rodMat.emissive.setHex(prem ? rd.color : 0); F.rodMat.emissiveIntensity = prem ? .45 : 1;   // 전설 이상 낚싯대는 은은하게 빛남
       const gl = F.rodMat.userData.glow; if (gl) { gl.visible = prem; gl.material.color.setHex(rd.color === 0x1b1b1f || rd.color === 0x23356e ? 0xbfd8ff : rd.color); }
       F.reelMat.color.setHex((REELS.find(r => r.id === f.reel) || REELS[0]).color); } }
@@ -7547,6 +7617,9 @@ function itemIcon(cat, it, size) {
     else if (it.id === "squid") { g.fillStyle = "#f6e6ee"; g.beginPath(); g.moveTo(x, s * .16); g.quadraticCurveTo(x + s * .22, y - s * .02, x + s * .14, y + s * .1); g.lineTo(x - s * .14, y + s * .1); g.quadraticCurveTo(x - s * .22, y - s * .02, x, s * .16); g.fill(); olStroke(g, S2); g.lineCap = "round"; for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(x - s * .12 + i * s * .06, y + s * .1); g.quadraticCurveTo(x - s * .16 + i * s * .07, y + s * .26, x - s * .1 + i * s * .06, y + s * .34); g.lineWidth = s * .05; g.strokeStyle = OL; g.stroke(); g.lineWidth = s * .03; g.strokeStyle = "#f6e6ee"; g.stroke(); } g.fillStyle = "#1a1410"; for (const sx of [-1, 1]) { g.beginPath(); g.arc(x + sx * s * .06, y + s * .04, s * .025, 0, 7); g.fill(); } }
     else if (it.id === "lure") { SICON.fish(g, x, y, S2, "#f2c230"); SICON.hook(g, x - s * .05, y + s * .26, s * .3); }
     else { g.save(); g.translate(x, y); for (let i = 0; i < 12; i++) { g.rotate(Math.PI / 6); g.fillStyle = i % 2 ? "rgba(255,216,77,.7)" : "rgba(179,138,240,.6)"; g.beginPath(); g.moveTo(-s * .04, 0); g.lineTo(0, -s * .44); g.lineTo(s * .04, 0); g.fill(); } g.restore(); SICON.fish(g, x, y, S2 * .9, "#b38af0"); SICON.star(g, x + s * .26, y - s * .24, s * .22); }
+  } else if (cat === "rod" && ROD_PIC.has(it.id)) {
+    g.drawImage(ROD_PIC.get(it.id), 0, 0, s, s);   // 3D 모델로 찍은 그림 (v1.38)
+    if ((it.lv || 1) >= 25) SICON.star(g, s * .2, s * .2, s * .18);
   } else if (cat === "rod") {
     g.save(); g.translate(x, y); g.rotate(-Math.PI / 4);
     rrPath(g, -s * .05, s * .12, s * .1, s * .3, s * .04); g.fillStyle = "#8a5a34"; g.fill(); olStroke(g, S2 * .7);
