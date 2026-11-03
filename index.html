@@ -1615,7 +1615,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.64.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.65.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -2814,7 +2814,7 @@ const LV_MAX = 100;
 const XP_TABLE = (() => { const base = (lv) => Math.round(40 * Math.pow(Math.max(0, lv - 1), 1.55)); const t = []; for (let l = 0; l <= LV_MAX; l++) t[l] = base(l); let step = t[50] - t[49]; for (let l = 51; l <= LV_MAX; l++) { step = Math.round(step * 1.09); t[l] = t[l - 1] + step; } return t; })();
 const xpNeed = (lv) => XP_TABLE[clamp(Math.floor(lv) || 0, 0, LV_MAX)];
 /* ---------- 운영자 실험실 (v1.64): 이 기기에만 저장되는 테스트 설정 · 소비 지점에서 S.isOwner일 때만 적용돼요 ---------- */
-const LAB = { fish: lsGet("mn.lab.fish", 1), xp: lsGet("mn.lab.xp", 1), move: lsGet("mn.lab.move", 1), time: lsGet("mn.lab.time", -1),
+const LAB = { fish: lsGet("mn.lab.fish2", 1), xp: lsGet("mn.lab.xp", 1), move: lsGet("mn.lab.move", 1), time: lsGet("mn.lab.time", -1),
   noHeat: !!lsGet("mn.lab.noHeat", 0), noBreak: !!lsGet("mn.lab.noBreak", 0), fastBite: !!lsGet("mn.lab.fastBite", 0), perfect: !!lsGet("mn.lab.perfect", 0), tier: lsGet("mn.lab.tier", -1) };
 const labSet = (k, v) => { LAB[k] = v; lsSet("mn.lab." + k, v); if (S.sheet === "admintools") refreshSheet(true); };
 function levelOf(xp) { let lv = 1; while (lv < LV_MAX && xp >= xpNeed(lv + 1)) lv++; return lv; }
@@ -3136,7 +3136,8 @@ function luckProbs(p, extra) {
 const baseSize = (f) => Math.sqrt(f.min * f.max);
 // 화면에 보이는 크기 배율 (v1.44): 보통 ×1 = 1, 클수록 크게 — ×10이면 약 4배, ×100이면 건물만 해요(최대 22)
 // v1.59.1: 수치 그대로 — 표시된 길이 1m = 게임 안 1m(1칸). 6m 고래는 6m, 큰 개체는 적힌 길이만큼
-const fishVisLen = (f, sizeCm) => clamp((Number(sizeCm) || 0) / 100 * (S.isOwner ? LAB.fish : 1), .05, 600);   // 실험실: 물고기 그래픽 크기
+const FISH_VIS = 2.4;   // 물고기 그래픽 기본 배율 (v1.65 · 모두에게 적용 — 실험실에서 ×2.4가 딱 좋다고 확정)
+const fishVisLen = (f, sizeCm) => clamp((Number(sizeCm) || 0) / 100 * FISH_VIS * (S.isOwner ? LAB.fish : 1), .05, 600);   // 실험실 슬라이더는 기본 배율 위에 추가로 곱해져요
 const fishVisK = (f, sizeCm) => { const k = f && sizeCm ? sizeCm / baseSize(f) : 1; return k <= 1 ? Math.max(.6, k) : Math.pow(k, .6); };
 function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
 /* v1.43: 크기는 극단적으로 — 보통이 ×1(100%)일 때 아주 드물게 ×100(10,000%)까지. 클수록 훨씬 드물어요(꼬리가 긴 분포)
@@ -3360,7 +3361,7 @@ function fightJumpFx() {
   if (!R || !scene || REEL.fx == null || !REEL.r) return;
   const m = fishMesh(REEL.r.f.id);
   const ring = new T3.Mesh(GEO.ring, new T3.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .7, depthWrite: false })); scene.add(ring);
-  if (m) { m.scale.setScalar((.6 + REEL.r.f.tier * .3) * (S.isOwner ? LAB.fish : 1)); scene.add(m); }
+  if (m) { m.scale.setScalar((.6 + REEL.r.f.tier * .3) * FISH_VIS * (S.isOwner ? LAB.fish : 1)); scene.add(m); }
   JUMPS.push({ m: m || new T3.Object3D(), ring, x: REEL.fx, z: REEL.fz, dx: 0, dz: 0, ang: Math.random() * 6, h: 1.5, t0: performance.now() / 1000, dur: 1.0 });
 }
 function reelFrame(now) {
@@ -11485,7 +11486,7 @@ SHEETS.admintools = (body) => {
   } else if (t === "lab") {
     const tg = (label, key) => h("button", { "aria-pressed": String(!!LAB[key]), onclick: () => labSet(key, !LAB[key]), text: (LAB[key] ? "🟢 " : "⚪ ") + label });
     const chipSet = (key, opts) => h("div", { class: "chips" }, opts.map(([v, l]) => h("button", { "aria-pressed": String(LAB[key] === v), onclick: () => labSet(key, v), text: l })));
-    body.append(h("div", { class: "muted", style: "font-size:12.5px;line-height:1.6", text: "이 기기에만 저장되는 테스트 설정이에요. 운영자 계정으로 접속했을 때만 적용돼요. 물고기 크기는 실제 크기가 아니라 화면에 그려지는 크기만 바뀌어요." }));
+    body.append(h("div", { class: "muted", style: "font-size:12.5px;line-height:1.6", text: "이 기기에만 저장되는 테스트 설정이에요. 운영자 계정으로 접속했을 때만 적용돼요. 물고기 그래픽은 모두에게 ×2.4가 기본으로 적용되고 있고, 아래 슬라이더는 그 위에 추가로 곱해져요." }));
     const fr = h("input", { type: "range", min: "0.3", max: "3", step: "0.1", value: String(LAB.fish), style: "flex:1", "aria-label": "물고기 그래픽 크기" });
     fr.addEventListener("change", () => labSet("fish", Number(fr.value)));
     body.append(h("div", { class: "sec", text: "🐟 물고기 그래픽 크기 ×" + LAB.fish.toFixed(1) }), h("div", { class: "row" }, fr, h("button", { class: "btn sm", onclick: () => labSet("fish", 1), text: "기본으로" })));
