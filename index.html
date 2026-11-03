@@ -1460,6 +1460,13 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .rb-row.open{border-color:rgba(47,174,127,.5)}.rb-row .rb-i{font-size:26px}.rb-row .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.rb-row small{color:var(--muted);font-size:12px}
 .rb-tag{font-size:12px;font-weight:800;color:#2fae7f}
 @media (max-width:560px){.rb-ledger{grid-template-columns:repeat(2,1fr)}}
+.restbar .rb-open{background:#2f8f5b;color:#fff}.restbar .rb-open.on{background:#e2522c}
+.rm-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.rm-step{padding:8px 4px;border-radius:12px;text-align:center;border:1.5px solid var(--line);background:var(--bg);font-size:11.5px;display:flex;flex-direction:column;gap:2px}
+.rm-step b{font-size:12px}.rm-step.done{opacity:.6}.rm-step.cur{border-color:#e2952c;background:rgba(226,149,44,.16)}
+.rm-next{display:flex;gap:10px;align-items:center;margin-top:8px;padding:12px;border-radius:14px;border:1.5px dashed #e2952c}.rm-next small{display:block;font-size:12px;color:var(--muted)}.rm-next .grow{flex:1;min-width:0}
+.rm-list{display:flex;flex-direction:column;gap:6px}.rm-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg)}
+.rm-row .grow{flex:1;min-width:140px}.rm-row small{display:block;font-size:12px;color:var(--muted)}.rm-i{font-size:24px}
+.rm-hire{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}.rm-card{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;padding:12px 8px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg)}.rm-card small{font-size:11.5px;color:var(--muted)}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 </style>
 
@@ -1602,7 +1609,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.53.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.55.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -2203,8 +2210,14 @@ const REST_CFG = {
   chopHits: [5, 20],                     // 썰기 연타 수: 작은 생선 ~ 큰 생선
   stationCap: { board: 1, boil: 3, fry: 3, grill: 2 },
 };
-const REST_LV = [   // 가게 단계 (Phase 4에서 업그레이드 · 외관이 붙어요)
-  { name: "포장마차", seats: 4 }, { name: "작은 횟집", seats: 6 }, { name: "동네 맛집", seats: 6 }, { name: "2층 레스토랑", seats: 6 }, { name: "어촌의 명소", seats: 6 }];
+const REST_STAFF_KEYS = ["hs", "uni", "pro", "chef"];
+const REST_LV = [   // 가게 단계: 비용 · 알바 상한 · 동시 티켓 · 완벽 팁 가산 · 판매가 가산 · 하루 운영비 · 손님 자리 (외관은 다음 단계)
+  { name: "포장마차", cost: 0, hire: 0, tickets: 2, tip: 0, price: 0, opex: 0, seats: 4 },
+  { name: "작은 횟집", cost: 5000, hire: 1, tickets: 3, tip: .05, price: 0, opex: 50, seats: 6 },
+  { name: "동네 맛집", cost: 20000, hire: 2, tickets: 4, tip: .05, price: 0, opex: 150, seats: 6 },
+  { name: "2층 레스토랑", cost: 60000, hire: 3, tickets: 5, tip: .05, price: 0, opex: 400, seats: 6 },
+  { name: "어촌의 명소", cost: 150000, hire: 4, tickets: 6, tip: .05, price: .1, opex: 800, seats: 6 },
+];
 // 레시피: ing = [어종 id, 개수] · chop = 썰기 필요 · cook = 조리 스테이션 (없으면 회) · cost = 해금비(안쪽 단위, 0 = 기본 제공) · dish = 접시 모양
 const RECIPES = [
   { id: "gwangeo-hoe", t: 1, name: "광어회", ico: "🍣", ing: [["b-gwangeo", 1]], chop: true, cook: null, cost: 0, dish: "sashimi" },
@@ -2240,6 +2253,8 @@ function normRest(r) {
   const pl = k.plate && typeof k.plate === "object" ? k.plate : {};
   return {
     lv: clamp(Math.floor(Number(r.lv) || 0), 0, REST_LV.length - 1), mig: r.mig ? 1 : 0,
+    staff: (Array.isArray(r.staff) ? r.staff : []).filter(x => x && REST_STAFF_KEYS.includes(x.g)).slice(0, 4).map(x => ({ id: str(x.id, 16) || uid4(), g: x.g, post: ["prep", "run", "cook"].includes(x.post) ? x.post : "prep", name: str(x.name, 8) || "알바", since: str(x.since, 10) })),
+    last: r.last && typeof r.last === "object" && typeof r.last.d === "string" ? { d: r.last.d, sales: Number(r.last.sales) || 0, tips: Number(r.last.tips) || 0, plates: Number(r.last.plates) || 0, wages: Number(r.last.wages) || 0, opex: Number(r.last.opex) || 0, net: Number(r.last.net) || 0, short: Number(r.last.short) || 0, closed: !!r.last.closed } : null,
     unlocked: (Array.isArray(r.unlocked) ? r.unlocked : []).filter(id => RECIPE[id]),
     plates: clamp(Math.floor(Number(r.plates) || 0), 0, 1e8), sales: clamp(Math.floor(Number(r.sales) || 0), 0, 1e12), tips: clamp(Math.floor(Number(r.tips) || 0), 0, 1e12),
     day: r.day && typeof r.day === "object" && typeof r.day.d === "string" ? { d: r.day.d, sales: Math.max(0, Math.floor(Number(r.day.sales) || 0)), plates: Math.max(0, Math.floor(Number(r.day.plates) || 0)), tips: Math.max(0, Math.floor(Number(r.day.tips) || 0)), tickets: Math.max(0, Math.floor(Number(r.day.tickets) || 0)), perfect: Math.max(0, Math.floor(Number(r.day.perfect) || 0)) } : null,
@@ -2248,7 +2263,7 @@ function normRest(r) {
   };
 }
 const restUnlocked = (r) => r.cost === 0 || P.rest.unlocked.includes(r.id);
-function restDay() { const d = kstDay(); if (!P.rest.day || P.rest.day.d !== d) P.rest.day = { d, sales: 0, plates: 0, tips: 0, tickets: 0, perfect: 0 }; return P.rest.day; }
+function restDay() { const d = kstDay(); if (!P.rest.day || P.rest.day.d !== d) { if (P.rest.day) restSettle({ ...P.rest.day, open: P.rest.day.tickets > 0 }); P.rest.day = { d, sales: 0, plates: 0, tips: 0, tickets: 0, perfect: 0 }; } return P.rest.day; }
 
 function normProfile(p) {
   const n = newProfile();
@@ -4971,6 +4986,8 @@ async function openRest(i) {   // 포차 앞에서 「차리기」 → 그 자�
   restMigrate(); walkInRest(); coach("rest");
   if (restVerify().length) console.warn("레시피 마진 검산 실패", restVerify());
 }
+// (v1.54) 장사 시작 · 종료: 내 포차 안에 있을 때 위에 뜨는 창. 시작해야 손님이 와요
+function setRestOpen(on) { S.restOpen = on; setTimeout(updateRestBar, 0); if (on) S.restNextGuest = Date.now() + 2000; sfx(on ? "ui-confirmation" : "ui-close", .45); toast(on ? "🏮 장사를 시작했어요! 손님이 들어와요" : "🌙 장사를 마쳤어요 · 새 손님은 오지 않아요"); }
 function walkInRest() { const p = restW(1.1, 2.0); walkTo(p.x, p.z, () => { const q = restW(.2, 0); walkTo(q.x, q.z); }); }
 const enterRest = openRest;
 function leaveRest() { if (!atRest()) return; const p = restW(4.2, 2.0); walkTo(p.x, p.z); }
@@ -5073,19 +5090,19 @@ function restChop(it) {
   if (it.hits >= need) { it.chopped = true; restSnd("complete_1", .35); { const bw = stationW("board"); fxPop(bw.x, 1.9, bw.z, "손질 끝!", "#ffffff"); } }
   restChanged();
 }
-function serveDish(hand) {
+function serveDish(hand, byStaff) {
   const tk = (S.restTickets || []).filter(t => t.r === hand.dish && !t.served).sort((a, b) => a.t0 - b.t0)[0];
-  if (!tk) { toast("이 요리를 시킨 손님이 없어요 · 손에 들고 있다가 주문이 오면 올려요"); return; }
-  const r = RECIPE[hand.dish], base = recipePrice(r), tip = hand.q === "perfect" ? Math.round(base * REST_CFG.perfectTip) : 0, sum = base + tip;
+  if (!tk) { if (!byStaff) toast("이 요리를 시킨 손님이 없어요 · 손에 들고 있다가 주문이 오면 올려요"); return; }
+  const r = RECIPE[hand.dish], LV = REST_LV[P.rest.lv], base = Math.round(recipePrice(r) * (1 + LV.price)), tip = hand.q === "perfect" ? Math.round(base * (REST_CFG.perfectTip + LV.tip)) : 0, sum = base + tip;
   P.gold += sum; P.rest.plates++; P.rest.sales += base; P.rest.tips += tip;
   const d = restDay(); d.sales += base; d.tips += tip; d.plates++; if (tip) d.perfect++;
-  restK().hand = null; tk.served = Date.now();
+  if (!byStaff) restK().hand = null; tk.served = Date.now();
   stat("soldGold", sum); questProgress("sell", sum); markDirty();
   restSnd("servingbell_1", .5); setTimeout(() => restSnd("register_1", .5), 250);
   const gst = (S.restGuests || []).find(gu => gu.tk === tk); if (gst) { gst.eatUntil = Date.now() + 4500; gst.dish = dishMesh(r.id); const tw = restW(gst.seat[0] < 5 ? 3.0 : 6.6, gst.seat[0] < 5 ? gst.seat[1] : gst.seat[1] * .45); gst.dish.position.set(tw.x, gst.seat[0] < 5 ? 1.06 : .78, tw.z); scene.add(gst.dish); }
-  fxPop(ME.x, 2.4, ME.z, "+" + won(sum) + (tip ? " (팁 " + won(tip) + ")" : ""), tip ? "#ffd84d" : "#ffffff");
+  { const fp = byStaff ? stationW("pass") : ME; fxPop(fp.x, 2.4, fp.z, "+" + won(sum) + (tip ? " (팁 " + won(tip) + ")" : ""), tip ? "#ffd84d" : "#ffffff"); }
   try { ACT_FX.sell(sum); } catch {}
-  toast(r.ico + " " + r.name + " 서빙 · +" + won(sum) + (tip ? " · 완벽 팁 +" + won(tip) : ""));
+  if (!byStaff) toast(r.ico + " " + r.name + " 서빙 · +" + won(sum) + (tip ? " · 완벽 팁 +" + won(tip) : ""));
   restChanged();
 }
 function restChanged() { markDirty(); restRenderStations(); renderRestHud(); updateRestBar(); if (S.sheet === "restbook") refreshSheet(); }
@@ -5139,9 +5156,9 @@ function restTick(t, dt) {
   const near = restNear(), now = Date.now(), d = restDay();
   if (near !== !!S.restNearOn) { S.restNearOn = near; updateRestBar(); }
   // 손님 오기 (가게 가까이 있을 때만 영업해요)
-  const cap = REST_CFG.ticketCap[P.rest.lv], busy = S.restGuests.length;
+  const cap = REST_LV[P.rest.lv].tickets, busy = S.restGuests.length;
   const freeSeats = REST_SEATS.map((s, i) => i).filter(i => !S.restGuests.some(gu => gu.si === i)).slice(0, REST_LV[P.rest.lv].seats);
-  if (near && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length && d.tickets < REST_CFG.dayTickets) {
+  if (S.restOpen && near && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length && d.tickets < REST_CFG.dayTickets) {
     const r = pickTicketRecipe();
     if (r) {
       const si = pick(freeSeats), seat = REST_SEATS[si];
@@ -5171,7 +5188,7 @@ function restTick(t, dt) {
     const seated = gu.stage === "wait" && !gu.path.length && !walking;
     gu.B.g.position.set(gu.x, seated ? .22 : 0, gu.z); gu.B.g.rotation.y = gu.ry || 0; gu.B.g.visible = !atHome();
     const sw = walking ? Math.sin(t * 9 + gu.si) : 0; gu.B.rig.position.y = Math.abs(sw) * .06; gu.B.feet[0].position.z = .05 + sw * .12; gu.B.feet[1].position.z = .05 - sw * .12;
-    if (seated && gu.eatUntil && now < gu.eatUntil) { const q = Math.sin(t * 8); gu.B.hands[1].position.set(.25, .62 + q * .08, .3); }
+    gu.B.rig.rotation.x = seated && gu.eatUntil && now < gu.eatUntil ? .12 + Math.sin(t * 8) * .06 : 0;   // 냠냠
     const lbl = gu.stage === "out" ? (gu.happy ? "😋 잘 먹었어요!" : "😢 너무 늦었어요") : gu.tk && gu.tk.served ? "😋 냠냠" : gu.stage === "wait" ? RECIPE[gu.r].ico + " " + RECIPE[gu.r].name : "";
     const left = gu.tk && !gu.tk.served ? (gu.tk.until - now) / (REST_CFG.patience * 1000) : 1;
     const tcol = left < .25 ? "#c2402a" : left < .5 ? "#d9a514" : "#2a78bb", tk2 = lbl + tcol;
@@ -5179,6 +5196,7 @@ function restTick(t, dt) {
     gu.tag.visible = !!lbl && !atHome(); gu.tag.position.set(gu.x, seated ? 2.0 : 1.85, gu.z);
   }
   if (!S.restRenderAt || now - S.restRenderAt > 120) { S.restRenderAt = now; restRenderStations(); renderRestHud(true); }
+  restStaffTick(t, dt);
   if (RESTG.oil) RESTG.oil.material.color.setHSL(.1, .75, .52 + (restK().fry.length ? Math.sin(t * 20) * .05 : 0));
   if (Math.random() < .25) for (const id of ["boil", "fry", "grill"]) if (restK()[id].length) { const p = stationW(id); fxBurst(p.x + .1, 1.25, p.z + (Math.random() - .5) * .3, { n: 1, spd: .15, up: .7, size: .14, dur: 1.1, spread: .1, col: id === "fry" ? 0xffe0a0 : 0xffffff }); }
 }
@@ -5195,7 +5213,8 @@ function updateRestBar() {
   const d = restDay();
   bar.hidden = false;
   bar.replaceChildren(h("b", { text: "🏮 " + P.nick + "네 포차 · " + REST_LV[P.rest.lv].name }), h("span", { class: "num", text: "오늘 " + won(d.sales + d.tips) + " · " + d.plates + "접시" }),
-    h("button", { onclick: () => openSheet("restbook"), text: "📖 레시피" }), ...(atRest() ? [] : [h("button", { onclick: walkInRest, text: "안으로" })]));
+    h("button", { class: "rb-open" + (S.restOpen ? " on" : ""), onclick: () => setRestOpen(!S.restOpen), text: S.restOpen ? "🌙 장사 종료" : "🏮 장사 시작" }),
+    h("button", { onclick: () => openSheet("restbook"), text: "📖 레시피" }), h("button", { onclick: () => openSheet("restmanage"), text: "🧑‍🍳 가게" + (S.restSettleNew ? " 🔴" : "") }), ...(atRest() ? [] : [h("button", { onclick: walkInRest, text: "안으로" })]));
   syncUIState(); renderRestHud();
 }
 function renderRestHud(quiet) {
@@ -5292,6 +5311,176 @@ function restActions(consider) {
     else if (hand && !hand.dish && s.id !== "pass") label = s.ico + " " + s.name + "에 올리기";
     consider(p.x, p.z, { key: "rest:" + s.id + ":" + label, label, run: () => { ME.ry = s.ry; presMove(true); restUse(s.id); } }, .95);
   }
+}
+/* ---------- 식당 2단계 (v1.55): 알바 · 역할 배치 자동화 · 가게 단계 · 밤 정산 ----------
+   알바는 고용비(한 번) + 일당(장사한 날마다, 다음 날 정산). 역할: 손질(냉장고→도마→썰기) · 운반·서빙(도마→조리/접시, 다 익은 것→접시, 완성 요리→서빙) · 조리(완벽 구간에 꺼내기).
+   단계가 오르면 고용 상한 · 동시 티켓 · 팁이 늘어요(외관은 다음 단계). 수치는 REST_LV · REST_STAFF 표만 바꾸면 돼요 */
+const REST_STAFF = {
+  hs: { name: "동네 고등학생", ico: "🧒", hire: 300, wage: 100, speed: .6, can: ["prep"], perfect: 0, up: 0 },
+  uni: { name: "대학생 알바", ico: "🎒", hire: 800, wage: 250, speed: .85, can: ["prep", "run"], perfect: .35, up: 0 },
+  pro: { name: "경력 조리 알바", ico: "👨‍🍳", hire: 2500, wage: 600, speed: 1.1, can: ["prep", "run", "cook"], perfect: .7, up: 0 },
+  chef: { name: "전문 셰프", ico: "⭐", hire: 8000, wage: 1500, speed: 1.4, can: ["prep", "run", "cook"], perfect: .9, up: .25 },
+};
+const STAFF_POST = { prep: { name: "손질", ico: "🔪", stand: "board" }, run: { name: "운반 · 서빙", ico: "🛎", stand: "pass" }, cook: { name: "조리", ico: "🔥", stand: "grill" } };
+const STAFF_NAMES = ["민지", "준호", "서연", "도윤", "하은", "지호", "수아", "건우", "예린", "태민", "다은", "현우"];
+const restStaffCap = () => REST_LV[P.rest.lv].hire;
+function hireStaff(g) {
+  const G = REST_STAFF[g]; if (!G) return;
+  if (P.rest.staff.length >= restStaffCap()) { toast(P.rest.lv === 0 ? "포장마차는 혼자 해요 · 「작은 횟집」으로 키우면 알바를 쓸 수 있어요" : "지금 가게 단계에서는 " + restStaffCap() + "명까지 고용할 수 있어요"); return; }
+  if (P.gold < G.hire) { toast("고용비가 모자라요 (" + won(G.hire) + ")"); return; }
+  P.gold -= G.hire;
+  const used = new Set(P.rest.staff.map(s => s.name)), name = STAFF_NAMES.find(n => !used.has(n)) || "알바";
+  P.rest.staff.push({ id: uid4(), g, post: G.can[G.can.length - 1] === "cook" && !P.rest.staff.some(s => s.post === "cook") ? "cook" : G.can.includes("run") && !P.rest.staff.some(s => s.post === "run") ? "run" : "prep", name, since: kstDay() });
+  markDirty(); sfx("coins", .45); toast(G.ico + " " + name + "(" + G.name + ")을 고용했어요 · 일당 " + won(G.wage) + "은 장사한 날마다 다음 날 정산돼요"); restStaffSync(); refreshSheet(true);
+}
+function fireStaff(id) { P.rest.staff = P.rest.staff.filter(s => s.id !== id); markDirty(); restStaffSync(); refreshSheet(true); toast("알바를 내보냈어요"); }
+function setPost(id, post) { const s = P.rest.staff.find(x => x.id === id); if (!s || !REST_STAFF[s.g].can.includes(post)) return; s.post = post; markDirty(); restStaffSync(); refreshSheet(true); }
+function upgradeRest() {
+  const nx = REST_LV[P.rest.lv + 1]; if (!nx) return;
+  if (P.gold < nx.cost) { toast("돈이 모자라요 (" + won(nx.cost) + ")"); return; }
+  P.gold -= nx.cost; P.rest.lv++; markDirty(); sfx("coins", .5); restSnd("fanfare_1", .5);
+  toast("🏮 「" + nx.name + "」이 됐어요! 알바 " + nx.hire + "명 · 동시 주문 " + nx.tickets + "장" + (nx.tip ? " · 완벽 팁 +" + Math.round(nx.tip * 100) + "%p" : "") + (nx.price ? " · 판매가 +" + Math.round(nx.price * 100) + "%" : ""));
+  updateRestBar(); refreshSheet(true);
+}
+// 어젯밤 정산: 장사한 날(손님을 받은 날)만 일당 · 운영비를 내요
+function restSettle(prev) {
+  if (!prev || !prev.open) { P.rest.last = prev ? { d: prev.d, sales: prev.sales, tips: prev.tips, plates: prev.plates, wages: 0, opex: 0, net: prev.sales + prev.tips, closed: true } : null; return; }
+  const wages = P.rest.staff.reduce((a, s) => a + (REST_STAFF[s.g] ? REST_STAFF[s.g].wage : 0), 0), opex = REST_LV[P.rest.lv].opex || 0, cost = wages + opex;
+  const paid = Math.min(P.gold, cost); P.gold -= paid;
+  P.rest.last = { d: prev.d, sales: prev.sales, tips: prev.tips, plates: prev.plates, wages, opex, net: prev.sales + prev.tips - cost, short: cost - paid };
+  S.restSettleNew = true; markDirty();
+}
+
+/* 알바 몸 · 움직임 (내 화면에만) */
+S.restStaffB = new Map();
+function restStaffSync() {
+  for (const [id, b] of S.restStaffB) if (!P.rest.staff.some(s => s.id === id)) { scene.remove(b.B.g); scene.remove(b.tag); S.restStaffB.delete(id); }
+  if (!T3 || !scene || S.restSlot < 0) return;
+  P.rest.staff.forEach((s, k) => {
+    if (S.restStaffB.has(s.id)) return;
+    const B = makeBody(); applyOutfit(B, normWear({ top: "", bottom: "" }), ["#ffffff", "#2a78bb", "#2f8f5b", "#1d2a33"][Object.keys(REST_STAFF).indexOf(s.g)] || "#ffffff");
+    B.faceMat.map = faceTexture("npc"); B.faceMat.needsUpdate = true; scene.add(B.g);
+    const tag = makeText(); scene.add(tag);
+    const p = restStand(REST_ST.find(x => x.id === STAFF_POST[s.post].stand)); S.restStaffB.set(s.id, { B, tag, x: p.x + .3 * k, z: p.z, ry: 0, busy: 0, act: "" });
+  });
+}
+function plateCompatible(items) {   // 이 재료들이 접시에 함께 담겨도 되는지 (어떤 주문 레시피의 일부)
+  const cands = (S.restTickets || []).filter(t => !t.served).map(t => RECIPE[t.r]);
+  return cands.some(r => items.every(it => itemFits(r, it)) && r.ing.every(([id, n]) => items.filter(it => it.fish === id).length <= n));
+}
+function staffTarget(it) {   // 이 재료가 갈 다음 곳: 조리 스테이션 또는 접시
+  const r = (S.restTickets || []).filter(t => !t.served).map(t => RECIPE[t.r]).find(r => r.ing.some(([id]) => id === it.fish) && (!r.chop || it.chopped));
+  if (!r) return null;
+  if (r.cook && it.cook !== r.cook) return r.cook;
+  return "plate";
+}
+function tryPlate(it, sf) {
+  const pl = restK().plate; if (pl.dish) return false;
+  if (!plateCompatible(pl.items.concat(it))) return false;
+  pl.items.push(it); restSnd("plate_1", .3);
+  const done = plateMatch(pl.items);
+  if (done) { let q = done.cook && pl.items.every(x => x.q === "perfect") ? "perfect" : "normal"; if (q === "normal" && sf && Math.random() < REST_STAFF[sf.g].up) q = "perfect"; pl.dish = { id: done.id, q, items: pl.items }; pl.items = []; restSnd("complete_1", .45); }
+  return true;
+}
+function staffNeed() {   // 주문에 필요한데 주방에 아직 없는 어종 (오래된 주문 먼저)
+  const tks = (S.restTickets || []).filter(t => !t.served).sort((a, b) => a.t0 - b.t0), have = new Map();
+  for (const tk of tks) for (const [id, n] of RECIPE[tk.r].ing) {
+    const inK = kitchenCount(id) + (have.get(id) || 0);
+    let need = 0; for (const t2 of tks) for (const [id2, n2] of RECIPE[t2.r].ing) if (id2 === id) need += n2;
+    if (need > inK && P.bag.some(b => b.fishId === id)) return { id, r: RECIPE[tk.r] };
+  }
+  return null;
+}
+function staffStep(s, sb) {   // 할 일 하나를 고르고 끝내요 (시간은 속도에 따라)
+  const G = REST_STAFF[s.g], k = restK(), sp = G.speed, can = (p) => G.can.includes(p);
+  const doIt = (dur, at, act, fn) => { sb.busy = Date.now() + dur / sp; sb.at = at; sb.act = act; sb.fn = fn; };
+  const cookTake = (perfectOnly) => {
+    for (const id of ["boil", "fry", "grill"]) for (const x of k[id]) {
+      const g = cookGauge(x); if (g < 1) continue;
+      const inWin = g <= 1 + REST_CFG.perfectWin; if (perfectOnly && !inWin) continue;
+      if (!tryPlateDry(x.it)) continue;
+      doIt(700, id, "꺼내기", () => { if (!k[id].includes(x)) return; x.it.cook = id; x.it.q = inWin && Math.random() < G.perfect ? "perfect" : "normal"; k[id] = k[id].filter(y => y !== x); if (!tryPlate(x.it, s)) k.board.length ? returnToBag(x.it) : (k.board = [{ it: x.it, t0: 0 }]); });
+      return true;
+    }
+    return false;
+  };
+  if (s.post === "cook" && can("cook") && cookTake(true)) return;
+  if (s.post === "run" || s.post === "cook") {
+    if (k.plate.dish) { const tk = (S.restTickets || []).find(t => t.r === k.plate.dish.id && !t.served); if (tk) { doIt(1300, "pass", "서빙", () => { const pd = k.plate.dish; if (!pd) return; k.plate.dish = null; serveDish({ dish: pd.id, q: pd.q, items: pd.items }, true); }); return; } }
+    if (cookTake(false)) return;
+    const b = k.board[0];
+    if (b && b.it.chopped) { const tg = staffTarget(b.it);
+      if (tg === "plate" && tryPlateDry(b.it)) { doIt(900, "plate", "담기", () => { if (k.board[0] !== b) return; k.board = []; if (!tryPlate(b.it, s)) k.board = [b]; }); return; }
+      if (tg && tg !== "plate" && k[tg].length < REST_CFG.stationCap[tg]) { doIt(900, tg, COOK_KO[tg], () => { if (k.board[0] !== b) return; k.board = []; k[tg].push({ it: b.it, t0: Date.now(), cook0: tg }); restSnd(tg === "boil" ? "boil_1" : tg === "fry" ? "fry_1" : "grill_1", .3); }); return; } }
+    if (s.post !== "prep" && !can("prep")) return;
+  }
+  if (can("prep")) {
+    const b = k.board[0];
+    if (b && !b.it.chopped) { doIt(330, "board", "썰기", () => { if (k.board[0] !== b) return; b.it.hits++; restSnd("chop_" + (1 + (b.it.hits % 4)), .25); if (b.it.hits >= chopHitsFor(b.it.fish)) b.it.chopped = true; }); return; }
+    if (s.post !== "prep") return;
+    const nd = staffNeed(); if (!nd) return;
+    if (nd.r.chop) { if (k.board.length) return; doIt(1400, "fridge", "재료 꺼내기", () => { if (k.board.length) return; const it = takeFromBag(nd.id); if (it) k.board = [{ it, t0: 0 }]; }); return; }
+    const st = nd.r.cook; if (st && k[st].length < REST_CFG.stationCap[st]) doIt(1400, "fridge", "재료 꺼내기", () => { const it = takeFromBag(nd.id); if (it) { k[st].push({ it, t0: Date.now(), cook0: st }); restSnd("fry_1", .3); } });
+  }
+}
+function tryPlateDry(it) { const pl = restK().plate; return !pl.dish && plateCompatible(pl.items.concat(it)); }
+function restStaffTick(t, dt) {
+  if (S.restSlot < 0 || !P.rest.staff.length) return;
+  if (S.restStaffB.size !== P.rest.staff.length) restStaffSync();
+  const now = Date.now(), working = S.restOpen && restNear();
+  for (const s of P.rest.staff) {
+    const sb = S.restStaffB.get(s.id); if (!sb) continue;
+    if (sb.busy && now >= sb.busy) { const fn = sb.fn; sb.busy = 0; sb.fn = null; sb.act = ""; try { fn && fn(); } catch (e) { console.warn("staff", e); } restChanged(); }
+    if (!sb.busy && working) staffStep(s, sb);
+    const st = REST_ST.find(x => x.id === (sb.busy ? sb.at : STAFF_POST[s.post].stand)), p = restStand(st);
+    const dx = p.x - sb.x, dz = p.z - sb.z, d = Math.hypot(dx, dz);
+    if (d > .05) { const sp2 = Math.min(d, 2.2 * dt); sb.x += dx / d * sp2; sb.z += dz / d * sp2; sb.ry = Math.atan2(dx, dz); } else sb.ry = st.ry;
+    sb.B.g.position.set(sb.x, 0, sb.z); sb.B.g.rotation.y = sb.ry; sb.B.g.visible = !atHome();
+    const chop = sb.busy && sb.act === "썰기"; sb.B.rig.rotation.x = chop ? .14 + Math.abs(Math.sin(t * 14)) * .1 : sb.busy ? .06 : 0;   // 일하는 몸짓 (NPC 몸에는 손이 없어요)
+    const G = REST_STAFF[s.g], lbl = G.ico + " " + s.name + " · " + (sb.act || (working ? "대기" : "쉬는 중")), key = lbl;
+    if (sb.tagKey !== key) { sb.tagKey = key; setText(sb.tag, lbl, "#1d2a33", "#ffffff", .2, true); }
+    sb.tag.position.set(sb.x, 1.75, sb.z); sb.tag.visible = !atHome();
+  }
+}
+// 가게 관리: 단계 · 알바 · 장부
+function restManageSheet(body) {
+  const lv = P.rest.lv, L = REST_LV[lv], nx = REST_LV[lv + 1], d = restDay();
+  setHead("🧑‍🍳 가게 관리", L.name + " · 알바 " + P.rest.staff.length + "/" + L.hire + "명 · 동시 주문 " + L.tickets + "장");
+  // 가게 단계
+  const steps = h("div", { class: "rm-steps" }, REST_LV.map((x, i) => h("div", { class: "rm-step" + (i === lv ? " cur" : i < lv ? " done" : "") }, h("b", { text: "Lv." + (i + 1) }), h("span", { text: x.name }))));
+  body.append(h("div", { class: "sec", text: "🏮 가게 단계" }), steps);
+  if (nx) body.append(h("div", { class: "rm-next" },
+    h("div", { class: "grow" }, h("b", { text: "다음: Lv." + (lv + 2) + " " + nx.name }),
+      h("small", { text: "알바 " + nx.hire + "명 · 동시 주문 " + nx.tickets + "장 · 손님 자리 " + nx.seats + (nx.tip ? " · 완벽 팁 +" + Math.round(nx.tip * 100) + "%p" : "") + (nx.price ? " · 판매가 +" + Math.round(nx.price * 100) + "%" : "") + " · 운영비 하루 " + won(nx.opex) }),
+      h("small", { class: "muted", text: "가게 모습은 다음 업데이트에서 단계마다 바뀌어요" })),
+    h("button", { class: "btn pri", disabled: P.gold < nx.cost, onclick: upgradeRest, text: won(nx.cost) + " 키우기" })));
+  else body.append(h("div", { class: "muted", text: "최고 단계예요!" }));
+  // 알바
+  body.append(h("div", { class: "sec", text: "👥 알바 · " + P.rest.staff.length + " / " + L.hire + "명" + (L.hire ? "" : " (포장마차는 혼자 해요)") }));
+  const list = h("div", { class: "rm-list" });
+  for (const s of P.rest.staff) {
+    const G = REST_STAFF[s.g];
+    list.append(h("div", { class: "rm-row" }, h("span", { class: "rm-i", text: G.ico }),
+      h("div", { class: "grow" }, h("b", { text: s.name + " · " + G.name }), h("small", { text: "속도 ×" + G.speed + " · 일당 " + won(G.wage) + (G.perfect ? " · 완벽 " + Math.round(G.perfect * 100) + "%" : "") })),
+      h("div", { class: "seg" }, G.can.map(p => h("button", { "aria-pressed": String(s.post === p), onclick: () => setPost(s.id, p), text: STAFF_POST[p].ico + " " + STAFF_POST[p].name }))),
+      armBtn("내보내기", "한 번 더 누르면 내보내요", () => fireStaff(s.id), "ghost")));
+  }
+  if (!P.rest.staff.length) list.append(h("div", { class: "empty-note", text: L.hire ? "아직 알바가 없어요 · 아래에서 고용해요" : "가게를 「작은 횟집」으로 키우면 알바를 쓸 수 있어요" }));
+  body.append(list);
+  const full = P.rest.staff.length >= L.hire;
+  body.append(h("div", { class: "rm-hire" }, Object.entries(REST_STAFF).map(([g, G]) => h("div", { class: "rm-card" },
+    h("span", { class: "rm-i", text: G.ico }), h("b", { text: G.name }),
+    h("small", { text: G.can.map(p => STAFF_POST[p].name).join(" · ") + (G.up ? " · 요리 품질 업" : "") }),
+    h("small", { class: "num", text: "고용비 " + won(G.hire) + " · 일당 " + won(G.wage) }),
+    h("button", { class: "btn sm pri", disabled: full || P.gold < G.hire, onclick: () => hireStaff(g), text: full ? "자리 없음" : "고용" })))));
+  // 장부
+  const last = P.rest.last;
+  body.append(h("div", { class: "sec", text: "📒 장부" }), h("div", { class: "rb-ledger" },
+    h("div", null, h("small", { text: "오늘 매출 + 팁" }), h("b", { class: "num", text: won(d.sales + d.tips) })),
+    h("div", null, h("small", { text: "오늘 나갈 돈 (장사하면)" }), h("b", { class: "num", text: won(P.rest.staff.reduce((a, s) => a + REST_STAFF[s.g].wage, 0) + L.opex) })),
+    h("div", null, h("small", { text: "어제 순이익" }), h("b", { class: "num", text: last ? won(last.net) : "-" })),
+    h("div", null, h("small", { text: "어제 일당 · 운영비" }), h("b", { class: "num", text: last ? won(last.wages) + " · " + won(last.opex) : "-" }))));
+  body.append(h("div", { class: "muted", style: "font-size:12px", text: "일당 · 운영비는 장사한 날(손님을 받은 날)만, 다음 날 처음 들어올 때 정산돼요. 알바는 장사 중이고 내가 포차 근처에 있을 때 일해요." }));
 }
 Object.assign(TUTS, { rest: { icon: "🏮", title: "내 포차", steps: [
   "손님이 앉으면 위에 주문 티켓이 떠요. 티켓에 적힌 재료(초록 = 가방에 있음)를 냉장고에서 꺼내요.",
@@ -8927,7 +9116,7 @@ function updateHint() {
 
 /* ===================== 시트 ===================== */
 const SHEETS = {};
-SHEETS.restfridge = restFridgeSheet; SHEETS.restbook = restBookSheet;
+SHEETS.restfridge = restFridgeSheet; SHEETS.restbook = restBookSheet; SHEETS.restmanage = (b) => { S.restSettleNew = false; restManageSheet(b); };
 SHEETS.channels = channelsSheet;
 S.sheetStack = [];
 function openSheet(name, arg, opt) {
