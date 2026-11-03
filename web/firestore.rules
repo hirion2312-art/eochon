@@ -25,8 +25,9 @@ service cloud.firestore {
 
     match /chat/{id} {
       allow read: if signedIn();
-      allow create: if signedIn() && request.resource.data.text is string && request.resource.data.text.size() <= 200;
-      allow delete: if signedIn() && old(172800000);          // 이틀 지난 채팅 정리
+      allow create: if signedIn() && request.resource.data.text is string && request.resource.data.text.size() <= 200
+        && !(exists(/databases/$(database)/documents/config/mutes) && request.auth.uid in get(/databases/$(database)/documents/config/mutes).data.uids);
+      allow delete: if signedIn() && (old(172800000) || isAdmin());   // 이틀 지난 채팅 정리 · 운영자는 언제든
     }
     match /fish/{id} {
       allow read: if signedIn();
