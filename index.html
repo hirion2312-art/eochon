@@ -913,7 +913,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.23.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.24.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 10 },
   { name: "고급", base: 30 },
@@ -6542,8 +6542,95 @@ SHEETS.quests = (body) => {
 };
 
 /* ---------- 이동 ---------- */
+/* ---------- 마을 지도 ----------
+   실제 월드 좌표로 그린 그림 지도. 위 = 남쪽(갯벌 해변), 오른쪽 = 상점가 — 처음 카메라가 보는 방향과 같아요.
+   ▲ 내 위치 · 친구(이름) · 다른 사람(점)이 1초마다 바뀌고, 장소를 누르면 그곳으로 걸어가요 */
+const MAP = { x0: -55, x1: 27, z0: -127, z1: 77 };
+const MAP_ICO = { bait: "🎣", release: "🐟", face: "🙂", sashimi: "🍣", clothes: "👕", lotto: "🎰", bank: "🏦" };
+function mapSpots() {
+  const out = PLACES.map(p => ({ name: p.name, x: p.x, z: p.z, go: () => walkTo(p.x, p.z) }));
+  for (const b of BUILDINGS) out.push({ name: b.name, x: 11, z: b.z, go: () => b.sheet ? goBuilding(b.id) : walkTo(5.6, b.z) });
+  return out;
+}
+function drawTownMap(cv) {
+  const W = cv.width, H = cv.height, g = cv.getContext("2d"), k = W / (MAP.x1 - MAP.x0), u = W / 240;
+  const X = (x) => (x - MAP.x0) * k, Y = (z) => (z - MAP.z0) * k;
+  const R = (x0, z0, x1, z1, col) => { g.fillStyle = col; g.fillRect(X(Math.min(x0, x1)), Y(Math.min(z0, z1)), Math.abs(x1 - x0) * k, Math.abs(z1 - z0) * k); };
+  const C = (x, z, r, col) => { g.fillStyle = col; g.beginPath(); g.arc(X(x), Y(z), r, 0, 7); g.fill(); };
+  const T = (txt, x, z, px, col, bold) => { g.font = (bold ? "700 " : "500 ") + px * u + "px " + getComputedStyle(document.body).fontFamily; g.textAlign = "center"; g.textBaseline = "middle"; g.lineWidth = 3 * u; g.strokeStyle = "rgba(255,255,255,.85)"; g.strokeText(txt, X(x), Y(z)); g.fillStyle = col; g.fillText(txt, X(x), Y(z)); };
+  const E = (ico, x, z, px) => { g.font = px * u + "px sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(ico, X(x), Y(z)); };
+  // 바다 · 뒷산 · 땅
+  g.fillStyle = "#8ecfe0"; g.fillRect(0, 0, W, H);
+  R(15, MAP.z0, MAP.x1, MAP.z1, "#a9cc92"); R(-1.5, MAP.z0, 15, -68, "#a9cc92");
+  R(-9.8, -68, 15, 76, "#e9e0cd");
+  // 갯벌 해변: 갯벌(썰물 땐 드러나고 밀물 땐 물) → 모래사장
+  const low = tideLow(), band = (fx, col) => { g.fillStyle = col; g.beginPath(); g.moveTo(X(-1.5), Y(-127)); for (let z = -127; z <= -67; z += 1) g.lineTo(X(fx(z)), Y(z)); g.lineTo(X(-1.5), Y(-67)); g.closePath(); g.fill(); };
+  band((z) => mudX(z) + 1, low ? "#a89276" : "#9fd3e2"); band(shoreX, "#efdcab");
+  // 산책로 · 차도 · 인도
+  R(-9.8, -68, -4, 76, "#d8c8aa"); R(-4, -69.5, 4, 76, "#62666d"); R(4, -69.5, 7, 76, "#d2c8b4");
+  g.fillStyle = "#f2d36b"; for (let z = 72; z > -68; z -= 6) g.fillRect(X(-.15), Y(z), .3 * k, 2.4 * k);
+  // 부두 · 선착장
+  R(-52.4, -3.6, -9.6, 3.6, "#a8794e"); R(-52.4, -11.6, -46, 11.6, "#a8794e");
+  for (const s of Object.values(SEAT)) if (s.kind === "pier") C(s.x, s.z, 1.3 * u, "#f6f1e7");
+  E("⛵", BOAT.dock.x, BOAT.dock.z - 1.5, 13);
+  // 포차 · 시장
+  for (const tz of TABLES_Z()) C(-6.6, tz, 1.25 * k, "#e8662e");
+  for (const s of STALLS) { R(s.x + .2, s.z - 1.9, s.x + 1.8, s.z + 1.9, S.stalls && stallAlive(S.stalls[s.i]) ? "#f26b3a" : "#8a6a4a"); g.strokeStyle = "#ffffff"; g.lineWidth = u; g.strokeRect(X(s.x + .2), Y(s.z - 1.9), 1.6 * k, 3.8 * k); }
+  // 상점가
+  for (const b of BUILDINGS) {
+    R(7, b.z - 4.5, 15, b.z + 4.5, "#" + b.color.toString(16).padStart(6, "0"));
+    g.strokeStyle = "rgba(0,0,0,.25)"; g.lineWidth = u; g.strokeRect(X(7), Y(b.z - 4.5), 8 * k, 9 * k);
+    E(MAP_ICO[b.id] || "🏪", 11, b.z, 15);
+  }
+  // 윗마을
+  R(UPTOWN.x0, UPTOWN.z0, UPTOWN.x1, UPTOWN.z1, "#ddd3c0"); R(7.9, 40.4, 11.1, 71.2, "#cbbb9c");
+  R(OFFICE.x - OFFICE.w / 2, OFFICE.z - OFFICE.d / 2, OFFICE.x + OFFICE.w / 2, OFFICE.z + OFFICE.d / 2, "#2f4a6a"); E("🪪", OFFICE.x, OFFICE.z, 15);
+  R(REALTY_LOT.x0 + .5, REALTY_LOT.z0 + .5, REALTY_LOT.x1 - .5, REALTY_LOT.z1 - .5, "#c2402a"); E("🏠", REALTY.x, REALTY.z, 15);
+  C(UP.fountain[0], UP.fountain[1], 1.8 * k, "#7fc4d8");
+  // 명예의 전당
+  R(HALL.x0, HALL.z0, HALL.x1, HALL.z1, "#ece4d2"); R(HALL.x0 + .6, HALL.cz - .95, HALL.x1 - 1.2, HALL.cz + .95, "#b8342a");
+  for (const s of STATUE_SPOTS) R(s.x - .85, s.z - .85, s.x + .85, s.z + .85, "#d2a24a");
+  E("🏆", HALL.x1 - 1.6, HALL.cz, 13);
+  // 구역 이름
+  T("낭만 부두", -31, -7.5, 10, "#4a3420", true); T("포차 거리", -6.8, 36.5, 9, "#8a3a1a", true); T("수산시장", -7, -50, 9, "#8a3a1a", true);
+  T("윗마을", 15.2, 74.5, 10, "#2f4a6a", true); T("명예의 전당", 13, -69.6, 9, "#7a5a10", true); T("갯벌 해변", -16, -100, 10, "#6a5030", true);
+  T(low ? "썰물 · 갯벌이 드러났어요" : "밀물 · 갯벌이 잠겼어요", -24, -92, 7.5, "#4a5a66"); T("낭만 거리", 0, 10, 8.5, "#ffffff");
+  // 사람들: 다른 사람 = 점, 친구 = 이름
+  for (const p of otherPeers(false)) {
+    const fr = p.uid && P.friends && P.friends[p.uid];
+    C(p.x, p.z, (fr ? 3.2 : 2.4) * u, "#ffffff"); C(p.x, p.z, (fr ? 2.4 : 1.7) * u, fr ? "#2fae7f" : p.color);
+    if (fr) T(p.nick, p.x, p.z - 4, 8, "#1e6a4a", true);
+  }
+  // 나: 보는 방향 화살표
+  if (!atHome()) {
+    const mx = X(ME.x), my = Y(ME.z), a = Math.atan2(Math.cos(ME.ry), Math.sin(ME.ry)), r = 7 * u;
+    g.save(); g.translate(mx, my); g.rotate(a);
+    g.fillStyle = "#ff7a4d"; g.strokeStyle = "#ffffff"; g.lineWidth = 2 * u;
+    g.beginPath(); g.moveTo(r, 0); g.lineTo(-r * .7, r * .65); g.lineTo(-r * .35, 0); g.lineTo(-r * .7, -r * .65); g.closePath(); g.fill(); g.stroke(); g.restore();
+  }
+}
 SHEETS.travel = (body) => {
-  setHead("어디로 갈까요?", "누르면 그곳까지 걸어가요");
+  setHead("마을 지도", "장소를 누르면 그곳까지 걸어가요 · 위쪽이 갯벌 해변");
+  if (atHome()) {
+    body.append(h("div", { class: "empty-note", text: "지금은 집 안이에요. 마을로 나가면 지도에 내 위치가 보여요." }), h("div", { class: "row" }, h("button", { class: "btn pri", onclick: () => { closeSheet(); leaveHouse(); }, text: "마을로 나가기" })));
+    return;
+  }
+  const cw = 480, cv = document.createElement("canvas");
+  cv.width = cw; cv.height = Math.round(cw * (MAP.z1 - MAP.z0) / (MAP.x1 - MAP.x0)); cv.className = "townmap"; cv.setAttribute("role", "img"); cv.setAttribute("aria-label", "마을 지도");
+  cv.style.cssText = "display:block;margin:0 auto;width:min(100%, calc(72vh * " + (cw / cv.height).toFixed(3) + "));border-radius:14px;cursor:pointer;touch-action:manipulation;box-shadow:0 0 0 1px var(--glass-line)";
+  drawTownMap(cv);
+  cv.addEventListener("click", (e) => {
+    const rc = cv.getBoundingClientRect(), x = MAP.x0 + (e.clientX - rc.left) / rc.width * (MAP.x1 - MAP.x0), z = MAP.z0 + (e.clientY - rc.top) / rc.height * (MAP.z1 - MAP.z0);
+    let best = null, bd = 7;
+    for (const s of mapSpots()) { const d = Math.hypot(s.x - x, s.z - z); if (d < bd) { bd = d; best = s; } }
+    if (best) { closeSheet(); toast(best.name + "(으)로 가요"); best.go(); return; }
+    if (walkable(x, z)) { closeSheet(); walkTo(x, z); return; }
+    toast("거기로는 걸어갈 수 없어요");
+  });
+  body.append(cv, h("div", { class: "muted", style: "font-size:12px;text-align:center;margin:6px 0 2px", text: "🔶 나 · 🟢 친구 · ● 다른 사람 · 주황 노점 = 장사 중" }));
+  clearInterval(S.mapTimer);
+  S.mapTimer = setInterval(() => { if (S.sheet !== "travel" || !cv.isConnected) { clearInterval(S.mapTimer); return; } drawTownMap(cv); }, 1000);
+  body.append(h("div", { class: "sec", text: "빠른 이동" }));
   for (const p of PLACES) body.append(h("div", { class: "listrow" },
     h("div", { class: "grow" }, h("b", { text: p.name }), h("div", { class: "muted", style: "font-size:12.5px", text: p.d })),
     h("button", { class: "btn sm pri", onclick: () => { closeSheet(); walkTo(p.x, p.z); }, text: "가기" })));
