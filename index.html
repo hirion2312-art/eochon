@@ -10,7 +10,7 @@
 :root{
   --bg:#e7efee; --surface:#f7fbfa; --surface2:#dae7e5; --ink:#132f38; --muted:#56717a; --line:#bfd2d0;
   --accent:#e2522c; --accent-ink:#ffffff; --sea:#1d5c70; --ok:#2f8f5b;
-  --t0:#71877e; --t1:#2a78bb; --t2:#8448cc; --t3:#d4701a; --t4:#b8921a;
+  --t0:#71877e; --t1:#2a78bb; --t2:#8448cc; --t3:#d4701a; --t4:#b8921a; --t5:#0f9f9a;
   --shadow:0 10px 30px rgba(19,47,56,.18);
   --glass:rgba(16,22,26,.58); --glass-strong:rgba(16,22,26,.72); --glass-line:rgba(255,255,255,.14);
   --hud-ink:#f6f1e7; --hud-muted:rgba(246,241,231,.66); --hud-accent:#ff7a4d;
@@ -23,12 +23,12 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0b171c; --surface:#11222a; --surface2:#183039; --ink:#d9e7e8; --muted:#8aa2a8; --line:#23404a;
   --accent:#ff6a42; --accent-ink:#1a0d08; --sea:#5fb3cc; --ok:#55c487;
-  --t0:#9cb1a8; --t1:#62a9e8; --t2:#b38af0; --t3:#f39a4c; --t4:#e6c446;
+  --t0:#9cb1a8; --t1:#62a9e8; --t2:#b38af0; --t3:#f39a4c; --t4:#e6c446; --t5:#3fd6cc;
   --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#0b171c; --surface:#11222a; --surface2:#183039; --ink:#d9e7e8; --muted:#8aa2a8; --line:#23404a;
   --accent:#ff6a42; --accent-ink:#1a0d08; --sea:#5fb3cc; --ok:#55c487;
-  --t0:#9cb1a8; --t1:#62a9e8; --t2:#b38af0; --t3:#f39a4c; --t4:#e6c446;
+  --t0:#9cb1a8; --t1:#62a9e8; --t2:#b38af0; --t3:#f39a4c; --t4:#e6c446; --t5:#3fd6cc;
   --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark }
 
 html,body{height:100%}
@@ -161,7 +161,7 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.sm{padding:3px 9px;font-size:12px}
 .tier{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;color:#fff;letter-spacing:.02em}
-.tier.t0{background:var(--t0)}.tier.t1{background:var(--t1)}.tier.t2{background:var(--t2)}.tier.t3{background:var(--t3)}.tier.t4{background:var(--t4)}
+.tier.t0{background:var(--t0)}.tier.t1{background:var(--t1)}.tier.t2{background:var(--t2)}.tier.t3{background:var(--t3)}.tier.t4{background:var(--t4)}.tier.t5{background:linear-gradient(90deg,#0f9f9a,#7b5cd6,#e0479a);box-shadow:0 0 6px rgba(123,92,214,.6)}
 .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .muted{color:var(--muted)}
 .sec{font-family:var(--f-display);font-size:16px;margin:4px 0 -4px}
@@ -301,6 +301,8 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 .fmsg[data-st="warn"]{color:#ff8a6a;animation:fshake .25s infinite}
 @keyframes fshake{50%{transform:translateX(2px)}}
 .fight.boss .fbox{box-shadow:0 0 0 2px #f2c230,0 0 22px rgba(242,194,48,.45)}
+.fight[data-tier="5"] .fbox{box-shadow:0 0 0 2px #7b5cd6,0 0 30px rgba(63,214,204,.7);animation:mythglow 1.6s ease-in-out infinite alternate}
+@keyframes mythglow{to{box-shadow:0 0 0 2px #e0479a,0 0 36px rgba(224,71,154,.7)}}
 .fight[data-tier="4"] .fbox{box-shadow:0 0 0 2px #ff5a3c,0 0 26px rgba(255,90,60,.55)}
 .fmsg[data-st="rage"]{color:#ff6a4d;animation:fshake .18s infinite}
 .fight.hot .fbox{box-shadow:0 0 0 2px #e2402a,0 0 26px rgba(226,64,42,.55)}
@@ -771,7 +773,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
     <label class="tsound"><input type="checkbox" id="tSound" checked> 물소리·효과음 켜고 시작</label>
     <button class="tstart" id="tStart" type="button" disabled>불러오는 중…</button>
     <div class="tlinks"><button type="button" id="tBug">🐞 오류 제보</button><button type="button" id="tIdea">💡 건의하기</button><button type="button" id="tInvite">🤝 초대 코드</button></div>
-    <div class="tfoot"><span id="tVer">v1.19.0</span> · Enter 키로도 들어갈 수 있어요</div>
+    <div class="tfoot"><span id="tVer">v1.20.0</span> · Enter 키로도 들어갈 수 있어요</div>
   </div>
 </div>
 
@@ -791,15 +793,16 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.19.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.20.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 10 },
   { name: "고급", base: 30 },
   { name: "희귀", base: 120 },
   { name: "영웅", base: 600 },
   { name: "전설", base: 3000 },
+  { name: "신화", base: 12000 },
 ];
-const TIER_VARS = ["--t0", "--t1", "--t2", "--t3", "--t4"];
+const TIER_VARS = ["--t0", "--t1", "--t2", "--t3", "--t4", "--t5"];
 const BAITS = [
   { id: "worm",   name: "지렁이",     price: 0,    p: [80, 18, 2, 0, 0],      note: "무료 · 무한" },
   { id: "shrimp", name: "새우",       price: 10,   p: [60, 30, 9, 1, 0] },
@@ -841,6 +844,33 @@ const BUILTIN = [
     art: { body: "#3c5566", belly: "#c9d4da", fin: "#2e4453", pattern: "spots", pc: "#e8f0f3", len: 1.15, th: .9, dense: true } },
   { id: "b-sangalchi", name: "산갈치", tier: 4, min: 300, max: 800, desc: "깊은 바다에서 올라온다는 은빛 리본.",
     art: { body: "#c9d3da", belly: "#f4f7f8", fin: "#e0474c", pattern: "none", len: 1.25, th: .42, crest: true } },
+  // v1.20 새 물고기 · where: night(밤) · sea(배 위 깊은 바다) · dawn(새벽·노을)
+  { id: "b-jeongaeng", name: "전갱이", tier: 0, min: 15, max: 30, desc: "꼬리 쪽 단단한 비늘(모)이 특징인 등푸른 물고기.", art: { body: "#5f8a8c", belly: "#e8eeea", fin: "#c9b25a", pattern: "finlets", pc: "#d8d0a0", len: 1.05, th: .85 } },
+  { id: "b-hakkkong", name: "학꽁치", tier: 0, min: 15, max: 30, desc: "바늘 같은 아래턱을 가진 날씬한 은빛 물고기.", art: { body: "#7fb0c2", belly: "#f2f6f6", fin: "#5f8a9a", pattern: "none", len: 1.25, th: .48, bill: true } },
+  { id: "b-bokseom", name: "복섬", tier: 0, min: 8, max: 15, desc: "손바닥만 한 꼬마 복어. 화나면 빵빵해져요.", art: { body: "#8a8a52", belly: "#f2efd8", fin: "#6a6a3a", pattern: "spots", pc: "#4a4a2a", len: .78, th: 1.45, dense: true } },
+  { id: "b-noraemi", name: "노래미", tier: 0, min: 15, max: 35, desc: "갈색 얼룩무늬로 바위에 숨는 동네 물고기.", art: { body: "#8a6a4a", belly: "#d9c4a2", fin: "#6a4e34", pattern: "spots", pc: "#5a3e28", len: 1.05, th: .85 } },
+  { id: "b-sungeo", name: "숭어", tier: 0, min: 30, max: 60, desc: "물 위로 펄쩍펄쩍 뛰어오르는 은빛 물고기.", art: { body: "#7f8a96", belly: "#eef1f3", fin: "#5f6a76", pattern: "stripes", pc: "#5a6672", len: 1.15, th: .75 } },
+  { id: "b-jwichi", name: "쥐치", tier: 1, min: 15, max: 30, desc: "쥐포의 그 물고기. 납작한 마름모 몸.", art: { body: "#a8a080", belly: "#e6e0c8", fin: "#8a8262", pattern: "spots", pc: "#6a6448", len: .82, th: 1.5 } },
+  { id: "b-galchi", name: "갈치", tier: 1, min: 60, max: 120, where: "night", desc: "밤바다의 은빛 칼. 불빛을 보고 모여들어요.", art: { shape: "eel", body: "#c9d3da", belly: "#f4f7f8", fin: "#dfe6ea", th: .9, taper: true, shine: true, crest: true } },
+  { id: "b-jukkumi", name: "주꾸미", tier: 1, min: 10, max: 25, where: "dawn", desc: "작은 다리 여덟 개. 봄에 맛이 오르는 꼬마 문어.", art: { shape: "octo", body: "#b47a6a", belly: "#e8c4b6", fin: "#a46a5a", pattern: "spots", pc: "#7a4a3e" } },
+  { id: "b-gwangeo", name: "광어", tier: 1, min: 35, max: 80, desc: "모래 바닥에 납작 붙은 횟감의 왕. 눈이 왼쪽에 몰려 있어요.", art: { shape: "flat", body: "#8a7a5a", belly: "#c9b896", fin: "#7a6a4a", pattern: "spots", pc: "#5a4c34", len: 1.05 } },
+  { id: "b-dodari", name: "도다리", tier: 1, min: 20, max: 35, where: "dawn", desc: "봄 도다리쑥국의 주인공. 광어보다 작고 둥글어요.", art: { shape: "flat", body: "#9a8a62", belly: "#d9c9a6", fin: "#8a7a52", pattern: "spots", pc: "#4a3c28", len: .9, th: 1.05, dense: true } },
+  { id: "b-gamseongdom", name: "감성돔", tier: 2, min: 30, max: 60, where: "dawn", desc: "낚시꾼들의 로망. 새벽과 해 질 녘에 잘 물어요.", art: { body: "#4a5662", belly: "#c9d0d6", fin: "#323c46", pattern: "stripes", pc: "#3a4652", len: .95, th: 1.2 } },
+  { id: "b-doldom", name: "돌돔", tier: 2, min: 30, max: 60, desc: "흰 몸에 굵은 검은 줄무늬 일곱 개. 갯바위의 제왕.", art: { body: "#e8e4d8", belly: "#f6f4ee", fin: "#2a2a30", pattern: "stripes", pc: "#1e1e24", len: .95, th: 1.25 } },
+  { id: "b-bengedom", name: "벵에돔", tier: 2, min: 25, max: 50, where: "night", desc: "검푸른 몸의 갯바위 물고기. 밤에 경계를 풀어요.", art: { body: "#26323e", belly: "#5a6672", fin: "#1a242e", pattern: "none", len: .95, th: 1.15 } },
+  { id: "b-bangeo", name: "방어", tier: 2, min: 60, max: 120, where: "sea", desc: "겨울 바다의 기름진 대물. 노란 줄이 옆구리를 가로질러요.", art: { body: "#2f5a7a", belly: "#e8eef2", fin: "#c9b22a", pattern: "finlets", pc: "#e8c93a", len: 1.15, th: .85 } },
+  { id: "b-munui", name: "무늬오징어", tier: 2, min: 20, max: 45, where: "night", desc: "몸에 물결무늬가 일렁이는 오징어. 에깅 낚시의 꽃.", art: { shape: "squid", body: "#c9a89a", belly: "#f2e2da", fin: "#d9b8aa", pattern: "waves", pc: "#8a5a4a" } },
+  { id: "b-samchi", name: "삼치", tier: 2, min: 60, max: 110, where: "sea", desc: "날카로운 이빨로 미끼를 끊어 가는 은빛 사냥꾼.", art: { body: "#4a6a86", belly: "#eef2f4", fin: "#3a5670", pattern: "spots", pc: "#2a4258", len: 1.25, th: .65 } },
+  { id: "b-butjangeo", name: "붕장어", tier: 2, min: 50, max: 100, where: "night", desc: "밤이 되면 굴에서 나오는 길쭉한 바다 장어.", art: { shape: "eel", body: "#7a6a52", belly: "#e2d8c4", fin: "#6a5a42", th: 1.1, crest: true } },
+  { id: "b-busiri", name: "부시리", tier: 3, min: 80, max: 180, where: "sea", desc: "방어의 사촌이지만 힘은 한 수 위. 지구력 끝판왕.", art: { body: "#3a6a86", belly: "#f0f4f6", fin: "#d9c23a", pattern: "finlets", pc: "#f2d84a", len: 1.2, th: .85 } },
+  { id: "b-hokdom", name: "혹돔", tier: 3, min: 50, max: 100, desc: "이마에 커다란 혹이 솟은 붉은 바위 물고기.", art: { body: "#c96a5a", belly: "#f2c9b8", fin: "#a8483a", pattern: "none", len: 1, th: 1.2, hump: true } },
+  { id: "b-daewangmuneo", name: "대왕문어", tier: 3, min: 100, max: 300, where: "sea", desc: "다리를 펴면 어른 키를 훌쩍 넘는 바다의 힘센 손.", art: { shape: "octo", body: "#a8483a", belly: "#f2c4b0", fin: "#b8584a", pattern: "spots", pc: "#7a2e24" } },
+  { id: "b-neungseong", name: "능성어", tier: 3, min: 50, max: 90, desc: "굵은 갈색 띠를 두른 바리과 물고기. 맛이 귀해요.", art: { body: "#8a6a4a", belly: "#d9c4a8", fin: "#6a4a32", pattern: "stripes", pc: "#4a3222", len: 1.05, th: 1.05 } },
+  { id: "b-dotdom", name: "돗돔", tier: 4, min: 100, max: 200, where: "sea", desc: "전설의 심해 거물. 낚으면 신문에 나요.", art: { body: "#3a4048", belly: "#8a9098", fin: "#2a3038", pattern: "stripes", pc: "#2a2e34", len: 1.1, th: 1.15, eye: 1.4 } },
+  { id: "b-dageumbari", name: "다금바리", tier: 4, min: 60, max: 120, where: "night", desc: "제주 바다의 귀한 손님. 맛으로는 따라올 자가 없어요.", art: { body: "#7a5a46", belly: "#d8c0a8", fin: "#5a3e2e", pattern: "spots", pc: "#4a2e20", len: 1.05, th: 1.1, dense: true } },
+  { id: "b-geumdom", name: "황금 참돔", tier: 5, min: 60, max: 110, desc: "백 년에 한 번 나타난다는 금빛 참돔. 보면 행운이 온대요.", art: { body: "#f2c230", belly: "#fff2b0", fin: "#e8a21a", pattern: "spots", pc: "#fff6d0", len: 1, th: 1.15, shimmer: true, glow: "rgba(255,216,77,.55)" } },
+  { id: "b-byeolgaori", name: "별빛 가오리", tier: 5, min: 150, max: 300, where: "night", desc: "밤하늘을 등에 업은 가오리. 별빛이 반짝여요.", art: { shape: "ray", body: "#1a2450", belly: "#3a4a8a", fin: "#1a2450", pattern: "spots", pc: "#fff6c0", dense: true, glow: "rgba(120,140,255,.45)" } },
+  { id: "b-haeryong", name: "바다의 용", tier: 5, min: 300, max: 800, where: "sea", desc: "깊은 바다를 지키는 전설 속 해룡. 비늘이 옥빛으로 빛나요.", art: { shape: "dragon", body: "#2f9a86", belly: "#bff2e0", fin: "#e8c13a", pc: "#f2e08a", th: 1.25, glow: "rgba(63,214,204,.5)" } },
   // 3D 모델 물고기 (fish/*.glb)
   ...[
     ["b-clown", "흰동가리", 0, 6, 11, "말미잘 사이에 숨어 사는 주황 줄무늬 꼬마.", "01_Clownfish", "#f07a2a", "stripes", "#ffffff"],
@@ -910,7 +940,66 @@ const safeImg = (s) => typeof s === "string" && /^data:image\/png;base64,[A-Za-z
 const str = (v, n) => typeof v === "string" ? v.slice(0, n) : "";
 
 /* ===================== 물고기 그림 (기본 물고기는 코드로 생성) ===================== */
+/* 몸 모양이 다른 물고기들: 납작이(광어·도다리) · 가오리 · 장어/갈치 · 오징어 · 문어 · 해룡 */
+function fishOutline(ctx, w) { ctx.strokeStyle = "rgba(20,25,30,.5)"; ctx.lineWidth = Math.max(1, w / 110); ctx.lineJoin = "round"; ctx.lineCap = "round"; }
+function fishEye(ctx, x, y, r) { ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(x - r * .15, y, r * .55, 0, 7); ctx.fill(); ctx.fillStyle = "rgba(255,255,255,.9)"; ctx.beginPath(); ctx.arc(x - r * .35, y - r * .3, r * .2, 0, 7); ctx.fill(); }
+function fishSpots(ctx, cx, cy, L, T, col, n, rr, seed) { ctx.fillStyle = col; let s = seed || 7; for (let i = 0; i < n; i++) { s = (s * 9301 + 49297) % 233280; const a = s / 233280; s = (s * 9301 + 49297) % 233280; const b = s / 233280; ctx.beginPath(); ctx.arc(cx + (a * 2 - 1) * L * .85, cy + (b * 2 - 1) * T * .75, rr * (.6 + a * .6), 0, 7); ctx.fill(); } }
+function drawShapeFish(ctx, a, w, h) {
+  const cx = w * .5, cy = h * .52; fishOutline(ctx, w);
+  if (a.glow) { const gg = ctx.createRadialGradient(cx, cy, 4, cx, cy, w * .55); gg.addColorStop(0, a.glow); gg.addColorStop(1, "rgba(255,255,255,0)"); ctx.fillStyle = gg; ctx.fillRect(0, 0, w, h); }
+  if (a.shape === "flat" || a.shape === "ray") {
+    const L = w * .32 * (a.len || 1), T = h * .3 * (a.th || 1);
+    if (a.shape === "ray") {   // 가오리: 마름모 날개 + 긴 꼬리
+      ctx.fillStyle = a.fin; ctx.beginPath(); ctx.moveTo(cx + L * .5, cy); ctx.quadraticCurveTo(cx + L * 1.3, cy + T * .1, cx + L * 1.75, cy + T * .05); ctx.lineWidth = Math.max(2, w / 70); ctx.strokeStyle = a.fin; ctx.stroke(); fishOutline(ctx, w);
+      ctx.beginPath(); ctx.moveTo(cx - L, cy); ctx.quadraticCurveTo(cx - L * .2, cy - T * 1.55, cx + L * .55, cy); ctx.quadraticCurveTo(cx - L * .2, cy + T * 1.55, cx - L, cy); ctx.closePath();
+      const g = ctx.createRadialGradient(cx - L * .3, cy - T * .2, 2, cx - L * .2, cy, L); g.addColorStop(0, a.belly); g.addColorStop(1, a.body); ctx.fillStyle = g; ctx.fill(); ctx.stroke();
+      ctx.save(); ctx.clip(); if (a.pattern === "spots") fishSpots(ctx, cx - L * .2, cy, L * .8, T * 1.2, a.pc, a.dense ? 34 : 14, T * .09, 11); ctx.restore();
+      fishEye(ctx, cx - L * .62, cy - T * .22, T * .12); fishEye(ctx, cx - L * .62, cy + T * .22, T * .12);
+      return;
+    }
+    // 납작이: 위에서 본 타원 몸 + 테두리 지느러미, 눈 두 개가 한쪽에
+    ctx.fillStyle = a.fin; ctx.beginPath(); ctx.moveTo(cx + L * .85, cy); ctx.lineTo(cx + L * 1.3, cy - T * .55); ctx.quadraticCurveTo(cx + L * 1.15, cy, cx + L * 1.3, cy + T * .55); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx, cy, L * 1.02, T * 1.12, 0, 0, 7); ctx.fill(); ctx.stroke();
+    for (let k = -8; k <= 8; k++) { ctx.beginPath(); ctx.moveTo(cx + k * L * .1, cy - T * .98); ctx.lineTo(cx + k * L * .11, cy - T * 1.1); ctx.moveTo(cx + k * L * .1, cy + T * .98); ctx.lineTo(cx + k * L * .11, cy + T * 1.1); ctx.stroke(); }
+    ctx.beginPath(); ctx.ellipse(cx, cy, L * .9, T * .95, 0, 0, 7); const g = ctx.createLinearGradient(0, cy - T, 0, cy + T); g.addColorStop(0, a.body); g.addColorStop(1, a.belly); ctx.fillStyle = g; ctx.fill(); ctx.stroke();
+    ctx.save(); ctx.clip(); if (a.pattern === "spots") fishSpots(ctx, cx, cy, L * .9, T * .9, a.pc, a.dense ? 30 : 16, T * .1, 5); ctx.restore();
+    ctx.beginPath(); ctx.moveTo(cx - L * .55, cy + T * .05); ctx.quadraticCurveTo(cx + L * .2, cy + T * .15, cx + L * .8, cy); ctx.stroke();
+    fishEye(ctx, cx - L * .62, cy - T * .38, T * .14); fishEye(ctx, cx - L * .45, cy - T * .52, T * .14);
+    ctx.beginPath(); ctx.moveTo(cx - L * .88, cy - T * .05); ctx.quadraticCurveTo(cx - L * .8, cy + T * .15, cx - L * .7, cy + T * .1); ctx.stroke();
+    return;
+  }
+  if (a.shape === "eel" || a.shape === "dragon") {   // 장어 · 갈치 · 해룡: 물결치는 긴 몸
+    const L = w * .42, T = h * .1 * (a.th || 1), seg = 40, pts = [];
+    for (let i = 0; i <= seg; i++) { const u = i / seg, x = cx - L + u * L * 2, y = cy + Math.sin(u * Math.PI * 2.2) * h * .12 * (a.shape === "dragon" ? 1.2 : .8); pts.push([x, y, T * (u < .12 ? .7 + u * 2.5 : 1 - (u - .12) * (a.taper ? .95 : .7))]); }
+    if (a.crest || a.shape === "dragon") { ctx.fillStyle = a.fin; ctx.beginPath(); ctx.moveTo(pts[3][0], pts[3][1] - pts[3][2]); for (let i = 3; i <= seg; i++) ctx.lineTo(pts[i][0], pts[i][1] - pts[i][2] * (1.7 + (i % 3 === 0 ? .6 : 0))); for (let i = seg; i >= 3; i--) ctx.lineTo(pts[i][0], pts[i][1] - pts[i][2] * .9); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (const [x, y, t] of pts) ctx.lineTo(x, y - t); for (let i = seg; i >= 0; i--) ctx.lineTo(pts[i][0], pts[i][1] + pts[i][2]); ctx.closePath();
+    const g = ctx.createLinearGradient(0, cy - h * .2, 0, cy + h * .2); g.addColorStop(0, a.body); g.addColorStop(.6, a.body); g.addColorStop(1, a.belly); ctx.fillStyle = g; ctx.fill(); ctx.stroke();
+    if (a.shine) { ctx.save(); ctx.clip(); ctx.globalAlpha = .45; ctx.fillStyle = "#ffffff"; for (let i = 2; i < seg; i += 2) ctx.fillRect(pts[i][0], pts[i][1] - pts[i][2] * .6, L / seg, pts[i][2] * .35); ctx.restore(); }
+    if (a.shape === "dragon") { ctx.fillStyle = a.pc; for (let i = 6; i < seg; i += 4) { ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], pts[i][2] * .35, 0, 7); ctx.fill(); }
+      ctx.strokeStyle = a.pc; ctx.lineWidth = Math.max(1.5, w / 120); ctx.beginPath(); ctx.moveTo(pts[1][0], pts[1][1] - T * .2); ctx.quadraticCurveTo(pts[0][0] - L * .12, pts[0][1] - T * 2.2, pts[0][0] - L * .2, pts[0][1] - T * 1.6); ctx.moveTo(pts[1][0], pts[1][1] + T * .2); ctx.quadraticCurveTo(pts[0][0] - L * .12, pts[0][1] + T * 2.4, pts[0][0] - L * .22, pts[0][1] + T * 1.9); ctx.stroke(); fishOutline(ctx, w); }
+    fishEye(ctx, pts[2][0], pts[2][1] - T * .2, T * (a.shape === "dragon" ? .5 : .42));
+    return;
+  }
+  if (a.shape === "squid" || a.shape === "octo") {
+    const big = a.shape === "octo", R0 = h * (big ? .26 : .2), hx = big ? cx - w * .12 : cx - w * .18;
+    ctx.strokeStyle = "rgba(20,25,30,.5)";
+    // 다리
+    const n = big ? 8 : 10;
+    for (let k = 0; k < n; k++) { const off = (k / (n - 1) - .5) * h * (big ? .62 : .42), len = big ? w * .42 : w * (k < 2 ? .5 : .32);
+      ctx.fillStyle = a.fin; ctx.beginPath(); const x0 = hx + R0 * .7, y0 = cy + off * .35; ctx.moveTo(x0, y0 - 3); ctx.bezierCurveTo(x0 + len * .4, y0 + off * .9 - 6, x0 + len * .7, y0 + off * 1.2 + Math.sin(k) * 8, x0 + len, y0 + off * 1.1 + Math.sin(k * 2) * 6); ctx.bezierCurveTo(x0 + len * .7, y0 + off * 1.2 + 6, x0 + len * .4, y0 + off * .9 + 6, x0, y0 + 3); ctx.closePath(); ctx.fill(); ctx.stroke();
+      if (big) { ctx.fillStyle = a.belly; for (let q = 1; q < 6; q++) { ctx.beginPath(); ctx.arc(x0 + len * q / 7, y0 + off * (q / 6) + 3, 1.6, 0, 7); ctx.fill(); } } }
+    // 머리 (몸통)
+    ctx.beginPath(); if (big) ctx.ellipse(hx - R0 * .2, cy - R0 * .2, R0 * 1.2, R0, 0, 0, 7); else { ctx.moveTo(hx + R0 * .8, cy - R0 * .7); ctx.lineTo(hx - R0 * 2.4, cy - R0 * .2); ctx.lineTo(hx - R0 * 2.6, cy); ctx.lineTo(hx - R0 * 2.4, cy + R0 * .2); ctx.lineTo(hx + R0 * .8, cy + R0 * .7); ctx.closePath(); }
+    const g = ctx.createLinearGradient(0, cy - R0, 0, cy + R0); g.addColorStop(0, a.body); g.addColorStop(1, a.belly); ctx.fillStyle = g; ctx.fill(); ctx.stroke();
+    if (!big) { ctx.fillStyle = a.fin; ctx.beginPath(); ctx.moveTo(hx - R0 * 2.5, cy); ctx.lineTo(hx - R0 * 1.4, cy - R0 * .95); ctx.lineTo(hx - R0 * .6, cy - R0 * .5); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(hx - R0 * 2.5, cy); ctx.lineTo(hx - R0 * 1.4, cy + R0 * .95); ctx.lineTo(hx - R0 * .6, cy + R0 * .5); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    ctx.save(); ctx.beginPath(); if (big) ctx.ellipse(hx - R0 * .2, cy - R0 * .2, R0 * 1.2, R0, 0, 0, 7); else ctx.rect(hx - R0 * 2.5, cy - R0, R0 * 3.3, R0 * 2); ctx.clip(); if (a.pattern === "spots") fishSpots(ctx, hx - R0 * (big ? .2 : .9), cy, R0 * (big ? 1.1 : 1.6), R0 * .8, a.pc, 18, R0 * .1, 3); if (a.pattern === "waves") { ctx.strokeStyle = a.pc; ctx.globalAlpha = .6; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(hx - R0 * .8, cy, R0 * (.3 + i * .25), -1, 1); ctx.stroke(); } } ctx.restore();
+    fishOutline(ctx, w); fishEye(ctx, hx + R0 * (big ? .55 : .45), cy - R0 * (big ? .05 : .15), R0 * .2);
+    return;
+  }
+}
 function drawProcFish(ctx, a, w, h) {
+  if (a.shape) { ctx.save(); drawShapeFish(ctx, a, w, h); ctx.restore(); return; }
+  if (a.glow) { const gg = ctx.createRadialGradient(w * .47, h * .52, 4, w * .47, h * .52, w * .55); gg.addColorStop(0, a.glow); gg.addColorStop(1, "rgba(255,255,255,0)"); ctx.fillStyle = gg; ctx.fillRect(0, 0, w, h); }
   const cx = w * 0.47, cy = h * 0.52, L = w * 0.33 * (a.len || 1), T = h * 0.27 * (a.th || 1);
   const lw = Math.max(1, w / 110);
   ctx.save();
@@ -949,6 +1038,8 @@ function drawProcFish(ctx, a, w, h) {
   ctx.fillStyle = a.fin; ctx.globalAlpha = .9;
   ctx.beginPath(); ctx.moveTo(cx - L * 0.3, cy + T * 0.15); ctx.quadraticCurveTo(cx - L * 0.05, cy + T * 0.55, cx - L * 0.02, cy + T * 0.2); ctx.closePath(); ctx.fill();
   ctx.globalAlpha = 1;
+  if (a.hump) { ctx.fillStyle = a.body; ctx.beginPath(); ctx.ellipse(cx - L * .62, cy - T * .72, L * .26, T * .42, -.3, 0, 7); ctx.fill(); ctx.stroke(); }
+  if (a.shimmer) { ctx.save(); ctx.beginPath(); ctx.ellipse(cx, cy, L, T, 0, 0, 7); ctx.clip(); ctx.globalAlpha = .5; const sg = ctx.createLinearGradient(cx - L, cy - T, cx + L, cy + T); sg.addColorStop(0, "rgba(255,255,255,0)"); sg.addColorStop(.45, "rgba(255,255,255,.9)"); sg.addColorStop(.55, "rgba(255,255,255,0)"); ctx.fillStyle = sg; ctx.fillRect(cx - L, cy - T, L * 2, T * 2); ctx.restore(); }
   // 눈
   const er = T * 0.17 * (a.eye || 1);
   ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(cx - L * 0.68, cy - T * 0.18, er, 0, 7); ctx.fill(); ctx.stroke();
@@ -1021,13 +1112,13 @@ function normUserFish(id, d) {
 
 /* ===================== 추가 정의: 회 버프·머리색 ===================== */
 const BUFFS = {
-  bite: { name: "입질 빠르게", unit: "%",  vals: [10, 15, 20, 30, 40] },
-  luck: { name: "고급 이상 확률", unit: "%p", vals: [5, 8, 12, 18, 25] },
-  size: { name: "물고기 크기", unit: "%",  vals: [5, 8, 12, 18, 25] },
-  gold: { name: "판매가", unit: "%",      vals: [5, 10, 15, 25, 40] },
+  bite: { name: "입질 빠르게", unit: "%",  vals: [10, 15, 20, 30, 40, 50] },
+  luck: { name: "고급 이상 확률", unit: "%p", vals: [5, 8, 12, 18, 25, 32] },
+  size: { name: "물고기 크기", unit: "%",  vals: [5, 8, 12, 18, 25, 32] },
+  gold: { name: "판매가", unit: "%",      vals: [5, 10, 15, 25, 40, 55] },
 };
 const BUFF_KEYS = Object.keys(BUFFS);
-const BUFF_MIN = [5, 10, 20, 40, 60];
+const BUFF_MIN = [5, 10, 20, 40, 60, 90];
 const SKINS = ["#ffe3cf", "#f6d2b4", "#eab894", "#d39a72", "#a96e4b", "#7a4a30", "#f7c8d8", "#cfe8c8"];
 const HAIRS = ["#2a2220", "#6b4226", "#c98d4b", "#e8c66a", "#7a4fa0", "#3d6fb0", "#d0607a", "#eeeeee"];
 const DISH_MAX = 30;
@@ -1176,13 +1267,13 @@ function newProfile() {
 }
 function normItem(it) {
   if (!it || typeof it !== "object") return null;
-  const tier = clamp(Math.floor(Number(it.tier) || 0), 0, 4);
+  const tier = clamp(Math.floor(Number(it.tier) || 0), 0, 5);
   return { id: isUid(it.id) ? it.id : uid4(), fishId: str(it.fishId, 80), name: str(it.name, 14) || "물고기", tier,
-    size: clamp(Number(it.size) || 1, 0.1, 5000), k: clamp(Number(it.k) || 1, 0.1, 10), price: clamp(Math.round(Number(it.price) || 1), 1, 200000), ts: Number(it.ts) || Date.now(), hooked: !!it.hooked };
+    size: clamp(Number(it.size) || 1, 0.1, 5000), k: clamp(Number(it.k) || 1, 0.1, 10), price: clamp(Math.round(Number(it.price) || 1), 1, 2000000), ts: Number(it.ts) || Date.now(), hooked: !!it.hooked };
 }
 function normDish(d) {
   if (!d || typeof d !== "object") return null;
-  const tier = clamp(Math.floor(Number(d.tier) || 0), 0, 4);
+  const tier = clamp(Math.floor(Number(d.tier) || 0), 0, 5);
   const b = d.buff || {};
   const type = BUFF_KEYS.includes(b.type) ? b.type : "bite";
   const q = clamp(Math.floor(Number(d.q) || 0), 0, 2);
@@ -1345,6 +1436,9 @@ const ACH = [
   { id: "catch300", name: "부두의 터줏대감", desc: "물고기 300마리 낚기", val: () => P.caught || 0, goal: 300, gold: 2500, title: "터줏대감" },
   { id: "rare1", name: "희귀한 만남", desc: "희귀 이상 물고기 낚기", val: () => (P.stats.t2 || 0) + (P.stats.t3 || 0) + (P.stats.t4 || 0), goal: 1, gold: 300 },
   { id: "hero1", name: "영웅을 낚다", desc: "영웅 등급 물고기 낚기", stat: "t3", goal: 1, gold: 1000 },
+  { id: "myth1", name: "신화를 낚다", desc: "신화 등급 물고기 낚기", stat: "t5", goal: 1, gold: 10000, title: "신화의 어부" },
+  { id: "boot10", name: "바다 청소부", desc: "낡은 장화 10개 건지기", stat: "junk_boot", goal: 10, gold: 300, title: "바다 청소부" },
+  { id: "chest3", name: "보물 사냥꾼", desc: "보물 상자 3개 건지기", stat: "junk_chest", goal: 3, gold: 1000 },
   { id: "legend1", name: "전설과의 대면", desc: "전설 등급 물고기 낚기", stat: "t4", goal: 1, gold: 3000, title: "전설의 낚시꾼" },
   { id: "monster1", name: "괴물급!", desc: "×2.2 이상 괴물급 개체 낚기", stat: "monster", goal: 1, gold: 800 },
   { id: "night10", name: "달빛 낚시", desc: "밤에 물고기 10마리 낚기", stat: "nightCatch", goal: 10, gold: 400, title: "달빛 낚시꾼" },
@@ -1353,6 +1447,8 @@ const ACH = [
   { id: "snap10", name: "끊어진 인연", desc: "줄이 10번 끊기기 (괜찮아요!)", stat: "snaps", goal: 10, gold: 200 },
   { id: "dex10", cat: "도감", name: "꼬마 수집가", desc: "도감 10종 채우기", val: dexCount, goal: 10, gold: 500 },
   { id: "dex25", name: "바다 박사", desc: "도감 25종 채우기", val: dexCount, goal: 25, gold: 2000, title: "바다 박사" },
+  { id: "dex45", name: "어촌 박물학자", desc: "도감 45종 채우기", val: dexCount, goal: 45, gold: 6000, title: "박물학자" },
+  { id: "night_fish", name: "밤바다의 친구", desc: "밤에만 나오는 물고기 5종 낚기", val: () => BUILTIN.filter(f => f.where === "night" && P.dex[f.id]).length, goal: 5, gold: 1500 },
   { id: "coop5", cat: "함께", name: "둘이서 한 마리", desc: "함께 낚시로 5마리 낚기", stat: "coop", goal: 5, gold: 700 },
   { id: "friends5", name: "부두 인싸", desc: "친구 5명 만들기", val: () => Object.keys(P.friends).length, goal: 5, gold: 500, title: "부두 인싸" },
   { id: "boat3", name: "먼바다 단골", desc: "멍낚호로 3번 출항하기", stat: "boats", goal: 3, gold: 500 },
@@ -1684,7 +1780,7 @@ const xpNeed = (lv) => Math.round(40 * Math.pow(Math.max(0, lv - 1), 1.55));
 function levelOf(xp) { let lv = 1; while (lv < LV_MAX && xp >= xpNeed(lv + 1)) lv++; return lv; }
 const myLv = () => levelOf(P.xp || 0);
 function xpFor(r, perfect, auto) {
-  const f = r.f, base = [6, 14, 35, 90, 220][f.tier] || 6;
+  const f = r.f, base = [6, 14, 35, 90, 220, 600][f.tier] || 6;
   return base * (.7 + .3 * Math.min(3, r.k || 1)) * (perfect ? 1.2 : 1) * (r.coop ? 1.5 : 1) * (r.manual ? 1.15 : 1) * (auto ? .6 : 1) * (atSea() ? 1.2 : 1);
 }
 function gainXp(n) {
@@ -1833,13 +1929,18 @@ function checkRecord(f, k, size) {
    자동 챔질(또는 멍 모드)이면 입질을 놓쳐도 등급별 확률로 자동 포획. */
 const waitMs = () => (1.12 - .25 * (S.castPow || .6)) * (S.castPerfect ? .85 : 1) * (S.speed === "test" ? rnd(7000, 18000) : rnd(25000, 60000)) * (1 - buffVal("bite") / 100) * (hasTackle("spinner") ? 0.85 : 1) * (hasTackle("lamp") && isNight() ? .7 : 1) * (atSea() ? 0.75 : 1) * evMul("bite");
 const BITE_MS = 2200, CAST_MS = 900, CATCH_MS = 2600, MISS_MS = 1400;
-const AUTO_RATE = [0.9, 0.7, 0.45, 0.25, 0.12];
+const AUTO_RATE = [0.9, 0.7, 0.45, 0.25, 0.12, 0.04];
 /* 스타듀밸리 BobberBar 규칙 그대로: 트랙 568, 물고기 위치 0~532, 1초에 60번 계산 */
 const TRACK = 568;
 const BAR_PX = { worm: 112, shrimp: 124, paste: 136, lure: 152, legend: 168 };   // 스타듀 초록 막대 96+레벨×8 → 미끼가 레벨 역할
 const MOTION_KO = { mixed: "변덕스러움", dart: "튀어 오름", smooth: "부드러움", sinker: "가라앉음", floater: "떠오름" };
 // 종별 난이도·움직임 (스타듀 물고기 값 참고)
 const FISH_BEHAVIOR = {
+  "b-jeongaeng": [22, "dart"], "b-hakkkong": [18, "smooth"], "b-bokseom": [16, "floater"], "b-noraemi": [24, "sinker"], "b-sungeo": [30, "floater"],
+  "b-jwichi": [40, "mixed"], "b-galchi": [48, "dart"], "b-jukkumi": [35, "sinker"], "b-gwangeo": [46, "sinker"], "b-dodari": [40, "sinker"],
+  "b-gamseongdom": [66, "smooth"], "b-doldom": [72, "mixed"], "b-bengedom": [62, "dart"], "b-bangeo": [72, "dart"], "b-munui": [60, "floater"], "b-samchi": [68, "dart"], "b-butjangeo": [62, "sinker"],
+  "b-busiri": [95, "dart"], "b-hokdom": [86, "sinker"], "b-daewangmuneo": [96, "sinker"], "b-neungseong": [84, "sinker"],
+  "b-dotdom": [116, "sinker"], "b-dageumbari": [108, "smooth"], "b-geumdom": [122, "mixed"], "b-byeolgaori": [128, "floater"], "b-haeryong": [126, "mixed"],
   "b-pirami": [20, "dart"], "b-bungeo": [15, "mixed"], "b-mangdung": [28, "mixed"], "b-clown": [25, "smooth"], "b-goldfish": [18, "floater"], "b-betta": [35, "dart"],
   "b-ureok": [40, "sinker"], "b-godeungeo": [45, "dart"], "b-bollak": [38, "smooth"], "b-bluetang": [50, "mixed"], "b-angelfish": [45, "smooth"],
   "b-puffer": [80, "floater"], "b-moray": [60, "sinker"], "b-lionfish": [55, "dart"],
@@ -1850,7 +1951,7 @@ const FISH_BEHAVIOR = {
 function behaviorOf(f) {
   const b = FISH_BEHAVIOR[f.id];
   if (b) return { diff: b[0], type: b[1] };
-  return { diff: [25, 45, 65, 85, 105][f.tier], type: ["mixed", "dart", "smooth", "sinker", "floater"][hashStr(f.id) % 5] };
+  return { diff: [25, 45, 65, 85, 105, 125][f.tier], type: ["mixed", "dart", "smooth", "sinker", "floater"][hashStr(f.id) % 5] };
 }
 const randInt = (a, b) => Math.floor(a + Math.random() * (b - a));
 S.auto = lsGet("mn.auto", false);
@@ -1937,7 +2038,25 @@ function hook() {
   if (S.coop && S.coop.role === "guest") { coopSend("hook"); setPhase("idle", 0); return; }
   S.hooked = true;
   if (S.coop && S.coop.role === "host") { coopHostStart(); return; }
+  if (Math.random() < .06) { junkCatch(); return; }
   startReel(rollFish(S.castBait));
+}
+/* 잡동사니 · 보물: 가끔 물고기 대신 걸려 올라와요 (싸움 없이 바로) */
+const JUNK = [
+  { id: "boot", w: 55, name: "낡은 장화", ico: "🥾", line: "앗, 누가 버린 장화예요. 쓰레기는 치웠어요!", gold: 0, xp: 2 },
+  { id: "bottle", w: 32, name: "병 편지", ico: "🍾", gold: [10, 50], xp: 4, notes: ["「이 편지를 읽는 어부에게 행운이 깃들기를!」", "「참돔은 새벽에 잘 문대요. — 옛날 어부」", "「배 위에서는 큰 물고기가 잘 잡혀요.」", "「갈치는 밤에만 나와요. 불빛을 좋아하거든요.」", "「몸부림칠 때는 꼭 손을 떼세요!」"] },
+  { id: "chest", w: 13, name: "작은 보물 상자", ico: "🧰", gold: [300, 2000], xp: 20, bait: true },
+];
+function junkCatch() {
+  const j = JUNK[weighted(JUNK.map(x => x.w))];
+  let g = 0; if (Array.isArray(j.gold)) g = Math.round(j.gold[0] + Math.random() * (j.gold[1] - j.gold[0]));
+  if (g) P.gold += g;
+  let extra = "";
+  if (j.bait) { const b = ["krill", "paste", "squid"][Math.floor(Math.random() * 3)], n = 3 + Math.floor(Math.random() * 5); P.baits[b] = (P.baits[b] || 0) + n; extra = " · " + (BAITS.find(x => x.id === b) || {}).name + " " + n + "개"; }
+  stat("junk_" + j.id); gainXp(j.xp); markDirty();
+  setPhase("catch", 1600); sfx(j.id === "chest" ? "jingle-rare" : "splash", .35);
+  toast([h("b", { text: j.ico + " " + j.name + "를 건졌어요" }), h("div", { class: "muted", style: "font-size:12px", text: (j.notes ? j.notes[Math.floor(Math.random() * j.notes.length)] + " " : j.line ? j.line + " " : "") + (g ? "+" + won(g) : "") + extra })], j.id === "chest" ? "lvup" : null, 5000);
+  if (j.id === "chest") postSys(P.nick + "님이 바다에서 보물 상자를 건졌어요!");
 }
 function missFish(r, msg) {
   setPhase("miss", MISS_MS);
@@ -1963,17 +2082,27 @@ function rollSizeK() {
 }
 function sizeLabel(k) { return k < .6 ? "꼬마" : k < .85 ? "작은" : k < 1.2 ? "보통" : k < 1.6 ? "큰" : k < 2.2 ? "왕" : "괴물급"; }
 function priceFor(f, k) { return Math.max(1, Math.round(TIERS[f.tier].base * Math.pow(k, 1.7))); }
+/* 사는 곳 · 시간: night 밤에만 · sea 배 위 깊은 바다에서만 · dawn 새벽·노을에 3배 (다른 때도 가끔) */
+const isDawnDusk = () => { const hh = gameHour(); return (hh >= 4.8 && hh < 7.2) || (hh >= 17.2 && hh < 19.8); };
+function habitatW(f) {
+  if (f.where === "night") return isNight() ? 1.6 : 0;
+  if (f.where === "sea") return atSea() ? 1.5 : 0;
+  if (f.where === "dawn") return isDawnDusk() ? 3 : .35;
+  return 1;
+}
+const WHERE_KO = { night: "🌙 밤에만", sea: "⛵ 배 위에서만", dawn: "🌅 새벽·노을에 잘 물어요" };
 function rollFish(baitId, opts) {
   opts = opts || {};
   const deep = atSea();
   const bait = BAITS.find(b => b.id === baitId) || BAITS[0];
   let tier = weighted(luckProbs(bait.p, (deep ? 30 : 0) + (S.castPow || 0) * 6 + (S.castPerfect ? 8 : 0) + (eventOn("rare") ? 15 : 0)));
-  const pool = allFish();
+  { const mc = (baitId === "legend" ? .006 : baitId === "lure" ? .0015 : 0) * (deep ? 2 : 1) * (isNight() ? 1.5 : 1) * (eventOn("rare") ? 2 : 1); if (Math.random() < mc) tier = 5; }
+  const pool = allFish().filter(f => habitatW(f) > 0);
   let cands = pool.filter(f => f.tier === tier);
   while (!cands.length && tier > 0) { tier--; cands = pool.filter(f => f.tier === tier); }
   if (!cands.length) cands = BUILTIN;
   // 깊은 바다 물고기는 배 위에서 3배 잘 나오고, 부두에서는 절반
-  const w = cands.map(f => DEEP.has(f.id) ? (deep ? 3 : 0.5) : 1);
+  const w = cands.map(f => (DEEP.has(f.id) ? (deep ? 3 : 0.5) : 1) * habitatW(f));
   let rr = Math.random() * w.reduce((a, b) => a + b, 0), f = cands[0];
   for (let i = 0; i < cands.length; i++) { if ((rr -= w[i]) < 0) { f = cands[i]; break; } }
   let k = rollSizeK() * (1 + buffVal("size") / 100) * (deep ? 1.15 : 1);
@@ -2031,6 +2160,7 @@ const TIER_FIGHT = [
   { p: .64, s: 16, dist: 16, run: 1.2, boost: .24, regen: .035, rage: .05, rageF: .98 },
   { p: .8, s: 26, dist: 20, run: 1.35, boost: .32, regen: .05, rage: .11, rageF: 1.17 },
   { p: .95, s: 38, dist: 24, run: 1.5, boost: .38, regen: .065, rage: .2, rageF: 1.36 },
+  { p: 1.0, s: 40, dist: 26, run: 1.5, boost: .4, regen: .07, rage: .22, rageF: 1.46 },
 ];
 const FIGHT_MSG = { rage: "몸부림! 지금은 무조건 손을 떼요", cruise: "천천히 감아요", run: "돌진! 무리하게 감지 마세요", jump: "점프! 손을 떼요", dive: "잠수하며 버티는 중", tired: "지쳤어요 · 지금 감아요!" };
 const STATE_W = { dart: { run: .45, jump: .25, dive: .05, cruise: .25 }, smooth: { run: .35, jump: .05, dive: .1, cruise: .5 }, sinker: { run: .25, jump: .02, dive: .45, cruise: .28 }, floater: { run: .2, jump: .38, dive: .02, cruise: .4 }, mixed: { run: .33, jump: .15, dive: .15, cruise: .37 } };
@@ -2056,7 +2186,7 @@ function startReel(r, opts) {
   $("fightCoop").hidden = !coop;
   $("fight").hidden = false; document.body.classList.add("fighting");
   $("fight").classList.toggle("boss", r.f.tier >= 3); $("fight").dataset.tier = r.f.tier;
-  if (r.f.tier >= 3) { toast([h("b", { text: r.f.tier >= 4 ? "⚠ 전설급 대물이에요!" : "⚠ 대물 입질!" }), h("div", { class: "muted", style: "font-size:12px", text: "몸부림칠 땐 꼭 손을 떼요 · 약한 낚싯대와 줄로는 버티기 어려워요" })], "lvup", 4000); sfx("jingle-rare", .3); }
+  if (r.f.tier >= 3) { toast([h("b", { text: r.f.tier >= 5 ? "✨ 신화 속 물고기가 물었어요!!" : r.f.tier >= 4 ? "⚠ 전설급 대물이에요!" : "⚠ 대물 입질!" }), h("div", { class: "muted", style: "font-size:12px", text: "몸부림칠 땐 꼭 손을 떼요 · 약한 낚싯대와 줄로는 버티기 어려워요" })], "lvup", 4000); sfx("jingle-rare", .3); }
   coach("fight");
   drawFight(); requestAnimationFrame(reelFrame);
 }
@@ -2986,7 +3116,7 @@ function renderChat() {
 function normChat(id, d) {
   return { id, kind: ["sys", "brag"].includes(d.kind) ? d.kind : "msg", nick: str(d.nick, 16) || "손님", text: str(d.text, 160),
     color: /^#[0-9a-f]{6}$/i.test(d.color || "") ? d.color : "#888888", ts: Number(d.ts) || 0,
-    fishId: str(d.fishId, 80), tier: clamp(Math.floor(Number(d.tier) || 0), 0, 4), size: Number(d.size) || 0 };
+    fishId: str(d.fishId, 80), tier: clamp(Math.floor(Number(d.tier) || 0), 0, 5), size: Number(d.size) || 0 };
 }
 async function postChat(msg) {
   if (S.online) {
@@ -4695,7 +4825,7 @@ function updateStallSigns() {
       if (alive) st.menu.slice(0, 8).forEach((m, k) => {
         const z = -1.25 + (k % 4) * .78 + (k >= 4 ? .3 : 0), x = STALL_DECO.x + (k >= 4 ? -.35 : .2);
         plain(GEOD.plate || (GEOD.plate = new T3.CylinderGeometry(.19, .15, .04, 16)), cmat(0xf8f6f0), x, STALL_DECO.y, z, u.plates);
-        const cols = [[0xff8a5c, 0xfff1e8], [0xf2f0ea, 0xff9a8a], [0xe2402a, 0xffc9b0], [0xf2c230, 0xff8a5c], [0xb38af0, 0xff8a5c]][m.tier];
+        const cols = [[0xff8a5c, 0xfff1e8], [0xf2f0ea, 0xff9a8a], [0xe2402a, 0xffc9b0], [0xf2c230, 0xff8a5c], [0xb38af0, 0xff8a5c], [0x3fd6cc, 0xfff1e8]][m.tier] || [0xff8a5c, 0xfff1e8];
         for (let q = 0; q < 3; q++) { const sl = plain(GEOD.slice || (GEOD.slice = new T3.BoxGeometry(.2, .035, .07)), cmat(cols[q % 2]), x - .02 + q * .015, STALL_DECO.y + .04 + q * .012, z - .07 + q * .07, u.plates); sl.rotation.y = .5; }
       });
     }
@@ -5822,7 +5952,7 @@ function itemState(c, it) {
   return { own: !!P.tools[it.id], using: !!P.tools[it.id] };
 }
 function itemStat(c, it) {
-  if (c === "bait") return "희귀 이상 " + rareP(it) + "%" + (it.p[4] ? " · 전설 " + it.p[4] + "%" : "");
+  if (c === "bait") return "희귀 이상 " + rareP(it) + "%" + (it.p[4] ? " · 전설 " + it.p[4] + "%" : "") + (it.id === "legend" || it.id === "lure" ? " · 신화 가능" : "");
   if (c === "rod") return "버티는 힘 " + Math.round(it.tens * 100) + " · 채비 " + it.slots + "칸";
   if (c === "reel") return "과열 " + Math.round(it.heat * 100) + "% · 감기 " + it.speed.toFixed(1) + "m/s";
   if (c === "line") return it.add ? "줄 강도 +" + Math.round(it.add * 100) + "%" : "기본 강도";
@@ -6112,7 +6242,12 @@ SHEETS.dex = (body) => {
     h("button", { role: "tab", "aria-selected": String(S.dexTab === "base"), onclick: () => { S.dexTab = "base"; refreshSheet(true); }, text: "기본 물고기" }),
     h("button", { role: "tab", "aria-selected": String(S.dexTab === "user"), onclick: () => { S.dexTab = "user"; refreshSheet(true); }, text: "유저가 방류한 물고기 " + mine.filter(visible).length })));
   const grid = h("div", { class: "grid" });
-  if (S.dexTab === "base") for (const f of base) grid.append(dexCard(f, known(f.id)));
+  if (S.dexTab === "base") {
+    const tf = S.dexTier == null ? -1 : S.dexTier;
+    body.append(h("div", { class: "tabs" }, h("button", { "aria-selected": String(tf < 0), onclick: () => { S.dexTier = null; refreshSheet(true); }, text: "전체" }),
+      TIERS.map((T, i) => h("button", { "aria-selected": String(tf === i), onclick: () => { S.dexTier = i; refreshSheet(true); }, text: T.name + " " + base.filter(f => f.tier === i && known(f.id)).length + "/" + base.filter(f => f.tier === i).length }))));
+    for (const f of base.filter(f => tf < 0 || f.tier === tf).sort((a, b) => a.tier - b.tier)) grid.append(dexCard(f, known(f.id)));
+  }
   else {
     const list = mine.filter(f => visible(f) || f.owner === S.uid).sort((a, b) => b.ts - a.ts);
     if (!list.length) { body.append(h("div", { class: "empty-note" }, "아직 방류된 물고기가 없어요. 상점가의 ", h("b", { text: "방류소" }), "에서 첫 물고기를 그려 바다에 풀어 보세요.")); return; }
@@ -6132,6 +6267,7 @@ function dexCard(f, isKnown) {
   const rec = S.records && S.records.get(f.id);
   if (rec) card.append(h("div", { class: "meta" }, h("span", { text: "부두 기록" }), h("span", { class: "num", text: "×" + rec.k.toFixed(2) + " · " + rec.nick })));
   if (showArt && f.desc) card.append(h("div", { class: "desc", text: f.desc }));
+  if (f.where) card.append(h("div", { class: "desc", style: "color:var(--accent);font-weight:700", text: WHERE_KO[f.where] }));
   if (f.user) {
     card.append(h("div", { class: "desc", text: "방류: " + f.nick + (f.reports.length >= REPORT_HIDE ? " · 신고 누적으로 숨김" : f.reports.length ? " · 신고 " + f.reports.length : "") }));
     const acts = h("div", { class: "acts" });
@@ -6566,6 +6702,7 @@ SHEETS.fbadmin = (body) => {
    은행과 갯벌 사이 오른쪽 빈터. 분야별 랭킹(rank/<uid>, 각자 자기 기록만 씀)을 모아 1등의 동상을 세움.
    동상은 그 사람의 옷차림 + 얼굴 그림을 금빛 청동으로 */
 const HALL = { x0: 6.4, x1: 19.6, z0: -66.8, z1: -54.2, cz: -60.5 };
+const RANK_CATS_OLD = 0;
 const RANK_CATS = [
   { id: "catch", ico: "🎣", name: "낚시왕", f: "caught", show: (v) => fmt(v) + "마리" },
   { id: "lv", ico: "⭐", name: "최고 레벨", f: "xp", show: (v) => "Lv." + levelOf(v) },
