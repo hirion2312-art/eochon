@@ -473,6 +473,7 @@ body.titling .castb,body.mung .castb{display:none!important}
 .arow .meter{height:6px}
 .arow .ar{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:12px;white-space:nowrap}
 .ttl-tag{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;background:#fff1c2;color:#8a6510;white-space:nowrap}
+.cttl{display:inline-block;font-size:11px;font-weight:800;line-height:1.5;padding:0 7px;border-radius:999px;background:linear-gradient(180deg,#ffe27a,#ffd84d);color:#4a3200;white-space:nowrap;vertical-align:1px;box-shadow:0 1px 3px rgba(0,0,0,.45),inset 0 0 0 1px rgba(122,84,0,.35)}
 /* 시계 · 레벨 */
 .clock{display:flex;gap:6px;align-items:center;padding:8px 12px;border-radius:999px;font-size:12.5px;white-space:nowrap}
 .clock b{font-family:var(--f-mono);font-weight:500;font-size:13px}
@@ -1615,7 +1616,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.67.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.67.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -4352,6 +4353,7 @@ function onPeers(ch) {
 /* ===================== 채팅 ===================== */
 let lastSend = 0;
 function renderChat() {
+  const ttlOf = new Map(); for (const p of otherPeers(true)) if (p.uid && p.ttl) ttlOf.set(p.uid, p.ttl);   // 옛 메시지 보완용: 지금 접속 중인 사람의 칭호
   const list = $("chatList");
   const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 60;
   list.replaceChildren();
@@ -4363,17 +4365,17 @@ function renderChat() {
     else if (m.kind === "brag") {
       const f = findFish(m.fishId);
       list.append(h("li", { class: "brag" }, f ? h("img", { src: fishArt(f).src, alt: "" }) : null,
-        h("div", { class: "bt" }, m.ttl ? h("span", { class: "ttl-tag", style: "margin-right:5px", text: m.ttl }) : null, h("b", { style: "color:" + m.color, text: m.nick }), "님의 자랑 ", tm, h("br"),
+        h("div", { class: "bt" }, (m.ttl || ttlOf.get(m.uid)) ? h("span", { class: "cttl", style: "margin-right:5px", text: m.ttl || ttlOf.get(m.uid) }) : null, h("b", { style: "color:" + m.color, text: m.nick }), "님의 자랑 ", tm, h("br"),
           tierChip(m.tier), " ", h("b", { text: m.text }), " ", h("span", { class: "num", text: fmtSize(m.size) }))));
     }
-    else list.append(h("li", null, m.ttl ? h("span", { class: "ttl-tag", style: "margin-right:5px", text: m.ttl }) : null, h("span", { class: "who", style: "color:" + m.color, text: m.nick }), h("span", { text: m.text }), tm));
+    else list.append(h("li", null, (m.ttl || ttlOf.get(m.uid)) ? h("span", { class: "cttl", style: "margin-right:5px", text: m.ttl || ttlOf.get(m.uid) }) : null, h("span", { class: "who", style: "color:" + m.color, text: m.nick }), h("span", { text: m.text }), tm));
   }
   if (nearBottom) list.scrollTop = list.scrollHeight;
 }
 function normChat(id, d) {
   return { id, kind: ["sys", "brag"].includes(d.kind) ? d.kind : "msg", nick: str(d.nick, 16) || "손님", text: str(d.text, 160),
     color: /^#[0-9a-f]{6}$/i.test(d.color || "") ? d.color : "#888888", ts: Number(d.ts) || 0,
-    fishId: str(d.fishId, 80), tier: clamp(Math.floor(Number(d.tier) || 0), 0, 5), size: Number(d.size) || 0, ch: clamp(Math.floor(Number(d.ch) || 1), 1, 99), ttl: TAG_OK(d.ttl) ? String(d.ttl).slice(0, 24) : "" };
+    fishId: str(d.fishId, 80), tier: clamp(Math.floor(Number(d.tier) || 0), 0, 5), size: Number(d.size) || 0, ch: clamp(Math.floor(Number(d.ch) || 1), 1, 99), ttl: TAG_OK(d.ttl) ? String(d.ttl).slice(0, 24) : "", uid: str(d.uid, 64) };
 }
 async function postChat(msg) {
   if (S.online) {
