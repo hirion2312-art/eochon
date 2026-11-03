@@ -1615,7 +1615,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.60.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.61.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -4272,7 +4272,7 @@ function channelsSheet(body) {   // SHEETS.channels
 }
 function fullPresence() {
   return { nick: P.nick, color: P.color, skin: P.skin, uid: S.uid || null, x: ME.x, z: ME.z, ry: ME.ry, st: ME.st, seat: ME.seat,
-    stall: S.myStall, phase: S.phase, fv: S.myFace ? S.myFace.ts || 0 : 0, wear: wearStr(P.wear), card: S.card ? S.card.id : null, lv: myLv(), rod: P.rod, reel: P.reel, cp: S.castPow || .6, ttl: myTag(), home: S.homeHost || null };
+    stall: S.myStall, phase: S.phase, fv: S.myFace ? S.myFace.ts || 0 : 0, wear: wearStr(P.wear), card: S.card ? S.card.id : null, lv: myLv(), rod: P.rod, reel: P.reel, cp: S.castPow || .6, ttl: myTag(), home: S.homeHost || null, rst: restPresence() };
 }
 const ST_OK = ["idle", "walk", "run", "sit", "fish", "stall", "coop", "dig"];
 const TAG_OK = (t) => ACH_TITLES.includes(t) || JOBS.some(j => j.name === t);
@@ -5180,7 +5180,12 @@ function pickTicketRecipe() {
   return pick(pool);
 }
 function kitchenCount(fishId) { const k = restK(); let n = 0; const c = (it) => { if (it && it.fish === fishId) n++; }; c(k.hand); for (const s of ["board", "boil", "fry", "grill"]) k[s].forEach(x => c(x.it)); k.plate.items.forEach(c); return n; }
+function restPresence() {   // 다른 사람에게 보이는 내 가게: 자리 · 영업 · 앉은 손님 수 · 알바 (v1.61)
+  if (S.restSlot < 0) return null;
+  return { s: S.restSlot, o: S.restOpen ? 1 : 0, g: (S.restGuests || []).filter(gu => gu.stage === "wait").length, sf: P.rest.staff.map(s => ({ g: s.g, p: s.post, n: s.name })) };
+}
 function restTick(t, dt) {
+  { const rp = restPresence(), sig = rp ? rp.s + "|" + rp.o + "|" + rp.g + "|" + rp.sf.map(x => x.g + x.p).join(",") : ""; if (sig !== S.rstSig) { S.rstSig = sig; pushPresence({ rst: rp }); } }
   if (S.restSlot < 0) { if (S.restIn) { S.restIn = false; updateRestBar(); } return; }
   if (!RESTG && T3 && R) { loadRestModels(); buildRestScene(true); }
   if (!RESTG) return;
@@ -5307,8 +5312,8 @@ function restFridgeSheet(body) {
   const grid = h("div", { class: "rf-grid" });
   for (const id of ids) {
     const f = findFish(id), n = P.bag.filter(it => it.fishId === id).length, nd = need.get(id) || 0;
-    grid.append(h("button", { class: "rf-it" + (nd ? " need" : "") + (n ? "" : " none"), disabled: !n, onclick: () => { const it = takeFromBag(id); if (!it) return; restK().hand = it; closeSheet(); restSnd("plate_2", .35); restChanged(); } },
-      h("img", { src: fishArt(f).src, alt: "" }), h("b", { text: f.name }), h("small", { text: n ? "가방 " + n + "마리" : "없어요 · 낚아 오세요" }), nd ? h("span", { class: "rf-n", text: "주문 " + nd }) : null));
+    grid.append(h("button", { class: "rf-it" + (nd ? " need" : "") + (n || canAutoBuy(id) ? "" : " none"), disabled: !n && !canAutoBuy(id), onclick: () => { const it = staffTake(id); if (!it) return; if (it.bought) toast("🧊 " + f.name + " 자동 구매 · " + won(mktBuyPrice(f)) + " (가게 금고)"); restK().hand = it; closeSheet(); restSnd("plate_2", .35); restChanged(); } },
+      h("img", { src: fishArt(f).src, alt: "" }), h("b", { text: f.name }), h("small", { text: n ? "가방 " + n + "마리" : canAutoBuy(id) ? "자동 구매 " + won(mktBuyPrice(f)) + " · 금고에서" : "없어요 · 낚아 오세요" }), nd ? h("span", { class: "rf-n", text: "주문 " + nd }) : null));
   }
   if (!ids.length) grid.append(h("div", { class: "empty-note", text: "해금한 레시피 재료가 없어요." }));
   body.append(grid, h("div", { class: "muted", style: "font-size:12px;margin-top:10px", text: "요리는 크기를 보지 않아요 · 큰 개체는 시장에 팔면 더 비싸요" }));
@@ -5439,8 +5444,8 @@ function staffNeed() {   // 주문에 필요한데 주방에 아직 없는 어�
   }
   return null;
 }
-function staffStep(s, sb) {   // 할 일 하나를 고르고 끝내요 (시간은 속도에 따라)
-  const G = REST_STAFF[s.g], k = restK(), sp = G.speed, can = (p) => G.can.includes(p);
+function staffStep(s, sb) {   // 할 일 하나를 골라요 · 역할은 "먼저 할 일"만 정하고, 무슨 역할이든 혼자서 처음부터 끝까지 다 만들 수 있어요 (v1.61)
+  const G = REST_STAFF[s.g], k = restK(), sp = G.speed;
   const doIt = (dur, at, act, fn) => { sb.busy = Date.now() + dur / sp; sb.at = at; sb.act = act; sb.fn = fn; };
   const cookTake = (perfectOnly) => {
     for (const id of ["boil", "fry", "grill"]) for (const x of k[id]) {
@@ -5452,25 +5457,26 @@ function staffStep(s, sb) {   // 할 일 하나를 고르고 끝내요 (시간�
     }
     return false;
   };
-  const all = s.post === "all";
-  if ((s.post === "cook" || all) && cookTake(true)) return;
-  if (s.post === "run" || s.post === "cook" || all) {
-    if (k.plate.dish) { const tk = (S.restTickets || []).find(t => t.r === k.plate.dish.id && !t.served); if (tk) { doIt(1300, "pass", "서빙", () => { const pd = k.plate.dish; if (!pd) return; k.plate.dish = null; serveDish({ dish: pd.id, q: pd.q, items: pd.items }, true); }); return; } }
-    if (cookTake(false)) return;
+  const stepServe = () => {   // 완성 접시 서빙 · 다 익은 것 꺼내 담기 · 손질된 재료 스테이션으로 옮기기
+    if (k.plate.dish) { const tk = (S.restTickets || []).find(t => t.r === k.plate.dish.id && !t.served); if (tk) { doIt(1300, "pass", "서빙", () => { const pd = k.plate.dish; if (!pd) return; k.plate.dish = null; serveDish({ dish: pd.id, q: pd.q, items: pd.items }, true); }); return true; } }
+    if (cookTake(false)) return true;
     const b = k.board[0];
     if (b && b.it.chopped) { const tg = staffTarget(b.it);
-      if (tg === "plate" && tryPlateDry(b.it)) { doIt(900, "plate", "담기", () => { if (k.board[0] !== b) return; k.board = []; if (!tryPlate(b.it, s)) k.board = [b]; }); return; }
-      if (tg && tg !== "plate" && k[tg].length < REST_CFG.stationCap[tg]) { doIt(900, tg, COOK_KO[tg], () => { if (k.board[0] !== b) return; k.board = []; k[tg].push({ it: b.it, t0: Date.now(), cook0: tg }); restSnd(tg === "boil" ? "boil_1" : tg === "fry" ? "fry_1" : "grill_1", .3); }); return; } }
-    if (s.post !== "prep" && !can("prep")) return;
-  }
-  if (can("prep")) {
+      if (tg === "plate" && tryPlateDry(b.it)) { doIt(900, "plate", "담기", () => { if (k.board[0] !== b) return; k.board = []; if (!tryPlate(b.it, s)) k.board = [b]; }); return true; }
+      if (tg && tg !== "plate" && k[tg].length < REST_CFG.stationCap[tg]) { doIt(900, tg, COOK_KO[tg], () => { if (k.board[0] !== b) return; k.board = []; k[tg].push({ it: b.it, t0: Date.now(), cook0: tg }); restSnd(tg === "boil" ? "boil_1" : tg === "fry" ? "fry_1" : "grill_1", .3); }); return true; } }
+    return false;
+  };
+  const stepPrep = () => {   // 썰기 · 냉장고에서 재료 가져오기
     const b = k.board[0];
-    if (b && !b.it.chopped) { doIt(330, "board", "썰기", () => { if (k.board[0] !== b) return; b.it.hits++; restSnd("chop_" + (1 + (b.it.hits % 4)), .25); if (b.it.hits >= chopHitsFor(b.it.fish)) b.it.chopped = true; }); return; }
-    if (s.post !== "prep" && !all) return;
-    const nd = staffNeed(); if (!nd) return;
-    if (nd.r.chop) { if (k.board.length) return; doIt(1400, "fridge", "재료 꺼내기", () => { if (k.board.length) return; const it = staffTake(nd.id); if (it) k.board = [{ it, t0: 0 }]; }); return; }
-    const st = nd.r.cook; if (st && k[st].length < REST_CFG.stationCap[st]) doIt(1400, "fridge", "재료 꺼내기", () => { const it = staffTake(nd.id); if (it) { k[st].push({ it, t0: Date.now(), cook0: st }); restSnd("fry_1", .3); } });
-  }
+    if (b && !b.it.chopped) { doIt(330, "board", "썰기", () => { if (k.board[0] !== b) return; b.it.hits++; restSnd("chop_" + (1 + (b.it.hits % 4)), .25); if (b.it.hits >= chopHitsFor(b.it.fish)) b.it.chopped = true; }); return true; }
+    const nd = staffNeed(); if (!nd) return false;
+    if (nd.r.chop) { if (k.board.length) return false; doIt(1400, "fridge", "재료 꺼내기", () => { if (k.board.length) return; const it = staffTake(nd.id); if (it) k.board = [{ it, t0: 0 }]; }); return true; }
+    const st = nd.r.cook; if (st && k[st].length < REST_CFG.stationCap[st]) { doIt(1400, "fridge", "재료 꺼내기", () => { const it = staffTake(nd.id); if (it) { k[st].push({ it, t0: Date.now(), cook0: st }); restSnd("fry_1", .3); } }); return true; }
+    return false;
+  };
+  if (s.post === "cook" || s.post === "all") { if (cookTake(true)) return; if (stepServe()) return; stepPrep(); }
+  else if (s.post === "run") { if (stepServe()) return; if (cookTake(true)) return; stepPrep(); }
+  else { if (stepPrep()) return; if (stepServe()) return; cookTake(true); }   // 손질 담당도 남은 일(꺼내기 · 담기 · 서빙)은 끝까지 해요
 }
 const canAutoBuy = (id) => { const f = findFish(id); return !!(P.rest.autoBuy && f && P.rest.fund >= mktBuyPrice(f)); };
 function staffTake(id) {   // 알바가 재료를 가져와요: 내 가방 먼저, 없으면 자동 구매(가게 금고)
@@ -5497,6 +5503,45 @@ function restStaffTick(t, dt) {
     if (sb.tagKey !== key) { sb.tagKey = key; setText(sb.tag, lbl, "#1d2a33", "#ffffff", .2, true); }
     sb.tag.position.set(sb.x, 1.75, sb.z); sb.tag.visible = !atHome();
   }
+}
+/* 다른 사람 가게의 손님 · 알바 보여 주기 (그 사람 presence의 rst만으로 그려요 · v1.61) */
+S.restProxy = new Map();
+function restProxyTick() {
+  if (!T3 || !scene) return;
+  if (atHome()) { for (const px of S.restProxy.values()) for (const o of px.objs) o.visible = false; return; }
+  const seen = new Set();
+  for (const p of S.peers || []) {
+    if (p.sameTab || p.kind !== "viewer") continue;
+    const pr = p.presence || {}; if (pr.home) continue;
+    const r = pr.rst; if (!r || typeof r !== "object") continue;
+    const slot = Math.floor(Number(r.s)); if (!(slot >= 0 && slot < POCHA.n)) continue;
+    const g = clamp(Math.floor(Number(r.g) || 0), 0, REST_SEATS.length);
+    const sf = (Array.isArray(r.sf) ? r.sf : []).slice(0, 4).map(x => x && REST_STAFF[x.g] ? { g: x.g, p: STAFF_POST[x.p] ? x.p : "all", n: typeof x.n === "string" && x.n ? x.n.slice(0, 8) : "알바" } : null).filter(Boolean);
+    if (!g && !sf.length) continue;
+    seen.add(p.peer);
+    const sig = slot + "|" + g + "|" + sf.map(x => x.g + x.p + x.n).join(",");
+    const old = S.restProxy.get(p.peer);
+    if (old && old.sig === sig) { for (const o of old.objs) o.visible = true; continue; }
+    if (old) for (const o of old.objs) scene.remove(o);
+    const objs = [];
+    for (let i = 0; i < g; i++) {   // 손님: 마당 테이블에 앉아 있어요
+      const seat = REST_SEATS[i], B = makeBody(), wear = {}, k2 = hashStr(p.peer + ":" + i) % 99;
+      for (const sl of ["hat", "top", "bottom", "shoes"]) { const opts = CLOTHES.filter(c => c.slot === sl && !c.ev); if (opts.length && (k2 + sl.length) % 3) wear[sl] = opts[(k2 * 7 + sl.length * 3) % opts.length].id; }
+      applyOutfit(B, normWear(wear), COLORS[k2 % COLORS.length]); B.faceMat.map = faceTexture("npc"); B.faceMat.needsUpdate = true;
+      B.g.position.set(POCHA.x + seat[0], .22, POCHA_Z(slot) + seat[1]); B.g.rotation.y = seat[2]; B.rig.rotation.x = .12;
+      scene.add(B.g); objs.push(B.g);
+    }
+    for (const s of sf) {   // 알바: 자기 스테이션 자리에 서 있어요
+      const B = makeBody(); applyOutfit(B, normWear({ top: "", bottom: "" }), ["#ffffff", "#2a78bb", "#2f8f5b", "#1d2a33"][Object.keys(REST_STAFF).indexOf(s.g)] || "#ffffff");
+      B.faceMat.map = faceTexture("npc"); B.faceMat.needsUpdate = true;
+      const st = REST_ST.find(x => x.id === STAFF_POST[s.p].stand) || REST_ST[1];
+      B.g.position.set(POCHA.x + st.sx, 0, POCHA_Z(slot) + st.sz); B.g.rotation.y = st.ry;
+      scene.add(B.g); objs.push(B.g);
+      const tag = makeText(); setText(tag, REST_STAFF[s.g].ico + " " + s.n, "#1d2a33", "#ffffff", .2, true); tag.position.set(POCHA.x + st.sx, 1.75, POCHA_Z(slot) + st.sz); scene.add(tag); objs.push(tag);
+    }
+    S.restProxy.set(p.peer, { sig, objs });
+  }
+  for (const [k2, px] of S.restProxy) if (!seen.has(k2)) { for (const o of px.objs) scene.remove(o); S.restProxy.delete(k2); }
 }
 // 가게 관리: 단계 · 알바 · 장부
 function restManageSheet(body) {
@@ -8920,7 +8965,7 @@ function loop3D(ms) {
   seaMat.uniforms.sunDir.value.copy(_v2); skyMat.uniforms.sunDir.value.copy(_v2);
   for (const b of buoys) { b.position.y = waveY(b.position.x, b.position.z, t) - .1; b.rotation.z = Math.sin(t + b.position.x) * .12; }
   for (const s of SWING) s.g.rotation.x = Math.sin(t * 1.4 + s.ph) * .07;
-  updateLife(dt, t); homeTick(t); restTick(t, dt); npcShopTick(t, dt); townTick(t, dt); updateFx(t, dt); breachTick(t, dt); marketRoofTick(t);
+  updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); npcShopTick(t, dt); townTick(t, dt); updateFx(t, dt); breachTick(t, dt); marketRoofTick(t);
   SWIM_T.value = t; updateJumps(dt, t); updateTide3D(dt); updateDust(dt);
   updateBoat3D(t, now);
   if (onBoat()) { const bs = SEAT[ME.seat]; ME.x = bs.x; ME.z = bs.z; ME.ry = bs.ry; }
