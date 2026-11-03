@@ -647,6 +647,27 @@ body.athome .stat,body.athome #runBtn{display:none}
   .sc-shelf{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
   .sc-dish{width:72px;height:72px}
 }
+/* ===== 대물 수면 돌파 연출 (v1.31) ===== */
+.cine{position:fixed;inset:0;z-index:60;pointer-events:none}
+.cine .cb{position:absolute;left:0;right:0;height:0;background:#05080b;transition:height .5s cubic-bezier(.2,.8,.2,1)}
+.cine .cb.top{top:0}.cine .cb.bot{bottom:0}
+.cine.on .cb{height:11vh}
+.cine-cap{position:absolute;left:0;right:0;top:15vh;text-align:center;font-weight:900;font-size:clamp(20px,3.4vw,34px);color:#e9f4ff;letter-spacing:.04em;text-shadow:0 2px 0 #000,0 0 18px rgba(80,170,255,.6);opacity:0;transform:translateY(-6px);transition:opacity .4s,transform .4s}
+.cine.on .cine-cap{opacity:1;transform:none}
+.cine.hot .cine-cap{animation:cineShake .09s infinite}
+.cine.boom .cine-cap{animation:cineBoom .7s cubic-bezier(.2,1.6,.4,1) both,cineOut .5s 1s forwards;font-size:clamp(46px,9vw,96px);color:#fff;-webkit-text-stroke:2px #0d2236}
+.cine.t3.boom .cine-cap{text-shadow:0 0 30px #b98aff,0 4px 0 #2a1450}
+.cine.t4.boom .cine-cap{text-shadow:0 0 34px #ffc83a,0 4px 0 #5a3a00}
+.cine.t5.boom .cine-cap{text-shadow:0 0 40px #ff7ad9,0 0 80px #6fd0ff,0 4px 0 #4a0d3a}
+@keyframes cineShake{25%{transform:translate(2px,-1px)}50%{transform:translate(-2px,1px)}75%{transform:translate(1px,2px)}}
+@keyframes cineOut{to{opacity:0;transform:scale(1.15)}}
+@keyframes cineBoom{0%{transform:scale(2.6);opacity:0}60%{transform:scale(.92);opacity:1}100%{transform:scale(1);opacity:1}}
+.cine-skip{position:absolute;right:16px;bottom:calc(11vh + 12px);pointer-events:auto;border:1px solid rgba(255,255,255,.35);background:rgba(10,14,18,.55);color:#e8f1f7;font:700 13px/1 inherit;padding:9px 14px;border-radius:999px;cursor:pointer}
+body.cinema #hint,body.cinema #standBtn,body.cinema #castBtn,body.cinema .toasts{visibility:hidden}
+.cine-flash{position:fixed;inset:0;z-index:59;pointer-events:none;background:radial-gradient(circle at 50% 45%,#fff,rgba(220,240,255,.85) 40%,rgba(200,230,255,0) 75%);opacity:0}
+.cine-flash.go{animation:cineFlash .9s ease-out}
+@keyframes cineFlash{0%{opacity:.95}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.cine.hot .cine-cap,.cine.boom .cine-cap{animation:none}}
 /* ===== 인터페이스 개편 (v1.21) ===== */
 .fx-ex{position:sticky;top:-16px;z-index:3;margin:-16px -18px 0;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--line)}
 .fx-bench{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start}
@@ -953,6 +974,8 @@ details.guidebox summary{cursor:pointer;font-weight:700}
   <div class="hint glass" id="hint">눌러서 이동 · 드래그로 둘러보기</div>
   <button class="hook" id="hookBtn" hidden>챔질!<small>Space</small></button>
   <button class="castb" id="castBtn" hidden aria-label="꾹 눌러서 힘을 모았다가 떼면 던져요"><span class="cin"><b id="castTxt">꾹 눌러<br>던지기</b><small>Space</small></span></button>
+  <div class="cine" id="cine" hidden><i class="cb top"></i><i class="cb bot"></i><div class="cine-cap" id="cineCap"></div><button class="cine-skip" id="cineSkip" type="button">건너뛰기 ▸</button></div>
+  <div class="cine-flash" id="cineFlash"></div>
   <div class="fight" id="fight" hidden>
     <div class="fbox">
       <div class="fhead"><span class="fname" id="fightName"></span><span class="fcoop" id="fightCoop" hidden>함께 낚시 · 둘 다 버텨야 잡혀요</span><span class="fdist" id="fightDist">0m</span></div>
@@ -1043,14 +1066,14 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.30.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.31.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
-  { name: "일반", base: 10 },
-  { name: "고급", base: 30 },
-  { name: "희귀", base: 120 },
-  { name: "영웅", base: 600 },
-  { name: "전설", base: 3000 },
-  { name: "신화", base: 12000 },
+  { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
+  { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
+  { name: "희귀", base: 300 },
+  { name: "영웅", base: 1400 },
+  { name: "전설", base: 6000 },
+  { name: "신화", base: 22000 },
 ];
 const TIER_VARS = ["--t0", "--t1", "--t2", "--t3", "--t4", "--t5"];
 const BAITS = [
@@ -1374,9 +1397,9 @@ function allFish() { return BUILTIN.concat(S.userFish.filter(visible)); }
 function findFish(id) { return BUILTIN.find(f => f.id === id) || SHELLS.find(f => f.id === id) || S.userFish.find(f => f.id === id) || null; }
 /* 갯벌에서 호미로 캐는 것들 (낚시 목록·도감에는 안 들어감) */
 const SHELLS = [
-  { id: "s-bajirak", name: "바지락", tier: 0, min: 3, max: 6, price: 9, shell: true, desc: "갯벌의 단골손님. 국물 맛이 좋아요." },
-  { id: "s-matjogae", name: "맛조개", tier: 1, min: 8, max: 14, price: 24, shell: true, desc: "길쭉한 조개. 구멍에서 쏙 올라와요." },
-  { id: "s-kkotge", name: "꽃게", tier: 2, min: 12, max: 22, price: 70, shell: true, desc: "집게를 조심하세요. 갯벌의 보물." },
+  { id: "s-bajirak", name: "바지락", tier: 0, min: 3, max: 6, price: 22, shell: true, desc: "갯벌의 단골손님. 국물 맛이 좋아요." },
+  { id: "s-matjogae", name: "맛조개", tier: 1, min: 8, max: 14, price: 60, shell: true, desc: "길쭉한 조개. 구멍에서 쏙 올라와요." },
+  { id: "s-kkotge", name: "꽃게", tier: 2, min: 12, max: 22, price: 175, shell: true, desc: "집게를 조심하세요. 갯벌의 보물." },
 ];
 const isShell = (fishId) => typeof fishId === "string" && fishId.startsWith("s-");
 function drawShellArt(g, id, w, hh) {
@@ -1761,7 +1784,9 @@ function rawFishMul(id, d) {
 }
 function fishMul(id, d) { d = d == null ? mktDay() : d; return id === todayFish(d) ? TODAY_FISH_MUL : rawFishMul(id, d); }
 function fishTrend(id) { const d = mktDay(), now = fishMul(id, d), prev = rawFishMul(id, d - 1); return now > prev + .01 ? 1 : now < prev - .01 ? -1 : 0; }
-const fishSell = (it) => sellValue(Math.round(it.price * fishMul(it.fishId)));
+// 예전에 잡아 둔 물고기도 지금 값(v1.31 인상)으로 쳐 줘요
+function curPrice(it) { const f = findFish(it.fishId), k = clamp(Number(it.k) || 1, .1, 10); return !f ? it.price : f.shell ? Math.max(it.price, Math.round(f.price * Math.pow(k, 1.2))) : Math.max(it.price, priceFor(f, k)); }
+const fishSell = (it) => sellValue(Math.round(curPrice(it) * fishMul(it.fishId)));
 function mulTag(id) {   // 「×1.12 ▲」 · 오늘의 생선은 「오늘의 생선 ×1.5」
   if (id === todayFish()) return "⭐ 오늘의 생선 ×" + TODAY_FISH_MUL;
   const m = fishMul(id), tr = fishTrend(id);
@@ -2075,11 +2100,12 @@ function digAt(spot) {
   if (S.digging) return;
   if (P.bag.length >= BAG_MAX) { toast("가방이 가득 찼어요. 먼저 정리해 주세요"); return; }
   S.digging = true; ME.target = null; ME.st = "dig"; ME.ry = Math.atan2(spot.x - ME.x, spot.z - ME.z); pushPresence({ st: "dig" }); presMove(true);
-  sfx("bubble", .3);
+  sfx("bubble", .3); try { ACT_FX.dig(spot.x, spot.z, false); setTimeout(() => ACT_FX.dig(spot.x, spot.z, false), 700); } catch {}
   setTimeout(() => {
     S.digging = false; ME.st = "idle"; pushPresence({ st: "idle" }); spot.dug = true;
     const roll = Math.random(), f = roll < .04 ? SHELLS[2] : roll < .34 ? SHELLS[1] : roll < .9 ? SHELLS[0] : null;
     if (!f) { toast("빈 구멍이었어요… 다른 숨구멍을 찾아봐요"); return; }
+    try { ACT_FX.dig(spot.x, spot.z, true); fxPop(ME.x, 2.4, ME.z, f.name + "!", "#ffe9b0"); } catch {}
     const k = Math.round(clamp(Math.exp(gauss() * .25), .6, 1.8) * 100) / 100, size = Math.round(Math.sqrt(f.min * f.max) * k * 10) / 10, price = Math.max(1, Math.round(f.price * Math.pow(k, 1.2)));
     P.bag.unshift({ id: uid4(), fishId: f.id, name: f.name, tier: f.tier, size, k, price, ts: Date.now(), hooked: false });
     stat("digs"); if (f.id === "s-kkotge") stat("crabs"); questProgress("dig"); gainXp([3, 7, 18][f.tier]);
@@ -2091,9 +2117,9 @@ function digAt(spot) {
 }
 function sellShells() {
   const list = shellItems(); if (!list.length) return;
-  let sum = 0; for (const it of list) sum += sellValue(it.price);
+  let sum = 0; for (const it of list) sum += sellValue(curPrice(it));
   P.bag = P.bag.filter(it => !isShell(it.fishId)); P.gold += sum; stat("soldGold", sum); markDirty(); questProgress("sell", sum);
-  sfx("ui-confirmation", .45); toast("조개 " + list.length + "개를 팔아 " + won(sum) + "을 받았어요"); refreshSheet();
+  sfx("coins", .45); try { ACT_FX.sell(sum); } catch {} toast("조개 " + list.length + "개를 팔아 " + won(sum) + "을 받았어요"); refreshSheet();
 }
 
 /* ===================== 처음 하는 것 안내 (코치 카드) =====================
@@ -2168,7 +2194,7 @@ function gainXp(n) {
   S.lastXp = { n, at: Date.now() };
   if (after > before) {
     toast([h("b", { text: "낚시 Lv." + after + " 달성!" }), h("div", { class: "muted", style: "font-size:12px", text: levelUnlocks(after) || "더 큰 물고기에 도전해 보세요" })], "lvup", 6000);
-    sfx("jingle-rare", .5); doEmote("cheer"); pushPresence({ lv: after });
+    sfx("jingle-rare", .5); doEmote("cheer"); pushPresence({ lv: after }); try { ACT_FX.level(after); } catch {}
     postSys(P.nick + "님이 낚시 Lv." + after + "이 되었어요!");
   }
   markDirty();
@@ -2282,7 +2308,7 @@ function questProgress(kind, n) {
   let changed = false;
   for (const q of P.quests.list) if (q.kind === kind && !q.claimed && q.have < q.need) {
     q.have = Math.min(q.need, q.have + (n || 1)); changed = true;
-    if (q.have >= q.need) toast("오늘의 의뢰 완료: " + questText(q) + " · 상태판에서 보상을 받으세요");
+    if (q.have >= q.need) { try { ACT_FX.quest(); } catch {} } if (q.have >= q.need) toast("오늘의 의뢰 완료: " + questText(q) + " · 상태판에서 보상을 받으세요");
   }
   if (changed) { markDirty(); updateQuestCount(); }
 }
@@ -2397,6 +2423,7 @@ function tick() {
   try { tickInner(); } catch (e) { console.warn("tick", e); setPhase("miss", MISS_MS); }
 }
 function tickInner() {
+  if (BREACH) { if (Date.now() - BREACH.wall > 25000) finishBreach(); return; }   // 대물 연출 중 (창을 내려 둬도 끝나게)
   if (S.coachOpen) { S.phaseEnd += 200; return; }   // 안내 카드가 떠 있으면 시간 멈춤
   // 자동 낚시는 화면을 보고 있을 때만 · 오래 손을 안 대면 멈춤 (방치 낚시 막기)
   if (autoOn() && fishingNow() && !REEL.on) {
@@ -2415,8 +2442,8 @@ function tickInner() {
   if (S.phase === "idle") { readyCast(); return; }
   if (S.phase === "ready" || S.phase === "charge") { if (S.phase === "ready" && autoOn()) startCast(); return; }
   if (S.phase === "reel" || now < S.phaseEnd) return;
-  if (S.phase === "cast") { setPhase("wait", waitMs()); sfx("splash", .18); }
-  else if (S.phase === "wait") { setPhase("bite", BITE_MS); sfx("bubble", .6); if (!autoOn()) coach("bite"); if (S.coop && S.coop.role === "host") coopSend("bite"); }
+  if (S.phase === "cast") { setPhase("wait", waitMs()); sfx("splash", .18); ACT_FX.splash(bobPos(), S.castPerfect); }
+  else if (S.phase === "wait") { setPhase("bite", BITE_MS); sfx("bubble", .6); ACT_FX.bite(bobPos()); if (!autoOn()) coach("bite"); if (S.coop && S.coop.role === "host") coopSend("bite"); }
   else if (S.phase === "bite") {
     if (S.coop && S.coop.role === "host") { coopBiteMissed(); return; }
     if (autoOn()) {
@@ -2432,7 +2459,7 @@ setInterval(tick, 200);
 function hook() {
   if (S.phase !== "bite") return;
   if (S.coop && S.coop.role === "guest") { coopSend("hook"); setPhase("idle", 0); return; }
-  S.hooked = true;
+  S.hooked = true; ACT_FX.hook(bobPos());
   if (S.coop && S.coop.role === "host") { coopHostStart(); return; }
   if (Math.random() < .06) { junkCatch(); return; }
   startReel(rollFish(S.castBait));
@@ -2456,7 +2483,7 @@ function junkCatch() {
   if (j.id === "chest") postSys(P.nick + "님이 바다에서 보물 상자를 건졌어요!");
 }
 function missFish(r, msg) {
-  setPhase("miss", MISS_MS);
+  setPhase("miss", MISS_MS); try { ACT_FX.miss(bobPos()); } catch {}
   toast(msg);
 }
 function luckProbs(p, extra) {
@@ -2525,7 +2552,9 @@ function landFish(r, perfect, auto) {
   else if (P.bag.length >= BAG_MAX) { P.gold += sv; sold = true; toast("가방이 가득 차서 바로 팔았어요 (+" + won(sv) + ")"); }
   else P.bag.unshift(item);
   markDirty();
-  S.lastCatch = { f, size, k, price, at: Date.now() };
+  const from = S.catchFrom || bobPos(); S.catchFrom = null;
+  S.lastCatch = { f, size, k, price, at: Date.now(), from };
+  if (from && f.tier < 3) ACT_FX.splash(from, f.tier >= 2);
   setPhase("catch", CATCH_MS);
   pushPresence({ catch: { id: f.id, n: f.name, t: f.tier, s: size, ts: Date.now() } });
   sfx("splash", .5); sfx(["jingle-catch", "jingle-catch", "jingle-rare", "fanfare-hero", "fanfare-legend", "fanfare-myth"][f.tier] || "jingle-catch", f.tier >= 3 ? .5 : .45);
@@ -2721,6 +2750,7 @@ function endReel(ok, silent, why) {
   try { wearGear(); } catch {}
   if (!ok) { sfx("ui-error", .35); try { navigator.vibrate && navigator.vibrate(60); } catch {} }
   if (REEL.coop) { coopReelDone(ok, REEL.perfect); return; }
+  if (ok && REEL.r.f.tier >= 3) { try { startBreach(REEL.r, REEL.perfect); return; } catch (e) { console.warn("breach", e); BREACH = null; } }   // 영웅 이상: 수면 돌파 연출 뒤에 들어 올림
   if (ok) { try { landFish(REEL.r, REEL.perfect, false); } catch (e) { console.warn("landFish", e); setPhase("miss", MISS_MS); toast("물고기를 담다가 문제가 생겼어요. 다시 던질게요"); } }
   else missFish(REEL.r, why || "놓쳤어요… " + TIERS[REEL.r.f.tier].name + " 물고기가 도망갔어요");
 }
@@ -2974,7 +3004,7 @@ function nearestAction() {
     consider(p.x, p.z, { key: "card:" + p.peer + p.card, label: p.nick + "님 명함 받기", run: () => takeCard(p) }, 2.6);
   }
   if (tideLow() && inMudArea(ME.x, ME.z)) for (const sp of digSpots()) if (!sp.dug) consider(sp.x, sp.z, { key: "dig:" + sp.x.toFixed(1), label: P.tools.hoe ? "호미로 캐기" : "호미가 필요해요", run: () => digAt(sp) }, 1.6);
-  { const n = shellItems().length; if (n) consider(SHELL_BUYER.x, SHELL_BUYER.z, { key: "shellsell:" + n, label: "조개 팔기 · " + n + "개 " + won(shellItems().reduce((a, it) => a + sellValue(it.price), 0)) + "", run: sellShells }, 1.9); }
+  { const n = shellItems().length; if (n) consider(SHELL_BUYER.x, SHELL_BUYER.z, { key: "shellsell:" + n, label: "조개 팔기 · " + n + "개 " + won(shellItems().reduce((a, it) => a + sellValue(curPrice(it)), 0)) + "", run: sellShells }, 1.9); }
   for (const st of STALLS) {
     const cur = S.stalls[st.i], alive = stallAlive(cur);
     const label = !alive ? "노점 열기" : cur.owner === S.uid ? (S.myStall === st.i ? "내 노점 보기" : "내 노점으로 돌아가기") : cur.nick + "네 횟집 구경하기";
@@ -4116,15 +4146,164 @@ function updateFx(t, dt) {
   const now = performance.now() / 1000;
   for (let i = FX.length - 1; i >= 0; i--) {
     const e = FX[i], p = (now - e.t0) / e.dur, m = e.o.material;
-    if (p >= 1) { scene.remove(e.o); e.o.geometry.dispose(); if (m.map && m.map !== SPARK_TEX) m.map.dispose(); m.dispose(); FX.splice(i, 1); continue; }
+    if (e.kind === "fn") { if (p >= 1 || e.upd(e, p, dt) === false) { if (e.o) scene.remove(e.o); FX.splice(i, 1); } continue; }
+    if (p >= 1) { scene.remove(e.o); if (e.o.geometry) e.o.geometry.dispose(); if (m.map && m.map !== SPARK_TEX) m.map.dispose(); m.dispose(); FX.splice(i, 1); continue; }
+    if (p < 0) { e.o.visible = false; continue; } e.o.visible = true;
     if (e.rainbow) m.color.setHSL((t * .35 + i * .1) % 1, .85, .62);
     if (e.kind === "pts") {
-      const a = e.o.geometry.attributes.position, v = e.vel;
-      for (let k = 0; k < a.count; k++) { v[k * 3 + 1] -= 3.2 * dt; a.array[k * 3] += v[k * 3] * dt; a.array[k * 3 + 1] = Math.max(.1, a.array[k * 3 + 1] + v[k * 3 + 1] * dt); a.array[k * 3 + 2] += v[k * 3 + 2] * dt; }
+      const a = e.o.geometry.attributes.position, v = e.vel, gr = e.g == null ? 3.2 : e.g, fl = e.floor == null ? .1 : e.floor;
+      for (let k = 0; k < a.count; k++) { v[k * 3 + 1] -= gr * dt; a.array[k * 3] += v[k * 3] * dt; a.array[k * 3 + 1] = Math.max(fl, a.array[k * 3 + 1] + v[k * 3 + 1] * dt); a.array[k * 3 + 2] += v[k * 3 + 2] * dt; }
       a.needsUpdate = true; m.opacity = 1 - p * p;
-    } else if (e.kind === "ring") { e.o.scale.setScalar(1 + p * 4); m.opacity = (1 - p) * .9; }
+    } else if (e.kind === "ring") { e.o.scale.setScalar(1 + p * (e.grow || 4)); m.opacity = (1 - p) * (e.op || .9); }
+    else if (e.kind === "pop") { const q = Math.min(1, p * 6); e.o.position.y = e.y0 + p * .9; e.o.scale.copy(e.sc).multiplyScalar(.6 + .4 * (q < 1 ? q * 1.15 : 1)); m.opacity = p > .7 ? 1 - (p - .7) / .3 : 1; }
     else { const s = p < .15 ? p / .15 : 1; e.o.scale.set(s, 1, s); m.opacity = (p < .15 ? p / .15 : 1 - (p - .15) / .85) * .75; e.o.rotation.y += dt * .8; }
   }
+}
+/* ===================== 행동 연출 (v1.31) =====================
+   fxBurst: 물방울 · 동전 · 흙 같은 알갱이 / fxRing: 물결 고리 / fxPop: 머리 위로 떠오르는 글자 / fxFn: 직접 움직이는 연출 */
+function fxBurst(x, y, z, o) {
+  if (!T3 || !scene) return;
+  o = o || {}; const n = o.n || 20, now = performance.now() / 1000;
+  const pos = new Float32Array(n * 3), vel = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, sp = (o.spd || 1.5) * (.35 + Math.random() * .8);
+    pos.set([x + (Math.random() - .5) * (o.spread || .2), y, z + (Math.random() - .5) * (o.spread || .2)], i * 3);
+    vel.set([Math.cos(a) * sp, (o.up || 2.5) * (.55 + Math.random() * .7), Math.sin(a) * sp], i * 3);
+  }
+  const geo = new T3.BufferGeometry(); geo.setAttribute("position", new T3.BufferAttribute(pos, 3));
+  const pm = new T3.PointsMaterial({ size: o.size || .18, map: sparkTex(), color: o.col == null ? 0xe9f8ff : o.col, transparent: true, depthWrite: false, blending: o.normal ? T3.NormalBlending : T3.AdditiveBlending });
+  const pts = new T3.Points(geo, pm); scene.add(pts);
+  FX.push({ o: pts, kind: "pts", vel, t0: now, dur: o.dur || 1, g: o.g == null ? 6 : o.g, floor: o.floor == null ? -.2 : o.floor });
+}
+function fxRing(x, y, z, o) {
+  if (!T3 || !scene) return;
+  o = o || {};
+  const ring = new T3.Mesh(new T3.TorusGeometry(o.r || .35, o.th || .04, 6, 40), new T3.MeshBasicMaterial({ color: o.col == null ? 0xffffff : o.col, transparent: true, depthWrite: false }));
+  ring.rotation.x = Math.PI / 2; ring.position.set(x, y, z); scene.add(ring);
+  FX.push({ o: ring, kind: "ring", t0: performance.now() / 1000 + (o.delay || 0), dur: o.dur || 1.1, grow: o.grow || 3, op: o.op || .8 });
+}
+function fxPop(x, y, z, text, col, o) {
+  if (!T3 || !scene) return;
+  o = o || {}; const s = makeText(); scene.add(s);
+  const font = "800 " + (o.big ? 44 : 32) + "px 'IBM Plex Sans KR','Apple SD Gothic Neo',sans-serif", mg = fxPop.g || (fxPop.g = document.createElement("canvas").getContext("2d"));
+  mg.font = font; const cw = Math.ceil(mg.measureText(text).width) + 24, ch = o.big ? 64 : 48;
+  paintSprite(s, "pop|" + text + Math.random(), cw, ch, (g) => { g.font = font; g.textBaseline = "middle"; g.lineJoin = "round"; g.lineWidth = 7; g.strokeStyle = "rgba(20,24,30,.85)"; g.strokeText(text, 12, ch / 2 + 2); g.fillStyle = col || "#ffffff"; g.fillText(text, 12, ch / 2 + 2); }, o.big ? .55 : .38);
+  s.position.set(x, y, z);
+  FX.push({ o: s, kind: "pop", t0: performance.now() / 1000, dur: o.dur || 1.6, y0: y, sc: s.scale.clone() });
+}
+function fxFn(upd, dur, obj) { FX.push({ o: obj || null, kind: "fn", upd, t0: performance.now() / 1000, dur }); }
+const meChar = () => folks.get("me");
+function bobPos(F) { F = F || meChar(); return F && F.bob ? F.bob.position.clone() : null; }
+const headPos = () => ({ x: ME.x, y: 2.3, z: ME.z });
+// 행동마다 부르는 연출
+const ACT_FX = {
+  splash(p, big) { if (!p) return; const y = waveY(p.x, p.z, performance.now() / 1000) + .05; fxBurst(p.x, y, p.z, { n: big ? 34 : 16, spd: big ? 1.6 : 1, up: big ? 3.4 : 2.2, size: .16, dur: .9 }); fxRing(p.x, y + .02, p.z, { r: .3, grow: big ? 5 : 3 }); if (big) fxRing(p.x, y + .02, p.z, { r: .3, grow: 7, delay: .18 }); },
+  bite(p) { if (!p) return; const y = waveY(p.x, p.z, performance.now() / 1000) + .05; fxBurst(p.x, y, p.z, { n: 10, spd: .7, up: 1.6, size: .13, dur: .7 }); fxRing(p.x, y + .02, p.z, { r: .25, grow: 4, dur: .8 }); },
+  hook(p) { S.jerkAt = performance.now(); if (p) { const y = waveY(p.x, p.z, performance.now() / 1000) + .05; fxBurst(p.x, y, p.z, { n: 22, spd: 1.3, up: 3, size: .16, dur: .9 }); } fxPop(ME.x, 2.6, ME.z, "챔질!", "#ffe27a"); },
+  miss(p) { if (p) { const y = waveY(p.x, p.z, performance.now() / 1000) + .05; fxBurst(p.x, y, p.z, { n: 12, spd: 1.1, up: 1.8, size: .14, dur: .8 }); } fxPop(ME.x, 2.5, ME.z, "놓쳤다…", "#b9d3e6"); S.missAt = performance.now(); },
+  sell(sum) { fxBurst(ME.x, 1.6, ME.z, { n: 26, col: 0xffd34d, spd: 1.4, up: 3.4, size: .2, dur: 1.2, floor: .05 }); fxPop(ME.x, 2.6, ME.z, "+" + won(sum), "#ffd84d", { big: true, dur: 2 }); },
+  pay(amt) { fxPop(ME.x, 2.5, ME.z, "-" + won(amt), "#ffb08a"); },
+  eat(d) { const c = TIER_HEX[d.tier || 0] || 0xff8fb0; fxBurst(ME.x, 1.5, ME.z, { n: 18, col: c, spd: .8, up: 2.2, g: 1.5, size: .2, dur: 1.4 }); fxPop(ME.x, 2.5, ME.z, "😋 냠냠", "#ffe3ef"); },
+  level(lv) { fxBurst(ME.x, .6, ME.z, { n: 60, col: 0xffd84d, spd: 2.2, up: 4.6, size: .24, dur: 1.8, floor: .05 }); fxRing(ME.x, .12, ME.z, { r: .6, th: .07, col: 0xffd84d, grow: 5, dur: 1.4 }); fxPop(ME.x, 2.8, ME.z, "LEVEL UP! Lv." + lv, "#ffd84d", { big: true, dur: 2.6 }); },
+  dig(x, z, good) { fxBurst(x, .05, z, { n: good ? 22 : 12, col: 0x7a5a3a, normal: true, spd: 1, up: 2.4, size: .14, dur: .8, floor: -.3 }); if (good) fxBurst(x, .2, z, { n: 14, col: 0xfff2b0, spd: .8, up: 2.6, size: .2, dur: 1.2 }); },
+  quest() { fxBurst(ME.x, 1.8, ME.z, { n: 24, col: 0x8affc1, spd: 1.2, up: 2.8, size: .2, dur: 1.3 }); fxPop(ME.x, 2.7, ME.z, "✔ 의뢰 완료!", "#8affc1", { big: true }); },
+};
+const TIER_HEX = [0xdfe6ea, 0x7ddc8f, 0x6fd0ff, 0xb98aff, 0xffc83a, 0xff7ad9];
+
+/* ---------- 대물 수면 돌파 (영웅 이상) ----------
+   잡기에 성공하면 바로 올라오지 않고: ① 쿠구구구 — 물밑 그림자 · 물결 · 거품 · 화면 흔들림 · 낮은 울림
+   ② 파앙! — 물기둥과 함께 물고기가 하늘로 솟구쳐 잠깐 느려지고(슬로 모션) ③ 내 품으로 날아와 들어 올려요 */
+let BREACH = null;
+const BREACH_RUMBLE = [0, 0, 0, 2.3, 2.8, 3.3], BREACH_AIR = 1.7;
+function startBreach(r, perfect) {
+  const F = meChar(), bp = (REEL.fx != null ? { x: REEL.fx, z: REEL.fz } : null) || bobPos(F) || { x: ME.x - 6, z: ME.z };
+  const tier = r.f.tier, t0 = performance.now() / 1000;
+  S.phase = "reel"; S.phaseEnd = Date.now() + 60000;   // 연출 동안 낚시 시간은 멈춤
+  const B = BREACH = { r, perfect, tier, x: bp.x, z: bp.z, t0, rum: BREACH_RUMBLE[tier] || 2.3, lastRing: 0, lastBub: 0, boom: false, mesh: null, shadow: null, w: 1.5 + tier * .5, wall: Date.now() };
+  // 물밑 그림자
+  const sh = new T3.Mesh(new T3.CircleGeometry(1, 28), new T3.MeshBasicMaterial({ color: 0x06121c, transparent: true, opacity: 0, depthWrite: false }));
+  sh.rotation.x = -Math.PI / 2; sh.position.set(B.x, waveY(B.x, B.z, t0) + .04, B.z); scene.add(sh); B.shadow = sh;
+  // 물고기 (3D 모델이 있으면 모델, 없으면 그림)
+  const md = FISH3D.get(r.f.id);
+  if (md) { B.mesh = new T3.Mesh(md.geo, md.mat); B.mesh.rotation.order = "YXZ"; B.mesh.scale.setScalar(B.w); }
+  else { B.mesh = new T3.Sprite(new T3.SpriteMaterial({ map: fishTexture(r.f), transparent: true })); B.mesh.scale.set(B.w * 1.4, B.w * .7, 1); B.sprite = true; }
+  B.mesh.visible = false; scene.add(B.mesh);
+  // 화면: 위아래 검은 띠 + 자막
+  const cine = $("cine"); cine.hidden = false; cine.className = "cine on t" + tier; document.body.classList.add("cinema");
+  $("cineCap").textContent = tier >= 5 ? "바다 전체가… 울리고 있어요" : tier >= 4 ? "수면 아래 거대한 그림자가…" : "뭔가 커다란 게 올라와요…";
+  $("cineSkip").onclick = () => finishBreach();
+  rumbleSound(B.rum, tier);
+  try { navigator.vibrate && navigator.vibrate([80, 60, 80, 60, 120, 60, 160]); } catch {}
+}
+function breachTick(t, dt) {
+  const B = BREACH; if (!B) return;
+  B.s = (B.s || 0) + Math.min(dt, 1 / 20);   // 느린 기기에서도 건너뛰지 않게 프레임 시간으로 진행
+  const now = performance.now() / 1000, s = B.s, wy = waveY(B.x, B.z, now);
+  if (s < B.rum) {   // ① 쿠구구구
+    const q = s / B.rum;
+    B.shadow.material.opacity = Math.min(.55, q * .7); B.shadow.scale.set((.8 + q * 1.6) * B.w * .9, (.4 + q * .8) * B.w * .9, 1);
+    B.shadow.position.set(B.x + Math.sin(s * 3) * .5 * (1 - q), wy + .04, B.z + Math.cos(s * 2.4) * .5 * (1 - q)); B.shadow.rotation.z = s * 1.3;
+    if (now - B.lastRing > .42 - q * .25) { B.lastRing = now; fxRing(B.x, wy + .03, B.z, { r: .4 + q, grow: 3 + q * 3, dur: 1.2, op: .6 }); }
+    if (now - B.lastBub > .09) { B.lastBub = now; fxBurst(B.x + (Math.random() - .5) * 2 * q, wy + .05, B.z + (Math.random() - .5) * 2 * q, { n: 3 + Math.round(q * 6), spd: .5, up: 1 + q * 2.5, size: .13, dur: .6 }); }
+    S.shake = Math.max(S.shake || 0, .03 + q * q * .16);
+    if (q > .55) $("cine").classList.add("hot");
+  } else {
+    if (!B.boom) {   // ② 파앙!
+      B.boom = true; B.shadow.visible = false; B.mesh.visible = true;
+      $("cineCap").textContent = "파앙!"; $("cine").classList.add("boom"); $("cineFlash").classList.remove("go"); void $("cineFlash").offsetWidth; $("cineFlash").classList.add("go");
+      const col = FX_COL[B.tier];
+      fxBurst(B.x, wy, B.z, { n: 160, spd: 2.6, up: 9 + B.tier, size: .3, dur: 2.2, spread: 1.2 });
+      fxBurst(B.x, wy, B.z, { n: 60, col, spd: 3.5, up: 6, size: .28, dur: 1.8, spread: .8 });
+      for (let k = 0; k < 3; k++) fxRing(B.x, wy + .03, B.z, { r: .6, th: .08, grow: 7 + k * 3, dur: 1.6 + k * .3, delay: k * .15 });
+      S.shake = .55; boomSound(B.tier); sfx("splash", 1);
+      try { navigator.vibrate && navigator.vibrate([200, 40, 90]); } catch {}
+    }
+    // 하늘로 솟구쳤다가(정점에서 슬로) 내 쪽으로
+    const a = s - B.rum, A = BREACH_AIR, slow = (u) => u < .35 ? u / .35 * .45 : u < .65 ? .45 + (u - .35) / .3 * .15 : .6 + (u - .65) / .35 * .4;   // 정점 근처에서 느리게
+    const u = clamp(a / A, 0, 1), e = slow(u), H = 3.4 + B.tier * .7;
+    const tx = ME.x + (B.x - ME.x) * .45, tz = ME.z + (B.z - ME.z) * .45;
+    const px = B.x + (tx - B.x) * e, pz = B.z + (tz - B.z) * e, py = wy + 4 * H * e * (1 - e) + (2.4 - wy) * e * e;
+    B.mesh.position.set(px, py, pz); B.last = { x: px, y: py, z: pz };
+    const vy = 4 * H * (1 - 2 * e), vh = Math.hypot(tx - B.x, tz - B.z) + .01;
+    if (B.sprite) B.mesh.material.rotation = Math.atan2(vy, vh) * .6 + Math.sin(a * 6) * .2;
+    else { B.mesh.rotation.y = Math.atan2(tx - B.x, tz - B.z); B.mesh.rotation.x = -Math.atan2(vy, vh * 3); B.mesh.rotation.z = Math.sin(a * 5) * .5; }
+    if (Math.random() < .6) fxBurst(px, py, pz, { n: 3, spd: .4, up: .2, size: .14, dur: .7, spread: B.w * .4 });   // 떨어지는 물방울
+    if (u >= 1) finishBreach();
+  }
+}
+function finishBreach() {
+  const B = BREACH; if (!B) return; BREACH = null;
+  scene.remove(B.shadow); B.shadow.geometry.dispose(); B.shadow.material.dispose();
+  scene.remove(B.mesh); if (B.sprite) B.mesh.material.dispose();
+  const cine = $("cine"); cine.className = "cine"; document.body.classList.remove("cinema"); setTimeout(() => { if (!BREACH) cine.hidden = true; }, 450);
+  S.shake = Math.max(S.shake || 0, .15);
+  S.catchFrom = B.last || { x: B.x, y: 1, z: B.z };
+  try { landFish(B.r, B.perfect, false); } catch (e) { console.warn("landFish", e); setPhase("miss", MISS_MS); }
+}
+// 소리: 낮게 깔리는 울림 → 쾅
+function rumbleSound(dur, tier) {
+  if (!AC || !S.sound) return;
+  try {
+    const t = AC.currentTime, len = Math.floor(AC.sampleRate * dur), buf = AC.createBuffer(1, len, AC.sampleRate), d = buf.getChannelData(0);
+    let l = 0; for (let i = 0; i < len; i++) { l = (l + .04 * (Math.random() * 2 - 1)) / 1.04; d[i] = l * 6; }
+    const src = AC.createBufferSource(); src.buffer = buf;
+    const lp = AC.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 140 + tier * 10;
+    const g = AC.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.9, t + dur * .95); g.gain.linearRampToValueAtTime(0, t + dur);
+    const o = AC.createOscillator(); o.type = "sine"; o.frequency.setValueAtTime(38, t); o.frequency.linearRampToValueAtTime(55, t + dur);
+    const og = AC.createGain(); og.gain.setValueAtTime(.0001, t); og.gain.exponentialRampToValueAtTime(.35, t + dur * .9); og.gain.linearRampToValueAtTime(0, t + dur);
+    src.connect(lp).connect(g).connect(AC.destination); o.connect(og).connect(AC.destination); src.start(t); o.start(t); o.stop(t + dur);
+  } catch {}
+}
+function boomSound(tier) {
+  if (!AC || !S.sound) return;
+  try {
+    const t = AC.currentTime, len = Math.floor(AC.sampleRate * 1.2), buf = AC.createBuffer(1, len, AC.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    const src = AC.createBufferSource(); src.buffer = buf; const bp = AC.createBiquadFilter(); bp.type = "lowpass"; bp.frequency.setValueAtTime(3000, t); bp.frequency.exponentialRampToValueAtTime(300, t + 1);
+    const g = AC.createGain(); g.gain.value = .8; src.connect(bp).connect(g).connect(AC.destination); src.start(t);
+    const o = AC.createOscillator(); o.type = "sine"; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(32, t + .5);
+    const og = AC.createGain(); og.gain.setValueAtTime(.9, t); og.gain.exponentialRampToValueAtTime(.0001, t + .7); o.connect(og).connect(AC.destination); o.start(t); o.stop(t + .8);
+  } catch {}
 }
 // 시장 길을 오가는 손님 캐릭터 (장사 중인 노점 앞에 멈춰 구경해요)
 const SHOPPERS = [];
@@ -6249,6 +6428,8 @@ function updateChar(F, f, t, dt, now) {
   if (f.st === "coop") { F.hands[0].position.set(-.16, .62, .44); F.hands[1].position.set(.18, .7, .5); }
   F.rig.rotation.x = 0;
   if (runAnim) { F.rig.rotation.x = .17; F.rig.position.y = Math.abs(Math.sin(F.walkT)) * .13; const sw2 = Math.sin(F.walkT); F.hands[0].position.set(-.42, .5, .08 - sw2 * .22); F.hands[1].position.set(.42, .5, .08 + sw2 * .22); }
+  F.head.rotation.x = f.phase === "miss" && fishing ? .32 : 0;   // 놓치면 고개를 푹 숙여요
+  if (f.phase === "miss" && fishing) F.rig.rotation.x = .16;
   if (f.st === "dig") { const q = Math.sin(t * 11); F.rig.rotation.x = .38 + q * .08; F.hands[0].position.set(-.16, .32 + q * .08, .5); F.hands[1].position.set(.16, .32 + q * .08, .5); }
   F.head.rotation.z = Math.sin(t * .9 + F.px) * .05;
   F.pivot.visible = !!fishing && f.phase !== "idle";
@@ -6263,6 +6444,8 @@ function updateChar(F, f, t, dt, now) {
   const rx = f.phase === "ready" ? .3 : f.phase === "charge" ? .3 - 1.4 * chP : targetRx;
   F.pivot.rotation.x += (rx - F.pivot.rotation.x) * (f.phase === "cast" ? .42 : .15);
   if (f.phase === "charge") F.rig.rotation.x = -.15 * chP;
+  if (f.me && S.jerkAt && performance.now() - S.jerkAt < 140) { F.pivot.rotation.x = -.55; F.rig.rotation.x = -.12; }   // 챔질: 낚싯대를 확 들어 올림
+  if (f.me && BREACH && !BREACH.boom) F.pivot.rotation.x = .35 + Math.sin(t * 30) * .08 * (1 + (BREACH.s || 0));   // 쿠구구: 낚싯대가 덜덜
   F.g.updateMatrixWorld(true);
   // 찌·줄
   const showLine = fishing && f.phase !== "idle";
@@ -6287,7 +6470,7 @@ function updateChar(F, f, t, dt, now) {
       } else { _v2.y -= .45; _v2.x += Math.sin(t * 9) * .6; _v2.z += Math.cos(t * 7) * .4; }
     }
     F.bob.visible = f.phase !== "catch"; F.bob.position.copy(_v2);
-    if (f.phase === "catch") _v2.set(_v.x, _v.y - 1.2, _v.z);
+    if (f.phase === "catch") _v2.set(_v.x, _v.y - .35, _v.z);
     const pos = F.line.geometry.attributes.position.array;
     const sag = fighting || f.phase === "ready" || f.phase === "charge" ? 0.05 : 0.9;
     for (let i = 0; i < 24; i++) {
@@ -6319,7 +6502,22 @@ function updateChar(F, f, t, dt, now) {
     if (f.me && S.show && now - S.show.at < 12000) { const it = S.show.item; ci = { n: it.name, t: it.tier, s: it.size, f: findFish(it.fishId), at: S.show.at }; holding = true; }
     else if (!f.me && f.show && seen && now - seen.sAt < 12000) { ci = { n: str(f.show.n, 12), t: clamp(Math.floor(Number(f.show.t) || 0), 0, 5), s: Number(f.show.s) || 0, f: typeof f.show.id === "string" ? findFish(f.show.id) : null, at: seen.sAt }; holding = true; }
   }
-  if (ci && !holding && F.fxAt !== ci.at) { F.fxAt = ci.at; spawnCatchFx(F.px, F.pz, ci.t, !!ci.f && ci.f.id === todayFish()); }   // 낚은 순간 한 번
+  if (ci && !holding && F.fxAt !== ci.at) { F.fxAt = ci.at; F.catchFrom = (f.me && S.lastCatch && S.lastCatch.from) || (F.bob ? F.bob.position.clone() : null); F.fxPending = true; }
+  // 잡은 물고기: 물에서 포물선을 그리며 날아와(0.75초) → 두 손으로 머리 위에 번쩍 들어 올려요 (희귀 이상은 폴짝)
+  let cpose = null;
+  if (ci && !holding) {
+    const u = (now - ci.at) / 750, fr = F.catchFrom;
+    if (u < 1 && fr) { const e = 1 - Math.pow(1 - u, 2), hx = F.px, hz = F.pz, hy = 2.1;
+      cpose = { arc: true, u, x: fr.x + (hx - fr.x) * e, y: fr.y + (hy - fr.y) * e + Math.sin(u * Math.PI) * 2.2, z: fr.z + (hz - fr.z) * e }; }
+    else {
+      if (F.fxPending) { F.fxPending = false; spawnCatchFx(F.px, F.pz, ci.t, !!ci.f && ci.f.id === todayFish()); }   // 품에 안기는 순간 반짝
+      const q = clamp((now - ci.at - 750) / 1000, 0, 1);
+      cpose = { arc: false, x: F.px, y: 2.05 + Math.sin(t * 3) * .05, z: F.pz };
+      F.hands[0].position.set(-.3, 1.55, .1); F.hands[1].position.set(.3, 1.55, .1);
+      if (ci.t >= 2 && q < 1) F.rig.position.y += Math.abs(Math.sin(q * Math.PI * 3)) * .22 * (1 - q);
+      if (fishing) { F.feet[0].position.y = F.feet[1].position.y = -.12; }
+    }
+  }
   let y = 2.2;
   if (ci) {
     const md = ci.f && FISH3D.get(ci.f.id);
@@ -6332,9 +6530,8 @@ function updateChar(F, f, t, dt, now) {
         F.hands[0].position.set(-.3, 1.55, .1); F.hands[1].position.set(.3, 1.55, .1);
         y = 2.35 + w * .3;
       } else {
-        F.tip.getWorldPosition(_v);
-        const lift = clamp((now - ci.at) / 600, 0, 1);
-        F.model.position.set(_v.x, _v.y - 1.2 - w * .5 - (1 - lift) * 2.5, _v.z); F.model.rotation.set(-Math.PI / 2, t * 2.2, Math.sin(t * 9) * .3);
+        if (cpose && cpose.arc) { F.model.position.set(cpose.x, cpose.y, cpose.z); F.model.rotation.set(-Math.PI / 2 + cpose.u * Math.PI * 2, t * 2, Math.sin(t * 14) * .4); }
+        else { F.model.position.set(cpose.x, cpose.y, cpose.z); F.model.rotation.set(0, t * .8, Math.sin(t * 7) * .08); y = 2.35 + w * .3; }
       }
     } else if (ci.f) {
       if (F.model) F.model.visible = false;
@@ -6346,9 +6543,8 @@ function updateChar(F, f, t, dt, now) {
         F.hands[0].position.set(-.3, 1.55, .1); F.hands[1].position.set(.3, 1.55, .1);
         y = 2.25 + w / 2;
       } else {
-        F.tip.getWorldPosition(_v);
-        const lift = clamp((now - ci.at) / 600, 0, 1);
-        F.fish.position.set(_v.x, _v.y - 1.2 - w / 4 - (1 - lift) * 2.5, _v.z); F.fish.material.rotation = Math.sin(t * 9) * .35 + 1.2;
+        if (cpose && cpose.arc) { F.fish.position.set(cpose.x, cpose.y, cpose.z); F.fish.material.rotation = cpose.u * Math.PI * 2; }
+        else { F.fish.position.set(cpose.x, cpose.y + w / 4, cpose.z); F.fish.material.rotation = Math.sin(t * 2) * .12; y = 2.25 + w / 2; }
       }
     } else { F.fish.visible = false; if (F.model) F.model.visible = false; }
     setText(F.clabel, (holding ? "자랑 · " : "") + ci.n + " " + fmtSize(ci.s), cssVarCache.tiers[ci.t], "#ffffff", .3, true);
@@ -6439,7 +6635,7 @@ function loop3D(ms) {
   seaMat.uniforms.sunDir.value.copy(_v2); skyMat.uniforms.sunDir.value.copy(_v2);
   for (const b of buoys) { b.position.y = waveY(b.position.x, b.position.z, t) - .1; b.rotation.z = Math.sin(t + b.position.x) * .12; }
   for (const s of SWING) s.g.rotation.x = Math.sin(t * 1.4 + s.ph) * .07;
-  updateLife(dt, t); homeTick(t); npcShopTick(t, dt); townTick(t, dt); updateFx(t, dt);
+  updateLife(dt, t); homeTick(t); npcShopTick(t, dt); townTick(t, dt); updateFx(t, dt); breachTick(t, dt);
   SWIM_T.value = t; updateJumps(dt, t); updateTide3D(dt); updateDust(dt);
   updateBoat3D(t, now);
   if (onBoat()) { const bs = SEAT[ME.seat]; ME.x = bs.x; ME.z = bs.z; ME.ry = bs.ry; }
@@ -6484,13 +6680,17 @@ function loop3D(ms) {
   } else {
   if (cam.yawGoal !== null) { cam.yaw = lerpAngle(cam.yaw, cam.yawGoal, Math.min(1, dt * 3)); if (Math.abs(((cam.yawGoal - cam.yaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI) < .01) cam.yawGoal = null; }
   if (S.mung) cam.yaw += dt * .04;
-  cam.t.lerp(_v.set(ME.x, 1.1, ME.z), 1 - Math.pow(.002, dt));
-  const pitch = S.mung ? Math.max(.15, cam.pitch * .6) : atHome() ? Math.max(.72, cam.pitch) : cam.pitch;
+  _v.set(ME.x, 1.1, ME.z);
+  if (BREACH) { const B = BREACH, m = B.boom ? .55 : .45; _v.set(ME.x + (B.x - ME.x) * m, B.boom && B.last ? Math.max(1.1, B.last.y * .7) : 1.1, ME.z + (B.z - ME.z) * m); }   // 대물 연출: 물고기 쪽을 크게 보여 줌
+  cam.t.lerp(_v, 1 - Math.pow(BREACH ? .05 : .002, dt));
+  const pitch0 = S.mung ? Math.max(.15, cam.pitch * .6) : atHome() ? Math.max(.72, cam.pitch) : cam.pitch, pitch = pitch0 + ((.16) - pitch0) * (cam.bz || 0);   // 대물 연출: 낮은 각도로 올려다봄
   if (S.meMenu && ME.moving) closeMeMenu();
   cam.zk = (cam.zk || 0) + ((S.meMenu ? 1 : 0) - (cam.zk || 0)) * Math.min(1, dt * 6);
-  const cd = (atHome() ? Math.min(cam.dist, 12) : cam.dist) * (1 - .3 * cam.zk);
+  cam.bz = (cam.bz || 0) + ((BREACH ? 1 : 0) - (cam.bz || 0)) * Math.min(1, dt * 2);
+  const cd = (atHome() ? Math.min(cam.dist, 12) : cam.dist) * (1 - .3 * cam.zk) + cam.bz * Math.max(3, 15 - cam.dist);
   camera.position.set(cam.t.x + Math.sin(cam.yaw) * Math.cos(pitch) * cd, cam.t.y + Math.sin(pitch) * cd, cam.t.z + Math.cos(cam.yaw) * Math.cos(pitch) * cd);
   if (camera.position.y < .6) camera.position.y = .6;
+  if (S.shake > .002) { camera.position.x += (Math.random() - .5) * S.shake; camera.position.y += (Math.random() - .5) * S.shake; camera.position.z += (Math.random() - .5) * S.shake; S.shake *= Math.pow(.015, dt); }
   camera.lookAt(cam.t);
   }
   if (POST) { R.setRenderTarget(POST.rt); R.render(scene, camera); R.setRenderTarget(null); R.render(POST.scene, POST.cam); }
@@ -6991,7 +7191,7 @@ function sellItems(pred) {
   let sum = 0, n = 0;
   P.bag = P.bag.filter(it => { if (pred(it)) { sum += fishSell(it); n++; return false; } return true; });
   if (!n) { toast("팔 물고기가 없어요"); return; }
-  P.gold += sum; stat("soldGold", sum); markDirty(); refreshSheet(); questProgress("sell", sum); sfx("coins", .5);
+  P.gold += sum; stat("soldGold", sum); markDirty(); refreshSheet(); questProgress("sell", sum); sfx("coins", .5); try { ACT_FX.sell(sum); } catch {}
   toast(n + "마리를 팔아 " + won(sum) + "을 받았어요");
 }
 function cutSashimi(item) {
@@ -7013,7 +7213,7 @@ function cutMany(items) {
 function eatDish(d) {
   P.dishes = P.dishes.filter(x => x.id !== d.id); stat("eat");
   if (P.listing[d.id]) { delete P.listing[d.id]; syncMenu(); }
-  applyBuff(d.buff); refreshSheet();
+  applyBuff(d.buff); refreshSheet(); try { ACT_FX.eat(d); } catch {}
   toast("「" + d.name + "」를 먹었어요 · " + buffText(d.buff) + " (" + d.buff.min + "분)");
 }
 SHEETS.bag = (body) => {

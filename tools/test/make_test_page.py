@@ -13,7 +13,7 @@ s = (root / "index.html").read_text(encoding="utf8")
 # three.js 는 vendor/ 의 로컬 사본을 써요 (네트워크가 막힌 환경에서도 돌도록)
 s = s.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>', '<script src="mockdb.js"></script><script src="three.min.js"></script>')
 s = s.replace('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>', '<script src="GLTFLoader.js"></script>')
-hooks = "S,P:()=>P,ME,cam,open:openSheet,setP:(f)=>f(P),sitNow,claimAttend,claimRef,sendFeedback,boatQuit,myCode,loadRanks,pushRank,setJob,cutSashimi,goOffice,enterHouse,leaveHouse,buyHouse,decoTap,BUILTIN,startReel,REEL,fightStep,endReel,openStall,listDish,npcVisit,SHOPPERS,dishFishValue,npcShopTick,spawnCatchFx,FX,todayFish,fishMul,fishSell,sellItems,landFish,simRate,gearStats,simRates,curGear,serveGuest,guestTick,listDishes,buyShopUpg,dishPrice,cutMany,waitMs,tick,TOWNFOLK,TOWN_NODES,chars:()=>CHARS,townPlan,townPos,walkable,scene:()=>scene,T3:()=>T3"
+hooks = "S,P:()=>P,ME,cam,open:openSheet,setP:(f)=>f(P),sitNow,claimAttend,claimRef,sendFeedback,boatQuit,myCode,loadRanks,pushRank,setJob,cutSashimi,goOffice,enterHouse,leaveHouse,buyHouse,decoTap,BUILTIN,startReel,REEL,fightStep,endReel,openStall,listDish,npcVisit,SHOPPERS,dishFishValue,npcShopTick,spawnCatchFx,FX,todayFish,fishMul,fishSell,sellItems,landFish,simRate,gearStats,simRates,curGear,serveGuest,guestTick,listDishes,buyShopUpg,dishPrice,cutMany,waitMs,tick,TOWNFOLK,TOWN_NODES,chars:()=>CHARS,townPlan,townPos,walkable,scene:()=>scene,T3:()=>T3,startBreach,breach:()=>BREACH,ACT_FX,curPrice,missFish,hook,setPhase"
 i = s.rfind("\nboot();")
 assert i > 0, "boot() 호출을 찾지 못했어요"
 s = s[:i] + "\nwindow.T={" + hooks + "};boot();" + s[i + len("\nboot();"):]

@@ -111,6 +111,9 @@ node tools/test/fight_sim.js
 - **마을 사람들 `TOWNFOLK`** (v1.30): `townTick` (`loop3D`에서 `npcShopTick` 다음). 주인 = 나 + 마을에 있는 `otherPeers(true)`(집 밖), 주인당 3명(키 `uid#0~2`, 최대 8명 = 24 NPC). `townPlan(key)`가 `mixHash`로 역할(`TOWN_ROLES`) · 길(`TOWN_NODES`/`TOWN_EDGES` 그래프 48칸 + 시작점 복귀)을 정하고, `townPos(plan, Date.now()/1000)`가 시각만으로 위치를 내서 모든 화면이 같아요(통신 없음). 새 구역을 만들면 노드 · 간선을 추가해요(`STOP_NODES`는 쉬어 가는 곳).
 - **겹침 방지** (v1.30): `rebuildChars()`가 매 프레임 `CHARS`(다른 사람 · `TOWNFOLK` · `SHOPPERS`의 보이는 위치)를 모아요. `sepPush(self,x,z,R)`로 보기 위치 오프셋(`sx/sz`)을 부드럽게 줘요(데이터 좌표는 그대로). 나는 `stepMove`에서 `charBlocked`로 가까워지는 이동만 막고 ±40°/75° 옆걸음을 해요. 앉은 사람 · 노점 의자는 제외.
 - **낚시 허점 막기** (v1.30): `WAIT_MIN`(입질 최소 3초), 자동 모드에서 `AUTO_MAX_TIER`(3=영웅) 이상은 도망, `document.hidden`이면 일시정지, `AUTO_IDLE_MS`(15분 무입력) → `autoIdleStop()`.
+- **행동 연출** (v1.31): `fxBurst` · `fxRing` · `fxPop` · `fxFn`이 `FX` 배열에 들어가고 `updateFx`가 움직여요. 행동별 묶음은 `ACT_FX`(splash · bite · hook · miss · sell · eat · level · dig · quest). 잡은 물고기 포물선 → 머리 위 들기는 `updateChar`의 `cpose`(`ci.at` 기준, 다른 사람도 같은 모습).
+- **대물 수면 돌파** (v1.31): `endReel(ok)`에서 영웅 이상이면 `startBreach` → `breachTick`(프레임 시간 `B.s`로 진행, 느린 기기도 건너뛰지 않음) → `finishBreach` → `landFish`. 진행 중엔 `S.phase = "reel"`이라 `tickInner`가 쉬고, 25초 넘으면 강제로 끝내요. 화면 띠는 `#cine`, 카메라는 `cam.bz` · `S.shake`.
+- **물고기 값** (v1.31): `TIERS[].base` 25/75/300/1400/6000/22000. 팔 때 `curPrice(it)`로 예전 물고기도 새 값 이상으로 쳐 줘요.
   - 잠긴 기능의 도전과제(집 · `job1`)는 `ACH`에서 빠져요.
 - **돈이 과하게 풀리지 않게** (v1.23.0): 공짜 돈(출석 · 보물 상자 · 초대 · 예금 이자 · 도전과제)은 낚시 벌이(초반 한 시간 ≈ 27만원)를 넘지 않게 맞췄어요. 새 보상을 넣을 때도 이 기준으로 봐요.
 - **물고기 시세** (v1.26): 물고기를 파는 곳은 모두 `fishSell(item)`을 써요(= `sellValue(price × fishMul(fishId))`). 새로 파는 곳을 만들면 이걸 써요. 시세는 `rawFishMul`(날짜 + 물고기 해시), 오늘의 생선은 `todayFish()` ×1.5. 조개 · 회(노점)는 시세와 따로예요.
