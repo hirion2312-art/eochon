@@ -114,6 +114,8 @@ node tools/test/fight_sim.js
 - **행동 연출** (v1.31): `fxBurst` · `fxRing` · `fxPop` · `fxFn`이 `FX` 배열에 들어가고 `updateFx`가 움직여요. 행동별 묶음은 `ACT_FX`(splash · bite · hook · miss · sell · eat · level · dig · quest). 잡은 물고기 포물선 → 머리 위 들기는 `updateChar`의 `cpose`(`ci.at` 기준, 다른 사람도 같은 모습).
 - **대물 수면 돌파** (v1.31): `endReel(ok)`에서 영웅 이상이면 `startBreach` → `breachTick`(프레임 시간 `B.s`로 진행, 느린 기기도 건너뛰지 않음) → `finishBreach` → `landFish`. 진행 중엔 `S.phase = "reel"`이라 `tickInner`가 쉬고, 25초 넘으면 강제로 끝내요. 화면 띠는 `#cine`, 카메라는 `cam.bz` · `S.shake`.
 - **물고기 값** (v1.31): `TIERS[].base` 25/75/300/1400/6000/22000. 팔 때 `curPrice(it)`로 예전 물고기도 새 값 이상으로 쳐 줘요.
+- **퀵바** (v1.32): `QUICK_ITEMS`(넣을 수 있는 칸) · `P.quick`(id 배열, 최대 `QUICK_MAX`=6) · `applyQuick()`가 `.dock` 버튼을 숨기고 CSS `order`로 정렬해요. 원래 있던 5개 버튼은 그대로 두고 `data-q`만 붙이고, 나머지는 `quickBtnFor`가 만들어요. 새 칸을 만들려면 `QUICK_ITEMS`에 `open`(시트) 또는 `run`과 `QSVG` 아이콘을 넣어요.
+- **초보 수첩 · 도움말** (v1.32): `GUIDE_STEPS`(done · go · reward), `P.guide`(받은 단계). 오른쪽 `#guideBtn`. 시트 머리의 `#sheetHelp`는 `TUTS["sheet_" + 이름]`이 있으면 보이고 `showHelp`로 그 카드를 다시 띄워요. 새 화면을 만들면 `TUTS`에 `sheet_이름` 설명을 꼭 넣어요.
   - 잠긴 기능의 도전과제(집 · `job1`)는 `ACH`에서 빠져요.
 - **돈이 과하게 풀리지 않게** (v1.23.0): 공짜 돈(출석 · 보물 상자 · 초대 · 예금 이자 · 도전과제)은 낚시 벌이(초반 한 시간 ≈ 27만원)를 넘지 않게 맞췄어요. 새 보상을 넣을 때도 이 기준으로 봐요.
 - **물고기 시세** (v1.26): 물고기를 파는 곳은 모두 `fishSell(item)`을 써요(= `sellValue(price × fishMul(fishId))`). 새로 파는 곳을 만들면 이걸 써요. 시세는 `rawFishMul`(날짜 + 물고기 해시), 오늘의 생선은 `todayFish()` ×1.5. 조개 · 회(노점)는 시세와 따로예요.

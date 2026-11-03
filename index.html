@@ -668,6 +668,53 @@ body.cinema #hint,body.cinema #standBtn,body.cinema #castBtn,body.cinema .toasts
 .cine-flash.go{animation:cineFlash .9s ease-out}
 @keyframes cineFlash{0%{opacity:.95}100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.cine.hot .cine-cap,.cine.boom .cine-cap{animation:none}}
+/* ===== 퀵바 꾸미기 · 초보 수첩 · 도움말 (v1.32) ===== */
+.sheet header .help{flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line,#d8d0c4);background:var(--card,#fff);color:var(--ink,#1d2a33);font:800 16px/1 inherit;cursor:pointer;margin-right:6px}
+.sheet header .help:hover{background:#fff4d6;border-color:#e2b43a}
+.dock .qbadge{position:absolute;top:2px;right:6px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#e2522c;color:#fff;font-size:10px;font-weight:800;line-height:16px}
+#guideBtn{border:1.5px solid rgba(255,216,77,.55);background:linear-gradient(180deg,rgba(255,216,77,.18),rgba(255,216,77,.06));color:var(--hud-ink);border-radius:12px;padding:7px 10px;font-size:12.5px;text-align:left;cursor:pointer;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#guideBtn.hot{animation:gdPulse 1.4s ease-in-out infinite;border-color:#ffd84d}
+#guideBtn #guideTx{color:#ffe08a;font-weight:700}
+@keyframes gdPulse{50%{box-shadow:0 0 0 4px rgba(255,216,77,.28)}}
+.qb-help{background:#fff8e6;border:1px solid #f0dcaa;border-radius:14px;padding:12px 14px;font-size:13.5px;color:#4a3a1a}
+.qb-help ol{margin:6px 0 0;padding-left:20px;line-height:1.6}
+.qb-prev{display:flex;gap:6px;padding:10px;border-radius:20px;background:#1d2a33;overflow-x:auto}
+.qb-slot{flex:1 0 74px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:14px;background:rgba(255,255,255,.08);color:#f4efe6;font-size:12px}
+.qb-slot .ico{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.qb-slot.empty{border:1.5px dashed rgba(255,255,255,.28);background:none;color:rgba(255,255,255,.45);justify-content:center}
+.qb-slot.fixed{background:rgba(255,216,77,.16);color:#ffe08a}
+.qb-slot small{font-size:10px;opacity:.7}
+.qb-ctl{display:flex;gap:2px}
+.qb-ctl button{width:22px;height:22px;border-radius:7px;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:10px;cursor:pointer;padding:0}
+.qb-ctl button.x{background:rgba(226,82,44,.75)}
+.qb-ctl button:disabled{opacity:.25;cursor:default}
+.qb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.qb-item{display:flex;align-items:center;gap:10px;text-align:left;padding:10px 12px;border-radius:14px;border:1.5px solid var(--line,#e2dacd);background:var(--card,#fff);cursor:pointer;color:inherit}
+.qb-item .qb-ico{flex:none;width:38px;height:38px;border-radius:12px;background:#eef3f6;display:grid;place-items:center}
+.qb-item .ico{width:22px;height:22px;stroke:#1d2a33;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.qb-item b{display:block;font-size:14px}.qb-item small{display:block;font-size:12px;color:var(--muted,#6b7780);margin-top:1px}
+.qb-item .qb-tag{flex:none;font-size:12px;font-weight:700;color:#1d6fb8}
+.qb-item.on{border-color:#2f8f5b;background:#f0faf3}.qb-item.on .qb-tag{color:#2f8f5b}
+.qb-item:disabled{opacity:.55;cursor:not-allowed}
+.gd-bar{height:10px;border-radius:5px;background:#ece5d8;overflow:hidden;margin-bottom:12px}.gd-bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd84d,#f2a93b);border-radius:5px;transition:width .5s}
+.gd-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.gd-step{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--card,#fff);border:1.5px solid var(--line,#e8e1d4)}
+.gd-step .gd-n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#ece5d8;font-weight:800;font-size:13px;color:#6b5a3a}
+.gd-step .gd-ico{font-size:22px;flex:none}
+.gd-step b{font-size:14.5px}.gd-step p{margin:4px 0 0;font-size:13px;line-height:1.55;color:var(--muted,#5f6a72)}
+.gd-step.now{border-color:#e2b43a;background:#fffaf0;box-shadow:0 2px 0 #f0dcaa}
+.gd-step.now .gd-n{background:#ffd84d;color:#3a2a10}
+.gd-step.ready{border-color:#2f8f5b;background:#f0faf3}.gd-step.ready .gd-n{background:#2f8f5b;color:#fff}
+.gd-step.got{opacity:.6}.gd-step.got .gd-n{background:#2f8f5b;color:#fff}
+.gd-step .btn{flex:none;white-space:nowrap}
+@media (min-width:821px){.dock[data-n="6"] button{min-width:50px;padding-left:6px;padding-right:6px}}
+.dock button>span:not(.badge):not(.cnt){white-space:nowrap}
+.gd-step .gd-tag{font-size:12px;font-weight:700;color:#2f8f5b}
+.gd-faq{display:flex;flex-direction:column;gap:6px}
+.gd-faq details{border-radius:12px;border:1px solid var(--line,#e8e1d4);background:var(--card,#fff);padding:10px 12px}
+.gd-faq summary{cursor:pointer;font-weight:700;font-size:14px}
+.gd-faq p{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--muted,#55606a)}
+@media (max-width:560px){.qb-grid{grid-template-columns:1fr}.gd-step{flex-wrap:wrap}.gd-step .btn{margin-left:36px}}
 /* ===== 인터페이스 개편 (v1.21) ===== */
 .fx-ex{position:sticky;top:-16px;z-index:3;margin:-16px -18px 0;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--line)}
 .fx-bench{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start}
@@ -1017,6 +1064,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
     <div class="big"><b id="caughtCount">0</b><span>마리 낚음</span></div>
     <div class="ln">가방 <b id="bagLine">0/40</b></div>
     <button id="baitChip" data-open="shop">미끼 · <span id="baitName">지렁이</span></button>
+    <button id="guideBtn" data-open="guide" hidden>📘 초보 수첩 · <span id="guideTx"></span></button>
     <button id="questBtn" data-open="quests">오늘의 의뢰 <b id="questCount">0/3</b></button>
     <button id="eventBtn" data-open="attend" hidden>🎁 출석 <b id="attendCount">0/7</b></button>
   </div>
@@ -1055,7 +1103,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 
 <div class="overlay" id="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-    <header><button class="back" id="sheetBack" hidden aria-label="뒤로">‹</button><div style="min-width:0;flex:1"><img id="sheetBan" class="shopban" alt="" hidden><h2 id="sheetTitle"></h2><div class="sub" id="sheetSub"></div></div><span class="goldchip" id="sheetGold" hidden></span><button class="close" id="sheetClose">닫기</button></header>
+    <header><button class="back" id="sheetBack" hidden aria-label="뒤로">‹</button><div style="min-width:0;flex:1"><img id="sheetBan" class="shopban" alt="" hidden><h2 id="sheetTitle"></h2><div class="sub" id="sheetSub"></div></div><span class="goldchip" id="sheetGold" hidden></span><button class="help" id="sheetHelp" hidden aria-label="이 화면 설명 보기" title="이 화면 설명 보기">?</button><button class="close" id="sheetClose">닫기</button></header>
     <div class="sbody" id="sheetBody"></div>
   </div>
 </div>
@@ -1066,7 +1114,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.31.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.32.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -1247,6 +1295,7 @@ function h(tag, attrs, ...kids) {
     if (v == null || v === false) continue;
     if (k === "class") el.className = v;
     else if (k === "text") el.textContent = v;
+    else if (k === "html") el.innerHTML = v;
     else if (k === "style") el.setAttribute("style", v);
     else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
     else el.setAttribute(k, v === true ? "" : v);
@@ -2841,7 +2890,7 @@ const BUILDINGS = [
   { id: "bait", name: "낚시 상점", z: 24, color: 0x6fa3c7, sheet: "shop" },
   { id: "release", name: "방류소", z: 12, color: 0xe2a35c, sheet: "studio" },
   { id: "face", name: "얼굴 공방", z: 0, color: 0xd88aa8, sheet: "face" },
-  { id: "sashimi", name: "회 센터", z: -12, color: 0x7fb59a, sheet: "sashimi" },
+  { id: "sashimi", name: "회 센터", short: "회센터", z: -12, color: 0x7fb59a, sheet: "sashimi" },
   { id: "clothes", name: "옷가게", z: -24, color: 0xe9a3b8, sheet: "clothes" },
   { id: "lotto", name: "행운 복권방", z: -36, color: 0xd8473a, sheet: "lotto" },
   { id: "bank", name: "낭만 은행", z: -48, color: 0x8aa3b8, sheet: "bank" },
@@ -6830,6 +6879,7 @@ function updateHud() {
   $("nick").textContent = P.nick;
   { const lv = myLv(), a = xpNeed(lv), b = xpNeed(lv + 1); $("lvChip").textContent = "Lv." + lv; $("xpFill").style.width = (lv >= LV_MAX ? 100 : clamp(((P.xp || 0) - a) / Math.max(1, b - a), 0, 1) * 100) + "%"; $("lvChip").parentNode.title = "낚시 Lv." + lv + " · 경험치 " + fmt(P.xp || 0) + (lv < LV_MAX ? " / " + fmt(b) : ""); }
   $("gold").textContent = won(P.gold);
+  if (typeof updateGuideChip === "function" && document.querySelector(".dock [data-q]")) updateGuideChip();
   { const eb = $("eventBtn"), show = !!P.attend && (P.attend.n < 7 || P.attend.last === kstDay()); eb.hidden = !show; eb.classList.toggle("hot", attendCan()); $("attendCount").textContent = P.attend.n + "/7"; }
   { const sg = $("sheetGold"); if (sg && !sg.hidden) sg.textContent = won(P.gold) + ""; }
   if (S.title) renderTitle();
@@ -6887,7 +6937,7 @@ function openSheet(name, arg, opt) {
   if (name === "clothes" && S.sheet !== "clothes") S.tryWear = null;
   S.sheet = name; S.sheetArg = arg;
   S.sheetStack = S.sheetStack.slice(-8); $("sheetBack").hidden = !S.sheetStack.length;
-  $("overlay").hidden = false;
+  $("overlay").hidden = false; $("sheetHelp").hidden = !TUTS["sheet_" + name];
   refreshSheet(true);
   $("sheetClose").focus();
   coach("sheet_" + name);
@@ -8947,6 +8997,8 @@ function menuTiles() {
       { ico: "🪪", t: "동사무소", s: isLocked("office") ? "🚧 준비 중" : P.job.id ? JOB[P.job.id].name : "직업 등록", go: () => { closeSheet(); goOffice(); } },
     ]],
     ["도움", [
+      { ico: "📘", t: "초보 어부 수첩", s: guideLeft() ? "할 일 " + (GUIDE_STEPS.length - guideLeft()) + "/" + GUIDE_STEPS.length + " · 궁금한 것 모음" : "다 끝냈어요 · 궁금한 것 모음", n: guideReady(), go: () => openSheet("guide") },
+      { ico: "🧩", t: "퀵바 꾸미기", s: "아래 막대에 넣을 메뉴 고르기", go: () => openSheet("quickbar") },
       { ico: "⚙️", t: "설정", s: "소리 · 입질 속도 · 그림자 · 계정", go: () => openSheet("settings") },
       { ico: "🐞", t: "오류 제보 · 건의", s: "운영자에게 보내기", go: () => openSheet("feedback") },
       { ico: "🧭", t: "안내 다시 보기", s: "처음 하는 것 설명", go: () => { closeSheet(); $("tutBtn").click(); } },
@@ -8954,7 +9006,7 @@ function menuTiles() {
     ].filter(Boolean)],
   ];
 }
-function menuBadgeCount() { return achClaimable() + questDone() + (attendCan() ? 1 : 0) + S.offersIn.size; }
+function menuBadgeCount() { return achClaimable() + questDone() + (attendCan() ? 1 : 0) + S.offersIn.size + guideReady(); }
 SHEETS.menu = (body) => {
   setHead("메뉴", P.nick + " · Lv." + myLv() + " · " + won(P.gold));
   for (const [sec, tiles] of menuTiles()) {
@@ -8993,6 +9045,194 @@ SHEETS.settings = (body) => {
   else more.append(h("button", { class: "setrow", onclick: () => openSheet("admintools") }, h("span", { class: "grow" }, h("b", { text: "운영자 권한 받기" }), h("small", { text: "운영자라면 여기서 계정 ID를 확인해요" })), h("span", { class: "chev", text: "›" })));
   body.append(h("div", { class: "sec", text: "더 보기" }), more, h("div", { class: "muted", style: "font-size:12px;text-align:center", text: "어촌생활 v" + GAME_VER }));
 };
+/* ===================== 퀵바 꾸미기 (v1.32) =====================
+   화면 아래 막대에 자주 쓰는 메뉴를 최대 6개까지 골라 넣고 순서를 바꿔요. 「메뉴」 칸은 항상 맨 끝에 있어요.
+   P.quick에 저장해서 다른 기기에서도 같아요 */
+const QUICK_MAX = 6, QUICK_DEF = ["bag", "dex", "travel", "friends", "home"];
+const QSVG = {
+  quests: '<path d="M7 3h10v18l-5-3-5 3z"/><path d="M10 8h4M10 12h4"/>',
+  ach: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M9 20h6"/>',
+  rank: '<path d="M4 20V13h5v7M9 20V8h6v12M15 20v-9h5v9"/>',
+  attend: '<rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M4 13h16M12 9v11"/><path d="M12 9c-2-4-6-3-5 0M12 9c2-4 6-3 5 0"/>',
+  emote: '<path d="M8 13V6a1.5 1.5 0 0 1 3 0v5M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v7a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-2.5-3.5a1.5 1.5 0 0 1 2.3-1.9L8 13"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>',
+  offers: '<path d="M3 12l4-4 4 3 3-2 7 5"/><path d="M7 14l3 3 2-1 2 2 3-2"/>',
+  guide: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M9 11l2 2 4-4"/>',
+  profile: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  shop: '<path d="M4 9l1.5-5h13L20 9"/><path d="M4 9a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0A2.7 2.7 0 0 0 20 9"/><path d="M5 11v9h14v-9"/><path d="M10 20v-5h4v5"/>',
+  sashimi: '<path d="M3 15c3-5 9-7 15-4l3-2v8l-3-2c-6 3-12 1-15-0z"/><circle cx="16" cy="12" r=".8"/>',
+  card: '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="8.5" cy="12" r="2"/><path d="M13 10h5M13 14h4"/>',
+};
+// 넣을 수 있는 메뉴 (bag·dex·travel·friends·home 은 원래 있던 버튼을 그대로 써요)
+const QUICK_ITEMS = [
+  { id: "bag", name: "가방", d: "잡은 물고기 · 회 · 미끼 · 장비" },
+  { id: "dex", name: "도감", d: "지금까지 만난 물고기 목록" },
+  { id: "travel", name: "지도", d: "장소를 눌러 바로 걸어가요" },
+  { id: "friends", name: "친구", d: "친구 목록 · 명함" },
+  { id: "home", name: "우리 집", d: "집에 가기 · 집 구하기" },
+  { id: "quests", name: "의뢰", d: "매일 바뀌는 작은 목표 3개", open: "quests" },
+  { id: "guide", name: "초보 수첩", short: "수첩", d: "처음 할 일을 순서대로 알려 줘요", open: "guide" },
+  { id: "shop", name: "낚시 상점", short: "상점", d: "미끼 · 낚싯대 · 릴 사러 걸어가요", run: () => goBuilding("bait") },
+  { id: "sashimi", name: "회 센터", d: "물고기를 회로 떠서 먹으러 가요", run: () => goBuilding("sashimi") },
+  { id: "ach", name: "도전과제", d: "달성 보상 · 칭호", open: "ach" },
+  { id: "rank", name: "랭킹", d: "명예의 전당 분야별 순위", open: "rank" },
+  { id: "attend", name: "출석", d: "7일 출석 선물", open: "attend" },
+  { id: "offers", name: "거래", d: "받은 거래 · 주문 제안", open: "offers" },
+  { id: "emote", name: "인사", d: "손 흔들기 · 박수 · 축하", run: () => { $("emotePop").hidden = false; } },
+  { id: "card", name: "명함", d: "명함을 내밀어 친구 만들기", run: () => { S.card ? stopCard() : startCard(); } },
+  { id: "profile", name: "내 정보", short: "내 정보", d: "레벨 · 기록 · 닉네임", open: "profile" },
+  { id: "settings", name: "설정", d: "소리 · 입질 속도 · 그림자", open: "settings" },
+];
+const QUICK = Object.fromEntries(QUICK_ITEMS.map(q => [q.id, q]));
+function normQuick(a) { const out = []; for (const id of Array.isArray(a) ? a : QUICK_DEF) if (QUICK[id] && !out.includes(id)) out.push(id); return out.slice(0, QUICK_MAX); }
+function goBuilding(id) {
+  const b = BUILDINGS.find(x => x.id === id); if (!b) return;
+  if (atHome()) { toast("마을로 나간 다음에 가 볼 수 있어요"); return; }
+  if (ME.seat || S.myStall >= 0) { lockedHint(); return; }
+  closeSheet(); walkTo(5.6, b.z, () => { ME.ry = Math.PI / 2; presMove(true); if (b.sheet) openSheet(b.sheet); });
+  toast("🚶 「" + b.name + "」(으)로 걸어가요");
+}
+function quickBtnFor(id) {
+  const dock = document.querySelector(".dock");
+  let b = dock.querySelector('[data-q="' + id + '"]');
+  if (b) return b;
+  const q = QUICK[id];
+  b = h("button", { "data-q": id, "aria-label": q.name });
+  b.innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + (QSVG[id] || "") + '</svg><span>' + (q.short || q.name) + '</span><span class="badge qbadge" hidden>0</span>';
+  if (q.open) b.dataset.open = q.open; else b.addEventListener("click", () => { closeSheet(); q.run(); });
+  dock.insertBefore(b, dock.querySelector(".menubtn"));
+  return b;
+}
+function applyQuick() {
+  const dock = document.querySelector(".dock"); if (!dock) return;
+  // 원래 있던 버튼에 이름표 달기
+  const map = { bag: '[data-open="bag"]', dex: '[data-open="dex"]', travel: '[data-open="travel"]', friends: '[data-open="friends"]', home: "#homeDockBtn" };
+  for (const [id, sel] of Object.entries(map)) { const el = dock.querySelector(sel); if (el && !el.dataset.q) el.dataset.q = id; }
+  P.quick = normQuick(P.quick);
+  for (const q of QUICK_ITEMS) { const b = quickBtnFor(q.id), k = P.quick.indexOf(q.id); b.hidden = k < 0; b.style.order = k < 0 ? 50 : k; }
+  const chat = dock.querySelector(".chatonly"); if (chat) chat.style.order = 40;
+  const menu = dock.querySelector(".menubtn"); if (menu) menu.style.order = 60;
+  dock.dataset.n = P.quick.length;
+  updateQuickBadges();
+}
+function updateQuickBadges() {
+  const set = (id, n) => { const b = document.querySelector('.dock [data-q="' + id + '"] .qbadge'); if (b) { b.hidden = !n; b.textContent = n; } };
+  set("quests", questDone()); set("ach", achClaimable()); set("attend", attendCan() ? 1 : 0); set("offers", S.offersIn.size); set("guide", guideReady());
+}
+function setQuick(list) { P.quick = normQuick(list); markDirty(); applyQuick(); refreshSheet(); }
+SHEETS.quickbar = (body) => {
+  setHead("퀵바 꾸미기", "화면 아래 막대에 자주 쓰는 메뉴를 넣어 두세요 · 최대 " + QUICK_MAX + "개");
+  const cur = normQuick(P.quick);
+  body.append(h("div", { class: "qb-help" },
+    h("b", { text: "이렇게 바꿔요" }),
+    h("ol", null, h("li", { text: "아래 「넣을 수 있는 메뉴」에서 ＋를 누르면 막대에 들어가요." }), h("li", { text: "막대 미리보기의 ◀ ▶로 자리를 옮기고, ✕로 빼요." }), h("li", { text: "「메뉴」 칸은 항상 맨 오른쪽에 있어요. 다른 모든 기능은 메뉴 안에도 있어요." }))));
+  // 미리보기 막대
+  const prev = h("div", { class: "qb-prev", role: "list", "aria-label": "지금 퀵바" });
+  cur.forEach((id, k) => {
+    const q = QUICK[id];
+    prev.append(h("div", { class: "qb-slot", role: "listitem" },
+      h("span", { class: "qb-ico", html: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + qIcon(id) + '</svg>' }), h("b", { text: q.name }),
+      h("div", { class: "qb-ctl" },
+        h("button", { "aria-label": q.name + " 왼쪽으로", disabled: k === 0, onclick: () => { const a = cur.slice(); [a[k - 1], a[k]] = [a[k], a[k - 1]]; setQuick(a); }, text: "◀" }),
+        h("button", { class: "x", "aria-label": q.name + " 빼기", onclick: () => setQuick(cur.filter(x => x !== id)), text: "✕" }),
+        h("button", { "aria-label": q.name + " 오른쪽으로", disabled: k === cur.length - 1, onclick: () => { const a = cur.slice(); [a[k + 1], a[k]] = [a[k], a[k + 1]]; setQuick(a); }, text: "▶" }))));
+  });
+  for (let k = cur.length; k < QUICK_MAX; k++) prev.append(h("div", { class: "qb-slot empty", text: "빈 칸" }));
+  prev.append(h("div", { class: "qb-slot fixed" }, h("span", { class: "qb-ico", html: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg>' }), h("b", { text: "메뉴" }), h("small", { text: "고정" })));
+  body.append(h("div", { class: "sec", text: "지금 퀵바 (" + cur.length + "/" + QUICK_MAX + ")" }), prev);
+  body.append(h("div", { class: "sec", text: "넣을 수 있는 메뉴" }), h("div", { class: "qb-grid" }, QUICK_ITEMS.map(q => {
+    const on = cur.includes(q.id), full = cur.length >= QUICK_MAX;
+    return h("button", { class: "qb-item" + (on ? " on" : ""), disabled: !on && full, onclick: () => setQuick(on ? cur.filter(x => x !== q.id) : cur.concat(q.id)), title: on ? "눌러서 빼기" : full ? "칸이 다 찼어요 · 하나를 먼저 빼 주세요" : "눌러서 넣기" },
+      h("span", { class: "qb-ico", html: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + qIcon(q.id) + '</svg>' }),
+      h("span", { class: "grow" }, h("b", { text: q.name }), h("small", { text: q.d })),
+      h("span", { class: "qb-tag", text: on ? "✓ 들어 있음" : full ? "꽉 찼어요" : "＋ 넣기" }));
+  })));
+  body.append(h("div", { class: "row", style: "justify-content:center;margin-top:12px" }, h("button", { class: "btn sm", onclick: () => { setQuick(QUICK_DEF); toast("퀵바를 처음 모양으로 되돌렸어요"); }, text: "처음 모양으로 되돌리기" })));
+};
+function qIcon(id) {
+  if (QSVG[id]) return QSVG[id];
+  const el = document.querySelector('.dock [data-q="' + id + '"] svg'); return el ? el.innerHTML : "";
+}
+// 퀵바를 꾹 누르면(0.6초) 꾸미기 화면
+(() => { let tmr = null; document.addEventListener("pointerdown", (e) => { if (!e.target.closest(".dock")) return; clearTimeout(tmr); tmr = setTimeout(() => { tmr = "fired"; openSheet("quickbar"); }, 600); }, true);
+  const stop = () => { if (tmr !== "fired") clearTimeout(tmr); else setTimeout(() => { tmr = null; }, 0); };
+  document.addEventListener("pointerup", stop, true); document.addEventListener("pointercancel", stop, true);
+  document.addEventListener("click", (e) => { if (tmr === "fired" && e.target.closest(".dock")) { e.stopPropagation(); e.preventDefault(); } }, true); })();
+
+/* ===================== 초보 어부 수첩 (v1.32) =====================
+   처음 하는 사람이 순서대로 따라 하면 게임 전체를 배울 수 있는 10단계. 하나 끝낼 때마다 작은 용돈 */
+const GUIDE_STEPS = [
+  { id: "fish", ico: "🎣", t: "첫 물고기 낚기", how: "부두의 빈자리(＋)로 가서 「낚시하기」 → 「꾹 눌러 던지기」 → 「!」가 뜨면 「챔질!」 → 버튼을 꾹 눌러 감아요.", done: () => (P.caught || 0) >= 1, go: () => goPlace("부두 입구"), reward: 50 },
+  { id: "sell", ico: "💰", t: "물고기 팔기", how: "가방을 열고 물고기를 골라 「팔기」를 눌러요. 그날 시세에 따라 값이 조금씩 달라요.", done: () => (P.stats.soldGold || 0) > 0, go: () => openSheet("bag"), reward: 50 },
+  { id: "bait", ico: "🪱", t: "더 좋은 미끼 사기", how: "상점가 맨 위 「낚시 상점」에서 새우나 크릴을 사요. 좋은 미끼일수록 귀한 물고기가 잘 와요.", done: () => Object.entries(P.baits).some(([k, v]) => k !== "shrimp" && v > 0) || (P.baits.shrimp || 0) > 5, go: () => goBuilding("bait"), reward: 50 },
+  { id: "quest", ico: "📜", t: "오늘의 의뢰 보상 받기", how: "오른쪽 「오늘의 의뢰」를 눌러 목표를 확인해요. 다 하면 「보상 받기」!", done: () => (P.stats.quests || 0) > 0, go: () => openSheet("quests"), reward: 80 },
+  { id: "eat", ico: "🍣", t: "회 먹고 힘내기", how: "「회 센터」에서 물고기를 회로 떠서 먹으면 잠깐 입질이 빨라지거나 좋은 물고기가 잘 와요.", done: () => (P.stats.eat || 0) > 0, go: () => goBuilding("sashimi"), reward: 80 },
+  { id: "dig", ico: "🐚", t: "갯벌에서 조개 캐기", how: "썰물 때 거리 남쪽 끝 갯벌로 가요. 「낚시 상점 › 도구」에서 호미와 장화를 사야 해요.", done: () => (P.stats.digs || 0) > 0, go: () => goPlace("갯벌 해변"), reward: 100 },
+  { id: "look", ico: "👕", t: "내 모습 꾸미기", how: "「옷가게」에서 옷을 사 입거나 「얼굴 공방」에서 얼굴을 그려요. 다른 사람에게도 보여요.", done: () => P.closet.length > 0 || !!(faceFor && faceFor("me")), go: () => goBuilding("clothes"), reward: 100 },
+  { id: "friend", ico: "🤝", t: "친구 만들기", how: "메뉴 › 「명함 내밀기」를 하거나, 명함을 내민 사람에게 다가가 받아요.", done: () => Object.keys(P.friends).length > 0, go: () => openSheet("friends"), reward: 100 },
+  { id: "boat", ico: "⛵", t: "멍낚호 타 보기", how: "부두 입구 선착장에서 배를 타요. 5분 동안 깊은 바다에서 귀한 물고기가 훨씬 잘 나와요.", done: () => (P.stats.boats || 0) > 0, go: () => goPlace("선착장 (멍낚호)"), reward: 150 },
+  { id: "lv5", ico: "⭐", t: "낚시 Lv.5 되기", how: "낚을 때마다 경험치가 쌓여요. 직접 챔질하고 퍼펙트로 잡으면 더 많이 받아요.", done: () => myLv() >= 5, go: () => openSheet("profile"), reward: 300 },
+];
+function guideState() { P.guide = P.guide && typeof P.guide === "object" ? P.guide : {}; return P.guide; }
+const guideReady = () => GUIDE_STEPS.filter(s => !guideState()[s.id] && safeDone(s)).length;
+const guideLeft = () => GUIDE_STEPS.filter(s => !guideState()[s.id]).length;
+function safeDone(s) { try { return !!s.done(); } catch { return false; } }
+function goPlace(name) { const pl = PLACES.find(p => p.name === name); if (!pl) return; if (atHome()) { toast("마을로 나간 다음에 가 볼 수 있어요"); return; } if (ME.seat || S.myStall >= 0) { lockedHint(); return; } closeSheet(); walkTo(pl.x, pl.z); toast("🚶 「" + pl.name + "」(으)로 걸어가요"); }
+function claimGuide(s) { const g = guideState(); if (g[s.id] || !safeDone(s)) return; g[s.id] = Date.now(); P.gold += s.reward; markDirty(); sfx("coins", .5); try { ACT_FX.sell(s.reward); } catch {} toast("📘 「" + s.t + "」 완료! 용돈 +" + won(s.reward)); updateGuideChip(); refreshSheet(); }
+function updateGuideChip() {
+  const b = $("guideBtn"); if (!b) return;
+  const left = guideLeft(), ready = guideReady(), next = GUIDE_STEPS.find(s => !guideState()[s.id]);
+  b.hidden = !left;
+  if (!left) return;
+  $("guideTx").textContent = ready ? "보상 받기 " + ready : "다음: " + next.t;
+  b.classList.toggle("hot", ready > 0);
+  updateQuickBadges();
+}
+const FAQ = [
+  ["돈은 어떻게 벌어요?", "물고기를 낚아서 팔아요. 큰 물고기일수록 훨씬 비싸요(크기 ×1.5면 값은 약 2배). 오늘의 생선(⭐)은 1.5배, 시세(▲▼)는 날마다 바뀌어요. 횟집 사장이 되면 회로 떠서 1.5배에 팔 수도 있어요."],
+  ["등급이 뭐예요?", "물고기는 일반 · 고급 · 희귀 · 영웅 · 전설 · 신화 6단계예요. 높을수록 귀하고 비싸지만 힘이 세서 좋은 장비가 필요해요. 영웅 이상은 「몸부림」을 쳐서 약한 줄은 끊어져요."],
+  ["손맛 싸움 막대는 뭐예요?", "「장력」은 줄이 받는 힘이에요. 빨간 선을 넘으면 끊겨요. 「과열」은 릴이 뜨거워지는 정도예요. 가득 차면 끊겨요. 물고기가 돌진·점프하면 손을 떼고, 「지쳤어요」가 뜨면 힘껏 감아요."],
+  ["드랙이 뭐예요?", "물고기가 당길 때 줄이 풀려 나가는 정도예요. 조이면 빨리 끌려오지만 장력이 올라가요. 잘 모르겠으면 「자동」에 두세요."],
+  ["좋은 장비는 언제 사요?", "레벨이 오르면 낚시 상점에 새 장비가 열려요. 상점의 「예상 성공률」을 보면 그 장비로 등급별로 몇 % 잡을 수 있는지 알려 줘요."],
+  ["회를 먹으면 뭐가 좋아요?", "몇 분 동안 입질이 빨라지거나, 좋은 물고기가 잘 오거나, 크기나 판매가가 올라가요. 등급이 높은 회일수록 효과가 크고 길어요."],
+  ["자동 챔질은 뭐예요?", "설정에서 켜면 입질을 놓쳐도 확률로 자동으로 낚아요. 대신 경험치가 60%이고, 영웅 이상 대물은 직접 잡아야 해요. 15분 동안 아무것도 안 누르면 꺼져요."],
+  ["밤이 되면 뭐가 달라요?", "게임 속 하루는 실제 시간과 같아요. 밤에만 나오는 물고기, 새벽 · 노을에 잘 나오는 물고기가 있어요. 도감에서 물고기마다 사는 시간을 볼 수 있어요."],
+];
+SHEETS.guide = (body) => {
+  const g = guideState(), doneN = GUIDE_STEPS.filter(s => g[s.id]).length;
+  setHead("초보 어부 수첩", "위에서부터 하나씩 해 보세요 · 끝낼 때마다 용돈을 드려요 (" + doneN + "/" + GUIDE_STEPS.length + ")");
+  body.append(h("div", { class: "gd-bar" }, h("i", { style: "width:" + (doneN / GUIDE_STEPS.length * 100) + "%" })));
+  const cur = GUIDE_STEPS.find(s => !g[s.id]);
+  body.append(h("ol", { class: "gd-list" }, GUIDE_STEPS.map((s, k) => {
+    const got = !!g[s.id], ok = safeDone(s), now = s === cur;
+    return h("li", { class: "gd-step" + (got ? " got" : ok ? " ready" : now ? " now" : "") },
+      h("span", { class: "gd-n", text: got ? "✓" : String(k + 1) }),
+      h("span", { class: "gd-ico", "aria-hidden": "true", text: s.ico }),
+      h("div", { class: "grow" }, h("b", { text: s.t }), (now || ok) && !got ? h("p", { text: s.how }) : null),
+      got ? h("span", { class: "gd-tag", text: "완료" })
+        : ok ? h("button", { class: "btn sm pri", onclick: () => claimGuide(s), text: "+" + won(s.reward) + " 받기" })
+        : h("button", { class: "btn sm", onclick: () => s.go(), text: "가 보기 ›" }));
+  })));
+  body.append(h("div", { class: "sec", text: "궁금한 것 모음" }), h("div", { class: "gd-faq" }, FAQ.map(([q, a]) => h("details", null, h("summary", { text: q }), h("p", { text: a })))));
+};
+// 시트 머리의 「?」: 그 화면 설명을 언제든 다시 보기
+function showHelp(name) { const id = "sheet_" + name; if (!TUTS[id] || coachQ.includes(id) || (S.coach && S.coach.id === id)) return; coachQ.push(id); if (!S.coach) nextCoach(); }
+Object.assign(TUTS, {
+  sheet_bag: { icon: "🎒", title: "가방", steps: ["잡은 물고기는 여기 모여요(최대 40마리). 물고기를 눌러 고르고 아래 막대에서 「팔기」를 눌러요. 여러 마리를 한 번에 고를 수도 있어요.", "「회」 칸에는 회 센터에서 뜬 회가 있어요. 먹으면 잠깐 능력치가 올라요. 「미끼」 「장비」 칸에서 쓸 것을 바꿔요."] },
+  sheet_dex: { icon: "📖", title: "도감", steps: ["지금까지 만난 물고기가 모여요. 회색 칸은 아직 못 만난 물고기예요.", "물고기를 누르면 사는 곳 · 나오는 시간 · 내 최고 기록 · 오늘 시세가 보여요. 밤에만 나오거나 배에서만 나오는 물고기도 있어요."] },
+  sheet_travel: { icon: "🗺️", title: "마을 지도", steps: ["가고 싶은 곳을 누르면 캐릭터가 거기까지 알아서 걸어가요(멀면 뛰어가요).", "초록 점은 친구, 노란 점은 나예요."] },
+  sheet_rank: { icon: "🏅", title: "명예의 전당", steps: ["분야별로 마을에서 가장 잘하는 사람 순위예요. 1위는 명예의 전당 광장에 금빛 동상이 서요!"] },
+  sheet_attend: { icon: "🎁", title: "출석 이벤트", steps: ["하루에 한 번 접속해서 「받기」를 누르면 선물을 줘요. 7일을 다 모으면 새내기 어부 세트를 받아요."] },
+  sheet_invite: { icon: "💌", title: "친구 초대", steps: ["내 추천인 코드를 친구에게 알려 주세요. 친구가 코드를 넣으면 둘 다 선물을 받고, 친구가 Lv.5가 되면 더 받아요."] },
+  sheet_menu: { icon: "🧭", title: "전체 메뉴", steps: ["게임의 모든 기능이 여기 있어요. 빨간 숫자는 받을 보상이 있다는 뜻이에요.", "자주 쓰는 건 「퀵바 꾸미기」로 화면 아래 막대에 넣어 두세요."] },
+  sheet_quickbar: { icon: "🧩", title: "퀵바 꾸미기", steps: ["화면 아래 막대(퀵바)에 넣을 메뉴를 최대 6개 골라요. ＋로 넣고, ◀ ▶로 자리를 바꾸고, ✕로 빼요.", "막대를 꾹 누르고 있어도 이 화면이 열려요."] },
+  sheet_guide: { icon: "📘", title: "초보 어부 수첩", steps: ["처음이라면 위에서부터 하나씩 따라 해 보세요. 「가 보기」를 누르면 그곳으로 데려다줘요.", "끝내면 버튼이 「용돈 받기」로 바뀌어요. 아래 「궁금한 것 모음」에 자주 묻는 질문이 있어요."] },
+  sheet_profile: { icon: "🙂", title: "내 정보", steps: ["내 레벨 · 낚은 수 · 기록이 모여 있어요. 닉네임과 이름표 칭호도 여기서 바꿔요."] },
+  sheet_offers: { icon: "🤝", title: "거래 · 주문", steps: ["다른 사람이 보낸 거래 제안이 여기 와요. 내용을 보고 「받기」나 「거절」을 눌러요."] },
+  sheet_settings: { icon: "⚙️", title: "설정", steps: ["소리 · 그림자 · 입질 속도 · 자동 챔질 · 자동 판매를 켜고 꺼요. 휴대폰이 느리면 「그림자」를 꺼 보세요."] },
+  sheet_stall: { icon: "🏮", title: "노점", steps: ["다른 사람이 연 횟집이에요. 차림표에서 회를 골라 사 먹을 수 있어요."] },
+  sheet_mystall: { icon: "🏮", title: "내 횟집", steps: ["회를 상에 올리고 손님 주문에 맞는 회를 내 주세요. 빨리 내면 팁과 평판이 올라요.", "평판이 쌓이면 별이 오르고 손님이 더 자주 와요."] },
+});
 /* ---------- 친구 ---------- */
 SHEETS.friends = (body) => {
   const peers = otherPeers(true);
@@ -9873,7 +10113,8 @@ async function boot() {
   setSpeedLabel(); updateHud();
   if (T3) { try { init3D(); } catch (e) { console.warn("3D", e); R = null; } }
   registerBoatSeats();
-  ensureQuests(); updateQuestCount();
+  ensureQuests(); updateQuestCount(); applyQuick(); updateGuideChip();
+  $("sheetHelp").addEventListener("click", () => showHelp(S.sheet));
   if (!R) {
     $("title").classList.add("nogl");
     setInterval(() => { stepMove(.05); updateActionUI(); }, 50);
