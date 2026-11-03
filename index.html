@@ -300,6 +300,9 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 .fmsg[data-st="tired"]{color:#7ee0a6}.fmsg[data-st="jump"]{color:#ffd84d}.fmsg[data-st="run"]{color:#ffc19a}
 .fmsg[data-st="warn"]{color:#ff8a6a;animation:fshake .25s infinite}
 @keyframes fshake{50%{transform:translateX(2px)}}
+.fight.boss .fbox{box-shadow:0 0 0 2px #f2c230,0 0 22px rgba(242,194,48,.45)}
+.fight[data-tier="4"] .fbox{box-shadow:0 0 0 2px #ff5a3c,0 0 26px rgba(255,90,60,.55)}
+.fmsg[data-st="rage"]{color:#ff6a4d;animation:fshake .18s infinite}
 .fight.hot .fbox{box-shadow:0 0 0 2px #e2402a,0 0 26px rgba(226,64,42,.55)}
 .fctl{display:flex;align-items:flex-end;gap:10px}
 .fdrag{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:16px;background:var(--glass-strong);border:1px solid var(--glass-line)}
@@ -768,7 +771,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
     <label class="tsound"><input type="checkbox" id="tSound" checked> 물소리·효과음 켜고 시작</label>
     <button class="tstart" id="tStart" type="button" disabled>불러오는 중…</button>
     <div class="tlinks"><button type="button" id="tBug">🐞 오류 제보</button><button type="button" id="tIdea">💡 건의하기</button><button type="button" id="tInvite">🤝 초대 코드</button></div>
-    <div class="tfoot"><span id="tVer">v1.18.0</span> · Enter 키로도 들어갈 수 있어요</div>
+    <div class="tfoot"><span id="tVer">v1.19.0</span> · Enter 키로도 들어갈 수 있어요</div>
   </div>
 </div>
 
@@ -788,7 +791,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.18.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.19.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 10 },
   { name: "고급", base: 30 },
@@ -2021,7 +2024,15 @@ function landFish(r, perfect, auto) {
    · 물고기: 유영 → 돌진 · 점프 · 잠수 → 지침. 지쳤을 때 감는 게 승부처. 점프할 때 감고 있으면 바늘이 빠질 수 있음 */
 const REEL = { on: false };
 const DRAG = [.35, .5, .65, .8, .95];
-const FIGHT_MSG = { cruise: "천천히 감아요", run: "돌진! 무리하게 감지 마세요", jump: "점프! 손을 떼요", dive: "잠수하며 버티는 중", tired: "지쳤어요 · 지금 감아요!" };
+/* 등급별 손맛: 높을수록 힘 · 체력 · 거리 · 돌진이 크게 늘고, 영웅 이상은 「몸부림」(약한 장비로는 버티기 어려운 순간 힘)이 와요 */
+const TIER_FIGHT = [
+  { p: .27, s: 4, dist: 8, run: .6, boost: .03, regen: .01, rage: 0, rageF: 0 },
+  { p: .48, s: 9, dist: 12, run: .95, boost: .14, regen: .02, rage: 0, rageF: 0 },
+  { p: .64, s: 16, dist: 16, run: 1.2, boost: .24, regen: .035, rage: .05, rageF: .98 },
+  { p: .8, s: 26, dist: 20, run: 1.35, boost: .32, regen: .05, rage: .11, rageF: 1.17 },
+  { p: .95, s: 38, dist: 24, run: 1.5, boost: .38, regen: .065, rage: .2, rageF: 1.36 },
+];
+const FIGHT_MSG = { rage: "몸부림! 지금은 무조건 손을 떼요", cruise: "천천히 감아요", run: "돌진! 무리하게 감지 마세요", jump: "점프! 손을 떼요", dive: "잠수하며 버티는 중", tired: "지쳤어요 · 지금 감아요!" };
 const STATE_W = { dart: { run: .45, jump: .25, dive: .05, cruise: .25 }, smooth: { run: .35, jump: .05, dive: .1, cruise: .5 }, sinker: { run: .25, jump: .02, dive: .45, cruise: .28 }, floater: { run: .2, jump: .38, dive: .02, cruise: .4 }, mixed: { run: .33, jump: .15, dive: .15, cruise: .37 } };
 S.autoDrag = lsGet("mn.autodrag", true); S.drag = lsGet("mn.drag", 3);
 function gearStats() {
@@ -2031,11 +2042,12 @@ function gearStats() {
 }
 function startReel(r, opts) {
   const coop = !!(opts && opts.coop), g = gearStats(), { diff, type } = behaviorOf(r.f);
-  const P0 = (.35 + Math.min(130, diff) / 110 * .65) * (coop ? 1.12 : 1);
-  const S0 = (8 + r.f.tier * 9) * (.8 + diff / 200) * (coop ? 1.2 : 1) * g.stamMul;
+  const tf = TIER_FIGHT[r.f.tier] || TIER_FIGHT[0], dn = clamp(diff / 130, 0, 1);
+  const P0 = tf.p * (.9 + dn * .2) * (coop ? 1.08 : 1);
+  const S0 = tf.s * (.85 + dn * .3) * (coop ? 1.2 : 1) * g.stamMul;
   if (coop) g.lineMax *= .96;
   const now = performance.now();
-  Object.assign(REEL, { on: true, r, coop, g, type, P: P0, S0, dist: 14 + r.f.tier * 5 + Math.random() * 6, stam: 1, heat: 0, maxHeat: 0, tension: .3, F: .3,
+  Object.assign(REEL, { on: true, r, coop, g, type, tf, rage: 0, P: P0, S0, dist: tf.dist + Math.random() * 4, stam: 1, heat: 0, maxHeat: 0, tension: .3, F: .3,
     st: "run", stT: 1.1, runBoost: .1, jumpChecked: false, hold: REEL.hold || false, drag: S.autoDrag ? 3 : S.drag, lineOut: 0, overT: 0, shook: false,
     manual: !S.autoDrag, time: 0, t0: now, last: now, acc: 0, fx: null, fz: null, perfect: false });
   REEL.dist0 = REEL.dist; r.manual = REEL.manual;
@@ -2043,18 +2055,21 @@ function startReel(r, opts) {
   const nm = $("fightName"); nm.textContent = "??? · " + TIERS[r.f.tier].name + " · " + MOTION_KO[type]; nm.style.background = cssVarCache.tiers[r.f.tier];
   $("fightCoop").hidden = !coop;
   $("fight").hidden = false; document.body.classList.add("fighting");
+  $("fight").classList.toggle("boss", r.f.tier >= 3); $("fight").dataset.tier = r.f.tier;
+  if (r.f.tier >= 3) { toast([h("b", { text: r.f.tier >= 4 ? "⚠ 전설급 대물이에요!" : "⚠ 대물 입질!" }), h("div", { class: "muted", style: "font-size:12px", text: "몸부림칠 땐 꼭 손을 떼요 · 약한 낚싯대와 줄로는 버티기 어려워요" })], "lvup", 4000); sfx("jingle-rare", .3); }
   coach("fight");
   drawFight(); requestAnimationFrame(reelFrame);
 }
 function nextFishState(R) {
   if (R.st === "tired") { if (R.stam > .32) { R.st = "cruise"; R.stT = 1.4; } else R.stT = 1.2; return; }
-  const w = STATE_W[R.type] || STATE_W.mixed, prev = R.st, wt = (k) => (k === prev && k !== "cruise") ? w[k] * .4 : w[k];
+  if (R.tf.rage && Math.random() < R.tf.rage && R.stam > .3) { R.st = "rage"; R.stT = 1.1 + Math.random() * .6; R.jumpChecked = false; sfx("splash", .45); fightJumpFx(); return; }
+  const w0 = STATE_W[R.type] || STATE_W.mixed, w = { ...w0, run: w0.run * R.tf.run }, prev = R.st, wt = (k) => (k === prev && k !== "cruise") ? w[k] * .4 : w[k];
   let tot = 0; for (const k in w) tot += wt(k);
   let x = Math.random() * tot, pick = "cruise";
   for (const k in w) { if ((x -= wt(k)) < 0) { pick = k; break; } }
   R.st = pick; R.jumpChecked = false;
   R.stT = pick === "run" ? .9 + Math.random() * 1.4 : pick === "jump" ? 1.1 : pick === "dive" ? 1.4 + Math.random() : 1.2 + Math.random() * 1.6;
-  if (pick === "run") R.runBoost = Math.random() * .2;
+  if (pick === "run") R.runBoost = Math.random() * R.tf.boost;
   if (pick === "jump") { sfx("splash", .35); fightJumpFx(); }
 }
 function fightStep(dt) {
@@ -2063,7 +2078,7 @@ function fightStep(dt) {
   if (R.st !== "tired" && R.stam < .18) { R.st = "tired"; R.stT = 2.5; }
   if (R.stT <= 0) nextFishState(R);
   const st = R.st, P0 = R.P * (.45 + .55 * R.stam);
-  const F = st === "run" ? P0 * (1 + R.runBoost) : st === "dive" ? P0 * .82 * (g.lead ? .8 : 1) : st === "jump" ? P0 * .5 : st === "tired" ? P0 * .25 : P0 * .38;
+  const F = st === "rage" ? R.tf.rageF * (.8 + .2 * R.stam) : st === "run" ? P0 * (1 + R.runBoost) : st === "dive" ? P0 * .82 * (g.lead ? .8 : 1) : st === "jump" ? P0 * .5 : st === "tired" ? P0 * .25 : P0 * .38;
   R.F += (F - R.F) * Math.min(1, dt * 6);
   if (S.autoDrag) { const need = R.F + (R.hold ? .3 : 0); let d = 1; while (d < 5 && DRAG[d - 1] < need - .04) d++; R.drag = d; }
   const lim = DRAG[R.drag - 1], raw = R.F + (R.hold ? .3 : 0);
@@ -2077,10 +2092,10 @@ function fightStep(dt) {
     R.tension = raw;
     R.heat = Math.max(0, R.heat - (R.hold ? g.cool : g.cool * 1.6) * dt);
     if (R.hold) R.dist -= g.speed * (1 - Math.min(.85, R.F * .6)) * dt;
-    else { R.dist += R.F * .7 * dt; R.stam = Math.min(1, R.stam + .02 * dt); }
+    else { R.dist += R.F * .7 * dt; R.stam = Math.min(1, R.stam + R.tf.regen * dt); }
   }
   R.lineOut = out;
-  R.stam = Math.max(0, R.stam - (R.F * (st === "run" ? 1.4 : 1) + out * .05) / R.S0 * dt);
+  R.stam = Math.max(0, R.stam - (R.F * (st === "run" || st === "rage" ? 1.4 : 1) + out * .05) / R.S0 * dt);
   R.maxHeat = Math.max(R.maxHeat, R.heat);
   if (st === "jump" && R.hold && !R.jumpChecked && R.stT < .6) { R.jumpChecked = true; if (!g.barbed && R.tension > .55 && Math.random() < .4) { R.shook = true; return "shake"; } }
   if (R.tension > g.lineMax) return "snap";
@@ -6588,7 +6603,7 @@ function pushRank(force) {
   if (!force && Date.now() - S.rankPushAt < 60000) return;
   const row = myRankRow(); if (!row.caught && !row.xp && !row.dex) return;
   S.rankPushAt = Date.now();
-  S.db.doc("rank/" + S.uid).set(row).catch((e) => console.warn("rank", e));
+  S.db.doc("records/rank_" + S.uid).set({ ...row, rank: 1, uid: S.uid }).catch((e) => console.warn("rank", e));
 }
 async function loadRanks(force) {
   if (!force && Date.now() - S.rankAt < 20000) return;
@@ -6596,8 +6611,8 @@ async function loadRanks(force) {
   const me = normRank(S.uid || "me", myRankRow());
   if (!S.online || !S.db) { for (const c of RANK_CATS) S.ranks[c.id] = me[c.f] > 0 ? [me] : []; hallDirty(); return; }
   await Promise.all(RANK_CATS.map(async (c) => {
-    try { const q = await S.db.collection("rank").orderBy(c.f, "desc").limit(10).get(); S.ranks[c.id] = q.docs.map(d => normRank(d.id, d.data())).filter(r => r[c.f] > 0); }
-    catch (e) { console.warn("rank load", c.id, e); }
+    try { const q = await S.db.collection("records").orderBy(c.f, "desc").limit(12).get(); S.rankErr = false; S.ranks[c.id] = q.docs.filter(d => d.id.startsWith("rank_")).map(d => normRank(d.id.slice(5), d.data())).slice(0, 10).filter(r => r[c.f] > 0); }
+    catch (e) { console.warn("rank load", c.id, e); S.rankErr = true; }
   }));
   hallDirty();
   if (S.sheet === "rank") refreshSheet();
@@ -6688,7 +6703,7 @@ function makeStatue(r, c) {
 function hallTick() {
   const H = HALL_OBJ; if (!H || !GEO.body) return;
   const now = Date.now();
-  if (now - S.rankAt > 180000) loadRanks(true);
+  if (now - S.rankAt > 180000 && (S.online || S.offlineFinal)) loadRanks(true);
   // 얼굴이 늦게 도착하면 다시 세움
   for (const sp of H.spots) {
     const c = RANK_CATS[sp.s.i], r = (S.ranks[c.id] || [])[0] || null;
@@ -6717,6 +6732,7 @@ SHEETS.rank = (body) => {
   setHead("🏆 명예의 전당", "분야별 상위 10명 · 1위는 광장에 금빛 동상이 서요 · 몇 분마다 갱신돼요");
   body.append(h("div", { class: "tabs", role: "tablist" }, RANK_CATS.map(x => h("button", { role: "tab", "aria-selected": String(x.id === c.id), onclick: () => { S.rankTab = x.id; refreshSheet(true); }, text: x.ico + " " + x.name }))));
   if (!S.online) body.append(h("div", { class: "muted", style: "font-size:12.5px", text: "혼자 모드에서는 내 기록만 보여요." }));
+  if (S.online && S.rankErr) body.append(h("div", { class: "nerr", text: "랭킹을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요." }));
   if (!list.length) body.append(h("div", { class: "empty-note", text: S.rankAt && Date.now() - S.rankAt < 3000 && S.online ? "불러오는 중이에요…" : "아직 기록이 없어요. 첫 1위가 되어 동상을 세워 보세요!" }));
   const medal = ["🥇", "🥈", "🥉"];
   list.forEach((r, i) => {
@@ -6725,7 +6741,7 @@ SHEETS.rank = (body) => {
       h("span", { class: "rk", text: medal[i] || String(i + 1) }),
       h("div", { class: "grow" }, h("b", { text: r.nick + (mine ? " (나)" : "") }), h("div", { class: "muted", style: "font-size:12px", text: "Lv." + levelOf(r.xp) + (isFriend(r.uid) ? " · 친구" : "") })),
       h("b", { class: "num rv", text: c.show(r[c.f], r) }),
-      S.isOwner && !mine ? armBtn("지우기", "한 번 더 누르면 랭킹에서 지움", async () => { try { await S.db.doc("rank/" + r.uid).delete(); toast(r.nick + "님 기록을 지웠어요"); loadRanks(true); } catch { toast("지우지 못했어요"); } }) : null));
+      S.isOwner && !mine ? armBtn("지우기", "한 번 더 누르면 랭킹에서 지움", async () => { try { await S.db.doc("records/rank_" + r.uid).delete(); toast(r.nick + "님 기록을 지웠어요"); loadRanks(true); } catch { toast("지우지 못했어요"); } }) : null));
   });
   const inTop = list.some(r => r.uid === S.uid);
   if (!inTop) body.append(h("div", { class: "rankrow mine" }, h("span", { class: "rk", text: "나" }), h("div", { class: "grow" }, h("b", { text: P.nick }), h("div", { class: "muted", style: "font-size:12px", text: me[c.f] > 0 ? "10위 안에 들면 이름이 올라가요" : "아직 기록이 없어요" })), h("b", { class: "num rv", text: c.show(me[c.f], me) })));
@@ -8216,6 +8232,7 @@ function enterGame() {
   if (!S.title || $("tStart").disabled) return;
   const back = (P.caught || 0) > 0 || Object.keys(P.dex).length > 0;
   S.title = false; document.body.classList.remove("titling");
+  S.chatSince = Date.now(); S.chat = []; renderChat();
   const t = $("title"); t.classList.add("out"); setTimeout(() => { t.hidden = true; }, 650);
   lsSet("mn.tsound", $("tSound").checked);
   if ($("tSound").checked && !S.sound) { S.sound = true; startSound(); $("soundBtn").setAttribute("aria-pressed", "true"); }
@@ -8234,9 +8251,10 @@ function enterGame() {
 
 /* ===================== 시작 ===================== */
 function goOffline(reason) {
+  S.offlineFinal = true;
   S.online = false;
   S.userFish = S.userFishAll = (lsGet("mn.fish", []) || []).map(d => normUserFish(String(d.id), d));
-  S.chat = (lsGet("mn.chat", []) || []).map(m => normChat(m.id || uid4(), m));
+  S.chat = [];
   S.profileReady = true;
   $("modeLabel").textContent = "혼자 모드 · 이 브라우저에만 저장";
   renderChat(); updateHud(); updateHint(); renderTitle();
@@ -8298,7 +8316,7 @@ async function boot() {
   db.collection("chat").orderBy("ts", "desc").limit(60).onSnapshot((snap) => {
     if (!snap.metadata.fromCache) { S.chatLoaded = true; clearTimeout(chatTimer); }
     const prevN = S.chat.length, prevLast = prevN ? S.chat[prevN - 1].id : null;
-    S.chat = snap.docs.map(d => normChat(d.id, d.data())).reverse(); renderChat();
+    S.chat = snap.docs.map(d => normChat(d.id, d.data())).filter(m => m.ts >= (S.chatSince || 0) - 1500).reverse(); renderChat();
     if (S.chatLoaded && prevLast && $("chatBox").classList.contains("min") && MOBILE()) { const i = S.chat.findIndex(m => m.id === prevLast); const n = i < 0 ? 1 : S.chat.length - 1 - i; if (n > 0) { S.chatUnread = (S.chatUnread || 0) + n; drawChatBadge(); } }
   }, (e) => { clearTimeout(chatTimer); console.warn("chat", e); });
   db.doc("config/notice").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; const prev = S.notice && S.notice.ts; S.notice = { text: str(d.text, 80), ts: Number(d.ts) || 0, until: Number(d.until) || 0 }; renderNoticeBar(); if (prev && S.notice.ts !== prev && S.notice.text) toast("📢 " + S.notice.text, null, 7000); }, () => {});

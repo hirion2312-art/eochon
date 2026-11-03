@@ -66,13 +66,21 @@ jobs:
           MSG: ${{ github.event.head_commit.message }}
         run: npx --yes firebase-tools@13 deploy --only hosting --project "${{ steps.sa.outputs.project }}" --non-interactive --message "$(printf '%s' "${MSG:-manual}" | head -n1 | cut -c1-200)"
 
-      - name: 보안 규칙 배포 (권한이 있으면)
+      - name: Firestore 보안 규칙 배포 (권한이 있으면)
         if: steps.sa.outputs.ready == 'true'
         continue-on-error: true
         working-directory: web
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.sa.outputs.cred }}
-        run: npx --yes firebase-tools@13 deploy --only firestore:rules,database --project "${{ steps.sa.outputs.project }}" --non-interactive
+        run: npx --yes firebase-tools@13 deploy --only firestore:rules --project "${{ steps.sa.outputs.project }}" --non-interactive
+
+      - name: Realtime Database 규칙 배포 (권한이 있으면)
+        if: steps.sa.outputs.ready == 'true'
+        continue-on-error: true
+        working-directory: web
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.sa.outputs.cred }}
+        run: npx --yes firebase-tools@13 deploy --only database --project "${{ steps.sa.outputs.project }}" --non-interactive
 
       - name: 정리
         if: always()
