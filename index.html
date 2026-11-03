@@ -1553,7 +1553,7 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.43.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.44.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -2987,6 +2987,8 @@ function luckProbs(p, extra) {
 }
 /* 개체 고유 크기: 종마다 기준 크기가 있고, 개체마다 배율이 자유분방하게 달라짐 (등급과 무관). 클수록 값이 많이 오름 */
 const baseSize = (f) => Math.sqrt(f.min * f.max);
+// 화면에 보이는 크기 배율 (v1.44): 보통 ×1 = 1, 클수록 크게 — ×10이면 약 4배, ×100이면 건물만 해요(최대 22)
+const fishVisK = (f, sizeCm) => { const k = f && sizeCm ? sizeCm / baseSize(f) : 1; return k <= 1 ? Math.max(.6, k) : Math.pow(k, .6); };
 function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
 /* v1.43: 크기는 극단적으로 — 보통이 ×1(100%)일 때 아주 드물게 ×100(10,000%)까지. 클수록 훨씬 드물어요(꼬리가 긴 분포)
    대략: ×2 이상 6% · ×5 이상 1% · ×10 이상 0.3% · ×30 이상 0.04% · ×100 근처 2만 마리에 1마리 */
@@ -4779,7 +4781,7 @@ function startBreach(r, perfect) {
   const F = meChar(), bp = (REEL.fx != null ? { x: REEL.fx, z: REEL.fz } : null) || bobPos(F) || { x: ME.x - 6, z: ME.z };
   const tier = r.f.tier, t0 = performance.now() / 1000;
   S.phase = "reel"; S.phaseEnd = Date.now() + 60000;   // 연출 동안 낚시 시간은 멈춤
-  const B = BREACH = { r, perfect, tier, x: bp.x, z: bp.z, t0, rum: BREACH_RUMBLE[tier] || 2.3, lastRing: 0, lastBub: 0, boom: false, mesh: null, shadow: null, w: 1.5 + tier * .5, wall: Date.now() };
+  const B = BREACH = { r, perfect, tier, x: bp.x, z: bp.z, t0, rum: BREACH_RUMBLE[tier] || 2.3, lastRing: 0, lastBub: 0, boom: false, mesh: null, shadow: null, w: Math.min(22, (1.5 + tier * .5) * fishVisK(r.f, baseSize(r.f) * (r.k || 1))), wall: Date.now() };
   // 물밑 그림자
   const sh = new T3.Mesh(new T3.CircleGeometry(1, 28), new T3.MeshBasicMaterial({ color: 0x06121c, transparent: true, opacity: 0, depthWrite: false }));
   sh.rotation.x = -Math.PI / 2; sh.position.set(B.x, waveY(B.x, B.z, t0) + .04, B.z); scene.add(sh); B.shadow = sh;
@@ -7388,11 +7390,12 @@ function updateChar(F, f, t, dt, now) {
   }
   let y = 2.2;
   if (ci) {
+    const vk = fishVisK(ci.f, ci.s);   // 실제 크기대로 (v1.44)
     const md = ci.f && FISH3D.get(ci.f.id);
     if (md) {
       if (!F.model) { F.model = new T3.Mesh(md.geo, md.mat); scene.add(F.model); }
       F.model.geometry = md.geo; F.model.material = md.mat; F.model.visible = true; F.fish.visible = false;
-      const w = 1.1 + ci.t * 0.45; F.model.scale.setScalar(w);
+      const w = Math.min(22, (1.1 + ci.t * 0.45) * vk); F.model.scale.setScalar(w);
       if (holding) {
         F.model.position.set(F.px, 2.05 + Math.sin(t * 3) * .05, F.pz); F.model.rotation.set(0, t * .8, 0);
         F.hands[0].position.set(-.3, 1.55, .1); F.hands[1].position.set(.3, 1.55, .1);
@@ -7404,7 +7407,7 @@ function updateChar(F, f, t, dt, now) {
     } else if (ci.f) {
       if (F.model) F.model.visible = false;
       if (F.fishId !== ci.f.id) { F.fish.material.map = fishTexture(ci.f); F.fish.material.needsUpdate = true; F.fishId = ci.f.id; }
-      const w = 1.1 + ci.t * 0.4;
+      const w = Math.min(22, (1.1 + ci.t * 0.4) * vk);
       F.fish.visible = true; F.fish.scale.set(w, w / 2, 1);
       if (holding) {
         F.fish.position.set(F.px, 2.0 + w / 4 + Math.sin(t * 3) * .05, F.pz); F.fish.material.rotation = Math.sin(t * 2) * .12;
