@@ -1615,7 +1615,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.65.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.66.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -4363,17 +4363,17 @@ function renderChat() {
     else if (m.kind === "brag") {
       const f = findFish(m.fishId);
       list.append(h("li", { class: "brag" }, f ? h("img", { src: fishArt(f).src, alt: "" }) : null,
-        h("div", { class: "bt" }, h("b", { style: "color:" + m.color, text: m.nick }), "님의 자랑 ", tm, h("br"),
+        h("div", { class: "bt" }, m.ttl ? h("span", { class: "ttl-tag", style: "margin-right:5px", text: m.ttl }) : null, h("b", { style: "color:" + m.color, text: m.nick }), "님의 자랑 ", tm, h("br"),
           tierChip(m.tier), " ", h("b", { text: m.text }), " ", h("span", { class: "num", text: fmtSize(m.size) }))));
     }
-    else list.append(h("li", null, h("span", { class: "who", style: "color:" + m.color, text: m.nick }), h("span", { text: m.text }), tm));
+    else list.append(h("li", null, m.ttl ? h("span", { class: "ttl-tag", style: "margin-right:5px", text: m.ttl }) : null, h("span", { class: "who", style: "color:" + m.color, text: m.nick }), h("span", { text: m.text }), tm));
   }
   if (nearBottom) list.scrollTop = list.scrollHeight;
 }
 function normChat(id, d) {
   return { id, kind: ["sys", "brag"].includes(d.kind) ? d.kind : "msg", nick: str(d.nick, 16) || "손님", text: str(d.text, 160),
     color: /^#[0-9a-f]{6}$/i.test(d.color || "") ? d.color : "#888888", ts: Number(d.ts) || 0,
-    fishId: str(d.fishId, 80), tier: clamp(Math.floor(Number(d.tier) || 0), 0, 5), size: Number(d.size) || 0, ch: clamp(Math.floor(Number(d.ch) || 1), 1, 99) };
+    fishId: str(d.fishId, 80), tier: clamp(Math.floor(Number(d.tier) || 0), 0, 5), size: Number(d.size) || 0, ch: clamp(Math.floor(Number(d.ch) || 1), 1, 99), ttl: TAG_OK(d.ttl) ? String(d.ttl).slice(0, 24) : "" };
 }
 async function postChat(msg) {
   if (S.online) {
@@ -4390,7 +4390,7 @@ function sendChat(text) {
   lastSend = Date.now();
   S.myBubble = { t: text, at: Date.now() };
   pushPresence({ bubble: { t: text.slice(0, 40), ts: Date.now() } });
-  postChat({ kind: "msg", nick: P.nick, color: P.color, text, ts: Date.now(), uid: S.uid || "" });
+  postChat({ kind: "msg", nick: P.nick, color: P.color, ttl: myTag(), text, ts: Date.now(), uid: S.uid || "" });
 }
 function postSys(text) { postChat({ kind: "sys", nick: "부두", color: "#888888", text, ts: Date.now(), uid: S.uid || "" }); }
 async function pruneChat() {
@@ -4405,7 +4405,7 @@ let showTimer = null;
 function brag(item) {
   S.show = { item, at: Date.now() };
   pushPresence({ show: { id: item.fishId, n: item.name, t: item.tier, s: item.size, ts: Date.now() } });
-  postChat({ kind: "brag", nick: P.nick, color: P.color, text: item.name, fishId: item.fishId, tier: item.tier, size: item.size, ts: Date.now(), uid: S.uid || "" });
+  postChat({ kind: "brag", nick: P.nick, color: P.color, ttl: myTag(), text: item.name, fishId: item.fishId, tier: item.tier, size: item.size, ts: Date.now(), uid: S.uid || "" });
   clearTimeout(showTimer);
   showTimer = setTimeout(() => { S.show = null; pushPresence({ show: null }); }, 12000);
   closeSheet();
