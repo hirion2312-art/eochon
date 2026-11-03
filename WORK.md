@@ -7,6 +7,7 @@
 
 | 누가 | 무엇 | 건드리는 곳 | 시작 |
 |---|---|---|---|
+| Claude (원 작업자 계정) | **회 센터 화면 재디자인 · 거리 NPC(접속자당 3명) · 캐릭터 겹침 방지 · 낚시 허점 수정** | `SHEETS.sashimi` · NPC(`SHOPPERS` 주변 · 새 `TOWNFOLK`) · `stepMove` · 낚시 루프(`hook`·`rollFish`·`reelFrame`·`fightStep`·판매) | 2026-11-03 |
 
 ## 다음에 할 일 (아무나 가져가요)
 
