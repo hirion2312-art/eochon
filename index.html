@@ -10,7 +10,7 @@
 :root{
   --bg:#e7efee; --surface:#f7fbfa; --surface2:#dae7e5; --ink:#132f38; --muted:#56717a; --line:#bfd2d0;
   --accent:#e2522c; --accent-ink:#ffffff; --sea:#1d5c70; --ok:#2f8f5b;
-  --t0:#71877e; --t1:#2a78bb; --t2:#8448cc; --t3:#d4701a; --t4:#b8921a; --t5:#0f9f9a;
+  --t0:#71877e; --t1:#2e8f57; --t2:#2a78bb; --t3:#1f9a8a; --t4:#8448cc; --t5:#b8921a; --t6:#0f9f9a; --t7:#c2438f; --t8:#7a2fd0; --t9:#4a3fd6;
   --shadow:0 10px 30px rgba(19,47,56,.18);
   --glass:rgba(16,22,26,.58); --glass-strong:rgba(16,22,26,.72); --glass-line:rgba(255,255,255,.14);
   --hud-ink:#f6f1e7; --hud-muted:rgba(246,241,231,.66); --hud-accent:#ff7a4d;
@@ -23,12 +23,12 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0b171c; --surface:#11222a; --surface2:#183039; --ink:#d9e7e8; --muted:#8aa2a8; --line:#23404a;
   --accent:#ff6a42; --accent-ink:#1a0d08; --sea:#5fb3cc; --ok:#55c487;
-  --t0:#9cb1a8; --t1:#62a9e8; --t2:#b38af0; --t3:#f39a4c; --t4:#e6c446; --t5:#3fd6cc;
+  --t0:#9cb1a8; --t1:#4cc276; --t2:#62a9e8; --t3:#2fd4bc; --t4:#b38af0; --t5:#e6c446; --t6:#3fd6cc; --t7:#f06fc0; --t8:#a95fff; --t9:#7a6cff;
   --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#0b171c; --surface:#11222a; --surface2:#183039; --ink:#d9e7e8; --muted:#8aa2a8; --line:#23404a;
   --accent:#ff6a42; --accent-ink:#1a0d08; --sea:#5fb3cc; --ok:#55c487;
-  --t0:#9cb1a8; --t1:#62a9e8; --t2:#b38af0; --t3:#f39a4c; --t4:#e6c446; --t5:#3fd6cc;
+  --t0:#9cb1a8; --t1:#4cc276; --t2:#62a9e8; --t3:#2fd4bc; --t4:#b38af0; --t5:#e6c446; --t6:#3fd6cc; --t7:#f06fc0; --t8:#a95fff; --t9:#7a6cff;
   --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark }
 
 html,body{height:100%}
@@ -162,7 +162,7 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.sm{padding:3px 9px;font-size:12px}
 .tier{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;color:#fff;letter-spacing:.02em}
-.tier.t0{background:var(--t0)}.tier.t1{background:var(--t1)}.tier.t2{background:var(--t2)}.tier.t3{background:var(--t3)}.tier.t4{background:var(--t4)}.tier.t5{background:linear-gradient(90deg,#0f9f9a,#7b5cd6,#e0479a);box-shadow:0 0 6px rgba(123,92,214,.6)}
+.tier.t0{background:var(--t0)}.tier.t1{background:var(--t1)}.tier.t2{background:var(--t2)}.tier.t3{background:var(--t3)}.tier.t4{background:var(--t4)}.tier.t5{background:var(--t5)}.tier.t6{background:var(--t6)}.tier.t7{background:var(--t7)}.tier.t8{background:var(--t8)}.tier.t9{background:linear-gradient(90deg,#0f9f9a,#7b5cd6,#e0479a);box-shadow:0 0 6px rgba(123,92,214,.6)}
 .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .muted{color:var(--muted)}
 .sec{font-family:var(--f-display);font-size:16px;margin:4px 0 -4px}
@@ -577,7 +577,7 @@ body.athome .stat{display:none}
 .sc-fish img{width:84px;height:42px;object-fit:contain;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
 .sc-fish span{text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .sc-fish.on{background:rgba(255,255,255,.22);box-shadow:0 0 0 2px #ffd84d,0 0 16px rgba(255,216,77,.6)}
-.sc-fish.g3 img{filter:drop-shadow(0 0 6px #c79bff)}.sc-fish.g4 img{filter:drop-shadow(0 0 8px #ffd84d)}.sc-fish.g5 img{filter:drop-shadow(0 0 10px #3fd6cc)}
+.sc-fish.g3 img{filter:drop-shadow(0 0 6px #2fd4bc)}.sc-fish.g4 img{filter:drop-shadow(0 0 6px #c79bff)}.sc-fish.g5 img{filter:drop-shadow(0 0 8px #ffd84d)}.sc-fish.g6 img{filter:drop-shadow(0 0 8px #3fd6cc)}.sc-fish.g7 img{filter:drop-shadow(0 0 9px #f06fc0)}.sc-fish.g8 img{filter:drop-shadow(0 0 10px #a95fff)}.sc-fish.g9 img{filter:drop-shadow(0 0 12px #7a6cff)}
 @keyframes scBob{50%{transform:translateY(-6px) rotate(-2deg)}}
 .sc-empty{margin:auto;font-size:13px;color:rgba(255,255,255,.85)}
 .sc-empty.dark{color:rgba(246,239,226,.6);padding:18px 0}
@@ -1190,8 +1190,8 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 @keyframes tshine{0%{background-position:160% 0}60%,100%{background-position:-60% 0}}
 @keyframes gpulse{0%,100%{box-shadow:0 0 0 1.5px var(--gc),0 0 8px var(--gs)}50%{box-shadow:0 0 0 2px var(--gc),0 0 18px var(--gs)}}
 @keyframes rainbow{0%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}33%{box-shadow:0 0 0 2px #7b8cff,0 0 16px rgba(123,140,255,.6)}66%{box-shadow:0 0 0 2px #3fd6cc,0 0 16px rgba(63,214,204,.6)}100%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}}
-.tier.t3,.tier.t4,.tier.t5{background-image:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.65) 50%,transparent 65%),var(--tb,none);background-size:250% 100%,100% 100%;background-repeat:no-repeat;animation:tshine 2.6s ease-in-out infinite}
-.tier.t3{--tb:linear-gradient(var(--t3),var(--t3))}.tier.t4{--tb:linear-gradient(var(--t4),var(--t4))}.tier.t5{--tb:linear-gradient(90deg,#0f9f9a,#7b5cd6,#e0479a)}
+.tier.t3,.tier.t4,.tier.t5,.tier.t6,.tier.t7,.tier.t8,.tier.t9{background-image:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.65) 50%,transparent 65%),var(--tb,none);background-size:250% 100%,100% 100%;background-repeat:no-repeat;animation:tshine 2.6s ease-in-out infinite}
+.tier.t3{--tb:linear-gradient(var(--t3),var(--t3))}.tier.t4{--tb:linear-gradient(var(--t4),var(--t4))}.tier.t5{--tb:linear-gradient(var(--t5),var(--t5))}.tier.t6{--tb:linear-gradient(var(--t6),var(--t6))}.tier.t7{--tb:linear-gradient(var(--t7),var(--t7))}.tier.t8{--tb:linear-gradient(var(--t8),var(--t8))}.tier.t9{--tb:linear-gradient(90deg,#0f9f9a,#7b5cd6,#e0479a)}
 /* v1.35 입장 흐름: 캐릭터 만들기 · 비행기 도착 장면 · 마우스 고정 시점 */
 .creator{position:fixed;inset:0;z-index:55;background:radial-gradient(120% 90% at 28% 38%,#fff3dc 0%,#ffd9a8 28%,#8fd0e0 62%,#2b6f8a 100%)}
 .creator .cstage{position:absolute;left:0;top:0;bottom:0;right:min(560px,44vw);display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -1238,7 +1238,12 @@ body.creating #sheetClose,body.creating #sheetBack{display:none}
 .ratetbl .up{color:#2fae7f;font-weight:700}.ratetbl .down{color:#d8402a;font-weight:700}
 .fperks{font-size:11.5px;color:#cfe9f2;padding:2px 2px 0;text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .irow.g4{--gc:#f2b630;--gs:rgba(242,182,48,.5);animation:gpulse 2.2s ease-in-out infinite}.irow.g5{animation:rainbow 2.6s linear infinite}
-.itile.g3,.card.g3{--gc:#9a6ee0;--gs:rgba(154,110,224,.5);animation:gpulse 2.4s ease-in-out infinite;border-color:transparent}
+.itile.g3,.card.g3{--gc:#2fd4bc;--gs:rgba(47,212,188,.5);animation:gpulse 2.4s ease-in-out infinite;border-color:transparent}
+.itile.g4,.card.g4{--gc:#9a6ee0;--gs:rgba(154,110,224,.5);animation:gpulse 2.2s ease-in-out infinite;border-color:transparent}
+.itile.g6,.card.g6{--gc:#3fd6cc;--gs:rgba(63,214,204,.5);animation:gpulse 2.2s ease-in-out infinite;border-color:transparent}
+.itile.g7,.card.g7{--gc:#f06fc0;--gs:rgba(240,111,192,.55);animation:gpulse 2s ease-in-out infinite;border-color:transparent}
+.itile.g8,.card.g8{--gc:#a95fff;--gs:rgba(169,95,255,.6);animation:gpulse 1.9s ease-in-out infinite;border-color:transparent}
+.itile.g9,.card.g9{animation:rainbow 2.2s linear infinite;border-color:transparent}
 .itile.g4,.card.g4{--gc:#f2b630;--gs:rgba(242,182,48,.6);animation:gpulse 1.8s ease-in-out infinite;border-color:transparent}
 .itile.g5,.card.g5{animation:rainbow 2.4s linear infinite;border-color:transparent}
 .itile.gtoday,.card.gtoday{outline:2px dashed #f2c230;outline-offset:2px}
@@ -1302,7 +1307,7 @@ body.emote-open .actbtn,body.emote-open .castb,body.emote-open .hook,body.me-ope
 html:root:not(.lg-x),html:root[data-theme]{   /* 밝은 · 어두운 모드 규칙보다 우선 */
   --bg:rgba(255,255,255,.055); --surface:#121b23; --surface2:rgba(255,255,255,.09); --ink:#eef3f5; --muted:#9db0b8; --line:rgba(255,255,255,.13);
   --accent:#ff6a42; --accent-ink:#1a0d08; --sea:#5fb3cc; --ok:#55c487;
-  --t0:#9cb1a8; --t1:#62a9e8; --t2:#b38af0; --t3:#f39a4c; --t4:#e6c446; --t5:#3fd6cc;
+  --t0:#9cb1a8; --t1:#4cc276; --t2:#62a9e8; --t3:#2fd4bc; --t4:#b38af0; --t5:#e6c446; --t6:#3fd6cc; --t7:#f06fc0; --t8:#a95fff; --t9:#7a6cff;
   --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark;
   --lg-fill:rgba(14,19,27,.52); --lg-fill-strong:rgba(12,16,24,.7);
   --lg-sheen:linear-gradient(180deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,.035) 38%,rgba(255,255,255,0) 60%,rgba(255,255,255,.04) 100%);
@@ -1616,26 +1621,22 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.67.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
-const TIERS = [
-  { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
-  { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
-  { name: "희귀", base: 300 },
-  { name: "영웅", base: 1400 },
-  { name: "전설", base: 6000 },
-  { name: "신화", base: 22000 },
+const GAME_VER = "1.69.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
+  { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
+  { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
 ];
-const TIER_VARS = ["--t0", "--t1", "--t2", "--t3", "--t4", "--t5"];
+const TIER_VARS = ["--t0", "--t1", "--t2", "--t3", "--t4", "--t5", "--t6", "--t7", "--t8", "--t9"];
 const BAITS = [
-  { id: "worm",   name: "지렁이",     price: 0,    p: [80, 18, 2, 0, 0],      note: "무료 · 무한", desc: "기본 미끼예요. 공짜라 떨어질 걱정이 없고, 대신 좋은 물고기는 거의 안 물어요." },
-  { id: "shrimp", name: "새우",       price: 10,   p: [60, 30, 9, 1, 0], desc: "지렁이보다 한 단계 위예요. 고급 물고기가 부쩍 늘어요." },
-  { id: "krill",  name: "크릴",       price: 25,   p: [50, 32, 15, 2.7, .3], lv: 2, desc: "희귀가 가끔 물고, 전설도 아주 가끔 나와요." },
-  { id: "paste",  name: "특제 떡밥",  price: 50,   p: [40, 35, 20, 4.5, 0.5], lv: 3, desc: "비법 반죽 떡밥이에요. 희귀 이상이 네 번에 한 번꼴로 물어요." },
-  { id: "squid",  name: "생오징어",   price: 120,  p: [28, 32, 28, 10, 2], lv: 6, desc: "싱싱한 오징어예요. 영웅급이 제법 나오는 대물 미끼예요." },
-  { id: "lure",   name: "황금 루어",  price: 300,  p: [20, 30, 30, 17, 3], lv: 9, desc: "금빛으로 번쩍여 대물을 부르고, 아주 가끔 신화급도 물어요." },
-  { id: "legend", name: "전설의 미끼", price: 2000, p: [0, 10, 40, 35, 15], lv: 16, desc: "전설 그 자체예요. 일반 물고기는 절대 안 물어요." },
+  { id: "worm",   name: "지렁이",     price: 0,    p: [80, 17, 2.5, .5, 0, 0, 0, 0, 0],      note: "무료 · 무한", desc: "기본 미끼예요. 공짜라 떨어질 걱정이 없고, 대신 좋은 물고기는 거의 안 물어요." },
+  { id: "shrimp", name: "새우",       price: 10,   p: [58, 30, 9, 2.5, .5, 0, 0, 0, 0], desc: "지렁이보다 한 단계 위예요. 고급 물고기가 부쩍 늘어요." },
+  { id: "krill",  name: "크릴",       price: 25,   p: [48, 31, 15, 4, 1.5, .5, 0, 0, 0], lv: 2, desc: "희귀가 가끔 물고, 전설도 아주 가끔 나와요." },
+  { id: "paste",  name: "특제 떡밥",  price: 50,   p: [38, 33, 19, 6, 3, 1, 0, 0, 0], lv: 3, desc: "비법 반죽 떡밥이에요. 희귀 이상이 네 번에 한 번꼴로 물어요." },
+  { id: "squid",  name: "생오징어",   price: 120,  p: [26, 30, 26, 10, 5, 2.4, .6, 0, 0], lv: 6, desc: "싱싱한 오징어예요. 영웅급이 제법 나오는 대물 미끼예요." },
+  { id: "lure",   name: "황금 루어",  price: 300,  p: [18, 27, 28, 14, 7, 4, 1.6, .4, 0], lv: 9, desc: "금빛으로 번쩍여 대물을 부르고, 아주 가끔 신화급도 물어요." },
+  { id: "legend", name: "전설의 미끼", price: 2000, p: [0, 8, 32, 24, 17, 11, 5.4, 2, .6], lv: 16, desc: "전설 그 자체예요. 일반 물고기는 절대 안 물어요." },
 ];
-const MYTH_CHANCE = { lure: .0015, legend: .006 };   // 신화 등급 확률 · 상점 설명에도 이 숫자를 그대로 보여요
+const APEX_CHANCE = { lure: .001, legend: .004 };   // 태초 등급(최상위) 확률 · 상점 설명에도 이 숫자를 그대로 보여요
 const RELEASE = [
   { name: "피라미급", cost: 1000,   tier: 0, min: 5,   max: 30 },
   { name: "붕어급",   cost: 5000,   tier: 1, min: 20,  max: 60 },
@@ -1660,13 +1661,13 @@ const BUILTIN = [
     art: { body: "#e0727a", belly: "#f7d0cf", fin: "#c95761", pattern: "spots", pc: "#7fd0e8", len: 1, th: 1.15 } },
   { id: "b-nongeo", name: "농어", tier: 2, min: 50, max: 110, desc: "힘 좋은 은빛 사냥꾼.",
     art: { body: "#7f98a3", belly: "#f0f4f4", fin: "#5c7680", pattern: "none", len: 1.15, th: .85 } },
-  { id: "b-darangeo", name: "참다랑어", tier: 3, min: 100, max: 250, desc: "쉬지 않고 대양을 달리는 거대한 물고기.", model: "fish/05_Bluefin_Tuna.glb",
+  { id: "b-darangeo", name: "참다랑어", tier: 4, min: 100, max: 250, desc: "쉬지 않고 대양을 달리는 거대한 물고기.", model: "fish/05_Bluefin_Tuna.glb",
     art: { body: "#1f3a5c", belly: "#cfd9e2", fin: "#e8c13a", pattern: "finlets", pc: "#e8c13a", len: 1.05, th: 1 } },
-  { id: "b-cheongsaechi", name: "청새치", tier: 3, min: 150, max: 300, desc: "창 같은 주둥이를 가진 바다의 검객.",
+  { id: "b-cheongsaechi", name: "청새치", tier: 4, min: 150, max: 300, desc: "창 같은 주둥이를 가진 바다의 검객.",
     art: { body: "#25507a", belly: "#dbe6ef", fin: "#1d3f60", pattern: "stripes", pc: "#7fb6e6", len: 1.1, th: .7, bill: true, sail: true } },
-  { id: "b-goraesangeo", name: "고래상어", tier: 4, min: 400, max: 1000, desc: "세상에서 가장 큰 물고기. 별처럼 흰 점이 가득.",
+  { id: "b-goraesangeo", name: "고래상어", tier: 5, min: 400, max: 1000, desc: "세상에서 가장 큰 물고기. 별처럼 흰 점이 가득.",
     art: { body: "#3c5566", belly: "#c9d4da", fin: "#2e4453", pattern: "spots", pc: "#e8f0f3", len: 1.15, th: .9, dense: true } },
-  { id: "b-sangalchi", name: "산갈치", tier: 4, min: 300, max: 800, desc: "깊은 바다에서 올라온다는 은빛 리본.",
+  { id: "b-sangalchi", name: "산갈치", tier: 6, min: 300, max: 800, desc: "깊은 바다에서 올라온다는 은빛 리본.",
     art: { body: "#c9d3da", belly: "#f4f7f8", fin: "#e0474c", pattern: "none", len: 1.25, th: .42, crest: true } },
   // v1.20 새 물고기 · where: night(밤) · sea(배 위 깊은 바다) · dawn(새벽·노을)
   { id: "b-jeongaeng", name: "전갱이", tier: 0, min: 15, max: 30, desc: "꼬리 쪽 단단한 비늘(모)이 특징인 등푸른 물고기.", art: { body: "#5f8a8c", belly: "#e8eeea", fin: "#c9b25a", pattern: "finlets", pc: "#d8d0a0", len: 1.05, th: .85 } },
@@ -1680,21 +1681,21 @@ const BUILTIN = [
   { id: "b-gwangeo", name: "광어", tier: 1, min: 35, max: 80, desc: "모래 바닥에 납작 붙은 횟감의 왕. 눈이 왼쪽에 몰려 있어요.", art: { shape: "flat", body: "#8a7a5a", belly: "#c9b896", fin: "#7a6a4a", pattern: "spots", pc: "#5a4c34", len: 1.05 } },
   { id: "b-dodari", name: "도다리", tier: 1, min: 20, max: 35, where: "dawn", desc: "봄 도다리쑥국의 주인공. 광어보다 작고 둥글어요.", art: { shape: "flat", body: "#9a8a62", belly: "#d9c9a6", fin: "#8a7a52", pattern: "spots", pc: "#4a3c28", len: .9, th: 1.05, dense: true } },
   { id: "b-gamseongdom", name: "감성돔", tier: 2, min: 30, max: 60, where: "dawn", desc: "낚시꾼들의 로망. 새벽과 해 질 녘에 잘 물어요.", art: { body: "#4a5662", belly: "#c9d0d6", fin: "#323c46", pattern: "stripes", pc: "#3a4652", len: .95, th: 1.2 } },
-  { id: "b-doldom", name: "돌돔", tier: 2, min: 30, max: 60, desc: "흰 몸에 굵은 검은 줄무늬 일곱 개. 갯바위의 제왕.", art: { body: "#e8e4d8", belly: "#f6f4ee", fin: "#2a2a30", pattern: "stripes", pc: "#1e1e24", len: .95, th: 1.25 } },
+  { id: "b-doldom", name: "돌돔", tier: 3, min: 30, max: 60, desc: "흰 몸에 굵은 검은 줄무늬 일곱 개. 갯바위의 제왕.", art: { body: "#e8e4d8", belly: "#f6f4ee", fin: "#2a2a30", pattern: "stripes", pc: "#1e1e24", len: .95, th: 1.25 } },
   { id: "b-bengedom", name: "벵에돔", tier: 2, min: 25, max: 50, where: "night", desc: "검푸른 몸의 갯바위 물고기. 밤에 경계를 풀어요.", art: { body: "#26323e", belly: "#5a6672", fin: "#1a242e", pattern: "none", len: .95, th: 1.15 } },
-  { id: "b-bangeo", name: "방어", tier: 2, min: 60, max: 120, where: "sea", desc: "겨울 바다의 기름진 대물. 노란 줄이 옆구리를 가로질러요.", art: { body: "#2f5a7a", belly: "#e8eef2", fin: "#c9b22a", pattern: "finlets", pc: "#e8c93a", len: 1.15, th: .85 } },
-  { id: "b-munui", name: "무늬오징어", tier: 2, min: 20, max: 45, where: "night", desc: "몸에 물결무늬가 일렁이는 오징어. 에깅 낚시의 꽃.", art: { shape: "squid", body: "#c9a89a", belly: "#f2e2da", fin: "#d9b8aa", pattern: "waves", pc: "#8a5a4a" } },
+  { id: "b-bangeo", name: "방어", tier: 3, min: 60, max: 120, where: "sea", desc: "겨울 바다의 기름진 대물. 노란 줄이 옆구리를 가로질러요.", art: { body: "#2f5a7a", belly: "#e8eef2", fin: "#c9b22a", pattern: "finlets", pc: "#e8c93a", len: 1.15, th: .85 } },
+  { id: "b-munui", name: "무늬오징어", tier: 3, min: 20, max: 45, where: "night", desc: "몸에 물결무늬가 일렁이는 오징어. 에깅 낚시의 꽃.", art: { shape: "squid", body: "#c9a89a", belly: "#f2e2da", fin: "#d9b8aa", pattern: "waves", pc: "#8a5a4a" } },
   { id: "b-samchi", name: "삼치", tier: 2, min: 60, max: 110, where: "sea", desc: "날카로운 이빨로 미끼를 끊어 가는 은빛 사냥꾼.", art: { body: "#4a6a86", belly: "#eef2f4", fin: "#3a5670", pattern: "spots", pc: "#2a4258", len: 1.25, th: .65 } },
   { id: "b-butjangeo", name: "붕장어", tier: 2, min: 50, max: 100, where: "night", desc: "밤이 되면 굴에서 나오는 길쭉한 바다 장어.", art: { shape: "eel", body: "#7a6a52", belly: "#e2d8c4", fin: "#6a5a42", th: 1.1, crest: true } },
-  { id: "b-busiri", name: "부시리", tier: 3, min: 80, max: 180, where: "sea", desc: "방어의 사촌이지만 힘은 한 수 위. 지구력 끝판왕.", art: { body: "#3a6a86", belly: "#f0f4f6", fin: "#d9c23a", pattern: "finlets", pc: "#f2d84a", len: 1.2, th: .85 } },
-  { id: "b-hokdom", name: "혹돔", tier: 3, min: 50, max: 100, desc: "이마에 커다란 혹이 솟은 붉은 바위 물고기.", art: { body: "#c96a5a", belly: "#f2c9b8", fin: "#a8483a", pattern: "none", len: 1, th: 1.2, hump: true } },
-  { id: "b-daewangmuneo", name: "대왕문어", tier: 3, min: 100, max: 300, where: "sea", desc: "다리를 펴면 어른 키를 훌쩍 넘는 바다의 힘센 손.", art: { shape: "octo", body: "#a8483a", belly: "#f2c4b0", fin: "#b8584a", pattern: "spots", pc: "#7a2e24" } },
-  { id: "b-neungseong", name: "능성어", tier: 3, min: 50, max: 90, desc: "굵은 갈색 띠를 두른 바리과 물고기. 맛이 귀해요.", art: { body: "#8a6a4a", belly: "#d9c4a8", fin: "#6a4a32", pattern: "stripes", pc: "#4a3222", len: 1.05, th: 1.05 } },
-  { id: "b-dotdom", name: "돗돔", tier: 4, min: 100, max: 200, where: "sea", desc: "전설의 심해 거물. 낚으면 신문에 나요.", art: { body: "#3a4048", belly: "#8a9098", fin: "#2a3038", pattern: "stripes", pc: "#2a2e34", len: 1.1, th: 1.15, eye: 1.4 } },
-  { id: "b-dageumbari", name: "다금바리", tier: 4, min: 60, max: 120, where: "night", desc: "제주 바다의 귀한 손님. 맛으로는 따라올 자가 없어요.", art: { body: "#7a5a46", belly: "#d8c0a8", fin: "#5a3e2e", pattern: "spots", pc: "#4a2e20", len: 1.05, th: 1.1, dense: true } },
-  { id: "b-geumdom", name: "황금 참돔", tier: 5, min: 60, max: 110, desc: "백 년에 한 번 나타난다는 금빛 참돔. 보면 행운이 온대요.", art: { body: "#f2c230", belly: "#fff2b0", fin: "#e8a21a", pattern: "spots", pc: "#fff6d0", len: 1, th: 1.15, shimmer: true, glow: "rgba(255,216,77,.55)" } },
-  { id: "b-byeolgaori", name: "별빛 가오리", tier: 5, min: 150, max: 300, where: "night", desc: "밤하늘을 등에 업은 가오리. 별빛이 반짝여요.", art: { shape: "ray", body: "#1a2450", belly: "#3a4a8a", fin: "#1a2450", pattern: "spots", pc: "#fff6c0", dense: true, glow: "rgba(120,140,255,.45)" } },
-  { id: "b-haeryong", name: "바다의 용", tier: 5, min: 300, max: 800, where: "sea", desc: "깊은 바다를 지키는 전설 속 해룡. 비늘이 옥빛으로 빛나요.", art: { shape: "dragon", body: "#2f9a86", belly: "#bff2e0", fin: "#e8c13a", pc: "#f2e08a", th: 1.25, glow: "rgba(63,214,204,.5)" } },
+  { id: "b-busiri", name: "부시리", tier: 4, min: 80, max: 180, where: "sea", desc: "방어의 사촌이지만 힘은 한 수 위. 지구력 끝판왕.", art: { body: "#3a6a86", belly: "#f0f4f6", fin: "#d9c23a", pattern: "finlets", pc: "#f2d84a", len: 1.2, th: .85 } },
+  { id: "b-hokdom", name: "혹돔", tier: 4, min: 50, max: 100, desc: "이마에 커다란 혹이 솟은 붉은 바위 물고기.", art: { body: "#c96a5a", belly: "#f2c9b8", fin: "#a8483a", pattern: "none", len: 1, th: 1.2, hump: true } },
+  { id: "b-daewangmuneo", name: "대왕문어", tier: 4, min: 100, max: 300, where: "sea", desc: "다리를 펴면 어른 키를 훌쩍 넘는 바다의 힘센 손.", art: { shape: "octo", body: "#a8483a", belly: "#f2c4b0", fin: "#b8584a", pattern: "spots", pc: "#7a2e24" } },
+  { id: "b-neungseong", name: "능성어", tier: 4, min: 50, max: 90, desc: "굵은 갈색 띠를 두른 바리과 물고기. 맛이 귀해요.", art: { body: "#8a6a4a", belly: "#d9c4a8", fin: "#6a4a32", pattern: "stripes", pc: "#4a3222", len: 1.05, th: 1.05 } },
+  { id: "b-dotdom", name: "돗돔", tier: 5, min: 100, max: 200, where: "sea", desc: "전설의 심해 거물. 낚으면 신문에 나요.", art: { body: "#3a4048", belly: "#8a9098", fin: "#2a3038", pattern: "stripes", pc: "#2a2e34", len: 1.1, th: 1.15, eye: 1.4 } },
+  { id: "b-dageumbari", name: "다금바리", tier: 5, min: 60, max: 120, where: "night", desc: "제주 바다의 귀한 손님. 맛으로는 따라올 자가 없어요.", art: { body: "#7a5a46", belly: "#d8c0a8", fin: "#5a3e2e", pattern: "spots", pc: "#4a2e20", len: 1.05, th: 1.1, dense: true } },
+  { id: "b-geumdom", name: "황금 참돔", tier: 7, min: 60, max: 110, desc: "백 년에 한 번 나타난다는 금빛 참돔. 보면 행운이 온대요.", art: { body: "#f2c230", belly: "#fff2b0", fin: "#e8a21a", pattern: "spots", pc: "#fff6d0", len: 1, th: 1.15, shimmer: true, glow: "rgba(255,216,77,.55)" } },
+  { id: "b-byeolgaori", name: "별빛 가오리", tier: 7, min: 150, max: 300, where: "night", desc: "밤하늘을 등에 업은 가오리. 별빛이 반짝여요.", art: { shape: "ray", body: "#1a2450", belly: "#3a4a8a", fin: "#1a2450", pattern: "spots", pc: "#fff6c0", dense: true, glow: "rgba(120,140,255,.45)" } },
+  { id: "b-haeryong", name: "바다의 용", tier: 9, min: 300, max: 800, where: "sea", desc: "깊은 바다를 지키는 전설 속 해룡. 비늘이 옥빛으로 빛나요.", art: { shape: "dragon", body: "#2f9a86", belly: "#bff2e0", fin: "#e8c13a", pc: "#f2e08a", th: 1.25, glow: "rgba(63,214,204,.5)" } },
   // 3D 모델 물고기 (fish/*.glb)
   ...[
     ["b-clown", "흰동가리", 0, 6, 11, "말미잘 사이에 숨어 사는 주황 줄무늬 꼬마.", "01_Clownfish", "#f07a2a", "stripes", "#ffffff"],
@@ -1763,10 +1764,10 @@ const BUILTIN = [
   { id: "b-chamjogi", name: "참조기", tier: 1, min: 20, max: 35, desc: "노란 배가 반짝이는 굴비의 주인공.", art: { body: "#c9b26a", belly: "#f2d84a", fin: "#a8904a", pattern: "none", len: 1.05, th: .85 } },
   { id: "b-imyeonsu", name: "임연수어", tier: 1, min: 30, max: 50, desc: "굵은 줄무늬가 다섯 개. 껍질 쌈이 별미예요.", art: { body: "#8a9a6a", belly: "#eef0e0", fin: "#6a7a4a", pattern: "stripes", pc: "#3a4428", len: 1.1, th: .8 } },
   { id: "b-hwangeo", name: "황어", tier: 1, min: 30, max: 45, where: "dawn", desc: "봄이면 붉은 띠를 두르고 강을 거슬러 올라요.", art: { body: "#6a7a86", belly: "#f2e6d8", fin: "#d8584a", pattern: "stripes", pc: "#e8784a", len: 1.1, th: .8 } },
-  { id: "b-mineo", name: "민어", tier: 2, min: 50, max: 100, desc: "여름 보양식의 왕. 부레까지 버릴 게 없어요.", art: { body: "#a89a7a", belly: "#f0e8d8", fin: "#8a7a5a", pattern: "none", len: 1.15, th: .9 } },
-  { id: "b-daegu", name: "대구", tier: 2, min: 50, max: 90, where: "sea", desc: "입이 커서 대구. 한겨울 먼바다에서 올라와요.", art: { body: "#8a8a6a", belly: "#efece0", fin: "#6a6a4a", pattern: "spots", pc: "#5a5a3a", len: 1.1, th: .95 } },
+  { id: "b-mineo", name: "민어", tier: 3, min: 50, max: 100, desc: "여름 보양식의 왕. 부레까지 버릴 게 없어요.", art: { body: "#a89a7a", belly: "#f0e8d8", fin: "#8a7a5a", pattern: "none", len: 1.15, th: .9 } },
+  { id: "b-daegu", name: "대구", tier: 3, min: 50, max: 90, where: "sea", desc: "입이 커서 대구. 한겨울 먼바다에서 올라와요.", art: { body: "#8a8a6a", belly: "#efece0", fin: "#6a6a4a", pattern: "spots", pc: "#5a5a3a", len: 1.1, th: .95 } },
   { id: "b-hongeo", name: "홍어", tier: 2, min: 60, max: 120, where: "dawn", desc: "마름모꼴 가오리. 삭히면 코가 뻥 뚫려요.", art: { shape: "ray", body: "#8a6a5a", belly: "#f2e2d8", fin: "#8a6a5a", pattern: "spots", pc: "#5a3e30" } },
-  { id: "b-daebangeo", name: "대방어", tier: 3, min: 90, max: 150, where: "sea", desc: "겨울 바다를 주름잡는 10kg 넘는 방어. 기름이 꽉 찼어요.", art: { body: "#2a4a6a", belly: "#eef2f6", fin: "#c9b22a", pattern: "finlets", pc: "#f2d84a", len: 1.2, th: .95 } },
+  { id: "b-daebangeo", name: "대방어", tier: 4, min: 90, max: 150, where: "sea", desc: "겨울 바다를 주름잡는 10kg 넘는 방어. 기름이 꽉 찼어요.", art: { body: "#2a4a6a", belly: "#eef2f6", fin: "#c9b22a", pattern: "finlets", pc: "#f2d84a", len: 1.2, th: .95 } },
 ];
 const NICK_A = ["졸린", "멍한", "느긋한", "배고픈", "수줍은", "심심한", "행복한", "반짝이는", "꾸벅꾸벅", "조용한", "엉뚱한", "따끈한", "노곤한", "말랑한"];
 const NICK_B = ["붕어", "고등어", "멸치", "갈매기", "해달", "문어", "복어", "가자미", "꽁치", "물개", "소라", "해파리", "오징어", "도다리"];
@@ -2186,13 +2187,13 @@ function newProfile() {
 }
 function normItem(it) {
   if (!it || typeof it !== "object") return null;
-  const tier = clamp(Math.floor(Number(it.tier) || 0), 0, 5);
+  const tier = clamp(Math.floor(Number(it.tier) || 0), 0, 9);
   return { id: isUid(it.id) ? it.id : uid4(), fishId: str(it.fishId, 80), name: str(it.name, 14) || "물고기", tier,
     size: clamp(Number(it.size) || 1, 0.1, 200000), k: clamp(Number(it.k) || 1, 0.1, 100), price: clamp(Math.round(Number(it.price) || 1), 1, 2000000), ts: Number(it.ts) || Date.now(), hooked: !!it.hooked, ...(it.paid ? { paid: clamp(Math.round(Number(it.paid) || 0), 0, 50000000) } : {}) };
 }
 function normDish(d) {
   if (!d || typeof d !== "object") return null;
-  const tier = clamp(Math.floor(Number(d.tier) || 0), 0, 5);
+  const tier = clamp(Math.floor(Number(d.tier) || 0), 0, 9);
   const b = d.buff || {};
   const type = BUFF_KEYS.includes(b.type) ? b.type : "bite";
   const q = clamp(Math.floor(Number(d.q) || 0), 0, 2);
@@ -2821,7 +2822,7 @@ const labSet = (k, v) => { LAB[k] = v; lsSet("mn.lab." + k, v); if (S.sheet === 
 function levelOf(xp) { let lv = 1; while (lv < LV_MAX && xp >= xpNeed(lv + 1)) lv++; return lv; }
 const myLv = () => levelOf(P.xp || 0);
 function xpFor(r, perfect, auto) {
-  const f = r.f, base = [6, 14, 35, 90, 220, 600][f.tier] || 6;
+  const f = r.f, base = [6, 14, 35, 60, 90, 220, 380, 600, 1000, 1800][f.tier] || 6;
   return base * (.7 + .3 * Math.min(3, r.k || 1)) * (perfect ? 1.2 : 1) * (r.coop ? 1.5 : 1) * (r.manual ? 1.15 : 1) * (auto ? .6 : 1) * (atSea() ? 1.2 : 1);
 }
 function gainXp(n) {
@@ -3048,7 +3049,7 @@ function startCast(pow, manual) {
 function fishingNow() { const s = ME.seat && SEAT[ME.seat]; if (!s) return false; return s.kind === "pier" || (s.kind === "boat" && boatPose(Date.now()).phase === "sea"); }
 const autoOn = () => S.auto || S.mung;
 /* 자동 낚시 제한: 영웅 이상은 직접 싸워야 잡혀요 · 15분 동안 손을 안 대면 멈춰요 · 다른 탭에 가 있으면 쉬어요 */
-const AUTO_MAX_TIER = 3, AUTO_IDLE_MS = 15 * 60000;
+const AUTO_MAX_TIER = 4, AUTO_IDLE_MS = 15 * 60000;   // 멍 모드는 영웅(4)부터 못 잡아요 (10등급에서도 예전과 같은 위치)
 S.lastInput = Date.now();
 for (const ev of ["pointerdown", "keydown", "touchstart", "wheel"]) window.addEventListener(ev, () => { S.lastInput = Date.now(); }, { passive: true, capture: true });
 function autoIdleStop() {
@@ -3168,7 +3169,7 @@ function rollFish(baitId, opts) {
   const deep = atSea();
   const bait = BAITS.find(b => b.id === baitId) || BAITS[0];
   let tier = weighted(luckProbs(bait.p, (deep ? 30 : 0) + (S.castPow || 0) * 6 + (S.castPerfect ? 8 : 0) + (eventOn("rare") ? 15 : 0)));
-  { const mc = (MYTH_CHANCE[baitId] || 0) * (deep ? 2 : 1) * (isNight() ? 1.5 : 1) * (eventOn("rare") ? 2 : 1); if (Math.random() < mc) tier = 5; }
+  { const mc = (APEX_CHANCE[baitId] || 0) * (deep ? 2 : 1) * (isNight() ? 1.5 : 1) * (eventOn("rare") ? 2 : 1); if (Math.random() < mc) tier = 9; }   // 태초 롤
   if (S.isOwner && LAB.tier >= 0) { tier = LAB.tier; labSet("tier", -1); }   // 실험실: 등급 고정 (한 번 쓰면 꺼져요)
   const pool = allFish().filter(f => habitatW(f) > 0);
   let cands = pool.filter(f => f.tier === tier);
@@ -3205,7 +3206,7 @@ function landFish(r, perfect, auto) {
   if (from && f.tier < 3) ACT_FX.splash(from, f.tier >= 2);
   setPhase("catch", CATCH_MS);
   pushPresence({ catch: { id: f.id, n: f.name, t: f.tier, s: size, ts: Date.now() } });
-  sfx("splash", .5); sfx(["jingle-catch", "jingle-catch", "jingle-rare", "fanfare-hero", "fanfare-legend", "fanfare-myth"][f.tier] || "jingle-catch", f.tier >= 3 ? .5 : .45);
+  sfx("splash", .5); sfx(["jingle-catch", "jingle-catch", "jingle-rare", "jingle-rare", "fanfare-hero", "fanfare-legend", "fanfare-legend", "fanfare-myth", "fanfare-myth", "fanfare-myth"][f.tier] || "jingle-catch", f.tier >= 3 ? .5 : .45);
   if (isToday) sfx("sparkle", .5);
   const art = fishArt(f);
   toast([h("img", { src: art.src, alt: "" }),
@@ -3275,7 +3276,7 @@ function startReel(r, opts) {
   $("fightCoop").hidden = !REEL.coop;
   $("fight").hidden = false; document.body.classList.add("fighting");
   $("fight").classList.toggle("boss", r.f.tier >= 3); $("fight").dataset.tier = r.f.tier;
-  if (r.f.tier >= 3) { toast([h("b", { text: r.f.tier >= 5 ? "✨ 신화 속 물고기가 물었어요!!" : r.f.tier >= 4 ? "⚠ 전설급 대물이에요!" : "⚠ 대물 입질!" }), h("div", { class: "muted", style: "font-size:12px", text: "몸부림칠 땐 꼭 손을 떼요 · 약한 낚싯대와 줄로는 버티기 어려워요" })], "lvup", 4000); sfx("jingle-rare", .3); }
+  if (r.f.tier >= 3) { toast([h("b", { text: r.f.tier >= 9 ? "🌌 태초의 존재가 물었어요!!" : r.f.tier >= 8 ? "✨ 초월급 존재가 물었어요!!" : r.f.tier >= 7 ? "✨ 신화 속 물고기가 물었어요!!" : r.f.tier >= 5 ? "⚠ 전설급 대물이에요!" : "⚠ 대물 입질!" }), h("div", { class: "muted", style: "font-size:12px", text: "몸부림칠 땐 꼭 손을 떼요 · 약한 낚싯대와 줄로는 버티기 어려워요" })], "lvup", 4000); sfx("jingle-rare", .3); }
   coach("fight");
   drawFight(); requestAnimationFrame(reelFrame);
 }
@@ -4375,7 +4376,7 @@ function renderChat() {
 function normChat(id, d) {
   return { id, kind: ["sys", "brag"].includes(d.kind) ? d.kind : "msg", nick: str(d.nick, 16) || "손님", text: str(d.text, 160),
     color: /^#[0-9a-f]{6}$/i.test(d.color || "") ? d.color : "#888888", ts: Number(d.ts) || 0,
-    fishId: str(d.fishId, 80), tier: clamp(Math.floor(Number(d.tier) || 0), 0, 5), size: Number(d.size) || 0, ch: clamp(Math.floor(Number(d.ch) || 1), 1, 99), ttl: TAG_OK(d.ttl) ? String(d.ttl).slice(0, 24) : "", uid: str(d.uid, 64) };
+    fishId: str(d.fishId, 80), tier: clamp(Math.floor(Number(d.tier) || 0), 0, 9), size: Number(d.size) || 0, ch: clamp(Math.floor(Number(d.ch) || 1), 1, 99), ttl: TAG_OK(d.ttl) ? String(d.ttl).slice(0, 24) : "", uid: str(d.uid, 64) };
 }
 async function postChat(msg) {
   if (S.online) {
@@ -5636,7 +5637,7 @@ Object.assign(TUTS, { rest: { icon: "🏮", title: "내 포차", steps: [
   "손님이 앉으면 위에 주문 티켓이 떠요. 티켓에 적힌 재료(초록 = 가방에 있음)를 냉장고에서 꺼내요.",
   "도마에서 「썰기」를 여러 번 눌러 손질 → 냄비 · 튀김기 · 불판에 올리면 저절로 익어요. 게이지가 금색일 때 꺼내면 완벽(팁 +15%)!",
   "접시에 재료를 모으면 요리가 완성돼요. 들고 서빙대에 올리면 정해진 값으로 바로 팔려요. 손님이 기다리다 가도 손해는 없어요."] } });
-const FX = [], FX_COL = [0xffffff, 0xffffff, 0x6fd0ff, 0xb98aff, 0xffc83a, 0xff7ad9];
+const FX = [], FX_COL = [0xffffff, 0xffffff, 0x6fd0ff, 0x64e0d4, 0xb98aff, 0xffc83a, 0x5ff2d0, 0xff7ad9, 0xc05fff, 0x7a5cff];
 let SPARK_TEX = null;
 function sparkTex() {
   if (SPARK_TEX) return SPARK_TEX;
@@ -5647,7 +5648,7 @@ function sparkTex() {
 }
 function spawnCatchFx(x, z, tier, today) {
   if (!T3 || !scene || (tier < 2 && !today)) return;
-  const now = performance.now() / 1000, col = today && tier < 2 ? 0xffd84d : FX_COL[tier], n = today && tier < 2 ? 36 : [0, 0, 44, 70, 110, 170][tier];
+  const now = performance.now() / 1000, col = today && tier < 2 ? 0xffd84d : FX_COL[tier], n = today && tier < 2 ? 36 : [0, 0, 44, 58, 70, 88, 110, 135, 170, 220][tier];
   const pos = new Float32Array(n * 3), vel = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) {
     const a = Math.random() * Math.PI * 2, sp = 1.2 + Math.random() * (1.4 + tier * .35);
@@ -5656,18 +5657,18 @@ function spawnCatchFx(x, z, tier, today) {
   const geo = new T3.BufferGeometry(); geo.setAttribute("position", new T3.BufferAttribute(pos, 3));
   const pm = new T3.PointsMaterial({ size: .28 + tier * .03, map: sparkTex(), color: col, transparent: true, depthWrite: false, blending: T3.AdditiveBlending });
   const pts = new T3.Points(geo, pm); scene.add(pts);
-  FX.push({ o: pts, kind: "pts", vel, t0: now, dur: 1.6 + tier * .25, rainbow: tier >= 5 });
+  FX.push({ o: pts, kind: "pts", vel, t0: now, dur: 1.6 + tier * .25, rainbow: tier >= 7 });
   if (tier >= 3) {
-    const ring = new T3.Mesh(new T3.TorusGeometry(.7, .07, 6, 48), new T3.MeshBasicMaterial({ color: tier >= 4 ? 0xffd84d : col, transparent: true, depthWrite: false, blending: T3.AdditiveBlending }));
+    const ring = new T3.Mesh(new T3.TorusGeometry(.7, .07, 6, 48), new T3.MeshBasicMaterial({ color: tier >= 5 ? 0xffd84d : col, transparent: true, depthWrite: false, blending: T3.AdditiveBlending }));
     ring.rotation.x = Math.PI / 2; ring.position.set(x, .25, z); scene.add(ring);
-    FX.push({ o: ring, kind: "ring", t0: now, dur: 1.6, rainbow: tier >= 5 });
+    FX.push({ o: ring, kind: "ring", t0: now, dur: 1.6, rainbow: tier >= 7 });
   }
-  if (tier >= 4) {
+  if (tier >= 5) {
     const c = document.createElement("canvas"); c.width = 4; c.height = 128; const g = c.getContext("2d"), gr = g.createLinearGradient(0, 0, 0, 128);
     gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(.6, "rgba(255,255,255,.55)"); gr.addColorStop(1, "rgba(255,255,255,.9)"); g.fillStyle = gr; g.fillRect(0, 0, 4, 128);
     const pil = new T3.Mesh(new T3.CylinderGeometry(.55, .95, 16, 24, 1, true), new T3.MeshBasicMaterial({ map: new T3.CanvasTexture(c), color: col, transparent: true, depthWrite: false, side: T3.DoubleSide, blending: T3.AdditiveBlending }));
     pil.position.set(x, 8, z); scene.add(pil);
-    FX.push({ o: pil, kind: "pillar", t0: now, dur: tier >= 5 ? 4.2 : 3.2, rainbow: tier >= 5 });
+    FX.push({ o: pil, kind: "pillar", t0: now, dur: tier >= 7 ? 4.2 : 3.2, rainbow: tier >= 7 });
   }
 }
 function updateFx(t, dt) {
@@ -5736,13 +5737,13 @@ const ACT_FX = {
   dig(x, z, good) { fxBurst(x, .05, z, { n: good ? 22 : 12, col: 0x7a5a3a, normal: true, spd: 1, up: 2.4, size: .14, dur: .8, floor: -.3 }); if (good) fxBurst(x, .2, z, { n: 14, col: 0xfff2b0, spd: .8, up: 2.6, size: .2, dur: 1.2 }); },
   quest() { fxBurst(ME.x, 1.8, ME.z, { n: 24, col: 0x8affc1, spd: 1.2, up: 2.8, size: .2, dur: 1.3 }); fxPop(ME.x, 2.7, ME.z, "✔ 의뢰 완료!", "#8affc1", { big: true }); },
 };
-const TIER_HEX = [0xdfe6ea, 0x7ddc8f, 0x6fd0ff, 0xb98aff, 0xffc83a, 0xff7ad9];
+const TIER_HEX = [0xdfe6ea, 0x7ddc8f, 0x6fd0ff, 0x64e0d4, 0xb98aff, 0xffc83a, 0x5ff2d0, 0xff7ad9, 0xc05fff, 0x7a5cff];
 
 /* ---------- 대물 수면 돌파 (영웅 이상) ----------
    잡기에 성공하면 바로 올라오지 않고: ① 쿠구구구 — 물밑 그림자 · 물결 · 거품 · 화면 흔들림 · 낮은 울림
    ② 파앙! — 물기둥과 함께 물고기가 하늘로 솟구쳐 잠깐 느려지고(슬로 모션) ③ 내 품으로 날아와 들어 올려요 */
 let BREACH = null;
-const BREACH_RUMBLE = [0, 0, 0, 2.3, 2.8, 3.3], BREACH_AIR = 1.7;
+const BREACH_RUMBLE = [0, 0, 0, 2.3, 2.5, 2.8, 3.0, 3.3, 3.6, 4.0], BREACH_AIR = 1.7;
 function startBreach(r, perfect) {
   const F = meChar(), bp = (REEL.fx != null ? { x: REEL.fx, z: REEL.fz } : null) || bobPos(F) || { x: ME.x - 6, z: ME.z };
   const tier = r.f.tier, t0 = performance.now() / 1000;
@@ -5758,7 +5759,7 @@ function startBreach(r, perfect) {
   B.mesh.visible = false; scene.add(B.mesh);
   // 화면: 위아래 검은 띠 + 자막
   const cine = $("cine"); cine.hidden = false; cine.className = "cine on t" + tier; document.body.classList.add("cinema");
-  $("cineCap").textContent = tier >= 5 ? "바다 전체가… 울리고 있어요" : tier >= 4 ? "수면 아래 거대한 그림자가…" : "뭔가 커다란 게 올라와요…";
+  $("cineCap").textContent = tier >= 7 ? "바다 전체가… 울리고 있어요" : tier >= 5 ? "수면 아래 거대한 그림자가…" : "뭔가 커다란 게 올라와요…";
   $("cineSkip").onclick = () => finishBreach();
   rumbleSound(B.rum, tier);
   try { navigator.vibrate && navigator.vibrate([80, 60, 80, 60, 120, 60, 160]); } catch {}
@@ -8791,7 +8792,9 @@ function updateChar(F, f, t, dt, now) {
     if (S.restPose && performance.now() - S.restPose.at < 260) { const q = 1 - (performance.now() - S.restPose.at) / 260; F.hands[1].position.set(.22, .48 + q * .32, .5); F.hands[0].position.set(-.22, .46, .46); F.rig.rotation.x = .12; }
     else if (restK().hand) { F.hands[0].position.set(-.24, .64, .4); F.hands[1].position.set(.24, .64, .4); }
   }
-  if (f.st === "dig") { const q = Math.sin(t * 11); F.rig.rotation.x = .38 + q * .08; F.hands[0].position.set(-.16, .32 + q * .08, .5); F.hands[1].position.set(.16, .32 + q * .08, .5); }
+  if (f.st === "dig") { const cyc = (t % 1.4) / 1.4, lift = cyc < .55 ? Math.sin(cyc / .55 * Math.PI * .5) : 1 - (cyc - .55) / .45; F.rig.rotation.x = .3 + lift * .14; F.hands[0].position.set(-.16, .26 + lift * .16, .5); F.hands[1].position.set(.16, .26 + lift * .16, .5); }   // 캐기 리듬: KayKit Digging 루프(1.40초)의 들고→내려찍기 비율을 현 몸 구조에 맞게 옮김 (v1.68)
+  if (fishing && (f.phase === "reel" || f.phase === "bite")) { const cr = t * 7.85 + F.px; F.hands[0].position.set(.12 + Math.cos(cr) * .065, .52 + Math.sin(cr) * .065, .4 + Math.sin(cr) * .02); }   // 릴 감기: 왼손이 릴 손잡이를 돌려요 (KayKit Fishing_Reeling 1.60초 루프 분석 · 손 위치 궤도만 현 신체 범위로 이식, v1.68)
+  if (fishing && f.phase === "catch") { F.hands[0].position.set(-.2, .88, .48); F.hands[1].position.set(.22, .88, .48); }   // 잡은 순간 두 손으로 번쩍 (KayKit Fishing_Catch 포즈 이식, v1.68)
   F.head.rotation.z = Math.sin(t * .9 + F.px) * .05;
   F.pivot.visible = !!fishing && f.phase !== "idle";
   { const rk = (f.rod || "bamboo") + "|" + (f.reel || "basic") + "|" + ROD3D.size; if (F.rodKey !== rk) { F.rodKey = rk; const rd = RODS.find(r => r.id === f.rod) || RODS[0], prem = rd.lv >= 25; fitHeldRod(F, rd);
@@ -8803,10 +8806,16 @@ function updateChar(F, f, t, dt, now) {
   const targetRx = f.me && REEL.on ? .62 - Math.min(1.3, REEL.tension) * .32 + Math.sin(t * 24) * .025 * REEL.tension : fighting ? .55 + Math.sin(t * 18) * .05 : .95;
   const chP = f.me ? (S.charge ? S.charge.p : 0) : .75;
   const rx = f.phase === "ready" ? .3 : f.phase === "charge" ? .3 - 1.4 * chP : targetRx;
-  F.pivot.rotation.x += (rx - F.pivot.rotation.x) * (f.phase === "cast" ? .42 : .15);
+  if (f.phase === "cast" && F._lph !== "cast") F._castAt = now; F._lph = f.phase;
+  if (f.phase === "cast" && F._castAt) {   // 캐스팅 궤도: KayKit Fishing_Cast(1.93초)의 손 궤적(뒤로 젖힘 유지 → 빠른 전방 스윕 → 오버슛 후 안정)을 낚싯대 피벗 곡선으로 이식 (v1.68)
+    const p = clamp((now - F._castAt) / 620, 0, 1), u = clamp(p / .5, 0, 1), ce = u * u * (3 - 2 * u);
+    let crx = -1.05 + (targetRx + 1.05) * ce; if (p >= .5) crx += Math.sin((p - .5) / .5 * Math.PI) * .22 * (1 - p);
+    F.pivot.rotation.x = crx; F.rig.rotation.x += Math.sin(p * Math.PI) * .1;
+  } else F.pivot.rotation.x += (rx - F.pivot.rotation.x) * .15;
   if (f.phase === "charge") F.rig.rotation.x = -.15 * chP;
   if (f.me && S.jerkAt && performance.now() - S.jerkAt < 140) { F.pivot.rotation.x = -.55; F.rig.rotation.x = -.12; }   // 챔질: 낚싯대를 확 들어 올림
   if (f.me && BREACH && !BREACH.boom) F.pivot.rotation.x = .35 + Math.sin(t * 30) * .08 * (1 + (BREACH.s || 0));   // 쿠구구: 낚싯대가 덜덜
+  if (fishing && f.phase === "reel" && f.me && REEL.on && REEL.st === "run") F.rig.rotation.x = -.1 - Math.sin(t * 3.7) * .05;   // 큰 물고기가 달릴 때 뒤로 젖혀 버티기 (KayKit Fishing_Struggling의 몸 흔들림 주기 이식, v1.68)
   F.g.updateMatrixWorld(true);
   // 찌·줄
   const showLine = fishing && f.phase !== "idle";
@@ -8858,10 +8867,10 @@ function updateChar(F, f, t, dt, now) {
                       : (f.bubble && seen && now - seen.bAt < 5500 ? f.bubble.t : null);
   let ci = null, holding = false;
   if (f.me && S.lastCatch && now - S.lastCatch.at < 3800) ci = { n: S.lastCatch.f.name, t: S.lastCatch.f.tier, s: S.lastCatch.size, f: S.lastCatch.f, at: S.lastCatch.at };
-  else if (!f.me && f.catch && seen && now - seen.cAt < 4500) ci = { n: str(f.catch.n, 12), t: clamp(Math.floor(Number(f.catch.t) || 0), 0, 5), s: Number(f.catch.s) || 0, f: typeof f.catch.id === "string" ? findFish(f.catch.id) : null, at: seen.cAt };
+  else if (!f.me && f.catch && seen && now - seen.cAt < 4500) ci = { n: str(f.catch.n, 12), t: clamp(Math.floor(Number(f.catch.t) || 0), 0, 9), s: Number(f.catch.s) || 0, f: typeof f.catch.id === "string" ? findFish(f.catch.id) : null, at: seen.cAt };
   if (!ci) {
     if (f.me && S.show && now - S.show.at < 12000) { const it = S.show.item; ci = { n: it.name, t: it.tier, s: it.size, f: findFish(it.fishId), at: S.show.at }; holding = true; }
-    else if (!f.me && f.show && seen && now - seen.sAt < 12000) { ci = { n: str(f.show.n, 12), t: clamp(Math.floor(Number(f.show.t) || 0), 0, 5), s: Number(f.show.s) || 0, f: typeof f.show.id === "string" ? findFish(f.show.id) : null, at: seen.sAt }; holding = true; }
+    else if (!f.me && f.show && seen && now - seen.sAt < 12000) { ci = { n: str(f.show.n, 12), t: clamp(Math.floor(Number(f.show.t) || 0), 0, 9), s: Number(f.show.s) || 0, f: typeof f.show.id === "string" ? findFish(f.show.id) : null, at: seen.sAt }; holding = true; }
   }
   if (ci && !holding && F.fxAt !== ci.at) { F.fxAt = ci.at; F.catchFrom = (f.me && S.lastCatch && S.lastCatch.from) || (F.bob ? F.bob.position.clone() : null); F.fxPending = true; }
   // 잡은 물고기: 물에서 포물선을 그리며 날아와(0.75초) → 두 손으로 머리 위에 번쩍 들어 올려요 (희귀 이상은 폴짝)
@@ -8976,6 +8985,70 @@ function applyPeriod(P2) {
     if (gl.bridge) gl.bridge.opacity = lit ? .9 : 0;
   }
 }
+/* ---------- 살아 움직이는 마을 생물 (v1.68 · 수집 애니메이션 에셋 적용) ----------
+   원칙: 캐릭터 신체 비율은 절대 건드리지 않아요. 사람용 스켈레톤 클립은 비율이 달라 몸이 망가지므로 제외하고,
+   모델 전용으로 만들어진 애니메이션이 붙은 생물 모델만 그대로 재생해요 (비둘기 Fast_Flying · 돌고래 Swim · Kenney 펫 walk/idle/eat).
+   에셋: a/anim.json (GLB를 base64로 묶음 · Quaternius/Kenney CC0) — 불러오기 실패해도 게임은 그대로 돌아가요. */
+const AMB = { started: false, birds: [], pets: [], dolphin: null, crab: null, setClip: null };
+function ambLoad() {
+  if (AMB.started || !T3 || !T3.GLTFLoader || !scene) return; AMB.started = true;
+  fetch("a/anim.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(pack => {
+    const loader = new T3.GLTFLoader();
+    AMB.setClip = (o, name) => { if (!o || !o.mx || o.cur === name) return; const c = (o.clips || []).find(c2 => c2.name === name); if (!c) return; o.mx.stopAllAction(); o.act = o.mx.clipAction(c); o.act.play(); o.cur = name; };
+    const spawn = (key, clipName, targetLen) => new Promise(res => {
+      try {
+        const bin = atob(pack[key]), buf = new ArrayBuffer(bin.length), u8 = new Uint8Array(buf);
+        for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+        loader.parse(buf, "a/anim/", gltf => {
+          const m = gltf.scene; scene.add(m);
+          const sz = new T3.Box3().setFromObject(m).getSize(new T3.Vector3()), len = Math.max(sz.x, sz.z) || 1;
+          m.scale.setScalar(targetLen / len);
+          let mx = null, act = null;
+          if (gltf.animations && gltf.animations.length) { mx = new T3.AnimationMixer(m); const clip = gltf.animations.find(c => c.name === clipName) || gltf.animations[0]; act = mx.clipAction(clip); act.play(); }
+          res({ m, mx, act, clips: gltf.animations || [], cur: clipName });
+        }, () => res(null));
+      } catch (e) { res(null); }
+    });
+    for (let i = 0; i < 3; i++) spawn("pigeon", "Fast_Flying", .62).then(o => { if (o) AMB.birds.push({ ...o, r: 11 + i * 4.5, h: 13.5 + i * 1.7, sp: .12 + i * .02, ph: i * 2.1 }); });
+    spawn("dolphin", "Armature|Swim", 2.7).then(o => { if (o) AMB.dolphin = o; });
+    spawn("cat", "idle", .58).then(o => { if (o) AMB.pets.push({ ...o, x: -4, z: 36, tx: -4, tz: 36, ry: 0, wait: 2 }); });
+    spawn("dog", "idle", .72).then(o => { if (o) AMB.pets.push({ ...o, x: 3, z: 41, tx: 3, tz: 41, ry: 0, wait: 0 }); });
+    spawn("crab", "walk", .5).then(o => { if (o) AMB.crab = { ...o, x: -10, dir: 1 }; });
+  }).catch(e => console.warn("anim assets", e));
+}
+function ambTick(t, dt) {
+  if (!scene) return; ambLoad();
+  const vis = !atHome() && !onBoat();
+  for (const b of AMB.birds) {
+    if (b.mx) b.mx.update(dt); b.m.visible = vis; if (!vis) continue;
+    const a = t * b.sp + b.ph, x = -24 + Math.cos(a) * b.r, z = 30 + Math.sin(a) * b.r, y = b.h + Math.sin(t * .7 + b.ph) * .8, a2 = a + .12;
+    b.m.position.set(x, y, z); b.m.lookAt(-24 + Math.cos(a2) * b.r, y, 30 + Math.sin(a2) * b.r);
+  }
+  const D = AMB.dolphin;
+  if (D) {
+    if (D.mx) D.mx.update(dt); D.m.visible = vis;
+    if (vis) {
+      const z = -16 + ((t * 2) % 46), x = -38 + Math.sin(z * .18) * 2, lp = (t % 5.5) / 5.5;
+      let y = waveY(x, z, t) - 1.7, ny = y;
+      if (lp < .36) { const u = lp / .36; y = waveY(x, z, t) - .55 + Math.sin(u * Math.PI) * 1.9; ny = waveY(x, z + .6, t) - .55 + Math.sin(Math.min(1, u + .08) * Math.PI) * 1.9; }
+      D.m.position.set(x, y, z); D.m.lookAt(x, ny, z + .6);
+    }
+  }
+  for (const p of AMB.pets) {
+    if (p.mx) p.mx.update(dt); p.m.visible = vis; if (!vis) continue;
+    const dx = p.tx - p.x, dz = p.tz - p.z, d = Math.hypot(dx, dz);
+    if (p.wait > 0) { p.wait -= dt; if (p.wait <= 0) { p.tx = clamp(p.x + rnd(-7, 7), -8.5, 5.5); p.tz = clamp(p.z + rnd(-6, 6), 29, 46); if (AMB.setClip) AMB.setClip(p, "walk"); } }
+    else if (d < .25) { if (AMB.setClip) AMB.setClip(p, Math.random() < .45 ? "eat" : "idle"); p.wait = rnd(2.5, 6); }
+    else { const sp = .62, vx = dx / d * sp * dt, vz = dz / d * sp * dt; p.x += vx; p.z += vz; p.ry = lerpAngle(p.ry, Math.atan2(dx, dz), Math.min(1, dt * 5)); }
+    p.m.position.set(p.x, groundY(p.x, p.z), p.z); p.m.rotation.y = p.ry;
+  }
+  const C = AMB.crab;
+  if (C) {
+    if (C.mx) C.mx.update(dt);
+    const onSand = inSand(C.x, -80); C.m.visible = vis && onSand;
+    if (C.m.visible) { C.x += C.dir * dt * .5; if (C.x > -5) C.dir = -1; if (C.x < -15) C.dir = 1; C.m.position.set(C.x, groundY(C.x, -80) + .03, -80); C.m.rotation.y = Math.PI; }
+  }
+}
 let lastMs = 0, placeShown = "";
 function loop3D(ms) {
   requestAnimationFrame(loop3D);
@@ -8998,7 +9071,7 @@ function loop3D(ms) {
   seaMat.uniforms.sunDir.value.copy(_v2); skyMat.uniforms.sunDir.value.copy(_v2);
   for (const b of buoys) { b.position.y = waveY(b.position.x, b.position.z, t) - .1; b.rotation.z = Math.sin(t + b.position.x) * .12; }
   for (const s of SWING) s.g.rotation.x = Math.sin(t * 1.4 + s.ph) * .07;
-  updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); npcShopTick(t, dt); townTick(t, dt); updateFx(t, dt); breachTick(t, dt); marketRoofTick(t);
+  updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); npcShopTick(t, dt); townTick(t, dt); ambTick(t, dt); updateFx(t, dt); breachTick(t, dt); marketRoofTick(t);
   SWIM_T.value = t; updateJumps(dt, t); updateTide3D(dt); updateDust(dt);
   updateBoat3D(t, now);
   if (onBoat()) { const bs = SEAT[ME.seat]; ME.x = bs.x; ME.z = bs.z; ME.ry = bs.ry; }
@@ -9428,7 +9501,7 @@ const SHOP_CATS = [["bait", "미끼"], ["rod", "낚싯대"], ["reel", "릴"], ["
 const catList = (c) => c === "bait" ? BAITS : c === "rod" ? RODS : c === "reel" ? REELS : c === "line" ? LINES : c === "tackle" ? TACKLES : TOOLS;
 S.shopTab = "bait"; S.shopSel = null;
 const itemLocked = (it) => (it.lv || 1) > myLv();
-const rareP = (b) => Math.round((b.p[2] + b.p[3] + b.p[4]) * 10) / 10;
+const rareP = (b) => Math.round(b.p.slice(2).reduce((a, x) => a + x, 0) * 10) / 10;
 function itemState(c, it) {
   if (c === "bait") return { own: it.id === "worm" || (P.baits[it.id] || 0) > 0, using: P.bait === it.id, count: it.id === "worm" ? "무한" : (P.baits[it.id] || 0) + "개" };
   if (c === "rod") return { own: P.rods.includes(it.id), using: P.rod === it.id };
@@ -9438,7 +9511,7 @@ function itemState(c, it) {
   return { own: !!P.tools[it.id], using: !!P.tools[it.id] };
 }
 function itemStat(c, it) {
-  if (c === "bait") return "희귀 이상 " + rareP(it) + "%" + (it.p[4] ? " · 전설 " + it.p[4] + "%" : "") + (MYTH_CHANCE[it.id] ? " · 신화 " + (Math.round(MYTH_CHANCE[it.id] * 10000) / 100) + "%" : "");
+  if (c === "bait") return "희귀 이상 " + rareP(it) + "%" + (it.p[5] ? " · 전설 " + it.p[5] + "%" : "") + (APEX_CHANCE[it.id] ? " · 태초 " + (Math.round(APEX_CHANCE[it.id] * 10000) / 100) + "%" : "");
   if (c === "rod") return "버티는 힘 " + Math.round(it.tens * 100) + " · 채비 " + it.slots + "칸" + (it.id === "bamboo" ? "" : " · 점프 -" + Math.round((1 - it.jump) * 100) + "% · 몸부림 충격 -" + Math.round(it.calm * 100) + "%");
   if (c === "reel") return "과열 " + Math.round(it.heat * 100) + "% · 식기 " + Math.round(it.cool * 100) + " · 감기 " + it.speed.toFixed(1) + "m/s";
   if (c === "line") return it.add ? "줄 강도 +" + Math.round(it.add * 100) + "%" : "기본 강도";
@@ -9466,7 +9539,7 @@ function shopPreview(cat, it) {
     h("h3", { text: it.name }), h("div", { class: "muted", style: "font-size:12.5px;line-height:1.5", text: it.desc || itemStat(cat, it) }));
   const cmp = h("div", { class: "cmp" });
   if (cat === "bait") box.append(probBar(it.p), h("div", { class: "plegend" }, it.p.map((v, i) => h("span", { style: "--c:var(" + TIER_VARS[i] + ")", text: TIERS[i].name + " " + v + "%" }))));
-  if (cat === "bait") { const mc = MYTH_CHANCE[it.id]; box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: mc ? "✨ 신화 " + (Math.round(mc * 10000) / 100) + "% · 심해에선 ×2, 밤엔 ×1.5, 희귀 축제 땐 ×2까지 올라가요" : "✨ 신화 등급은 이 미끼로는 안 나와요 · 황금 루어와 전설의 미끼만 신화를 노릴 수 있어요" }),
+  if (cat === "bait") { const mc = APEX_CHANCE[it.id]; box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: mc ? "🌌 태초 " + (Math.round(mc * 10000) / 100) + "% · 심해에선 ×2, 밤엔 ×1.5, 희귀 축제 땐 ×2까지 올라가요" : "🌌 태초 등급은 이 미끼로는 안 나와요 · 황금 루어와 전설의 미끼만 태초를 노릴 수 있어요" }),
     h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: "위 확률은 기본값이에요. 캐스트를 잘 던지거나 심해 · 이벤트에선 낮은 등급 확률이 위쪽으로 올라가고, 뽑힌 등급의 물고기가 지금 장소 · 시간에 없으면 아래 등급이 나와요." })); }
   if (cat === "rod") { const c0 = curRod(); cmp.append(...cmpRow("버티는 힘", c0.tens, it.tens, 1.5, v => Math.round(v * 100)), ...cmpRow("채비 칸", c0.slots, it.slots, 3, v => v + "칸"),
     ...cmpRow("점프 버티기", 1 - c0.jump, 1 - it.jump, .9, v => Math.round(v * 100) + "%"), ...cmpRow("몸부림 충격 흡수", c0.calm, it.calm, .3, v => Math.round(v * 100) + "%"), ...cmpRow("빨리 지치게", c0.tire - 1, it.tire - 1, .4, v => "+" + Math.round(v * 100) + "%"));
@@ -9727,7 +9800,7 @@ SHEETS.sashimi = (body) => {
   for (let i = 0; i < 9; i++) water.append(h("i", { class: "sc-bub", style: "--x:" + (8 + i * 11) + "%;--d:" + (3 + (i % 4)) + "s;--s:" + (4 + (i % 3) * 3) + "px" }));
   if (!fish.length) water.append(h("div", { class: "sc-empty", text: "수조가 비어 있어요 · 부두에서 낚아 오세요" }));
   fish.forEach((it, k) => { const f = findFish(it.fishId);
-    water.append(h("button", { class: "sc-fish" + (it.id === S.sashSel ? " on" : "") + (it.tier >= 3 ? " g" + Math.min(5, it.tier) : ""), style: "--bob:" + (2.4 + (k % 5) * .4) + "s;--dl:" + (k % 7) * .3 + "s", title: it.name,
+    water.append(h("button", { class: "sc-fish" + (it.id === S.sashSel ? " on" : "") + (it.tier >= 3 ? " g" + Math.min(9, it.tier) : ""), style: "--bob:" + (2.4 + (k % 5) * .4) + "s;--dl:" + (k % 7) * .3 + "s", title: it.name,
       onclick: () => { S.sashSel = it.id; sfx("ui-click", .25); refreshSheet(true); } },
       h("img", { src: f ? fishArt(f).src : "", alt: it.name }), h("span", { text: it.name }))); });
   tank.append(water);
@@ -11492,7 +11565,7 @@ SHEETS.admintools = (body) => {
     const fr = h("input", { type: "range", min: "0.3", max: "3", step: "0.1", value: String(LAB.fish), style: "flex:1", "aria-label": "물고기 그래픽 크기" });
     fr.addEventListener("change", () => labSet("fish", Number(fr.value)));
     body.append(h("div", { class: "sec", text: "🐟 물고기 그래픽 크기 ×" + LAB.fish.toFixed(1) }), h("div", { class: "row" }, fr, h("button", { class: "btn sm", onclick: () => labSet("fish", 1), text: "기본으로" })));
-    body.append(h("div", { class: "sec", text: "🎯 다음 캐스트 등급 고정 (한 번 쓰면 꺼져요)" }), chipSet("tier", [[-1, "끔"], [0, "일반"], [1, "고급"], [2, "희귀"], [3, "영웅"], [4, "전설"], [5, "신화"]]));
+    body.append(h("div", { class: "sec", text: "🎯 다음 캐스트 등급 고정 (한 번 쓰면 꺼져요)" }), chipSet("tier", [[-1, "끔"], [0, "일반"], [1, "고급"], [2, "희귀"], [3, "정예"], [4, "영웅"], [5, "전설"], [6, "환상"], [7, "신화"], [8, "초월"], [9, "태초"]]));
     body.append(h("div", { class: "sec", text: "⭐ 경험치 배율" }), chipSet("xp", [[1, "×1"], [2, "×2"], [5, "×5"], [10, "×10"]]));
     body.append(h("div", { class: "sec", text: "🏃 이동 속도" }), chipSet("move", [[0.5, "×0.5"], [1, "×1"], [1.5, "×1.5"], [2, "×2"], [3, "×3"]]));
     body.append(h("div", { class: "sec", text: "🕐 시간 고정 (낚시 · 배경 · 시계까지)" }), chipSet("time", [[-1, "실제 시간"], [6, "아침 6시"], [12, "낮 12시"], [18, "저녁 18시"], [23, "밤 23시"], [2, "새벽 2시"]]));
@@ -11709,7 +11782,7 @@ function updateGuideChip() {
 }
 const FAQ = [
   ["돈은 어떻게 벌어요?", "물고기를 낚아서 팔아요. 큰 물고기일수록 훨씬 비싸요(크기 ×1.5면 값은 약 2배). 오늘의 생선(⭐)은 1.5배, 시세(▲▼)는 날마다 바뀌어요. 횟집 사장이 되면 회로 떠서 1.5배에 팔 수도 있어요."],
-  ["등급이 뭐예요?", "물고기는 일반 · 고급 · 희귀 · 영웅 · 전설 · 신화 6단계예요. 높을수록 귀하고 비싸지만 힘이 세서 좋은 장비가 필요해요. 영웅 이상은 「몸부림」을 쳐서 약한 줄은 끊어져요."],
+  ["등급이 뭐예요?", "물고기는 일반 · 고급 · 희귀 · 정예 · 영웅 · 전설 · 환상 · 신화 · 초월 · 태초 10단계예요. 높을수록 귀하고 비싸지만 힘이 세서 좋은 장비가 필요해요. 영웅 이상은 「몸부림」을 쳐서 약한 줄은 끊어져요."],
   ["손맛 싸움 막대는 뭐예요?", "「장력」은 줄이 받는 힘이에요. 빨간 선을 넘으면 끊겨요. 「과열」은 릴이 뜨거워지는 정도예요. 가득 차면 끊겨요. 물고기가 돌진·점프하면 손을 떼고, 「지쳤어요」가 뜨면 힘껏 감아요."],
   ["드랙이 뭐예요?", "물고기가 당길 때 줄이 풀려 나가는 정도예요. 조이면 빨리 끌려오지만 장력이 올라가요. 잘 모르겠으면 「자동」에 두세요."],
   ["좋은 장비는 언제 사요?", "레벨이 오르면 낚시 상점에 새 장비가 열려요. 상점의 「예상 성공률」을 보면 그 장비로 등급별로 몇 % 잡을 수 있는지 알려 줘요."],
