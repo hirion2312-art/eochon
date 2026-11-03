@@ -45,7 +45,8 @@ web/                ← Firebase 설정 · 보안 규칙 · platform.js (Firebas
 
    - 저장소를 물으면 `hirion2312-art/eochon` 을 입력해요.
    - 빌드 스크립트 질문은 **No**, 자동 배포 질문은 아무거나 골라도 돼요.
-   - 그러면 저장소 Secrets에 `FIREBASE_SERVICE_ACCOUNT_…` 키가 자동으로 등록돼요.
+   - 그러면 저장소 Secrets에 `FIREBASE_SERVICE_ACCOUNT_EOCHON_LIFE` 키가 자동으로 등록돼요. 배포 파일은 이 이름 하나만 읽어요.
+   - Firebase 프로젝트 ID가 `eochon-life`가 아니면 키 이름도 달라져요. 그때는 `.github/workflows/deploy.yml`의 `secrets.FIREBASE_SERVICE_ACCOUNT_EOCHON_LIFE`를 실제 키 이름으로 바꿔 주세요.
    - 이 명령이 내 컴퓨터에 새로 만든 `.github/workflows/firebase-hosting-*.yml` 파일은 **올리지 말고 지워도 돼요**. 이 저장소에는 이미 `deploy.yml`이 있어요.
 3. 저장소 **Actions** 탭 → 「웹사이트 자동 배포」 → **Run workflow**를 눌러 한 번 시험해요.
 

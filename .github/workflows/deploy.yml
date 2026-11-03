@@ -1,7 +1,8 @@
 # main 브랜치에 게임이 올라오면 웹사이트(Firebase Hosting)에 자동으로 배포해요.
-# 필요한 것: 저장소 Secrets 에 FIREBASE_SERVICE_ACCOUNT 로 시작하는 서비스 계정 키
-#   (web 폴더에서 `firebase init hosting:github` 를 한 번 하면 자동으로 등록돼요)
+# 필요한 것: 저장소 Secrets 의 FIREBASE_SERVICE_ACCOUNT_EOCHON_LIFE (서비스 계정 키)
+#   (web 폴더에서 `firebase init hosting:github` 를 한 번 하면 이 이름으로 자동 등록돼요)
 #   + web/public/firebase-config.js 에 내 프로젝트 설정값
+# 비밀값은 이 키 하나만 이름으로 읽어요. 전체를 읽으면(toJSON(secrets)) GitHub가 악성 워크플로로 보고 멈춰요(v1.21~v1.23 때 겪음)
 name: 웹사이트 자동 배포
 
 on:
@@ -30,21 +31,20 @@ jobs:
       - name: 배포 준비 확인
         id: sa
         env:
-          ALL_SECRETS: ${{ toJSON(secrets) }}
+          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_EOCHON_LIFE }}
         run: |
           python3 - <<'PY'
           import json, os, pathlib
           out = open(os.environ["GITHUB_OUTPUT"], "a")
-          secrets = json.loads(os.environ["ALL_SECRETS"] or "{}")
-          keys = sorted(k for k in secrets if k.startswith("FIREBASE_SERVICE_ACCOUNT"))
-          if not keys:
-              print("::notice title=배포 건너뜀::저장소 Secrets 에 FIREBASE_SERVICE_ACCOUNT 키가 아직 없어요. README의 '자동 배포 켜기'를 따라 주세요.")
+          raw = os.environ.get("SA_JSON", "")
+          if not raw.strip():
+              print("::notice title=배포 건너뜀::저장소 Secrets 에 FIREBASE_SERVICE_ACCOUNT_EOCHON_LIFE 키가 없어요. README의 '자동 배포 켜기'를 따라 주세요.")
               out.write("ready=false\n"); raise SystemExit(0)
           cfg = pathlib.Path("web/public/firebase-config.js").read_text(encoding="utf8")
           if "여기에-apiKey" in cfg:
               print("::error title=설정 필요::web/public/firebase-config.js 가 아직 견본 그대로예요. 내 Firebase 설정값으로 바꿔서 올려 주세요.")
               raise SystemExit(1)
-          sa = json.loads(secrets[keys[0]])
+          sa = json.loads(raw)
           path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "sa.json"
           path.write_text(json.dumps(sa))
           out.write("ready=true\n")
