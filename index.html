@@ -1615,7 +1615,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.57.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.58.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -5175,6 +5175,7 @@ function restTick(t, dt) {
   if (inside !== !!S.restIn) { S.restIn = inside; restClip(inside); if (inside) cam.yawGoal = 0; updateRestBar(); updateHint(); }
   { const sg = stallSigns.find(x => x.userData.i === S.restSlot); if (sg) sg.visible = !inside; }   // 안에 있을 땐 앞 카운터 간판이 시야를 가려서 숨겨요
   const near = restNear(), now = Date.now(), d = restDay();
+  if (S.restOpen && now - (S.lastInput || now) > REST_IDLE_MS) { setRestOpen(false); toast([h("b", { text: "💤 자리를 비운 것 같아 장사를 마쳤어요" }), h("div", { class: "muted", style: "font-size:12px", text: "15분 동안 화면을 안 누르면 손님 · 알바가 멈춰요 · 다시 하려면 「장사 시작」" })], null, 9000); }   // 돈 복사 방지 (v1.58)
   if (near !== !!S.restNearOn) { S.restNearOn = near; updateRestBar(); }
   // 손님 오기 (가게 가까이 있을 때만 영업해요)
   const cap = REST_LV[P.rest.lv].tickets, busy = S.restGuests.length;
@@ -5356,6 +5357,7 @@ const REST_STAFF = {
 };
 const STAFF_POST = { all: { name: "혼자 다", ico: "🧑‍🍳", stand: "board" }, prep: { name: "손질", ico: "🔪", stand: "board" }, run: { name: "운반 · 서빙", ico: "🛎", stand: "pass" }, cook: { name: "조리", ico: "🔥", stand: "grill" } };
 const STAFF_NAMES = ["민지", "준호", "서연", "도윤", "하은", "지호", "수아", "건우", "예린", "태민", "다은", "현우"];
+const REST_IDLE_MS = 15 * 60000;   // 자리 비움: 이만큼 화면을 안 누르면 장사가 저절로 끝나요
 const restStaffCap = () => REST_LV[P.rest.lv].hire;
 function hireStaff(g) {
   const G = REST_STAFF[g]; if (!G) return;
