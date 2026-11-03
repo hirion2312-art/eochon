@@ -120,6 +120,7 @@ node tools/test/fight_sim.js
   - 잠긴 기능의 도전과제(집 · `job1`)는 `ACH`에서 빠져요.
 - **돈이 과하게 풀리지 않게** (v1.23.0): 공짜 돈(출석 · 보물 상자 · 초대 · 예금 이자 · 도전과제)은 낚시 벌이(초반 한 시간 ≈ 27만원)를 넘지 않게 맞췄어요. 새 보상을 넣을 때도 이 기준으로 봐요.
 - **물고기 시세** (v1.26): 물고기를 파는 곳은 모두 `fishSell(item)`을 써요(= `sellValue(price × fishMul(fishId))`). 새로 파는 곳을 만들면 이걸 써요. 시세는 `rawFishMul`(날짜 + 물고기 해시), 오늘의 생선은 `todayFish()` ×1.5. 조개 · 회(노점)는 시세와 따로예요.
+- **입장 흐름** (v1.35): `enterGame` → 처음이면 `startCreator`(시트 `creator` + 왼쪽 `#creator` 무대, `S.creating`) → `finishCreator` → `playArrival`(비행기 장면, `S.cut` · `arrivalCam` · 그동안 안개를 멀리) → `doEnter`. 다시 오면 바로 `doEnter`. **역은 `STATION = { x, z, ry }`만 정하면** 거기서 걸어 나와요. `P.made` = 캐릭터 만들기 마침. 마우스 고정 시점은 `S.mouseLook` · `mouseLocked` · `unlockMouse`(창 · 안내 카드가 뜨면 풀어요).
 - **내 횟집** (v1.28, 운영자 결정: 이 게임의 메인 재미): 회 값은 `dishPrice` = 기본 판매가 × `DISH_MUL`(1.5) 고정, 가격 입력 없음. 영업 손님 줄은 `S.guests`(사장님 화면에만) · `guestTick`(0.5초) · `serveGuest` · `renderGuests`(바뀐 것만 다시 그림). 평판 · 꾸미기는 `P.shop` · `SHOP_UPG` · `REP_STARS`. 알바 영업은 `npcVisit`.
 - **손맛 · 장비** (v1.27): 싸움 시작 상태는 `reelInit(r, opts, g)`(화면과 따로), 한 걸음은 `fightStep(dt, R)`. 장비 수치는 `gearStats(ov)`(ov 로 가상의 장비도 계산). 낚싯대 특성은 `ROD_PERK`(jump · calm · tire). 상점 「예상 성공률」은 `simRate`가 같은 난수로 120번 돌려요 — `TIER_FIGHT`나 장비를 고치면 상점에서 숫자를 확인해요.
 - **이펙트**: `spawnCatchFx(x, z, tier, today)` · `updateFx` (loop3D). 화면 빛남은 CSS 클래스 `g3` `g4` `g5` `gtoday`.

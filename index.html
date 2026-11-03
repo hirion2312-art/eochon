@@ -1026,12 +1026,92 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 .reel-name{align-self:flex-start;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;color:#fff;text-shadow:none}
 .reel-side span{font-size:13px;line-height:1.5}
 @media (prefers-reduced-motion:reduce){.hook{animation:none}.toast{animation:none}}
+/* ===== v1.35 UI 개편 1탄: 게임 화면 위 HUD =====
+   3D 화면 위에 떠 있어서 배경에 묻히지 않게: 밝은 크림 바탕 + 진한 글씨 + 또렷한 그림자. 창마다 쓰임에 맞춰 따로 다듬었어요 */
+:root{--hud2-bg:rgba(255,251,243,.96);--hud2-ink:#2a2420;--hud2-mute:#7a6e62;--hud2-line:rgba(42,36,32,.12);--hud2-sh:0 8px 24px rgba(20,34,40,.25)}
+/* 위 왼쪽: 내 카드 — 이름 · 돈 · 레벨을 가장 크게 */
+.hud.me .mecard{background:var(--hud2-bg);border:0;box-shadow:var(--hud2-sh),0 0 0 1px var(--hud2-line);-webkit-backdrop-filter:none;backdrop-filter:none;padding:6px 16px 6px 6px}
+.hud.me .mecard canvas{width:50px;height:50px;box-shadow:0 0 0 3px #fff,0 0 0 4.5px #e2522c}
+.hud.me .mecard .nm{color:var(--hud2-ink);font-size:15px;font-weight:800}
+.hud.me .mecard .gd,.hud.me .mecard .gd b{color:#b5651d;font-size:15px;font-weight:800}
+/* 위 오른쪽: 시계 · 채널 · 소리 · 설정 — 작은 정보라 단단한 알약 모양으로 */
+.hud.tr .clock,.hud.tr .chan,.hud.tr .icobtn{background:var(--hud2-bg);border:0;color:var(--hud2-ink);box-shadow:var(--hud2-sh),0 0 0 1px var(--hud2-line);-webkit-backdrop-filter:none;backdrop-filter:none}
+.hud.tr .clock b,.hud.tr .chan b,.hud.tr .chan span{color:var(--hud2-ink)}.hud.tr .chan b{color:#e2522c}
+.hud.tr .icobtn .ico{stroke:var(--hud2-ink)}.hud.tr .icobtn[aria-pressed="true"]{background:#e2522c}.hud.tr .icobtn[aria-pressed="true"] .ico{stroke:#fff}
+/* 오른쪽 아래: 낚시 현황 — 숫자 하나를 크게, 버튼은 줄마다 또렷하게 */
+.hud.stat{background:var(--hud2-bg);border:0;color:var(--hud2-ink);box-shadow:var(--hud2-sh),0 0 0 1px var(--hud2-line);-webkit-backdrop-filter:none;backdrop-filter:none;min-width:176px;padding:12px 14px}
+.hud.stat .big b{color:#173845;font-size:34px}.hud.stat .big span,.hud.stat .ln{color:var(--hud2-mute);font-size:12.5px}.hud.stat .ln b{color:var(--hud2-ink);font-weight:700}
+.hud.stat button{background:#f3ece0;border:1px solid var(--hud2-line);color:var(--hud2-ink);font-weight:700;font-size:13px;padding:7px 10px;border-radius:11px}
+.hud.stat button:hover{background:#ffe8cc}.hud.stat #questBtn b{color:#c2402a}
+.hud.stat #guideBtn{background:#fff3c4;border-color:#e8b923;color:var(--hud2-ink)}.hud.stat #guideBtn #guideTx{color:#9a6a00}
+/* 왼쪽 아래: 채팅 — 글이 많은 곳이라 바탕을 조금 더 밝고 불투명하게 */
+.hud.chat{background:rgba(255,251,243,.9);border:0;color:var(--hud2-ink);box-shadow:var(--hud2-sh),0 0 0 1px var(--hud2-line);-webkit-backdrop-filter:none;backdrop-filter:none}
+.hud.chat *{color:inherit}.hud.chat input{background:#fff;border:1px solid var(--hud2-line);color:var(--hud2-ink)}
+/* 아래 막대: 가장 자주 누르는 곳 — 크고 밝은 버튼, 칸마다 색이 다른 아이콘으로 한눈에 */
+.hud.dock{background:var(--hud2-bg)!important;border:0!important;box-shadow:0 12px 32px rgba(20,34,40,.3),0 0 0 1px var(--hud2-line)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;padding:7px 8px;gap:4px;border-radius:24px}
+.hud.dock button{color:var(--hud2-ink);font-weight:800;min-width:62px;padding:7px 10px 6px;border-radius:16px;transition:transform .12s,background .12s}
+.hud.dock button>span:not(.badge):not(.cnt){font-size:12px}
+.hud.dock button .ico{width:22px;height:22px;padding:7px;box-sizing:content-box;border-radius:13px;background:var(--qc,#8a8f96);stroke:#fff;color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.14)}
+.hud.dock button:hover{background:rgba(42,36,32,.06);transform:translateY(-2px)}.hud.dock button:active{transform:translateY(1px)}
+.hud.dock [data-q="bag"]{--qc:#c9783a}.hud.dock [data-q="dex"]{--qc:#2a8a9a}.hud.dock [data-q="travel"]{--qc:#4f9a52}.hud.dock [data-q="friends"]{--qc:#e06a92}.hud.dock [data-q="home"]{--qc:#e2952c}
+.hud.dock [data-q="quests"]{--qc:#8a5a34}.hud.dock [data-q="ach"]{--qc:#d9a514}.hud.dock [data-q="rank"]{--qc:#7a5ad6}.hud.dock [data-q="attend"]{--qc:#e2522c}.hud.dock [data-q="shop"]{--qc:#2a78bb}.hud.dock [data-q="sashimi"]{--qc:#d8402a}
+.hud.dock .chatonly{--qc:#3f8fd6}.hud.dock .menubtn{--qc:#2a3440;color:var(--hud2-ink)!important}
+.hud.dock .badge,.hud.dock .qbadge{box-shadow:0 0 0 2px #fff}
+@media (max-width:820px){.hud.dock{border-radius:22px 22px 0 0;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}.hud.dock button{min-width:0;padding:5px 2px 4px}.hud.dock button .ico{width:20px;height:20px;padding:6px}.hud.dock button>span:not(.badge):not(.cnt){font-size:11px}
+  .hud.stat{min-width:0;padding:9px 11px}.hud.stat .big b{font-size:26px}}
+/* 전체 메뉴: 묶음마다 색을 다르게 하고 타일을 크게 — 어디에 뭐가 있는지 색으로 기억해요 */
+.mgrid{grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px}
+.mtile{min-height:74px;border-radius:16px;border:1.5px solid var(--line);transition:transform .12s,border-color .12s}
+.mtile:hover{transform:translateY(-2px);border-color:var(--mc,var(--accent))}
+.mtile .mi{width:46px;height:46px;font-size:24px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--mc,#8a8f96) 22%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--mc,#8a8f96) 55%,transparent)}
+.mtile .mt b{font-size:15px}.mtile .mt small{font-size:12px}
+.mtile .mdot{position:absolute;top:8px;right:8px;min-width:20px;height:20px;border-radius:10px;background:#e2522c;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px}
+.msec{display:flex;align-items:center;gap:8px;margin:16px 2px 8px;font-weight:800;font-size:14px}.msec i{width:10px;height:10px;border-radius:3px;background:var(--mc)}
+.mhead{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(226,82,44,.14),rgba(42,120,187,.12));margin-bottom:4px}
+.mhead canvas{width:52px;height:52px;border-radius:50%}.mhead b{font-size:17px}.mhead small{display:block;color:var(--muted);font-size:12.5px}
 /* v1.26 좋은 물고기 · 물건 반짝임 · 오늘의 생선 · 시세표 */
 @keyframes tshine{0%{background-position:160% 0}60%,100%{background-position:-60% 0}}
 @keyframes gpulse{0%,100%{box-shadow:0 0 0 1.5px var(--gc),0 0 8px var(--gs)}50%{box-shadow:0 0 0 2px var(--gc),0 0 18px var(--gs)}}
 @keyframes rainbow{0%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}33%{box-shadow:0 0 0 2px #7b8cff,0 0 16px rgba(123,140,255,.6)}66%{box-shadow:0 0 0 2px #3fd6cc,0 0 16px rgba(63,214,204,.6)}100%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}}
 .tier.t3,.tier.t4,.tier.t5{background-image:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.65) 50%,transparent 65%),var(--tb,none);background-size:250% 100%,100% 100%;background-repeat:no-repeat;animation:tshine 2.6s ease-in-out infinite}
 .tier.t3{--tb:linear-gradient(var(--t3),var(--t3))}.tier.t4{--tb:linear-gradient(var(--t4),var(--t4))}.tier.t5{--tb:linear-gradient(90deg,#0f9f9a,#7b5cd6,#e0479a)}
+/* v1.35 입장 흐름: 캐릭터 만들기 · 비행기 도착 장면 · 마우스 고정 시점 */
+.creator{position:fixed;inset:0;z-index:55;background:radial-gradient(120% 90% at 28% 38%,#fff3dc 0%,#ffd9a8 28%,#8fd0e0 62%,#2b6f8a 100%)}
+.creator .cstage{position:absolute;left:0;top:0;bottom:0;right:min(560px,44vw);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.creator .cstage canvas{width:100%;height:82%;cursor:grab;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important}
+.creator .cname{font-family:var(--f-display);font-size:clamp(22px,3.2vw,38px);color:#173845;background:rgba(255,255,255,.75);padding:4px 22px;border-radius:999px;box-shadow:0 6px 18px rgba(23,56,69,.18)}
+.creator .chint{position:absolute;left:0;right:min(560px,44vw);top:calc(var(--st) + 18px);text-align:center;color:#173845;opacity:.6;font-size:13px}
+body.creating .overlay{background:transparent;padding:0;z-index:60}
+body.creating .sheet,body.creating .sheet.wide{width:min(560px,44vw);max-height:100%;height:100%;border-radius:24px 0 0 24px;animation:slidein .35s ease-out}
+body.creating #sheetClose,body.creating #sheetBack{display:none}
+.cstep{display:flex;gap:8px;margin-bottom:12px}
+.cstep button{flex:1;display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:14px;padding:10px 12px;font:inherit;font-weight:700}
+.cstep button i{font-style:normal;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--line);font-size:13px}
+.cstep button[aria-current="true"]{border-color:var(--accent,#e2522c);box-shadow:0 0 0 3px rgba(226,82,44,.18)}.cstep button[aria-current="true"] i{background:#e2522c;color:#fff}
+.cfield{display:flex;flex-direction:column;gap:8px;margin:14px 0}.cfield>label{font-weight:700;font-size:14px}
+.cinput{flex:1;min-width:0;font:inherit;font-size:17px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.cswatch{display:flex;flex-wrap:wrap;gap:10px}.cswatch button{width:44px;height:44px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line)}
+.cswatch button[aria-pressed="true"]{box-shadow:0 0 0 3px #e2522c;transform:scale(1.08)}
+.cnext{display:flex;justify-content:flex-end;margin-top:22px}.btn.lg{font-size:17px;padding:12px 22px}
+@media (max-width:820px){
+  .creator .cstage{right:0;bottom:auto;height:40vh}.creator .cstage canvas{height:78%}.creator .chint{display:none}
+  body.creating .overlay{align-items:flex-end}body.creating .sheet,body.creating .sheet.wide{width:100%;height:60vh;border-radius:22px 22px 0 0}
+}
+.cutscene{position:fixed;inset:0;z-index:70;pointer-events:none}
+.cutscene .pwin{position:absolute;left:50%;top:46%;width:min(46vh,62vw);height:min(66vh,88vw);transform:translate(-50%,-50%);border-radius:46% / 34%;
+  box-shadow:0 0 0 18px #d9d3c7,0 0 0 26px #ebe6dc,0 0 0 200vmax #f2eee6,inset 0 0 50px rgba(0,0,0,.28);overflow:hidden}
+.cutscene .blind{position:absolute;left:0;right:0;top:0;height:100%;background:linear-gradient(#e8e2d6,#d6cfc0);border-bottom:6px solid #c9c1b0}
+.cutscene.play .blind{animation:blindup 1.6s .5s ease-in-out forwards}
+@keyframes blindup{to{transform:translateY(-92%)}}
+.cutscene .cutcap{position:absolute;left:50%;bottom:calc(var(--sb) + 5vh);transform:translateX(-50%);text-align:center;color:#3a3026;display:flex;flex-direction:column;gap:4px;opacity:0;width:min(560px,92vw)}
+.cutscene.play .cutcap{animation:capin 1.2s 2.2s ease-out forwards}
+.cutscene .cutcap b{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,3.6vw,34px)}.cutscene .cutcap small{font-size:13px;letter-spacing:.06em;opacity:.7}.cutscene .cutcap>span{font-size:13px;opacity:.75}
+@keyframes capin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+.cutscene .cutskip{position:absolute;right:calc(var(--sr) + 14px);top:calc(var(--st) + 14px);pointer-events:auto;border:0;border-radius:999px;padding:8px 16px;background:rgba(58,48,38,.82);color:#fff;font:inherit;font-weight:700}
+.cutscene.end .pwin,.cutscene.end .cutcap{transition:opacity .8s;opacity:0}
+.xhair{position:fixed;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.45);z-index:15;display:none;pointer-events:none}
+body.mlock .xhair{display:block}
+.mlocktip{position:fixed;left:50%;top:calc(var(--st) + 70px);transform:translateX(-50%);z-index:16;background:rgba(16,22,26,.8);color:#fff;font-size:13px;padding:8px 16px;border-radius:999px;pointer-events:none}
 .shopbar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:8px 12px;border-radius:12px;background:linear-gradient(135deg,rgba(242,194,48,.18),rgba(226,82,44,.12));border:1px solid rgba(242,194,48,.4);margin-bottom:8px;font-size:13px}
 .shopbar .stars{color:#f2b630;font-size:18px;letter-spacing:1px}
 .guests{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin-bottom:10px}
@@ -1175,6 +1255,14 @@ details.guidebox summary{cursor:pointer;font-weight:700}
   </div>
 </div>
 
+<div class="creator" id="creator" hidden><div class="cstage"></div><div class="chint">끌어서 돌려 보세요</div></div>
+<div class="cutscene" id="cutscene" hidden aria-label="섬으로 날아오는 장면">
+  <div class="pwin"><i class="blind"></i></div>
+  <div class="cutcap"><small>✈️ 낭만 섬행 · 곧 도착해요</small><b>어서 와요, <span class="cutnick"></span>님!</b><span>창밖으로 오늘부터 살게 될 바닷가 마을이 보여요</span></div>
+  <button class="cutskip" type="button">건너뛰기 ▶</button>
+</div>
+<div class="xhair" aria-hidden="true"></div>
+<div class="mlocktip" id="mlockTip" hidden>🖱️ 마우스로 둘러봐요 · 가운데 점으로 가리키고 클릭 · 이동은 WASD · <b>Esc</b>로 커서 꺼내기</div>
 <div class="fade" id="fade" hidden></div>
 <div class="coach" id="coach" hidden role="dialog" aria-modal="true" aria-label="안내"><div class="ccard" id="coachCard"></div></div>
 
@@ -1191,7 +1279,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.34.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.35.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -1755,7 +1843,7 @@ function parseWear(s) {
 function newProfile() {
   return { nick: pick(NICK_A) + " " + pick(NICK_B), color: pick(COLORS), skin: "#f6d2b4", gold: 300,
     baits: { shrimp: 5, paste: 0, lure: 0, legend: 0 }, bait: "worm", bag: [], dex: {}, autoSell: 0, caught: 0,
-    dishes: [], buffs: [], listing: {}, pendingTrades: {}, pendingOrders: {}, rod: "bamboo", rods: ["bamboo"], gear: [], equip: [], quests: null, closet: [], wear: {}, friends: {}, reels: ["basic"], reel: "basic", lines: ["nylon"], line: "nylon", tools: {}, xp: 0, stats: {}, ach: {}, title: "", stocks: {}, bank: { amt: 0, ts: 0 }, tut: {}, attend: { n: 0, last: "" }, ref: null, invited: {}, job: { id: "", xp: {}, changedAt: 0 }, resident: 0, home: newHome(), npcSales: { day: "", n: 0 }, shop: newShop(), v: 7 };
+    dishes: [], buffs: [], listing: {}, pendingTrades: {}, pendingOrders: {}, rod: "bamboo", rods: ["bamboo"], gear: [], equip: [], quests: null, closet: [], wear: {}, friends: {}, reels: ["basic"], reel: "basic", lines: ["nylon"], line: "nylon", tools: {}, xp: 0, stats: {}, ach: {}, title: "", stocks: {}, bank: { amt: 0, ts: 0 }, tut: {}, attend: { n: 0, last: "" }, ref: null, invited: {}, job: { id: "", xp: {}, changedAt: 0 }, resident: 0, home: newHome(), npcSales: { day: "", n: 0 }, shop: newShop(), made: false, v: 7 };
 }
 function normItem(it) {
   if (!it || typeof it !== "object") return null;
@@ -1794,6 +1882,7 @@ function normProfile(p) {
   o.rod = o.rods.includes(p.rod) ? p.rod : "bamboo";
   o.npcSales = p.npcSales && typeof p.npcSales === "object" ? { day: str(p.npcSales.day, 10), n: clamp(Math.floor(Number(p.npcSales.n) || 0), 0, 999) } : { day: "", n: 0 };
   o.shop = normShop(p.shop);
+  o.made = !!p.made || (Number(p.caught) || 0) > 0;   // 캐릭터 만들기를 마쳤는지 (예전 플레이어는 마친 걸로)
   o.reels = (Array.isArray(p.reels) ? p.reels : []).filter(id => REELS.some(r => r.id === id)); if (!o.reels.includes("basic")) o.reels.unshift("basic");
   o.reel = o.reels.includes(p.reel) ? p.reel : "basic";
   o.lines = (Array.isArray(p.lines) ? p.lines : []).filter(id => LINES.some(r => r.id === id)); if (!o.lines.includes("nylon")) o.lines.unshift("nylon");
@@ -2288,7 +2377,7 @@ const TUTS = {
 const coachQ = [];
 function coach(id) {
   if (!TUTS[id] || !P.tut || P.tut[id] || (P.tut._off && id !== "jobnotice") || S.title || coachQ.includes(id) || (S.coach && S.coach.id === id)) return;
-  coachQ.push(id); if (!S.coach) nextCoach();
+  unlockMouse(); coachQ.push(id); if (!S.coach) nextCoach();
 }
 function nextCoach() {
   const id = coachQ.shift(); const box = $("coach");
@@ -7050,7 +7139,8 @@ function loop3D(ms) {
     if (best) { setText(GUIDE, "⬇ 여기서 낚시해요", "#ffd84d", "#132f38", .5, true); GUIDE.position.set(best.x, 2.2 + Math.abs(Math.sin(t * 3)) * .35, best.z); }
   }
   // 카메라 (메인 화면에서는 부두 둘레를 천천히 돎)
-  if (S.title) {
+  if (S.cut) arrivalCam(performance.now());
+  else if (S.title) {
     cam.ty = (cam.ty || 0) + dt * .035;
     camera.position.set(-22 + Math.sin(cam.ty) * 30, 9 + Math.sin(cam.ty * .7) * 2, 4 + Math.cos(cam.ty) * 30); camera.lookAt(-22, 1, 4);
   } else {
@@ -7082,6 +7172,11 @@ function loop3D(ms) {
 function bindInput() {
   const ptrs = new Map(); let down = null, pinch0 = 0, dist0 = 10;
   cv.addEventListener("pointerdown", (e) => {
+    // 마우스 고정 시점: 잠기지 않았으면 이 클릭으로 잠그고, 잠긴 동안 클릭은 가운데 점을 누른 거예요
+    if (e.pointerType === "mouse" && S.mouseLook && !S.title && e.button === 0) {
+      if (!mouseLocked()) { try { cv.requestPointerLock(); } catch {} return; }
+      const r = cv.getBoundingClientRect(); tapAt(r.left + r.width / 2, r.top + r.height / 2); return;
+    }
     cv.setPointerCapture(e.pointerId);
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (ptrs.size === 1) down = { x: e.clientX, y: e.clientY, at: Date.now(), yaw: cam.yaw, pitch: cam.pitch, moved: false };
@@ -7254,7 +7349,7 @@ S.sheetStack = [];
 function openSheet(name, arg, opt) {
   if (name === "office" && isLocked("office")) { lockedToast("동사무소"); return; }
   if (["realty", "storage", "tank", "guestbook"].includes(name) && isLocked("home")) { lockedToast("마이 홈 · 부동산"); return; }
-  closeMeMenu();
+  unlockMouse(); closeMeMenu();   // 창이 뜨면 마우스 고정을 풀어 커서로 누를 수 있게
   if (!(opt && opt.back)) { if (S.sheet && S.sheet !== name && SHEETS[name]) S.sheetStack.push([S.sheet, S.sheetArg]); else if (!S.sheet) S.sheetStack = []; }
   if (name === "dish") { S.bagTab = "dish"; name = "bag"; }
   if (!SHEETS[name]) { toast("이 가게는 곧 문을 열어요"); return; }
@@ -9345,9 +9440,14 @@ function menuTiles() {
 }
 function menuBadgeCount() { return achClaimable() + questDone() + (attendCan() ? 1 : 0) + S.offersIn.size + guideReady(); }
 SHEETS.menu = (body) => {
-  setHead("메뉴", P.nick + " · Lv." + myLv() + " · " + won(P.gold));
+  setHead("메뉴", "필요한 곳을 눌러요 · 아래 막대에 자주 쓰는 것을 넣을 수 있어요(퀵바 꾸미기)");
+  // 맨 위: 나 (얼굴 · 이름 · 레벨 · 돈) — 메뉴를 열 때마다 내 상태가 바로 보이게
+  const av = document.createElement("canvas"); av.width = av.height = 88; av.getContext("2d").drawImage($("avatar"), 0, 0, 88, 88);
+  body.append(h("div", { class: "mhead" }, av, h("div", null, h("b", { text: P.nick }), h("small", { text: "Lv." + myLv() + " · " + won(P.gold) + " · 낚은 물고기 " + fmt(P.caught || 0) + "마리" }))));
+  const SEC_COL = { "나": "#e2522c", "오늘 할 일": "#d9a514", "사람들": "#e06a92", "마을": "#4f9a52", "도움": "#2a78bb" };
   for (const [sec, tiles] of menuTiles()) {
-    body.append(h("div", { class: "sec", text: sec }), h("div", { class: "mgrid" }, tiles.map(t => h("button", { class: "mtile", onclick: t.go },
+    const mc = SEC_COL[sec] || "#8a8f96";
+    body.append(h("div", { class: "msec", style: "--mc:" + mc }, h("i"), h("span", { text: sec })), h("div", { class: "mgrid", style: "--mc:" + mc }, tiles.map(t => h("button", { class: "mtile", onclick: t.go },
       h("span", { class: "mi", "aria-hidden": "true", text: t.ico }), h("span", { class: "mt" }, h("b", { text: t.t }), t.s ? h("small", { text: t.s }) : null),
       t.n ? h("span", { class: "mdot", text: String(t.n) }) : null))));
   }
@@ -9361,6 +9461,7 @@ SHEETS.settings = (body) => {
   body.append(h("div", { class: "sec", text: "소리 · 화면" }), h("div", { class: "setlist" },
     toggleRow("물소리 · 효과음 · 음악", "바닷소리와 배경음악", S.sound, () => $("soundBtn").click()),
     toggleRow("그림자", "끄면 오래된 휴대폰에서 더 부드러워요", S.hq, () => setHq(!S.hq)),
+    matchMedia("(pointer: fine)").matches ? toggleRow("마우스 고정 시점", "화면을 클릭하면 커서가 숨고 마우스대로 시점이 돌아요 · 가운데 점으로 가리키고 클릭 · Esc로 풀기 · 끄면 끌어서 돌리고 클릭한 곳으로 걸어요", S.mouseLook, () => { S.mouseLook = !S.mouseLook; lsSet("mn.mlook", S.mouseLook); if (!S.mouseLook) unlockMouse(); refreshSheet(true); }) : null,
     h("button", { class: "setrow", onclick: () => { closeSheet(); setMung(true); } }, h("span", { class: "grow" }, h("b", { text: "멍 모드" }), h("small", { text: "화면만 보며 멍 때리기 · 끝내기 버튼으로 돌아와요" })), h("span", { class: "chev", text: "›" }))));
   body.append(h("div", { class: "sec", text: "낚시" }), h("div", { class: "setlist" },
     h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "입질 속도" }), h("small", { text: "찌를 던지고 입질이 올 때까지" })),
@@ -9964,6 +10065,7 @@ async function saveFace(err) {
   if (S.online) { try { await S.db.doc("faces/" + S.uid).set(face); } catch { err.textContent = "얼굴을 저장하지 못했어요. 다시 시도해 주세요."; return; } }
   for (const s of Object.values(faceEd.sets)) { s.saved = !s.reset && (s.saved || s.dirty || s.ex === "base"); s.dirty = false; }
   syncMenu();
+  if (S.creating) { finishCreator(); return; }   // 캐릭터 만들기 마지막 단계
   toast("얼굴과 표정 " + (1 + Object.keys(face.ex).length) + "가지를 저장했어요"); closeSheet();
 }
 
@@ -10371,6 +10473,115 @@ window.addEventListener("blur", () => { keys.clear(); S.shift = false; });
 document.addEventListener("keyup", (e) => { if (e.key === "Shift") S.shift = false; });
 $("runBtn").addEventListener("click", () => { S.runOn = !S.runOn; $("runBtn").setAttribute("aria-pressed", String(S.runOn)); sfx("ui-click", .25); toast(S.runOn ? "달리기 켬 · 빠르게 움직여요" : "달리기 끔 · 천천히 걸어요"); });
 
+/* ===================== 입장 흐름 (v1.35) =====================
+   처음 온 사람: 메인 화면 → 캐릭터 만들기(왼쪽 큰 인형 · 오른쪽 이름/색/얼굴) → 비행기 도착 장면(창밖으로 섬) → 역에서 나와요.
+   다시 온 사람: 메인 화면 → 역에서 나와요. 그동안 S.title 은 켜 둬서 다른 사람에게 보이지 않아요(presence 안 보냄) */
+// 역 문 앞 좌표 · 나오는 방향(ry). 맵 재구성 때 역을 지으면 여기만 정해 주세요. null 이면 지금처럼 거리 입구에서 시작해요
+const STATION = null;
+/* ---------- 캐릭터 만들기 ---------- */
+S.creating = false; S.createStep = 1;
+let CREATOR_TEX = null;
+function startCreator() {
+  S.creating = true; S.createStep = 1; document.body.classList.add("creating");
+  faceEd.skin = P.skin; faceEd.shirt = P.color;
+  const stage = $("creator"); stage.hidden = false;
+  if (T3 && R) {
+    const d = dollStage(); d.view = { y: .78, d: 6.2 }; d.yaw = .5;
+    stage.querySelector(".cstage").replaceChildren(d.canvas, h("div", { class: "cname", id: "cName" }));
+    if (!CREATOR_TEX) { const c = document.createElement("canvas"); c.width = c.height = 256; CREATOR_TEX = { c, tex: new T3.CanvasTexture(c) }; }
+  }
+  clearInterval(S.creatorTimer); S.creatorTimer = setInterval(creatorDollTick, 250); creatorDollTick();
+  openSheet("creator");
+}
+function creatorDollTick() {
+  if (!S.creating) { clearInterval(S.creatorTimer); return; }
+  const nm = $("cName"); if (nm) nm.textContent = P.nick;
+  if (!DOLL) return;
+  DOLL.B.skinM.color.set(faceEd.skin || P.skin); applyOutfit(DOLL.B, P.wear, faceEd.shirt || P.color);
+  const set = faceEd.sets && faceEd.sets.base;   // 그리는 중인 얼굴을 바로 인형에 보여 줘요
+  if (set && Object.keys(set.pads).length >= FACE_PARTS.length && CREATOR_TEX) { const g = CREATOR_TEX.c.getContext("2d"); g.clearRect(0, 0, 256, 256); composeSet(g, set, "base"); CREATOR_TEX.tex.needsUpdate = true; DOLL.B.faceMat.map = CREATOR_TEX.tex; }
+  else DOLL.B.faceMat.map = faceTexture("me");
+  DOLL.B.faceMat.needsUpdate = true;
+}
+SHEETS.creator = (body) => {
+  const step = S.createStep;
+  body.append(h("div", { class: "cstep" }, [["1", "이름 · 색"], ["2", "얼굴 그리기"]].map(([n, l]) => h("button", { "aria-current": String(String(step) === n), onclick: () => { S.createStep = +n; refreshSheet(true); } }, h("i", { text: n }), h("span", { text: l })))));
+  if (step === 1) {
+    setHead("캐릭터 만들기", "어촌생활에서 쓸 내 모습을 만들어요 · 나중에 얼굴 공방 · 옷가게에서 언제든 바꿀 수 있어요");
+    const inp = h("input", { class: "cinput", maxlength: "12", value: P.nick, placeholder: "2~12자 · 한글 · 영문 · 숫자", "aria-label": "닉네임" }), err = h("div", { class: "err" });
+    const apply = () => { const e = setNick(inp.value); err.textContent = e || ""; return !e; };
+    inp.addEventListener("change", apply);
+    body.append(h("div", { class: "cfield" }, h("label", { text: "이름" }), h("div", { class: "row" }, inp, h("button", { class: "btn", onclick: () => { inp.value = pick(NICK_A) + " " + pick(NICK_B); apply(); }, text: "🎲 무작위" })), err),
+      h("div", { class: "cfield" }, h("label", { text: "피부색" }), h("div", { class: "cswatch" }, SKINS.map((c, i) => h("button", { style: "background:" + c, "aria-label": "피부색 " + (i + 1), "aria-pressed": String(faceEd.skin === c), onclick: () => { faceEd.skin = c; creatorDollTick(); refreshSheet(true); } })))),
+      h("div", { class: "cfield" }, h("label", { text: "옷 색" }), h("div", { class: "cswatch" }, COLORS.map(c => h("button", { style: "background:" + c, "aria-label": "옷 색 " + c, "aria-pressed": String(faceEd.shirt === c), onclick: () => { faceEd.shirt = c; creatorDollTick(); refreshSheet(true); } })))),
+      h("div", { class: "cnext" }, h("button", { class: "btn pri lg", onclick: () => { if (!apply()) return; S.createStep = 2; refreshSheet(true); }, text: "다음 · 얼굴 그리기 →" })));
+    return;
+  }
+  SHEETS.face(body);
+  setHead("캐릭터 만들기", "2 / 2 · 눈 · 눈썹 · 입을 그려요 · 왼쪽 인형에 바로 보여요");
+  const go = body.querySelector(".abar .btn.pri"); if (go) go.textContent = "완성! 섬으로 출발 ✈️";
+  body.append(h("div", { class: "row", style: "justify-content:center;margin-top:6px" }, h("button", { class: "btn ghost", onclick: () => finishCreator(), text: "기본 얼굴로 바로 출발하기" })));
+};
+function finishCreator() {
+  if (!S.creating) return;
+  P.made = true; P.skin = faceEd.skin || P.skin; P.color = faceEd.shirt || P.color; markDirty(); flushSave();
+  S.creating = false; document.body.classList.remove("creating"); clearInterval(S.creatorTimer);
+  S.sheet = null; S.sheetStack = []; $("overlay").hidden = true; $("creator").hidden = true;
+  playArrival(() => doEnter(false));
+}
+/* ---------- 비행기 도착 장면: 비행기 창밖으로 바다와 섬을 보며 날아와요 (건너뛰기 가능) ---------- */
+const ARRIVAL_MS = 11500;
+let PLANE_WING = null;
+function playArrival(done) {
+  const el = $("cutscene");
+  if (!T3 || !R) { done(); return; }
+  if (!PLANE_WING) {
+    const g = new T3.Group(), white = phong(0xf4f1ea), gray = phong(0xb8bfc6), red = phong(0xd8402a);
+    const w = new T3.Mesh(new T3.BoxGeometry(9, .14, 1.9), white); w.position.set(4.5, 0, 0); w.rotation.y = -.18; g.add(w);
+    const tip = new T3.Mesh(new T3.BoxGeometry(.3, .9, .9), red); tip.position.set(8.9, .4, -.7); g.add(tip);
+    const eng = new T3.Mesh(new T3.CylinderGeometry(.45, .5, 1.8, 16), gray); eng.rotation.x = Math.PI / 2; eng.position.set(2.6, -.55, .1); g.add(eng);
+    g.visible = false; scene.add(g); PLANE_WING = g;
+  }
+  el.querySelector(".cutnick").textContent = P.nick;
+  el.querySelector(".cutskip").onclick = endArrival;
+  el.hidden = false; el.classList.remove("end"); void el.offsetWidth; el.classList.add("play");
+  S.cut = { t0: performance.now(), done, fog: scene.fog ? [scene.fog.near, scene.fog.far] : null }; PLANE_WING.visible = true;
+  if (scene.fog) { scene.fog.near = 260; scene.fog.far = 1200; }   // 먼 하늘에서도 섬이 보이게 (끝나면 되돌려요)
+  sfx("ui-open", .3);
+}
+function arrivalCam(now) {
+  const c = S.cut, p = clamp((now - c.t0) / ARRIVAL_MS, 0, 1), e = p * p * (3 - 2 * p);
+  const cx = (MAP.x0 + MAP.x1) / 2, cz = (MAP.z0 + MAP.z1) / 2;
+  // 먼바다에서 섬 둘레를 돌며 내려와요 (창은 비행기 옆면이라 섬을 옆으로 바라봄)
+  const a = -2.4 + e * 1.5, r = 300 - e * 210, y = 120 - e * 82 + Math.sin(p * 9) * .6;
+  camera.position.set(cx + Math.cos(a) * r, y, cz + Math.sin(a) * r);
+  camera.lookAt(cx + Math.cos(a + .55) * r * .25, 4 + (1 - e) * 20, cz + Math.sin(a + .55) * r * .25);
+  camera.rotateZ(Math.sin(p * 5) * .015 - .04);
+  if (PLANE_WING) { PLANE_WING.position.copy(camera.localToWorld(_v.set(1.6, -1.5, -4.2))); PLANE_WING.quaternion.copy(camera.quaternion); PLANE_WING.rotateY(-.9); PLANE_WING.rotateZ(.06); }
+  if (p >= .9 && !c.ending) { c.ending = true; $("cutscene").classList.add("end"); }
+  if (p >= 1) endArrival();
+}
+function endArrival() {
+  const c = S.cut; if (!c) return;
+  S.cut = null; if (PLANE_WING) PLANE_WING.visible = false;
+  if (c.fog && scene.fog) { scene.fog.near = c.fog[0]; scene.fog.far = c.fog[1]; }
+  fade(() => { $("cutscene").hidden = true; $("cutscene").classList.remove("play", "end"); c.done(); });
+}
+/* ---------- 마우스 고정 시점 (PC) ----------
+   화면을 클릭하면 커서가 숨고 마우스대로 시점이 돌아요. 가운데 점이 가리키는 곳을 클릭하면 그곳을 누른 거예요. Esc로 풀려요.
+   창 · 안내 카드가 뜨면 저절로 풀려요. 설정에서 끌 수 있어요 */
+S.mouseLook = matchMedia("(pointer: fine)").matches && lsGet("mn.mlook", true);
+const mouseLocked = () => document.pointerLockElement === cv;
+function unlockMouse() { if (mouseLocked()) document.exitPointerLock(); }
+document.addEventListener("pointerlockchange", () => {
+  const on = mouseLocked(); document.body.classList.toggle("mlock", on);
+  if (on) { const tip = $("mlockTip"); tip.hidden = false; clearTimeout(tip._t); tip._t = setTimeout(() => { tip.hidden = true; }, 4200); }
+});
+document.addEventListener("mousemove", (e) => {
+  if (!mouseLocked() || S.title) return;
+  cam.yawGoal = null; cam.yaw -= e.movementX * .0026; cam.pitch = clamp(cam.pitch + e.movementY * .002, .08, 1.25);
+});
+
 /* ===================== 메인 화면 =====================
    접속하면 먼저 이 화면. 뒤에서 부두가 천천히 돌아가고, 계정 로그인 상태·내 캐릭터를 보여 줌.
    「입장」 전에는 다른 사람에게 내 캐릭터가 보이지 않음(presence를 보내지 않음) */
@@ -10410,13 +10621,21 @@ function setupTitle() {
   renderTitle();
 }
 function enterGame() {
-  if (!S.title || $("tStart").disabled) return;
+  if (!S.title || $("tStart").disabled || S.creating || S.cut) return;
   const back = (P.caught || 0) > 0 || Object.keys(P.dex).length > 0;
-  S.title = false; document.body.classList.remove("titling");
-  S.chatSince = Date.now(); S.chat = []; renderChat();
-  const t = $("title"); t.classList.add("out"); setTimeout(() => { t.hidden = true; }, 650);
   lsSet("mn.tsound", $("tSound").checked);
   if ($("tSound").checked && !S.sound) { S.sound = true; startSound(); $("soundBtn").setAttribute("aria-pressed", "true"); }
+  if (!back && !P.made) { $("title").classList.add("out"); setTimeout(() => { $("title").hidden = true; }, 650); startCreator(); return; }   // 처음 왔으면 캐릭터부터
+  doEnter(back);
+}
+function doEnter(back) {
+  S.title = false; document.body.classList.remove("titling");
+  if (STATION) {   // 역에서 걸어 나와요
+    ME.x = STATION.x; ME.z = STATION.z; ME.ry = STATION.ry; ME.target = null;
+    setTimeout(() => walkTo(STATION.x + Math.sin(STATION.ry) * 3.5, STATION.z + Math.cos(STATION.ry) * 3.5), 400);
+  }
+  S.chatSince = Date.now(); S.chat = []; renderChat();
+  const t = $("title"); t.classList.add("out"); setTimeout(() => { t.hidden = true; }, 650);
   bgmUpdate();
   if (S.room) S.room.presence(fullPresence()).catch(() => {});
   cam.yawGoal = null; cam.yaw = 0; if (cam.t) cam.t.set(ME.x, 1.1, ME.z);
