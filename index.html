@@ -1280,6 +1280,71 @@ body.emote-open .actbtn,body.emote-open .castb,body.emote-open .hook,body.me-ope
   body:not(.seated):not(.casting):not(.fighting) .actbtn{max-width:calc(100vw - 248px);bottom:calc(env(safe-area-inset-bottom,0px) + 74px);font-size:15.5px;padding:10px 18px}
   body:not(.seated):not(.casting):not(.fighting) .actbtn.soft.up{bottom:calc(env(safe-area-inset-bottom,0px) + 128px)}
 }
+/* ===================== v1.39 어두운 리퀴드 글라스 =====================
+   화면 위 모든 UI(HUD · 아래 막대 · 채팅 · 배너 · 토스트 · 안내 카드 · 창)를 같은 재질로: 어둡고 비치는 유리 + 위쪽 빛 반사 + 가장자리 하이라이트.
+   색 · 바탕 · 테두리 · 그림자만 바꾸고 위치 · 크기는 그대로예요. 밝은 모드에서도 항상 어두운 유리예요 */
+html:root:not(.lg-x),html:root[data-theme]{   /* 밝은 · 어두운 모드 규칙보다 우선 */
+  --bg:rgba(255,255,255,.055); --surface:#121b23; --surface2:rgba(255,255,255,.09); --ink:#eef3f5; --muted:#9db0b8; --line:rgba(255,255,255,.13);
+  --accent:#ff6a42; --accent-ink:#1a0d08; --sea:#5fb3cc; --ok:#55c487;
+  --t0:#9cb1a8; --t1:#62a9e8; --t2:#b38af0; --t3:#f39a4c; --t4:#e6c446; --t5:#3fd6cc;
+  --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark;
+  --lg-fill:rgba(14,19,27,.52); --lg-fill-strong:rgba(12,16,24,.7);
+  --lg-sheen:linear-gradient(180deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,.035) 38%,rgba(255,255,255,0) 60%,rgba(255,255,255,.04) 100%);
+  --lg-edge:rgba(255,255,255,.17);
+  --lg-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(255,255,255,.07),inset 0 0 0 1px rgba(255,255,255,.05),0 12px 32px rgba(0,0,0,.38);
+  --lg-blur:blur(20px) saturate(175%) brightness(.92);
+  --glass:var(--lg-fill); --glass-strong:var(--lg-fill-strong); --glass-line:var(--lg-edge);
+  --hud-ink:#f3f1ec; --hud-muted:rgba(243,241,236,.64);
+  --hud2-bg:var(--lg-fill); --hud2-ink:#f3f1ec; --hud2-mute:rgba(243,241,236,.62); --hud2-line:var(--lg-edge); --hud2-sh:0 12px 32px rgba(0,0,0,.38);
+}
+.glass,.hud.me .mecard,.hud.tr .clock,.hud.tr .chan,.hud.tr .icobtn,.hud.stat,.hud.chat,.hud.dock,.toast,.fbox,.tcard,.coach .ccard,.mlocktip,.cutscene .cutskip{
+  background:var(--lg-sheen),var(--lg-fill)!important;border:1px solid var(--lg-edge)!important;color:var(--hud-ink);
+  box-shadow:var(--lg-shadow)!important;-webkit-backdrop-filter:var(--lg-blur)!important;backdrop-filter:var(--lg-blur)!important}
+.pop,.tcard,.fbox,.coach .ccard,.coop{background:var(--lg-sheen),var(--lg-fill-strong)!important}
+/* 창(시트): 큰 유리판 — 가장자리 빛 + 위쪽 반사 */
+.sheet{background:var(--lg-sheen),rgba(13,18,26,.74)!important;color:var(--ink);border:1px solid var(--lg-edge);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.04),0 24px 60px rgba(0,0,0,.5)!important;-webkit-backdrop-filter:blur(28px) saturate(170%);backdrop-filter:blur(28px) saturate(170%)}
+.sheet>header{border-bottom-color:var(--lg-edge)}
+.overlay{background:rgba(4,8,14,.28)}
+.sbody>.tabs:first-child,.sbody>.seg-tabs,.abar,.trybar,.fx-ex{background:rgba(16,22,30,.72)!important;-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);border-color:var(--lg-edge)!important}
+.btn{background:rgba(255,255,255,.07);border-color:var(--lg-edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn.pri{background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0) 55%),var(--accent);border-color:rgba(255,255,255,.28);color:#fff}
+.btn.ghost{background:transparent;box-shadow:none}
+.close,.sheet header .help{background:rgba(255,255,255,.08)!important;border-color:var(--lg-edge)!important;color:var(--ink)!important}
+.chips button{background:rgba(255,255,255,.06);border-color:var(--lg-edge)}
+.chips button[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 26%,rgba(255,255,255,.06));border-color:var(--accent)}
+input,select,textarea{background-color:rgba(255,255,255,.07);border-color:var(--lg-edge);color:var(--ink)}
+/* HUD 속 밝던 부분 */
+.hud.me .mecard .gd,.hud.me .mecard .gd b{color:#ffd77a}
+.hud.me .mecard canvas{box-shadow:0 0 0 2px rgba(255,255,255,.55),0 0 0 3.5px #ff6a42}
+.hud.tr .chan b{color:#ff8a5c}.hud.tr .icobtn[aria-pressed="true"]{background:var(--lg-sheen),rgba(255,106,66,.72)!important}
+.hud.stat .big b{color:#fff}
+.hud.stat button{background:rgba(255,255,255,.08);border:1px solid var(--lg-edge);color:var(--hud-ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.hud.stat button:hover{background:rgba(255,255,255,.14)}.hud.stat #questBtn b{color:#ff8a5c}
+.hud.stat #guideBtn{background:rgba(242,194,48,.16);border-color:rgba(242,194,48,.55);color:var(--hud-ink)}.hud.stat #guideBtn #guideTx{color:#ffd77a}
+.hud.chat input{background:rgba(255,255,255,.08);border:1px solid var(--lg-edge);color:var(--hud-ink)}
+.hud.dock button{color:var(--hud-ink)}.hud.dock button:hover{background:rgba(255,255,255,.09)}
+.hud.dock button .ico{box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 3px 8px rgba(0,0,0,.3)}
+.hud.dock .menubtn{--qc:rgba(255,255,255,.16);color:var(--hud-ink)!important}
+.hud.dock .badge,.hud.dock .qbadge{box-shadow:0 0 0 2px rgba(14,19,27,.9)}
+.runbtn[aria-pressed="true"]{background:var(--lg-sheen),rgba(255,106,66,.7)!important}
+.buff{background:rgba(85,196,135,.22);border-color:rgba(85,196,135,.5)}
+.noticebar{background:var(--lg-sheen),rgba(194,64,42,.62);border:1px solid rgba(255,160,140,.4);box-shadow:var(--lg-shadow);-webkit-backdrop-filter:var(--lg-blur);backdrop-filter:var(--lg-blur)}
+.actbtn{background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0) 52%),rgba(255,106,66,.86);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 0 0 1px rgba(255,255,255,.3),0 12px 28px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.actbtn.soft{background:var(--lg-sheen),var(--lg-fill-strong);box-shadow:var(--lg-shadow)}
+.coach{background:rgba(4,8,14,.3)}
+.mlocktip{color:#fff}
+/* 퀵바 꾸미기 미리보기도 진짜 막대와 같은 유리 */
+.qb2-bar{background:var(--lg-sheen),var(--lg-fill-strong)!important;border:1px solid var(--lg-edge);box-shadow:var(--lg-shadow)!important}
+.qb2-slot{color:var(--hud-ink)}.qb2-slot.empty .qb2-ico{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.5)}.qb2-slot.empty{color:rgba(255,255,255,.5)}
+/* 가게의 종이 · 나무 소품(가격표 · 페그보드 쪽지 · 통장 · 주문 전표)은 밝은 바탕이라 글씨를 진하게 그대로 */
+.passbook,.peg .ishelf,.pegwall .irow,.ishelf.slip,.tbox .gi{--ink:#132f38;--muted:#56717a;--line:#bfd2d0;--bg:#e7efee;--surface:#f7fbfa;color:#132f38}
+.passbook .btn,.peg .ishelf .btn,.pegwall .irow .btn,.ishelf.slip .btn:not(.pri){background:rgba(19,47,56,.06);border-color:rgba(19,47,56,.18);box-shadow:none}
+.tier.t4{color:#2e2200}
+/* 메뉴 타일 · 카드도 비치는 유리 조각처럼 */
+.mtile,.card,.listrow{box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+@media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 </style>
 
 <div class="app" id="app">
@@ -1421,7 +1486,7 @@ body.emote-open .actbtn,body.emote-open .castb,body.emote-open .hook,body.me-ope
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.38.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.39.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)

@@ -120,6 +120,7 @@ node tools/test/fight_sim.js
   - 잠긴 기능의 도전과제(집 · `job1`)는 `ACH`에서 빠져요.
 - **돈이 과하게 풀리지 않게** (v1.23.0): 공짜 돈(출석 · 보물 상자 · 초대 · 예금 이자 · 도전과제)은 낚시 벌이(초반 한 시간 ≈ 27만원)를 넘지 않게 맞췄어요. 새 보상을 넣을 때도 이 기준으로 봐요.
 - **물고기 시세** (v1.26): 물고기를 파는 곳은 모두 `fishSell(item)`을 써요(= `sellValue(price × fishMul(fishId))`). 새로 파는 곳을 만들면 이걸 써요. 시세는 `rawFishMul`(날짜 + 물고기 해시), 오늘의 생선은 `todayFish()` ×1.5. 조개 · 회(노점)는 시세와 따로예요.
+- **어두운 리퀴드 글라스** (v1.39): `</style>` 바로 앞 `/* ===== v1.39 어두운 리퀴드 글라스` 블록이 색 변수(`--bg` 반투명 · `--ink` 밝음 · `--lg-*` 유리 재료)를 밝은/어두운 모드 모두 덮어써요(`html:root:not(.lg-x)`로 우선순위를 높였어요). 새 HUD 요소는 `glass` 클래스만 붙이면 같은 유리가 돼요. 밝은 종이 소품을 새로 만들면 그 안에서 `--ink` 등을 진한 값으로 다시 정해 주세요(블록 안 `.passbook,.peg .ishelf…` 줄처럼).
 - **낚싯대 3D 모델** (v1.38): `a/rods.json`(14종, `tools/rods_pack.py <팩 zip>`으로 다시 만들어요 · OBJ 번호 01~14 → `RODS` id). 게임에서는 `loadRodModels`(물고기 모델 불러올 때 같이) → `ROD3D` · 그림 `ROD_PIC`(`itemIcon` 낚싯대). 손에 든 낚싯대는 `fitHeldRod(F, rd)`가 막대 낚싯대 대신 모델을 달고 `F.tip`(줄 나오는 곳)과 릴 자리를 맞춰요. 모델의 릴은 손에 들 때 숨기고 내 릴(`F.reelM`)을 달아요.
 - **UI 3탄** (v1.37): 아래 막대 칸 색은 `QCOL`(퀵바 꾸미기 화면과 같은 값, `applyQuick`이 `--qc`로 넣어요). 퀵바 꾸미기에서 고른 칸은 `S.qbSel`. CSS는 `/* ===== v1.37 UI 개편 3탄` 블록(`.att2*` 도장판 · `.inv-*` 초대장 · `.qb2-*` 작업대 · `.gd2-*` 수첩). 옛 `.qb-` · `.gd-` · `.attday` CSS는 지웠어요.
 - **UI 2탄 공용** (v1.36): `nickAvatar(nick, uid, size)` = 이름 첫 글자 얼굴 동그라미(내 uid나 "me"면 내 얼굴), `nickColor`, `friendStatus(peer)` = 친구가 하는 일 아이콘 · 글. 시트별 CSS는 `/* ===== v1.36 UI 개편 2탄` 블록(`.pcard` · `.pring` 고리(`--p` 0~1) · `.fcard` · `.acard` · `.podium` · `.bagsum` · `.dexsum` · `.setlist`). 도전과제 거르기는 `S.achF`.
