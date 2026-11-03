@@ -532,7 +532,8 @@ body.titling .noticebar{display:none}
 .homebar b{overflow:hidden;text-overflow:ellipsis;margin-right:4px}
 .homebar button{border:0;border-radius:999px;padding:5px 12px;background:rgba(255,255,255,.14);color:var(--hud-ink);font-size:12.5px}
 .homebar button.on{background:var(--hud-accent);color:#fff}
-body.athome .stat,body.athome #runBtn{display:none}
+body.athome .stat{display:none}
+#homeDockBtn{display:none!important}
 .decobar{position:absolute;left:50%;bottom:calc(var(--sb) + 76px);transform:translateX(-50%);z-index:5;width:min(560px,calc(100% - 24px));max-height:42vh;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:16px;background:var(--surface);color:var(--ink);box-shadow:0 12px 30px rgba(0,0,0,.3)}
 .decobar .dhead{display:flex;flex-direction:column;gap:2px}.decobar .dhead span{font-size:12px}
 .dinv{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
@@ -1206,9 +1207,6 @@ body.creating #sheetClose,body.creating #sheetBack{display:none}
 @keyframes capin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
 .cutscene .cutskip{position:absolute;right:calc(var(--sr) + 14px);top:calc(var(--st) + 14px);pointer-events:auto;border:0;border-radius:999px;padding:8px 16px;background:rgba(58,48,38,.82);color:#fff;font:inherit;font-weight:700}
 .cutscene.end .pwin,.cutscene.end .cutcap{transition:opacity .8s;opacity:0}
-.xhair{position:fixed;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.45);z-index:15;display:none;pointer-events:none}
-body.mlock .xhair{display:block}
-.mlocktip{position:fixed;left:50%;top:calc(var(--st) + 70px);transform:translateX(-50%);z-index:16;background:rgba(16,22,26,.8);color:#fff;font-size:13px;padding:8px 16px;border-radius:999px;pointer-events:none}
 .shopbar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:8px 12px;border-radius:12px;background:linear-gradient(135deg,rgba(242,194,48,.18),rgba(226,82,44,.12));border:1px solid rgba(242,194,48,.4);margin-bottom:8px;font-size:13px}
 .shopbar .stars{color:#f2b630;font-size:18px;letter-spacing:1px}
 .guests{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin-bottom:10px}
@@ -1249,7 +1247,6 @@ body.has-notice.on-boat .coop,body.has-notice.athome .coop{top:calc(var(--st) + 
 body.has-notice .toasts,body.on-boat .toasts,body.athome .toasts{top:calc(var(--st) + 54px)}
 body.has-notice.on-boat .toasts,body.has-notice.athome .toasts{top:calc(var(--st) + 94px)}
 body.has-coop .toasts{top:calc(var(--st) + 188px)}
-body.has-notice .mlocktip,body.on-boat .mlocktip,body.athome .mlocktip{top:calc(var(--st) + 96px)}
 .hud.chat{width:min(340px,calc(50% - 265px))}
 .runbtn{bottom:calc(var(--sb) + 260px)}
 @media (min-width:821px) and (max-width:1120px){
@@ -1297,7 +1294,7 @@ html:root:not(.lg-x),html:root[data-theme]{   /* 밝은 · 어두운 모드 규�
   --hud-ink:#f3f1ec; --hud-muted:rgba(243,241,236,.64);
   --hud2-bg:var(--lg-fill); --hud2-ink:#f3f1ec; --hud2-mute:rgba(243,241,236,.62); --hud2-line:var(--lg-edge); --hud2-sh:0 12px 32px rgba(0,0,0,.38);
 }
-.glass,.hud.me .mecard,.hud.tr .clock,.hud.tr .chan,.hud.tr .icobtn,.hud.stat,.hud.chat,.hud.dock,.toast,.fbox,.tcard,.coach .ccard,.mlocktip,.cutscene .cutskip{
+.glass,.hud.me .mecard,.hud.tr .clock,.hud.tr .chan,.hud.tr .icobtn,.hud.stat,.hud.chat,.hud.dock,.toast,.fbox,.tcard,.coach .ccard,.cutscene .cutskip{
   background:var(--lg-sheen),var(--lg-fill)!important;border:1px solid var(--lg-edge)!important;color:var(--hud-ink);
   box-shadow:var(--lg-shadow)!important;-webkit-backdrop-filter:var(--lg-blur)!important;backdrop-filter:var(--lg-blur)!important}
 .pop,.tcard,.fbox,.coach .ccard,.coop{background:var(--lg-sheen),var(--lg-fill-strong)!important}
@@ -1334,7 +1331,6 @@ input,select,textarea{background-color:rgba(255,255,255,.07);border-color:var(--
 .actbtn{background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0) 52%),rgba(255,106,66,.86);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 0 0 1px rgba(255,255,255,.3),0 12px 28px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 .actbtn.soft{background:var(--lg-sheen),var(--lg-fill-strong);box-shadow:var(--lg-shadow)}
 .coach{background:rgba(4,8,14,.3)}
-.mlocktip{color:#fff}
 /* 퀵바 꾸미기 미리보기도 진짜 막대와 같은 유리 */
 .qb2-bar{background:var(--lg-sheen),var(--lg-fill-strong)!important;border:1px solid var(--lg-edge);box-shadow:var(--lg-shadow)!important}
 .qb2-slot{color:var(--hud-ink)}.qb2-slot.empty .qb2-ico{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.5)}.qb2-slot.empty{color:rgba(255,255,255,.5)}
@@ -1355,6 +1351,37 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
 .chrow .chbar{height:8px;border-radius:4px;background:rgba(127,127,127,.22);overflow:hidden}.chrow .chbar i{display:block;height:100%;background:#2fae7f}
 .chrow.full .chbar i{background:#e2402a}.chrow.here{border-color:#3fd6cc;box-shadow:0 0 0 3px rgba(63,214,204,.18)}
 .chrow .chtag{font-size:12px;font-weight:800;color:#3fd6cc}.chrow .grow{flex:1;min-width:0}
+/* v1.42 도감 = 수집 책: 밝은 그림 칸 · 큰 이름 · 등급 색 · 누르면 자세히 */
+.dx-head{display:flex;gap:12px;align-items:stretch;padding:10px;border-radius:18px;border:1.5px solid var(--line);background:var(--bg)}
+.dx-all{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 10px;border-radius:14px;border:2px solid transparent;background:none;color:inherit;font:inherit;cursor:pointer}
+.dx-all small{font-size:12px;color:var(--muted);font-weight:700}.dx-all.on{border-color:var(--lg-edge,rgba(255,255,255,.2));background:rgba(255,255,255,.06)}
+.dx-tiers{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.dx-tier{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;gap:4px 8px;align-items:center;text-align:left;padding:8px 10px;border-radius:12px;border:2px solid transparent;background:rgba(255,255,255,.05);color:inherit;font:inherit;cursor:pointer}
+.dx-tier b{font-size:13.5px;color:var(--tc)}.dx-tier small{font-size:12px;color:var(--muted);justify-self:end}
+.dx-tier .dx-bar{grid-column:1/-1;display:block;height:7px;border-radius:4px;background:rgba(127,127,127,.25);overflow:hidden}.dx-tier .dx-bar>i{display:block;height:100%;background:var(--tc)}
+.dx-tier.on{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 18%,transparent)}
+.dx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:10px}
+.dx-tile{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:6px 6px 9px;border-radius:16px;border:2px solid color-mix(in srgb,var(--tc) 55%,transparent);background:rgba(255,255,255,.04);color:inherit;font:inherit;cursor:pointer;text-align:center;transition:transform .12s}
+.dx-tile:hover{transform:translateY(-2px)}.dx-tile.sel{border-color:#fff;box-shadow:0 0 0 3px var(--tc)}
+.dx-pic{display:grid;place-items:center;height:78px;border-radius:11px;background:radial-gradient(circle at 50% 42%,#ffffff 0%,color-mix(in srgb,var(--tc) 30%,#e8f4f6) 72%)}
+.dx-pic img{max-width:92%;max-height:68px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.25))}
+.dx-nm{font-size:14px;line-height:1.25;word-break:keep-all;margin-top:2px}
+.dx-tg{align-self:center;font-size:11px;font-weight:800;padding:1px 9px;border-radius:999px;background:var(--tc);color:#fff}
+.dx-n{position:absolute;right:10px;top:10px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;display:grid;place-items:center;background:rgba(20,28,36,.85);color:#fff;font-size:11.5px;font-weight:800}
+.dx-star{position:absolute;left:10px;top:9px;font-size:16px}
+.dx-tile.unknown{border-style:dashed;border-color:rgba(255,255,255,.18)}.dx-tile.unknown .dx-pic{background:rgba(255,255,255,.07)}
+.dx-tile.unknown .dx-pic img{filter:brightness(0) opacity(.45)}.dx-tile.unknown .dx-nm{color:var(--muted)}.dx-tile.unknown .dx-tg{opacity:.55}
+.dx-detail{position:relative;display:grid;grid-template-columns:minmax(110px,38%) 1fr;gap:14px;padding:14px;border-radius:18px;border:2px solid var(--tc);background:color-mix(in srgb,var(--tc) 12%,rgba(255,255,255,.03))}
+.dx-x{position:absolute;right:10px;top:10px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.08);color:inherit;cursor:pointer}
+.dx-big{display:grid;place-items:center;min-height:110px;align-self:start;aspect-ratio:1.3;border-radius:14px;background:radial-gradient(circle at 50% 42%,#fff 0%,color-mix(in srgb,var(--tc) 32%,#e8f4f6) 75%)}
+.dx-big img{max-width:94%;max-height:120px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}.dx-big.unknown img{filter:brightness(0) opacity(.45)}
+.dx-info{display:flex;flex-direction:column;gap:8px;min-width:0;padding-right:30px}
+.dx-title{font-family:var(--f-display);font-weight:400;font-size:24px;line-height:1.15}
+.dx-desc{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink)}.dx-where{font-weight:800;color:var(--accent);font-size:13px}
+.dx-rows{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.dx-row{display:flex;flex-direction:column;gap:1px;padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.06)}.dx-row span{font-size:11.5px;color:var(--muted)}.dx-row b{font-size:14px}
+@media (max-width:560px){.dx-head{flex-direction:column;padding:8px}.dx-all{flex-direction:row;gap:10px;padding:2px 8px}.dx-tiers{grid-template-columns:repeat(3,1fr);gap:4px}.dx-tier{padding:6px 7px}.dx-tier b{font-size:12.5px}.dx-tier small{font-size:11px}.dx-grid{grid-template-columns:repeat(3,1fr);gap:7px}.dx-pic{height:62px}.dx-pic img{max-height:54px}.dx-nm{font-size:12.5px}
+  .dx-detail{grid-template-columns:1fr}.dx-info{padding-right:0}.dx-rows{grid-template-columns:1fr 1fr}}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 </style>
 
@@ -1376,8 +1403,8 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
     <button class="icobtn glass" id="setBtn" aria-expanded="false" aria-label="설정" title="설정"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
   </div>
   <div class="pop glass" id="settingsPop" hidden>
-    <button id="speedBtn">입질 속도 <span>빠르게</span></button>
-    <button id="autoBtn" aria-pressed="false">자동 챔질 <span>끔</span></button>
+    <button id="speedBtn" hidden>입질 속도 <span>빠르게</span></button>
+    <button id="autoBtn" aria-pressed="false" hidden>자동 챔질 <span>끔</span></button>
     <button id="hqBtn" aria-pressed="true">그림자 <span>켬</span></button>
     <button id="mungBtn">멍 모드 <span>화면만 보기</span></button>
     <button id="codeBtn">내 후원 코드 <span id="myCode">------</span></button>
@@ -1413,7 +1440,6 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
   </div>
   <button class="mungexit glass" id="mungExit" hidden>멍 모드 끝내기</button>
   <div class="joy" id="joy" aria-label="이동 조이스틱"><i id="joyKnob"></i></div>
-  <button class="hud runbtn glass" id="runBtn" aria-pressed="false" title="달리기 (PC는 Shift를 누르고 있어도 돼요)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="14.5" cy="4.5" r="2"/><path d="M8 21l3-6 3 2v5M6 12l3-3h4l3 3 3 1M11 9l-2 5"/></svg><span>달리기</span></button>
   <button class="actbtn" id="actBtn" hidden></button>
   <button class="actbtn soft" id="standBtn" hidden>일어나기</button>
   <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -1449,7 +1475,7 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
     <button data-open="dex"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/></svg><span>도감</span><span class="cnt" id="dexCount">0</span></button>
     <button data-open="travel"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>지도</span></button>
     <button data-open="friends"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5A5 5 0 0 1 21 19"/></svg><span>친구</span><span class="badge" id="friendBadge" hidden>0</span></button>
-    <button id="homeDockBtn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg><span id="homeDockTx">우리 집</span></button>
+    <button id="homeDockBtn" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg><span id="homeDockTx">우리 집</span></button>
     <button class="chatonly" id="chatDockBtn"><span class="badge" id="chatBadge" hidden>0</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H9l-4 4z"/></svg><span>채팅</span></button>
     <button data-open="menu" class="menubtn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span>메뉴</span><span class="badge" id="menuBadge" hidden>0</span></button>
     <span hidden><button id="emoteBtn"></button><button data-open="offers" id="offersBtn"><span class="badge" id="offerBadge" hidden>0</span></button></span>
@@ -1479,8 +1505,6 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
   <div class="cutcap"><small>✈️ 낭만 섬행 · 곧 도착해요</small><b>어서 와요, <span class="cutnick"></span>님!</b><span>창밖으로 오늘부터 살게 될 바닷가 마을이 보여요</span></div>
   <button class="cutskip" type="button">건너뛰기 ▶</button>
 </div>
-<div class="xhair" aria-hidden="true"></div>
-<div class="mlocktip" id="mlockTip" hidden>🖱️ 마우스로 둘러봐요 · 가운데 점으로 가리키고 클릭 · 이동은 WASD · <b>우클릭</b>이나 <b>Alt</b>로 커서 꺼내기 · 다시 고정</div>
 <div class="fade" id="fade" hidden></div>
 <div class="coach" id="coach" hidden role="dialog" aria-modal="true" aria-label="안내"><div class="ccard" id="coachCard"></div></div>
 
@@ -1497,7 +1521,7 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.41.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.42.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -2019,7 +2043,7 @@ const jobLv = (id) => { const x = (P.job && P.job.xp && P.job.xp[id]) || 0; let 
 /* 출시 때 잠가 두는 곳: 동사무소(직업) · 마이 홈(부동산 · 집). 운영자는 시험용으로 들어갈 수 있어요.
    회 뜨기 · 노점 판매는 원래대로 누구나 해요(v1.25 · 횟집 사장 직업이 없어도). 숙련도와 노점 메뉴 칸 늘리기는 그대로 쌓여요 */
 const LOCKED = { office: true, home: true };
-const isLocked = (k) => LOCKED[k] && !S.isOwner;
+const isLocked = (k) => k === "home" || (LOCKED[k] && !S.isOwner);   // 우리 집은 운영자도 닫혀요 (v1.42 · 기능 없앰)
 function lockedToast(what) { sfx("ui-error", .3); toast([h("b", { text: "🚧 " + what + "은 준비 중이에요" }), h("div", { class: "muted", style: "font-size:12px", text: "정식 오픈 뒤 업데이트에서 열려요" })], null, 3600); }
 const isJob = (id) => id === "sashimi" || (!LOCKED.office && !!(P.job && P.job.id === id));
 const myTag = () => P.title || (P.job && JOB[P.job.id] ? JOB[P.job.id].name : "");
@@ -2138,7 +2162,7 @@ const S = {
   stalls: Array(8).fill(null), myStall: -1, offersIn: new Map(),
   phase: "idle", phaseStart: 0, phaseEnd: 0, castBait: "worm", hooked: false,
   lastCatch: null, myBubble: null, show: null,
-  speed: lsGet("mn.speed", "test"), sound: false, mung: false,
+  speed: "test", sound: false, mung: false,
   sheet: null, sheetArg: null, dexTab: "base", bagTab: "fish",
   card: null, cardIds: new Set(), takenCards: new Set(), meMenu: false, friendHere: null,
   title: true, titleForce: false, hq: lsGet("mn.hq", !matchMedia("(pointer: coarse)").matches),
@@ -2595,7 +2619,7 @@ const TUTS = {
 const coachQ = [];
 function coach(id) {
   if (!TUTS[id] || !P.tut || P.tut[id] || (P.tut._off && id !== "jobnotice") || S.title || coachQ.includes(id) || (S.coach && S.coach.id === id)) return;
-  unlockMouse(); coachQ.push(id); if (!S.coach) nextCoach();
+  coachQ.push(id); if (!S.coach) nextCoach();
 }
 function nextCoach() {
   const id = coachQ.shift(); const box = $("coach");
@@ -2794,7 +2818,7 @@ function behaviorOf(f) {
   return { diff: [25, 45, 65, 85, 105, 125][f.tier], type: ["mixed", "dart", "smooth", "sinker", "floater"][hashStr(f.id) % 5] };
 }
 const randInt = (a, b) => Math.floor(a + Math.random() * (b - a));
-S.auto = lsGet("mn.auto", false);
+S.auto = false;   // 자동 챔질은 없앴어요 (v1.42) · 멍 모드만 자동으로 낚아요
 function setPhase(ph, dur) {
   if (S.phase === "bite" && ph !== "bite") S.hookHideAt = Date.now();
   S.phase = ph; S.phaseStart = Date.now(); S.phaseEnd = S.phaseStart + dur;
@@ -2851,7 +2875,7 @@ function autoIdleStop() {
   if (S.mung) setMung(false);
   if (S.auto) { S.auto = false; lsSet("mn.auto", false); try { setAutoLabel(); } catch {} }
   setPhase("ready", 0); updateActionUI();
-  toast([h("b", { text: "💤 자리를 비운 것 같아 자동 낚시를 멈췄어요" }), h("div", { class: "muted", style: "font-size:12px", text: "15분 동안 화면을 안 누르면 멈춰요 · 다시 켜려면 설정에서 자동 챔질을 켜요" })], null, 9000);
+  toast([h("b", { text: "💤 자리를 비운 것 같아 자동 낚시를 멈췄어요" }), h("div", { class: "muted", style: "font-size:12px", text: "15분 동안 화면을 안 누르면 멈춰요 · 다시 하려면 멍 모드를 켜요" })], null, 9000);
 }
 function tick() {
   try { tickInner(); } catch (e) { console.warn("tick", e); setPhase("miss", MISS_MS); }
@@ -2882,9 +2906,9 @@ function tickInner() {
     if (S.coop && S.coop.role === "host") { coopBiteMissed(); return; }
     if (autoOn()) {
       const r = rollFish(S.castBait);
-      if (r.f.tier >= AUTO_MAX_TIER) missFish(r, "⚠ " + TIERS[r.f.tier].name + " 대물이 물었다가 도망갔어요 · 대물은 자동 챔질로는 못 잡아요. 직접 챔질해 보세요!");
+      if (r.f.tier >= AUTO_MAX_TIER) missFish(r, "⚠ " + TIERS[r.f.tier].name + " 대물이 물었다가 도망갔어요 · 대물은 멍 모드로는 못 잡아요. 직접 챔질해 보세요!");
       else if (Math.random() < AUTO_RATE[r.f.tier]) landFish(r, false, true);
-      else missFish(r, "자동 챔질 실패 · " + TIERS[r.f.tier].name + " 물고기가 도망갔어요");
+      else missFish(r, "멍 모드 낚시 실패 · " + TIERS[r.f.tier].name + " 물고기가 도망갔어요");
     } else missFish(null, "입질을 놓쳤어요. 「!」가 뜨면 챔질하세요");
   }
   else if (S.phase === "catch" || S.phase === "miss") readyCast();
@@ -2982,8 +3006,7 @@ function landFish(r, perfect, auto) {
   questProgress("catch"); if (f.tier >= 2) questProgress("tier2"); if (k >= 1.6) questProgress("big"); if (perfect) questProgress("perfect"); if (r.coop) questProgress("coop");
   checkRecord(f, k, size);
   let sold = false; const sv = fishSell(item), isToday = f.id === todayFish();
-  if (f.tier < P.autoSell && k < 1.6 && !isToday) { P.gold += sv; sold = true; }
-  else if (P.bag.length >= BAG_MAX) { P.gold += sv; sold = true; toast("가방이 가득 차서 바로 팔았어요 (+" + won(sv) + ")"); }
+  if (P.bag.length >= BAG_MAX) { P.gold += sv; sold = true; toast("가방이 가득 차서 바로 팔았어요 (+" + won(sv) + ")"); }
   else P.bag.unshift(item);
   markDirty();
   const from = S.catchFrom || bobPos(); S.catchFrom = null;
@@ -2997,7 +3020,7 @@ function landFish(r, perfect, auto) {
   toast([h("img", { src: art.src, alt: "" }),
     h("div", null, h("div", null, tierChip(f.tier), " ", h("b", { text: f.name }), " ", h("span", { class: "num", text: fmtSize(size) })),
       h("div", { class: "muted", style: "font-size:12px" },
-        sizeLabel(k) + " 개체 ×" + k.toFixed(2) + " · " + (perfect ? "퍼펙트! · " : auto ? "자동 챔질 · " : "") + (sold ? "자동 판매 +" + won(sv) + "" : "가방에 넣었어요 · 지금 팔면 " + won(sv) + "") + (firstTime ? " · 도감 신규!" : "")),
+        sizeLabel(k) + " 개체 ×" + k.toFixed(2) + " · " + (perfect ? "퍼펙트! · " : auto ? "멍 모드 · " : "") + (sold ? "자동 판매 +" + won(sv) + "" : "가방에 넣었어요 · 지금 팔면 " + won(sv) + "") + (firstTime ? " · 도감 신규!" : "")),
       h("div", { class: isToday ? "todaytag2" : "muted", style: "font-size:11.5px", text: mulTag(f.id) + (isToday ? " · 팔면 1.5배!" : "") }))],
     f.tier >= 3 ? "lvup" : "catch", f.tier >= 3 ? 5600 : 4600);
   if (f.user && S.online && isUid(f.owner) && f.owner !== S.uid) {
@@ -3375,7 +3398,8 @@ function stepMove(dt) {
   const len = Math.hypot(dx, dz);
   const was = ME.moving;
   if (len > 0.001) {
-    const running = S.shift || S.runOn || (S.joy && S.joy.m > .92) || (ME.target && !keys.size && S.walkRun);
+    S.keyHold = keys.size ? (S.keyHold || 0) + dt : 0;   // 달리기 키는 없앴어요 (v1.42) · 1초 넘게 걸으면 저절로 달려요
+    const running = S.keyHold > 1 || (S.joy && S.joy.m > .92) || (ME.target && !keys.size && S.walkRun);
     const sp = 5.5 * (running ? 1.85 : 1) * (S.joy && S.joy.m > .15 && !running ? .45 + .55 * S.joy.m : 1) * dt, stp = Math.min(sp, ME.target && !keys.size && !S.joy ? len : sp);
     const ux = dx / len * stp, uz = dz / len * stp;
     let nx = ME.x + ux, nz = ME.z + uz;
@@ -3447,13 +3471,6 @@ function nearestAction() {
   if (inUptown(ME.x, ME.z)) {
     if (isLocked("office")) consider(OFFICE.door.x, OFFICE.door.z, { key: "office:soon", label: "🚧 동사무소 · 준비 중", run: () => lockedToast("동사무소") }, 2.6);
     else consider(OFFICE.door.x, OFFICE.door.z, { key: "office", label: "동사무소 들어가기", run: () => { ME.ry = Math.PI / 2; presMove(true); openSheet("office"); } }, 2.6);
-    if (isLocked("home")) {
-      consider(REALTY.door.x, REALTY.door.z, { key: "realty:soon", label: "🚧 부동산 · 준비 중", run: () => lockedToast("마이 홈 · 부동산") }, 2.4);
-      consider(HOUSE_GATE.x, HOUSE_GATE.z, { key: "housegate:soon", label: "🚧 주택가 · 준비 중", run: () => lockedToast("마이 홈") }, 2.2);
-    } else {
-      consider(REALTY.door.x, REALTY.door.z, { key: "realty", label: "부동산 들어가기", run: () => { ME.ry = Math.PI / 2; presMove(true); openSheet("realty"); } }, 2.4);
-      consider(HOUSE_GATE.x, HOUSE_GATE.z, { key: "housegate:" + P.home.tier, label: P.home.tier >= 0 ? "우리 집 들어가기" : "주택가 · 아직 집이 없어요", run: () => P.home.tier >= 0 ? enterHouse(S.uid) : (toast("부동산에서 집을 사면 여기로 들어가요"), openSheet("realty")) }, 2.2);
-    }
   }
   if (inHall(ME.x, ME.z)) {
     for (const sp of STATUE_SPOTS) { const c = RANK_CATS[sp.i]; consider(sp.x, sp.z + sp.face * 1.5, { key: "hall:" + c.id, label: c.ico + " " + c.name + " 랭킹 보기", run: () => openSheet("rank", c.id) }, 1.4); }
@@ -3929,7 +3946,6 @@ const ME_ACTIONS = [
   { svg: ICO.friends, label: () => "친구 " + Object.keys(P.friends).length, run: () => openSheet("friends") },
   { svg: ICO.profile, label: () => "내 정보", run: () => openSheet("profile") },
   { svg: ICO.bag, label: () => "가방", run: () => openSheet("bag") },
-  { svg: '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>', label: () => atHome() ? "마을로" : isLocked("home") ? "우리 집 🚧" : P.home.tier >= 0 ? "우리 집" : "집 구하기", run: () => atHome() ? leaveHouse() : P.home.tier >= 0 ? enterHouse(S.uid) : (toast("윗마을 부동산에서 집을 살 수 있어요"), goRealty()) },
   { svg: ICO.emote, label: () => "인사", run: () => { closeFloatingUI("emote"); $("emotePop").hidden = false; syncUIState(); } },
   { svg: ICO.face, label: () => "꾸미기", run: () => openSheet("face") },
   { svg: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M8 20h8"/>', hot: () => achClaimable() > 0, label: () => "도전과제" + (achClaimable() ? " " + achClaimable() : ""), run: () => openSheet("ach") },
@@ -7522,12 +7538,6 @@ function loop3D(ms) {
 function bindInput() {
   const ptrs = new Map(); let down = null, pinch0 = 0, dist0 = 10;
   cv.addEventListener("pointerdown", (e) => {
-    // 마우스 고정 시점: 잠기지 않았으면 이 클릭으로 잠그고, 잠긴 동안 클릭은 가운데 점을 누른 거예요
-    if (e.pointerType === "mouse" && S.mouseLook && e.button === 2) return;   // 오른쪽 버튼은 커서 꺼내기/고정 (마우스 고정 시점)
-    if (e.pointerType === "mouse" && S.mouseLook && !S.title && e.button === 0) {
-      if (!mouseLocked()) { try { cv.requestPointerLock(); } catch {} return; }
-      const r = cv.getBoundingClientRect(); tapAt(r.left + r.width / 2, r.top + r.height / 2); return;
-    }
     cv.setPointerCapture(e.pointerId);
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (ptrs.size === 1) down = { x: e.clientX, y: e.clientY, at: Date.now(), yaw: cam.yaw, pitch: cam.pitch, moved: false };
@@ -7581,7 +7591,7 @@ function tapAt(x0, y0) {
     if (best.kind === "hall") { goHall(best.cat); return; }
     if (best.kind === "office") { goOffice(); return; }
     if (best.kind === "realty") { goRealty(); return; }
-    if (best.kind === "housegate") { if (isLocked("home")) { lockedToast("마이 홈"); return; } walkTo(HOUSE_GATE.x, HOUSE_GATE.z, () => P.home.tier >= 0 ? enterHouse(S.uid) : openSheet("realty")); return; }
+    if (best.kind === "housegate") return;   // 우리 집은 없앴어요 (v1.42)
     if (best.kind === "homegate") { const G = homeGeom(S.homeDoc); walkTo(HOME.x, G.yardZ1 - .4, leaveHouse); return; }
   }
   if (ground) {
@@ -7716,7 +7726,7 @@ function updateHint() {
   else if (fishingNow()) hint.textContent = S.phase === "ready" || S.phase === "charge" ? "꾹 눌렀다가 초록 칸에서 떼면 완벽한 캐스팅! 멀리 던질수록 좋은 물고기" : "「!」가 뜨면 챔질 → 꾹 눌러 감고, 돌진·점프하면 손 떼기 · 과열을 조심해요";
   else if (S.myStall >= 0) hint.textContent = "노점 운영 중 · 주문이 오면 자동으로 팔려요";
   else if (ME.seat) hint.textContent = "포차에 앉았어요 · 채팅으로 수다 떨기";
-  else hint.textContent = COARSE ? "눌러서 이동 · 나를 누르면 내 메뉴 · 사람을 누르면 친구·거래" : "클릭·WASD로 이동 · Shift로 달리기 · E로 상호작용 · 나를 클릭하면 내 메뉴 · 사람을 클릭하면 친구·거래";
+  else hint.textContent = COARSE ? "눌러서 이동 · 나를 누르면 내 메뉴 · 사람을 누르면 친구·거래" : "클릭·WASD로 이동 · E로 상호작용 · 나를 클릭하면 내 메뉴 · 사람을 클릭하면 친구·거래";
 }
 
 /* ===================== 시트 ===================== */
@@ -7726,7 +7736,7 @@ S.sheetStack = [];
 function openSheet(name, arg, opt) {
   if (name === "office" && isLocked("office")) { lockedToast("동사무소"); return; }
   if (["realty", "storage", "tank", "guestbook"].includes(name) && isLocked("home")) { lockedToast("마이 홈 · 부동산"); return; }
-  unlockMouse(); closeMeMenu();   // 창이 뜨면 마우스 고정을 풀어 커서로 누를 수 있게
+  closeMeMenu();
   if (!(opt && opt.back)) { if (S.sheet && S.sheet !== name && SHEETS[name]) S.sheetStack.push([S.sheet, S.sheetArg]); else if (!S.sheet) S.sheetStack = []; }
   if (name === "dish") { S.bagTab = "dish"; name = "bag"; }
   if (!SHEETS[name]) { toast("이 가게는 곧 문을 열어요"); return; }
@@ -8215,34 +8225,6 @@ SHEETS.sashimi = (body) => {
 };
 
 /* ---------- 도감 ---------- */
-SHEETS.dex = (body) => {
-  const base = BUILTIN, mine = S.userFish;
-  const known = (id) => P.dex[id] && P.dex[id].n > 0;
-  setHead("도감", "기본 " + base.filter(f => known(f.id)).length + "/" + base.length + " · 방류된 물고기 " + mine.filter(f => visible(f) && known(f.id)).length + "/" + mine.filter(visible).length);
-  body.append(h("div", { class: "tabs", role: "tablist" },
-    h("button", { role: "tab", "aria-selected": String(S.dexTab === "base"), onclick: () => { S.dexTab = "base"; refreshSheet(true); }, text: "기본 물고기" }),
-    h("button", { role: "tab", "aria-selected": String(S.dexTab === "user"), onclick: () => { S.dexTab = "user"; refreshSheet(true); }, text: "유저가 방류한 물고기 " + mine.filter(visible).length }),
-    h("button", { role: "tab", "aria-selected": String(S.dexTab === "market"), onclick: () => { S.dexTab = "market"; refreshSheet(true); }, text: "📈 오늘의 시세" })));
-  if (S.dexTab === "market") { body.append(marketBoard()); return; }
-  const grid = h("div", { class: "grid" });
-  if (S.dexTab === "base") {
-    const tf = S.dexTier == null ? -1 : S.dexTier;
-    // 위쪽 요약: 전체 발견률 고리 + 등급별 모은 정도 막대
-    const kn = base.filter(f => known(f.id)).length;
-    body.append(h("div", { class: "dexsum" }, h("div", { class: "pring sm", style: "--p:" + (kn / base.length).toFixed(3) }, h("span", { class: "aring", text: Math.round(kn / base.length * 100) + "%" })),
-      h("div", { class: "dsbars" }, TIERS.map((T, i) => { const all = base.filter(f => f.tier === i).length, got = base.filter(f => f.tier === i && known(f.id)).length;
-        return h("div", { class: "dsb" }, tierChip(i), h("i", { class: "bsbar" }, h("i", { style: "width:" + Math.round(got / Math.max(1, all) * 100) + "%;background:var(" + TIER_VARS[i] + ")" })), h("small", { class: "num", text: got + "/" + all })); }))));
-    body.append(h("div", { class: "tabs" }, h("button", { "aria-selected": String(tf < 0), onclick: () => { S.dexTier = null; refreshSheet(true); }, text: "전체" }),
-      TIERS.map((T, i) => h("button", { "aria-selected": String(tf === i), onclick: () => { S.dexTier = i; refreshSheet(true); }, text: T.name + " " + base.filter(f => f.tier === i && known(f.id)).length + "/" + base.filter(f => f.tier === i).length }))));
-    for (const f of base.filter(f => tf < 0 || f.tier === tf).sort((a, b) => a.tier - b.tier)) grid.append(dexCard(f, known(f.id)));
-  }
-  else {
-    const list = mine.filter(f => visible(f) || f.owner === S.uid).sort((a, b) => b.ts - a.ts);
-    if (!list.length) { body.append(h("div", { class: "empty-note" }, "아직 방류된 물고기가 없어요. 상점가의 ", h("b", { text: "방류소" }), "에서 첫 물고기를 그려 바다에 풀어 보세요.")); return; }
-    for (const f of list) grid.append(dexCard(f, known(f.id)));
-  }
-  body.append(grid);
-};
 /* 오늘의 시세표: 오늘의 생선 + 종별 시세(높은 순). 기준가는 보통 크기(×1.00) 한 마리를 팔 때 */
 function marketBoard() {
   const wrap = h("div"), tf = findFish(todayFish()), now = new Date(Date.now() + 9 * 3600e3), left = 24 * 60 - (now.getUTCHours() * 60 + now.getUTCMinutes());
@@ -8262,34 +8244,74 @@ function marketBoard() {
   wrap.append(list);
   return wrap;
 }
-function dexCard(f, isKnown) {
-  const d = P.dex[f.id];
-  const mineFish = f.user && f.owner && f.owner === S.uid;
-  const showArt = isKnown || mineFish;
-  const card = h("div", { class: "card" + (showArt && f.tier >= 3 ? " g" + f.tier : "") + (f.id === todayFish() ? " gtoday" : "") },
-    h("div", { class: "pic" + (showArt ? "" : " unknown") }, h("img", { src: fishArt(f).src, alt: "" })),
-    h("div", { class: "nm" }, h("span", { text: showArt ? f.name : "???" }), tierChip(f.tier)),
-    h("div", { class: "meta" }, h("span", { class: "num", text: "기준 " + fmtSize(baseSize(f)) }), h("span", { class: "num", text: d ? d.n + "마리" : "미발견" })));
-  if (d) card.append(h("div", { class: "meta" }, h("span", { text: "내 최대" }), h("span", { class: "num", text: fmtSize(d.best) + (d.bestK ? " ×" + d.bestK.toFixed(2) : "") })));
-  if (!f.user) card.append(h("div", { class: "meta" }, h("span", { text: "오늘 시세" }), h("span", { class: "num" + (f.id === todayFish() ? " todaytag2" : ""), text: mulTag(f.id).replace("시세 ", "") })));
-  const rec = S.records && S.records.get(f.id);
-  if (rec) card.append(h("div", { class: "meta" }, h("span", { text: "부두 기록" }), h("span", { class: "num", text: "×" + rec.k.toFixed(2) + " · " + rec.nick })));
-  if (showArt && f.desc) card.append(h("div", { class: "desc", text: f.desc }));
-  if (f.where) card.append(h("div", { class: "desc", style: "color:var(--accent);font-weight:700", text: WHERE_KO[f.where] }));
+/* ---------- 도감: 수집 책 (v1.42) — 위에 달성률 · 등급 막대(눌러서 거르기), 아래 큰 그림 칸, 누르면 자세히 ---------- */
+SHEETS.dex = (body) => {
+  const base = BUILTIN, mine = S.userFish;
+  const known = (id) => P.dex[id] && P.dex[id].n > 0;
+  setHead("📖 도감", "기본 " + base.filter(f => known(f.id)).length + "/" + base.length + " · 방류된 물고기 " + mine.filter(f => visible(f) && known(f.id)).length + "/" + mine.filter(visible).length);
+  body.append(h("div", { class: "tabs", role: "tablist" },
+    h("button", { role: "tab", "aria-selected": String(S.dexTab === "base"), onclick: () => { S.dexTab = "base"; S.dexSel = null; refreshSheet(true); }, text: "기본 물고기" }),
+    h("button", { role: "tab", "aria-selected": String(S.dexTab === "user"), onclick: () => { S.dexTab = "user"; S.dexSel = null; refreshSheet(true); }, text: "방류된 물고기 " + mine.filter(visible).length }),
+    h("button", { role: "tab", "aria-selected": String(S.dexTab === "market"), onclick: () => { S.dexTab = "market"; refreshSheet(true); }, text: "📈 오늘의 시세" })));
+  if (S.dexTab === "market") { body.append(marketBoard()); return; }
+  let list;
+  if (S.dexTab === "base") {
+    const tf = S.dexTier == null ? -1 : S.dexTier, kn = base.filter(f => known(f.id)).length;
+    // 달성률 고리 + 등급 막대 = 거르기 단추 (같은 등급을 한 번 더 누르면 전체)
+    body.append(h("div", { class: "dx-head" },
+      h("button", { class: "dx-all" + (tf < 0 ? " on" : ""), onclick: () => { S.dexTier = null; S.dexSel = null; refreshSheet(true); } },
+        h("div", { class: "pring sm", style: "--p:" + (kn / base.length).toFixed(3) }, h("span", { class: "aring", text: Math.round(kn / base.length * 100) + "%" })),
+        h("small", { text: "전체 " + kn + "/" + base.length })),
+      h("div", { class: "dx-tiers" }, TIERS.map((T, i) => {
+        const all = base.filter(f => f.tier === i).length, got = base.filter(f => f.tier === i && known(f.id)).length;
+        return h("button", { class: "dx-tier" + (tf === i ? " on" : ""), style: "--tc:var(" + TIER_VARS[i] + ")", "aria-pressed": String(tf === i), onclick: () => { S.dexTier = tf === i ? null : i; S.dexSel = null; refreshSheet(true); } },
+          h("b", { text: T.name }), h("i", { class: "dx-bar" }, h("i", { style: "width:" + Math.round(got / Math.max(1, all) * 100) + "%" })), h("small", { class: "num", text: got + "/" + all }));
+      }))));
+    list = base.filter(f => tf < 0 || f.tier === tf).sort((a, b) => a.tier - b.tier || (known(b.id) - known(a.id)));
+  } else {
+    list = mine.filter(f => visible(f) || f.owner === S.uid).sort((a, b) => b.ts - a.ts);
+    if (!list.length) { body.append(h("div", { class: "empty-note" }, "아직 방류된 물고기가 없어요. 상점가의 ", h("b", { text: "방류소" }), "에서 첫 물고기를 그려 바다에 풀어 보세요.")); return; }
+  }
+  const sel = list.find(f => f.id === S.dexSel);
+  if (sel) body.append(dexDetail(sel, known(sel.id)));
+  body.append(h("div", { class: "dx-grid" }, list.map(f => dexTile(f, known(f.id)))));
+};
+function dexTile(f, isKnown) {
+  const d = P.dex[f.id], show = isKnown || (f.user && f.owner === S.uid), today = f.id === todayFish();
+  return h("button", { class: "dx-tile" + (show ? "" : " unknown") + (show && f.tier >= 3 ? " g" + f.tier : "") + (S.dexSel === f.id ? " sel" : ""), style: "--tc:var(" + TIER_VARS[f.tier] + ")",
+    onclick: () => { S.dexSel = S.dexSel === f.id ? null : f.id; refreshSheet(true); const b = document.querySelector(".sheet .sbody"); if (b && S.dexSel) b.scrollTo({ top: 0, behavior: "smooth" }); } },
+    h("span", { class: "dx-pic" }, h("img", { src: fishArt(f).src, alt: "" })),
+    today ? h("span", { class: "dx-star", title: "오늘의 생선", text: "⭐" }) : null,
+    d ? h("span", { class: "dx-n num", text: d.n }) : null,
+    h("b", { class: "dx-nm", text: show ? f.name : "???" }),
+    h("span", { class: "dx-tg", text: TIERS[f.tier].name }));
+}
+function dexDetail(f, isKnown) {
+  const d = P.dex[f.id], mineFish = f.user && f.owner && f.owner === S.uid, show = isKnown || mineFish, rec = S.records && S.records.get(f.id);
+  const row = (k, v, cls) => h("div", { class: "dx-row" }, h("span", { text: k }), h("b", { class: "num " + (cls || ""), text: v }));
+  const box = h("div", { class: "dx-detail", style: "--tc:var(" + TIER_VARS[f.tier] + ")" },
+    h("button", { class: "dx-x", "aria-label": "닫기", onclick: () => { S.dexSel = null; refreshSheet(true); }, text: "✕" }),
+    h("div", { class: "dx-big" + (show ? "" : " unknown") }, h("img", { src: fishArt(f).src, alt: "" })),
+    h("div", { class: "dx-info" },
+      h("div", { class: "row" }, h("b", { class: "dx-title", text: show ? f.name : "아직 못 만난 물고기" }), tierChip(f.tier)),
+      show && f.desc ? h("p", { class: "dx-desc", text: f.desc }) : !show ? h("p", { class: "dx-desc", text: "낚으면 이름과 설명이 열려요." }) : null,
+      f.where ? h("div", { class: "dx-where", text: WHERE_KO[f.where] }) : null,
+      h("div", { class: "dx-rows" },
+        row("기준 크기", fmtSize(baseSize(f))),
+        row("내가 낚은 수", d ? d.n + "마리" : "아직 없어요"),
+        d ? row("내 최대", fmtSize(d.best) + (d.bestK ? " ×" + d.bestK.toFixed(2) : "")) : null,
+        !f.user ? row("오늘 시세", mulTag(f.id).replace("시세 ", ""), f.id === todayFish() ? "todaytag2" : "") : null,
+        rec ? row("부두 기록", "×" + rec.k.toFixed(2) + " · " + rec.nick) : null)));
   if (f.user) {
-    card.append(h("div", { class: "desc", text: "방류: " + f.nick + (f.reports.length >= REPORT_HIDE ? " · 신고 누적으로 숨김" : f.reports.length ? " · 신고 " + f.reports.length : "") }));
-    const acts = h("div", { class: "acts" });
+    const acts = h("div", { class: "row" }, h("small", { class: "muted", text: "방류: " + f.nick + (f.reports.length >= REPORT_HIDE ? " · 신고 누적으로 숨김" : f.reports.length ? " · 신고 " + f.reports.length : "") }));
     if (mineFish) acts.append(armBtn("삭제", "한 번 더 누르면 삭제", () => {
       if (S.online) S.db.doc("fish/" + f.docId).delete().then(() => toast("「" + f.name + "」을 바다에서 거뒀어요")).catch(() => toast("삭제하지 못했어요. 다시 시도해 주세요"));
       else { S.userFish = S.userFish.filter(x => x.id !== f.id); saveLocalFish(); refreshSheet(true); }
     }));
-    else if (S.online && S.uid) {
-      const did = f.reports.includes(S.uid);
-      acts.append(h("button", { class: "btn sm", disabled: did, onclick: () => report(f), text: did ? "신고함" : "신고" }));
-    }
-    card.append(acts);
+    else if (S.online && S.uid) { const did = f.reports.includes(S.uid); acts.append(h("button", { class: "btn sm", disabled: did, onclick: () => report(f), text: did ? "신고함" : "신고" })); }
+    box.querySelector(".dx-info").append(acts);
   }
-  return card;
+  return box;
 }
 async function report(f) {
   if (!S.online || !S.uid || f.reports.includes(S.uid)) return;
@@ -9857,13 +9879,12 @@ function menuTiles() {
     ]],
     ["마을", [
       { ico: "🗺️", t: "지도 · 이동", s: "장소를 눌러 바로 가기", go: () => openSheet("travel") },
-      { ico: "🏠", t: atHome() ? "마을로 나가기" : P.home.tier >= 0 ? "우리 집 가기" : "집 구하기", s: isLocked("home") ? "🚧 준비 중" : P.home.tier >= 0 ? HOUSES[P.home.tier].name : "윗마을 부동산", go: () => { closeSheet(); atHome() ? leaveHouse() : P.home.tier >= 0 ? enterHouse(S.uid) : goRealty(); } },
       { ico: "🪪", t: "동사무소", s: isLocked("office") ? "🚧 준비 중" : P.job.id ? JOB[P.job.id].name : "직업 등록", go: () => { closeSheet(); goOffice(); } },
     ]],
     ["도움", [
       { ico: "📘", t: "초보 어부 수첩", s: guideLeft() ? "할 일 " + (GUIDE_STEPS.length - guideLeft()) + "/" + GUIDE_STEPS.length + " · 궁금한 것 모음" : "다 끝냈어요 · 궁금한 것 모음", n: guideReady(), go: () => openSheet("guide") },
       { ico: "🧩", t: "퀵바 꾸미기", s: "아래 막대에 넣을 메뉴 고르기", go: () => openSheet("quickbar") },
-      { ico: "⚙️", t: "설정", s: "소리 · 입질 속도 · 그림자 · 계정", go: () => openSheet("settings") },
+      { ico: "⚙️", t: "설정", s: "소리 · 그림자 · 계정", go: () => openSheet("settings") },
       { ico: "🐞", t: "오류 제보 · 건의", s: "운영자에게 보내기", go: () => openSheet("feedback") },
       { ico: "🧭", t: "안내 다시 보기", s: "처음 하는 것 설명", go: () => { closeSheet(); $("tutBtn").click(); } },
       S.isOwner ? { ico: "🛠️", t: "운영자 도구", s: "공지 · 이벤트 · 플레이어", go: () => openSheet("admintools") } : null,
@@ -9893,14 +9914,7 @@ SHEETS.settings = (body) => {
   body.append(h("div", { class: "sec", text: "소리 · 화면" }), h("div", { class: "setlist" },
     toggleRow("🔊 물소리 · 효과음 · 음악", "바닷소리와 배경음악", S.sound, () => $("soundBtn").click()),
     toggleRow("🌗 그림자", "끄면 오래된 휴대폰에서 더 부드러워요", S.hq, () => setHq(!S.hq)),
-    matchMedia("(pointer: fine)").matches ? toggleRow("🖱️ 마우스 고정 시점", "화면을 클릭하면 커서가 숨고 마우스대로 시점이 돌아요 · 가운데 점으로 가리키고 클릭 · 우클릭이나 Alt로 커서 꺼내기/다시 고정 · 끄면 끌어서 돌리고 클릭한 곳으로 걸어요", S.mouseLook, () => { S.mouseLook = !S.mouseLook; lsSet("mn.mlook", S.mouseLook); if (!S.mouseLook) unlockMouse(); refreshSheet(true); }) : null,
     h("button", { class: "setrow", onclick: () => { closeSheet(); setMung(true); } }, h("span", { class: "grow" }, h("b", { text: "🧘 멍 모드" }), h("small", { text: "화면만 보며 멍 때리기 · 끝내기 버튼으로 돌아와요" })), h("span", { class: "chev", text: "›" }))));
-  body.append(h("div", { class: "sec", text: "낚시" }), h("div", { class: "setlist" },
-    h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "⏱️ 입질 속도" }), h("small", { text: "찌를 던지고 입질이 올 때까지" })),
-      h("div", { class: "seg" }, [["test", "빠르게 7–18초"], ["real", "느긋하게 25–60초"]].map(([v, l]) => h("button", { "aria-pressed": String(S.speed === v), onclick: () => { if (S.speed !== v) $("speedBtn").click(); refreshSheet(true); }, text: l })))),
-    toggleRow("🤖 자동 챔질", "입질을 놓쳐도 확률로 자동으로 낚아요 · 경험치 60% · 영웅 이상 대물은 직접 잡아야 해요 · 15분 손을 안 대면 멈춰요", S.auto, () => $("autoBtn").click()),
-    h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "💸 자동 판매" }), h("small", { text: "가방에 들어오자마자 바로 팔기" })),
-      h("div", { class: "seg" }, [[0, "끄기"], [1, "일반"], [2, "고급 이하"]].map(([v, l]) => h("button", { "aria-pressed": String((P.autoSell || 0) === v), onclick: () => { P.autoSell = v; markDirty(); refreshSheet(true); }, text: l }))))));
   const acct = h("div", { class: "setlist" },
     h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "👤 계정" }), h("small", { text: window.WEB_ACCT ? window.WEB_ACCT + "로 로그인됨" : S.online ? "claude.ai 계정" : "로그인 안 됨" }))),
     h("button", { class: "setrow", onclick: () => $("codeBtn").click() }, h("span", { class: "grow" }, h("b", { text: "🔑 내 코드 " + (S.uid ? myCode() : "------") }), h("small", { text: "후원 · 친구 초대에 쓰는 코드 · 눌러서 복사" })), h("span", { class: "chev", text: "⧉" })));
@@ -9918,7 +9932,7 @@ SHEETS.settings = (body) => {
 /* ===================== 퀵바 꾸미기 (v1.32) =====================
    화면 아래 막대에 자주 쓰는 메뉴를 최대 6개까지 골라 넣고 순서를 바꿔요. 「메뉴」 칸은 항상 맨 끝에 있어요.
    P.quick에 저장해서 다른 기기에서도 같아요 */
-const QUICK_MAX = 6, QUICK_DEF = ["bag", "dex", "travel", "friends", "home"];
+const QUICK_MAX = 6, QUICK_DEF = ["bag", "dex", "travel", "friends", "quests"];
 const QSVG = {
   quests: '<path d="M7 3h10v18l-5-3-5 3z"/><path d="M10 8h4M10 12h4"/>',
   ach: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M9 20h6"/>',
@@ -9939,7 +9953,6 @@ const QUICK_ITEMS = [
   { id: "dex", name: "도감", d: "지금까지 만난 물고기 목록" },
   { id: "travel", name: "지도", d: "장소를 눌러 바로 걸어가요" },
   { id: "friends", name: "친구", d: "친구 목록 · 명함" },
-  { id: "home", name: "우리 집", d: "집에 가기 · 집 구하기" },
   { id: "quests", name: "의뢰", d: "매일 바뀌는 작은 목표 3개", open: "quests" },
   { id: "guide", name: "초보 수첩", short: "수첩", d: "처음 할 일을 순서대로 알려 줘요", open: "guide" },
   { id: "shop", name: "낚시 상점", short: "상점", d: "미끼 · 낚싯대 · 릴 사러 걸어가요", run: () => goBuilding("bait") },
@@ -9951,7 +9964,7 @@ const QUICK_ITEMS = [
   { id: "emote", name: "인사", d: "손 흔들기 · 박수 · 축하", run: () => { closeFloatingUI("emote"); $("emotePop").hidden = false; syncUIState(); } },
   { id: "card", name: "명함", d: "명함을 내밀어 친구 만들기", run: () => { S.card ? stopCard() : startCard(); } },
   { id: "profile", name: "내 정보", short: "내 정보", d: "레벨 · 기록 · 닉네임", open: "profile" },
-  { id: "settings", name: "설정", d: "소리 · 입질 속도 · 그림자", open: "settings" },
+  { id: "settings", name: "설정", d: "소리 · 그림자 · 계정", open: "settings" },
 ];
 const QUICK = Object.fromEntries(QUICK_ITEMS.map(q => [q.id, q]));
 function normQuick(a) { const out = []; for (const id of Array.isArray(a) ? a : QUICK_DEF) if (QUICK[id] && !out.includes(id)) out.push(id); return out.slice(0, QUICK_MAX); }
@@ -9976,7 +9989,7 @@ function quickBtnFor(id) {
 function applyQuick() {
   const dock = document.querySelector(".dock"); if (!dock) return;
   // 원래 있던 버튼에 이름표 달기
-  const map = { bag: '[data-open="bag"]', dex: '[data-open="dex"]', travel: '[data-open="travel"]', friends: '[data-open="friends"]', home: "#homeDockBtn" };
+  const map = { bag: '[data-open="bag"]', dex: '[data-open="dex"]', travel: '[data-open="travel"]', friends: '[data-open="friends"]' };
   for (const [id, sel] of Object.entries(map)) { const el = dock.querySelector(sel); if (el && !el.dataset.q) el.dataset.q = id; }
   P.quick = normQuick(P.quick);
   for (const q of QUICK_ITEMS) { const b = quickBtnFor(q.id), k = P.quick.indexOf(q.id); b.hidden = k < 0; b.style.order = k < 0 ? 50 : k; if (QCOL[q.id]) b.style.setProperty("--qc", QCOL[q.id]); }
@@ -10070,7 +10083,6 @@ const FAQ = [
   ["드랙이 뭐예요?", "물고기가 당길 때 줄이 풀려 나가는 정도예요. 조이면 빨리 끌려오지만 장력이 올라가요. 잘 모르겠으면 「자동」에 두세요."],
   ["좋은 장비는 언제 사요?", "레벨이 오르면 낚시 상점에 새 장비가 열려요. 상점의 「예상 성공률」을 보면 그 장비로 등급별로 몇 % 잡을 수 있는지 알려 줘요."],
   ["회를 먹으면 뭐가 좋아요?", "몇 분 동안 입질이 빨라지거나, 좋은 물고기가 잘 오거나, 크기나 판매가가 올라가요. 등급이 높은 회일수록 효과가 크고 길어요."],
-  ["자동 챔질은 뭐예요?", "설정에서 켜면 입질을 놓쳐도 확률로 자동으로 낚아요. 대신 경험치가 60%이고, 영웅 이상 대물은 직접 잡아야 해요. 15분 동안 아무것도 안 누르면 꺼져요."],
   ["밤이 되면 뭐가 달라요?", "게임 속 하루는 실제 시간과 같아요. 밤에만 나오는 물고기, 새벽 · 노을에 잘 나오는 물고기가 있어요. 도감에서 물고기마다 사는 시간을 볼 수 있어요."],
 ];
 SHEETS.guide = (body) => {
@@ -10119,7 +10131,7 @@ Object.assign(TUTS, {
   sheet_guide: { icon: "📘", title: "초보 어부 수첩", steps: ["처음이라면 위에서부터 하나씩 따라 해 보세요. 「가 보기」를 누르면 그곳으로 데려다줘요.", "끝내면 버튼이 「용돈 받기」로 바뀌어요. 아래 「궁금한 것 모음」에 자주 묻는 질문이 있어요."] },
   sheet_profile: { icon: "🙂", title: "내 정보", steps: ["내 레벨 · 낚은 수 · 기록이 모여 있어요. 닉네임과 이름표 칭호도 여기서 바꿔요."] },
   sheet_offers: { icon: "🤝", title: "거래 · 주문", steps: ["다른 사람이 보낸 거래 제안이 여기 와요. 내용을 보고 「받기」나 「거절」을 눌러요."] },
-  sheet_settings: { icon: "⚙️", title: "설정", steps: ["소리 · 그림자 · 입질 속도 · 자동 챔질 · 자동 판매를 켜고 꺼요. 휴대폰이 느리면 「그림자」를 꺼 보세요."] },
+  sheet_settings: { icon: "⚙️", title: "설정", steps: ["소리 · 그림자를 켜고 꺼요. 휴대폰이 느리면 「그림자」를 꺼 보세요. 계정 · 내 코드 · 오류 제보도 여기 있어요."] },
   sheet_stall: { icon: "🏮", title: "노점", steps: ["다른 사람이 연 횟집이에요. 차림표에서 회를 골라 사 먹을 수 있어요."] },
   sheet_mystall: { icon: "🏮", title: "내 횟집", steps: ["회를 상에 올리고 손님 주문에 맞는 회를 내 주세요. 빨리 내면 팁과 평판이 올라요.", "평판이 쌓이면 별이 오르고 손님이 더 자주 와요."] },
 });
@@ -10162,7 +10174,6 @@ SHEETS.friends = (body) => {
       h("div", { class: "facts" },
         p ? h("button", { class: "btn sm pri", onclick: () => visitFriend(p), text: p.home ? "그 집으로" : "찾아가기" }) : oc ? h("button", { class: "btn sm pri", onclick: () => moveChannel(peerCh(oc)), text: "그 채널로" }) : null,
         p ? h("button", { class: "ibtn", title: "거래 · 함께 낚시", "aria-label": "거래 · 함께 낚시", onclick: () => openSheet("player", p.peer), text: "🤝" }) : null,
-        h("button", { class: "ibtn", title: "집 놀러 가기", "aria-label": "집 놀러 가기", disabled: !S.online, onclick: () => { closeSheet(); enterHouse(f.uid); }, text: "🏠" }),
         armBtn("삭제", "한 번 더 누르면 삭제", () => removeFriend(f.uid), "ghost")));
   };
   if (on.length) body.append(h("div", { class: "fsec" }, h("i", { class: "live" }), h("span", { text: "지금 접속 중 · " + on.length + "명" })), h("div", { class: "flist" }, on.map(card)));
@@ -10928,7 +10939,6 @@ document.addEventListener("keydown", (e) => {
   if (REEL.on && e.code === "KeyQ") { $("dragAuto").click(); return; }
   if (e.key === "Escape") { if (S.meMenu) closeMeMenu(); else if (S.sheet) closeSheet(); else if (S.mung) setMung(false); return; }
   if (e.code === "KeyE" && !S.sheet) { doAction(); return; }
-  if (e.key === "Shift") S.shift = true;
   if (KEYMAP[e.code] && !S.sheet) { keys.add(KEYMAP[e.code]); e.preventDefault(); }
 });
 document.addEventListener("keyup", (e) => { if (KEYMAP[e.code]) keys.delete(KEYMAP[e.code]); if (e.code === "Space") { reelHold(false); if (S.charge) releaseCast(); } });
@@ -10947,9 +10957,7 @@ function setHq(on) { S.hq = on; lsSet("mn.hq", on); const b = $("hqBtn"); b.setA
 $("hqBtn").addEventListener("click", () => setHq(!S.hq));
 setHq(S.hq);
 window.addEventListener("blur", () => reelHold(false));
-window.addEventListener("blur", () => { keys.clear(); S.shift = false; });
-document.addEventListener("keyup", (e) => { if (e.key === "Shift") S.shift = false; });
-$("runBtn").addEventListener("click", () => { S.runOn = !S.runOn; $("runBtn").setAttribute("aria-pressed", String(S.runOn)); sfx("ui-click", .25); toast(S.runOn ? "달리기 켬 · 빠르게 움직여요" : "달리기 끔 · 천천히 걸어요"); });
+window.addEventListener("blur", () => { keys.clear(); });
 
 /* ===================== 입장 흐름 (v1.35) =====================
    처음 온 사람: 메인 화면 → 캐릭터 만들기(왼쪽 큰 인형 · 오른쪽 이름/색/얼굴) → 비행기 도착 장면(창밖으로 섬) → 역에서 나와요.
@@ -11045,35 +11053,6 @@ function endArrival() {
   if (c.fog && scene.fog) { scene.fog.near = c.fog[0]; scene.fog.far = c.fog[1]; }
   fade(() => { $("cutscene").hidden = true; $("cutscene").classList.remove("play", "end"); c.done(); });
 }
-/* ---------- 마우스 고정 시점 (PC) ----------
-   화면을 클릭하면 커서가 숨고 마우스대로 시점이 돌아요. 가운데 점이 가리키는 곳을 클릭하면 그곳을 누른 거예요.
-   커서 꺼내기 · 다시 고정: 마우스 오른쪽 버튼 또는 Alt (v1.40 — Esc까지 손을 옮기지 않아도 돼요). Esc도 그대로 돼요.
-   창 · 안내 카드가 뜨면 저절로 풀려요. 설정에서 끌 수 있어요 */
-S.mouseLook = matchMedia("(pointer: fine)").matches && lsGet("mn.mlook", true);
-const mouseLocked = () => document.pointerLockElement === cv;
-function unlockMouse() { if (mouseLocked()) document.exitPointerLock(); }
-document.addEventListener("pointerlockchange", () => {
-  const on = mouseLocked(); document.body.classList.toggle("mlock", on);
-  if (on) { const tip = $("mlockTip"); tip.hidden = false; clearTimeout(tip._t); tip._t = setTimeout(() => { tip.hidden = true; }, 4200); }
-});
-function lockMouse() { if (!S.mouseLook || S.title || S.sheet || S.coach || S.cut || S.creating) return; try { const q = cv.requestPointerLock(); if (q && q.catch) q.catch(() => {}); } catch {} }
-function toggleMouse() { if (mouseLocked()) unlockMouse(); else lockMouse(); }
-// 오른쪽 버튼: 잠겨 있으면 커서를 꺼내고, 풀려 있을 때 게임 화면에서 누르면 다시 고정
-document.addEventListener("mousedown", (e) => {
-  if (e.button !== 2 || !S.mouseLook || S.title) return;
-  if (mouseLocked() || e.target === cv) { e.preventDefault(); e.stopPropagation(); toggleMouse(); }
-}, true);
-cv.addEventListener("contextmenu", (e) => { if (S.mouseLook) e.preventDefault(); });
-// Alt: 누를 때마다 커서 꺼내기 ↔ 다시 고정 (채팅 · 글 쓰는 중엔 안 해요)
-document.addEventListener("keydown", (e) => {
-  if (e.key !== "Alt" || !S.mouseLook || S.title || (e.target && e.target.closest && e.target.closest("input,textarea,select"))) return;
-  e.preventDefault(); if (!e.repeat) toggleMouse();
-});
-document.addEventListener("keyup", (e) => { if (e.key === "Alt" && S.mouseLook) e.preventDefault(); });   // 브라우저 메뉴가 뜨지 않게
-document.addEventListener("mousemove", (e) => {
-  if (!mouseLocked() || S.title) return;
-  cam.yawGoal = null; cam.yaw -= e.movementX * .0026; cam.pitch = clamp(cam.pitch + e.movementY * .002, .08, 1.25);
-});
 
 /* ===================== 메인 화면 =====================
    접속하면 먼저 이 화면. 뒤에서 부두가 천천히 돌아가고, 계정 로그인 상태·내 캐릭터를 보여 줌.
