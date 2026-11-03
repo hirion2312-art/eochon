@@ -1615,7 +1615,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.59.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.59.2";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -5062,7 +5062,11 @@ function restUse(id) {
       if (perfect) { restSnd("complete_1", .5); fxPop(ME.x, 2.3, ME.z, "완벽! ✨", "#ffd84d"); } else restSnd("plate_1", .35);
       return restChanged();
     }
-    if (hand.cook) { toast("이미 익힌 재료예요"); return; }
+    if (hand.cook) { toast("이미 익힌 재료예요 · 접시로 가져가요"); return; }
+    { const mine = RECIPES.filter(r => restUnlocked(r) && r.ing.some(([f]) => f === hand.fish));
+      if (!mine.some(r => r.cook === id && (!r.chop || hand.chopped))) {
+        const r2 = mine.find(r => r.cook === id) || mine[0];
+        toast(r2 && r2.cook === id ? "먼저 도마에서 손질해요 (" + r2.name + ")" : r2 ? "「" + r2.name + "」은 " + (r2.cook ? REST_ST.find(x => x.id === r2.cook).name + "에서 " + COOK_KO[r2.cook] : "익히지 않고 바로 접시에 담아요") : "이 재료로 만드는 요리가 없어요 · 🗑 쓰레기통에 버릴 수 있어요"); return; } }
     if (arr.length >= REST_CFG.stationCap[id]) { toast(COOK_KO[id] + " 자리가 꽉 찼어요"); return; }
     arr.push({ it: hand, t0: Date.now(), cook0: id }); k.hand = null;
     restSnd(id === "boil" ? "boil_1" : id === "fry" ? "fry_1" : "grill_1", .45); return restChanged();
@@ -5073,6 +5077,11 @@ function restUse(id) {
     if (pl.dish) { toast("완성된 요리를 먼저 들어 가요"); return; }
     if (!hand) { if (pl.items.length) { k.hand = pl.items.pop(); return restChanged(); } toast("접시에 담을 재료를 들고 와요"); return; }
     if (hand.dish) { toast("요리는 서빙대로 가져가요"); return; }
+    { const fits = RECIPES.filter(r => restUnlocked(r) && itemFits(r, hand));
+      if (!fits.length) { const r2 = RECIPES.find(r => restUnlocked(r) && r.ing.some(([f]) => f === hand.fish));
+        toast(!r2 ? "이 재료로 만드는 요리가 없어요 · 🗑 쓰레기통에 버릴 수 있어요" : r2.chop && !hand.chopped ? "먼저 도마에서 손질해요 (" + r2.name + ")" : r2.cook && hand.cook !== r2.cook ? "「" + r2.name + "」은 " + REST_ST.find(x => x.id === r2.cook).name + "에서 " + COOK_KO[r2.cook] + " 다음에 담아요" : "「" + r2.name + "」은 익히지 않고 담아요 · 이 재료는 🗑 쓰레기통에"); return; }
+      const all = pl.items.concat(hand);
+      if (pl.items.length && !fits.some(r => all.every(it => itemFits(r, it)) && r.ing.every(([f, n]) => all.filter(it => it.fish === f).length <= n))) { toast("접시에 다른 요리 재료가 있어요 · 빈손으로 접시를 누르면 하나씩 다시 들어요"); return; } }
     pl.items.push(hand); k.hand = null; restSnd("plate_1", .4);
     const done = plateMatch(pl.items);
     if (done) { const q = done.cook && pl.items.every(x => x.q === "perfect") ? "perfect" : "normal"; pl.dish = { id: done.id, q, items: pl.items }; pl.items = []; restSnd("complete_1", .55); { const pw = stationW("plate"); fxPop(pw.x, 2.1, pw.z, done.ico + " " + done.name + " 완성!", "#ffffff"); } }
