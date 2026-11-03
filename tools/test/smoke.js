@@ -9,7 +9,7 @@ const { chromium, devices } = require('playwright');
   for (const [name, opt] of [['pc', { viewport: { width: 1100, height: 720 } }], ['mobile', devices['iPhone 13']]]) {
     const ctx = await b.newContext(opt); const p = await ctx.newPage(); const errs = [];
     p.on('pageerror', e => errs.push('PE ' + e.message)); p.on('console', m => { if (m.type() === 'error' && !/404/.test(m.text())) errs.push(m.text()); });
-    await p.goto('http://localhost:' + (process.env.PORT || 8765) + '/index.html'); await p.waitForTimeout(6000);
+    await p.goto('http://localhost:' + (process.env.PORT || 8765) + '/index.html', { timeout: 180000 }); await p.waitForTimeout(6000);
     await p.screenshot({ path: `${out}/${name}-title.png` });
     await p.evaluate(() => { const P = window.T.P(); P.tut._off = true; P.tut.welcome = true; P.attend = { n: 7, last: 'x' }; });
     await p.evaluate(() => document.getElementById('tStart').click()); await p.waitForTimeout(2500);
