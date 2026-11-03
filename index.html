@@ -1615,7 +1615,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.63.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.64.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -2813,6 +2813,10 @@ const LV_MAX = 100;
    필요한 경험치가 9%씩 불어나요 (50→51은 571, 99→100은 39,000 · Lv.100까지 누적 482,631) */
 const XP_TABLE = (() => { const base = (lv) => Math.round(40 * Math.pow(Math.max(0, lv - 1), 1.55)); const t = []; for (let l = 0; l <= LV_MAX; l++) t[l] = base(l); let step = t[50] - t[49]; for (let l = 51; l <= LV_MAX; l++) { step = Math.round(step * 1.09); t[l] = t[l - 1] + step; } return t; })();
 const xpNeed = (lv) => XP_TABLE[clamp(Math.floor(lv) || 0, 0, LV_MAX)];
+/* ---------- 운영자 실험실 (v1.64): 이 기기에만 저장되는 테스트 설정 · 소비 지점에서 S.isOwner일 때만 적용돼요 ---------- */
+const LAB = { fish: lsGet("mn.lab.fish", 1), xp: lsGet("mn.lab.xp", 1), move: lsGet("mn.lab.move", 1), time: lsGet("mn.lab.time", -1),
+  noHeat: !!lsGet("mn.lab.noHeat", 0), noBreak: !!lsGet("mn.lab.noBreak", 0), fastBite: !!lsGet("mn.lab.fastBite", 0), perfect: !!lsGet("mn.lab.perfect", 0), tier: lsGet("mn.lab.tier", -1) };
+const labSet = (k, v) => { LAB[k] = v; lsSet("mn.lab." + k, v); if (S.sheet === "admintools") refreshSheet(true); };
 function levelOf(xp) { let lv = 1; while (lv < LV_MAX && xp >= xpNeed(lv + 1)) lv++; return lv; }
 const myLv = () => levelOf(P.xp || 0);
 function xpFor(r, perfect, auto) {
@@ -2820,6 +2824,7 @@ function xpFor(r, perfect, auto) {
   return base * (.7 + .3 * Math.min(3, r.k || 1)) * (perfect ? 1.2 : 1) * (r.coop ? 1.5 : 1) * (r.manual ? 1.15 : 1) * (auto ? .6 : 1) * (atSea() ? 1.2 : 1);
 }
 function gainXp(n) {
+  if (S.isOwner && LAB.xp !== 1) n = n * LAB.xp;   // 실험실: 경험치 배율
   n = Math.max(1, Math.round(n * evMul("xp")));
   const before = myLv(); P.xp = (P.xp || 0) + n; const after = myLv();
   S.lastXp = { n, at: Date.now() };
@@ -2854,7 +2859,7 @@ function setNick(v) {
 /* ===================== 하루 = 실제 시간 (한국 시각) =====================
    모두 같은 시계라 같은 순간에 같은 하늘을 봄. 해는 시각에 따라 조금씩 움직이고 하늘색도 천천히 바뀜 */
 const DAY_MS = 30 * 60000;   // 예금 이자 주기(30분)
-const gameHour = (now) => ((((now || Date.now()) / 3600000) + 9) % 24 + 24) % 24;
+const gameHour = (now) => S.isOwner && LAB.time >= 0 ? LAB.time : ((((now || Date.now()) / 3600000) + 9) % 24 + 24) % 24;   // 실험실: 시간 고정
 const isNight = () => { const hh = gameHour(); return hh >= 19.5 || hh < 5; };
 function clockText() { const hh = gameHour(), H = Math.floor(hh), M = Math.floor((hh - H) * 6) * 10; return (H < 12 ? "오전 " : "오후 ") + ((H % 12) || 12) + ":" + String(M).padStart(2, "0"); }
 const CLOCK_ICO = {
@@ -2964,7 +2969,7 @@ function checkRecord(f, k, size) {
    게이지 100% = 포획, 0% = 놓침. 한 번도 안 놓치면 「퍼펙트」 크기 +10%.
    자동 챔질(또는 멍 모드)이면 입질을 놓쳐도 등급별 확률로 자동 포획. */
 const WAIT_MIN = 3000;   // 버프를 아무리 겹쳐도 입질까지 최소 3초
-const waitMs = () => Math.max(WAIT_MIN, (1.12 - .25 * (S.castPow || .6)) * (S.castPerfect ? .85 : 1) * (S.speed === "test" ? rnd(7000, 18000) : rnd(25000, 60000)) * (1 - buffVal("bite") / 100) * (hasTackle("spinner") ? 0.85 : 1) * (hasTackle("lamp") && isNight() ? .7 : 1) * (atSea() ? 0.75 : 1) * evMul("bite"));
+const waitMs = () => Math.max(WAIT_MIN, (1.12 - .25 * (S.castPow || .6)) * (S.castPerfect ? .85 : 1) * (S.speed === "test" ? rnd(7000, 18000) : rnd(25000, 60000)) * (1 - buffVal("bite") / 100) * (hasTackle("spinner") ? 0.85 : 1) * (hasTackle("lamp") && isNight() ? .7 : 1) * (atSea() ? 0.75 : 1) * evMul("bite") * (S.isOwner && LAB.fastBite ? .03 : 1));
 const BITE_MS = 2200, CAST_MS = 900, CATCH_MS = 2600, MISS_MS = 1400;
 const AUTO_RATE = [0.9, 0.7, 0.45, 0.25, 0.12, 0.04];
 /* 스타듀밸리 BobberBar 규칙 그대로: 트랙 568, 물고기 위치 0~532, 1초에 60번 계산 */
@@ -3032,6 +3037,7 @@ function startCast(pow, manual) {
   S.castBait = b; S.hooked = false;
   S.castPow = pow == null ? .55 + Math.random() * .3 : clamp(pow, 0, 1);
   S.castPerfect = !!manual && S.castPow >= .85 && S.castPow <= .97;
+  if (S.isOwner && LAB.perfect && manual) { S.castPow = Math.max(S.castPow, .9); S.castPerfect = true; }   // 실험실: 항상 퍼펙트
   stat("casts");
   if (S.castPerfect) { stat("perfectCasts"); toast("완벽한 캐스팅! 입질이 빨라지고 좋은 물고기가 더 잘 와요"); sfx("ui-confirmation", .35); }
   else if (manual && S.castPow < .25) toast("살짝 던졌어요 · 멀리 던질수록 좋은 물고기가 와요");
@@ -3130,7 +3136,7 @@ function luckProbs(p, extra) {
 const baseSize = (f) => Math.sqrt(f.min * f.max);
 // 화면에 보이는 크기 배율 (v1.44): 보통 ×1 = 1, 클수록 크게 — ×10이면 약 4배, ×100이면 건물만 해요(최대 22)
 // v1.59.1: 수치 그대로 — 표시된 길이 1m = 게임 안 1m(1칸). 6m 고래는 6m, 큰 개체는 적힌 길이만큼
-const fishVisLen = (f, sizeCm) => clamp((Number(sizeCm) || 0) / 100, .05, 600);
+const fishVisLen = (f, sizeCm) => clamp((Number(sizeCm) || 0) / 100 * (S.isOwner ? LAB.fish : 1), .05, 600);   // 실험실: 물고기 그래픽 크기
 const fishVisK = (f, sizeCm) => { const k = f && sizeCm ? sizeCm / baseSize(f) : 1; return k <= 1 ? Math.max(.6, k) : Math.pow(k, .6); };
 function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
 /* v1.43: 크기는 극단적으로 — 보통이 ×1(100%)일 때 아주 드물게 ×100(10,000%)까지. 클수록 훨씬 드물어요(꼬리가 긴 분포)
@@ -3161,6 +3167,7 @@ function rollFish(baitId, opts) {
   const bait = BAITS.find(b => b.id === baitId) || BAITS[0];
   let tier = weighted(luckProbs(bait.p, (deep ? 30 : 0) + (S.castPow || 0) * 6 + (S.castPerfect ? 8 : 0) + (eventOn("rare") ? 15 : 0)));
   { const mc = (MYTH_CHANCE[baitId] || 0) * (deep ? 2 : 1) * (isNight() ? 1.5 : 1) * (eventOn("rare") ? 2 : 1); if (Math.random() < mc) tier = 5; }
+  if (S.isOwner && LAB.tier >= 0) { tier = LAB.tier; labSet("tier", -1); }   // 실험실: 등급 고정 (한 번 쓰면 꺼져요)
   const pool = allFish().filter(f => habitatW(f) > 0);
   let cands = pool.filter(f => f.tier === tier);
   while (!cands.length && tier > 0) { tier--; cands = pool.filter(f => f.tier === tier); }
@@ -3297,7 +3304,7 @@ function fightStep(dt, R) {
   if (raw > lim) {
     out = (raw - lim) * 6;
     R.tension = lim + (raw - lim) * .25;
-    R.heat += (out * .045 + (R.hold ? .25 : 0)) * g.heatMul * (st === "rage" ? 1 - g.calm : 1) * dt;   // 몸부림 충격 흡수는 그때 쌓이는 과열도 줄여요
+    R.heat += (out * .045 + (R.hold ? .25 : 0)) * g.heatMul * (st === "rage" ? 1 - g.calm : 1) * (S.isOwner && LAB.noHeat ? 0 : 1) * dt;   // 실험실: 과열 없음   // 몸부림 충격 흡수는 그때 쌓이는 과열도 줄여요
     R.dist += out * dt;
   } else {
     R.tension = raw;
@@ -3310,7 +3317,7 @@ function fightStep(dt, R) {
   R.stam = Math.max(0, R.stam - (R.F * (st === "run" || st === "rage" ? 1.4 : 1) + out * .05) / R.S0 * g.tire * dt);
   R.maxHeat = Math.max(R.maxHeat, R.heat);
   if (st === "jump" && R.hold && !R.jumpChecked && R.stT < .6) { R.jumpChecked = true; if (!g.barbed && R.tension > .55 && Math.random() < .4 * g.jump) { R.shook = true; return "shake"; } }
-  if (R.tension > g.lineMax) return "snap";
+  if (!(S.isOwner && LAB.noBreak) && R.tension > g.lineMax) return "snap";   // 실험실: 줄 안 끊김
   if (R.heat >= 1) { R.heat = 1; R.overT += dt; if (R.overT > .8) return "heat"; } else R.overT = 0;
   if (R.dist <= g.landAt) return "land";
   if (R.dist > 60) return "far";
@@ -3353,7 +3360,7 @@ function fightJumpFx() {
   if (!R || !scene || REEL.fx == null || !REEL.r) return;
   const m = fishMesh(REEL.r.f.id);
   const ring = new T3.Mesh(GEO.ring, new T3.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .7, depthWrite: false })); scene.add(ring);
-  if (m) { m.scale.setScalar(.6 + REEL.r.f.tier * .3); scene.add(m); }
+  if (m) { m.scale.setScalar((.6 + REEL.r.f.tier * .3) * (S.isOwner ? LAB.fish : 1)); scene.add(m); }
   JUMPS.push({ m: m || new T3.Object3D(), ring, x: REEL.fx, z: REEL.fz, dx: 0, dz: 0, ang: Math.random() * 6, h: 1.5, t0: performance.now() / 1000, dur: 1.0 });
 }
 function reelFrame(now) {
@@ -3601,7 +3608,7 @@ function stepMove(dt) {
     // (v1.48) PC: 기본은 걷기, Shift를 누르고 있으면 달리기 · 휴대폰: 조이스틱을 살짝 밀면 걷기, 끝까지(75% 넘게) 밀면 달리기
     const joyOn = S.joy && S.joy.m > .15;
     const running = joyOn ? S.joy.m > .75 : keys.size ? !!S.shift : !!(ME.target && (S.shift || S.walkRun));
-    const sp = 5.5 * (running ? 1.85 : 1) * (joyOn && !running ? .55 + .45 * Math.min(1, S.joy.m / .75) : 1) * dt, stp = Math.min(sp, ME.target && !keys.size && !S.joy ? len : sp);
+    const sp = 5.5 * (S.isOwner ? LAB.move : 1) * (running ? 1.85 : 1) * (joyOn && !running ? .55 + .45 * Math.min(1, S.joy.m / .75) : 1) * dt, stp = Math.min(sp, ME.target && !keys.size && !S.joy ? len : sp);
     const ux = dx / len * stp, uz = dz / len * stp;
     let nx = ME.x + ux, nz = ME.z + uz;
     const ok = (x, z) => walkable(x, z) && !charBlocked(x, z);
@@ -4276,7 +4283,7 @@ function channelsSheet(body) {   // SHEETS.channels
 }
 function fullPresence() {
   return { nick: P.nick, color: P.color, skin: P.skin, uid: S.uid || null, x: ME.x, z: ME.z, ry: ME.ry, st: ME.st, seat: ME.seat,
-    stall: S.myStall, phase: S.phase, fv: S.myFace ? S.myFace.ts || 0 : 0, wear: wearStr(P.wear), card: S.card ? S.card.id : null, lv: myLv(), rod: P.rod, reel: P.reel, cp: S.castPow || .6, ttl: myTag(), home: S.homeHost || null, rst: restPresence() };
+    stall: S.myStall, phase: S.phase, fv: S.myFace ? S.myFace.ts || 0 : 0, wear: wearStr(P.wear), card: S.card ? S.card.id : null, lv: myLv(), rod: P.rod, reel: P.reel, cp: S.castPow || .6, ttl: myTag(), gm: S.isOwner ? 1 : 0, home: S.homeHost || null, rst: restPresence() };
 }
 const ST_OK = ["idle", "walk", "run", "sit", "fish", "stall", "coop", "dig"];
 const TAG_OK = (t) => ACH_TITLES.includes(t) || JOBS.some(j => j.name === t);
@@ -4300,7 +4307,7 @@ function otherPeers(all) {
       catch: pr.catch && typeof pr.catch.n === "string" ? pr.catch : null,
       show: pr.show && typeof pr.show.n === "string" ? pr.show : null,
       emo: pr.emo && typeof pr.emo.e === "string" && EMOTES[pr.emo.e] ? pr.emo : null, wear: parseWear(pr.wear),
-      card: isUid(pr.card) ? pr.card : null, lv: clamp(Math.floor(Number(pr.lv) || 0), 0, 99), ttl: TAG_OK(pr.ttl) ? pr.ttl : "",
+      card: isUid(pr.card) ? pr.card : null, lv: clamp(Math.floor(Number(pr.lv) || 0), 0, 120), ttl: TAG_OK(pr.ttl) ? pr.ttl : "", gm: pr.gm ? 1 : 0,
       rod: RODS.some(r => r.id === pr.rod) ? pr.rod : "bamboo", reel: REELS.some(r => r.id === pr.reel) ? pr.reel : "basic" });
   }
   return out;
@@ -6241,20 +6248,25 @@ function paintSprite(s, key, cw, ch, paint, hWorld) {
   s.scale.set(hWorld * cw / ch, hWorld, 1);
 }
 /* 이름표: 반투명 알약 + 레벨 배지 (나는 노란 테두리, 친구는 초록 하트) */
-function setNameTag(s, nick, lv, mode, ttl) {
+function setNameTag(s, nick, lv, mode, ttl, gm) {
   const font = "700 30px 'IBM Plex Sans KR','Apple SD Gothic Neo',sans-serif";
   const mg = setNameTag.g || (setNameTag.g = document.createElement("canvas").getContext("2d")); mg.font = font;
-  const tw = Math.ceil(mg.measureText(nick).width), H = 60, badge = lv ? 44 : 0, heart = mode === "friend" ? 30 : 0;
+  const tw = Math.ceil(mg.measureText(nick).width), H = 60, badge = gm ? 62 : lv ? 44 : 0, heart = mode === "friend" ? 30 : 0;
   const tfont = "700 21px 'IBM Plex Sans KR','Apple SD Gothic Neo',sans-serif"; mg.font = tfont; const ttw = ttl ? Math.ceil(mg.measureText(ttl).width) + 22 : 0;
-  const cw = 8 + (lv ? 8 + badge + 10 : 22) + heart + ttw + (ttl ? 8 : 0) + tw + 22, ch = H + 14;
-  paintSprite(s, "tag|" + nick + "|" + lv + "|" + mode + "|" + (ttl || "") + "|" + fontEpoch, cw, ch, (g) => {
+  const cw = 8 + (badge ? 8 + badge + 10 : 22) + heart + ttw + (ttl ? 8 : 0) + tw + 22, ch = H + 14;
+  paintSprite(s, "tag|" + nick + "|" + lv + "|" + mode + "|" + (ttl || "") + "|" + (gm ? "GM" : "") + "|" + fontEpoch, cw, ch, (g) => {
     const x0 = 4, y0 = 3, w = cw - 8, cy = y0 + H / 2;
     g.fillStyle = "rgba(0,0,0,.25)"; rrPath(g, x0, y0 + 4, w, H, H / 2); g.fill();
     g.fillStyle = mode === "npc" ? "rgba(36,120,80,.9)" : "rgba(18,26,32,.78)"; rrPath(g, x0, y0, w, H, H / 2); g.fill();
-    g.lineWidth = mode === "me" ? 3.5 : 2; g.strokeStyle = mode === "me" ? "#ffd84d" : mode === "friend" ? "#7ee0a6" : "rgba(255,255,255,.25)";
+    g.lineWidth = gm ? 4 : mode === "me" ? 3.5 : 2; g.strokeStyle = gm ? "#ff4747" : mode === "me" ? "#ffd84d" : mode === "friend" ? "#7ee0a6" : "rgba(255,255,255,.25)";   // GM은 붉은 테두리
     rrPath(g, x0 + 1.5, y0 + 1.5, w - 3, H - 3, (H - 3) / 2); g.stroke();
-    let x = x0 + (lv ? 8 : 22);
-    if (lv) {
+    let x = x0 + (badge ? 8 : 22);
+    if (gm) {
+      g.fillStyle = "#0f3d22"; rrPath(g, x, cy - 17, badge - 4, 34, 17); g.fill();
+      g.lineWidth = 2; g.strokeStyle = "#4be07f"; rrPath(g, x + 1, cy - 16, badge - 6, 32, 16); g.stroke();
+      g.fillStyle = "#4be07f"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "700 20px 'IBM Plex Mono',monospace"; g.fillText("GM", x + (badge - 4) / 2, cy + 1);
+      x += badge + 10;
+    } else if (lv) {
       const bx = x + badge / 2, col = lv >= 30 ? "#e8b02a" : lv >= 20 ? "#9a6ee0" : lv >= 10 ? "#3f8fd6" : "#2fae7f";
       g.fillStyle = col; g.beginPath(); g.arc(bx, cy, badge / 2 - 2, 0, 7); g.fill();
       g.lineWidth = 2; g.strokeStyle = "rgba(255,255,255,.75)"; g.stroke();
@@ -6267,7 +6279,7 @@ function setNameTag(s, nick, lv, mode, ttl) {
       x += heart;
     }
     if (ttl) { g.fillStyle = "rgba(255,216,77,.2)"; rrPath(g, x, cy - 15, ttw, 30, 15); g.fill(); g.font = tfont; g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = "#ffd84d"; g.fillText(ttl, x + 11, cy + 1); x += ttw + 8; }
-    g.font = font; g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = mode === "me" ? "#ffeeb8" : "#ffffff"; g.fillText(nick, x, cy + 1);
+    g.font = font; g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = gm ? "#4be07f" : mode === "me" ? "#ffeeb8" : "#ffffff"; g.fillText(nick, x, cy + 1);   // GM은 초록 글씨
   }, .34);
 }
 /* 말풍선: 흰 둥근 상자 + 아래 꼬리 */
@@ -8836,7 +8848,7 @@ function updateChar(F, f, t, dt, now) {
   } else { F.bob.visible = F.line.visible = F.ring.visible = F.excl.visible = false; }
   // 이름
   const fr = !f.me && isFriend(f.uid);
-  setNameTag(F.label, f.nick, f.lv || 0, f.me ? "me" : f.npc ? "npc" : fr ? "friend" : "other", f.ttl || ""); F.label.position.y = 1.9;
+  setNameTag(F.label, f.nick, f.lv || 0, f.me ? "me" : f.npc ? "npc" : fr ? "friend" : "other", f.ttl || "", f.gm); F.label.position.y = 1.9;
   // 말풍선·포획·자랑
   const seen = f.me ? null : S.peerSeen.get(f.peer);
   const bubble = f.me ? (S.myBubble && now - S.myBubble.at < 5500 ? S.myBubble.t : null)
@@ -8990,7 +9002,7 @@ function loop3D(ms) {
   updateActionUI();
   // 사람들
   const desired = new Map();
-  if (!S.title) desired.set("me", { me: true, x: ME.x, z: ME.z, ry: ME.ry, st: ME.st, seat: ME.seat, nick: P.nick, color: P.color, skin: P.skin, phase: S.phase, faceUid: "me", wear: P.wear, ttl: myTag(), lv: myLv(), rod: P.rod, reel: P.reel, emo: S.myEmo ? { e: S.myEmo.e, ts: S.myEmo.at } : null });
+  if (!S.title) desired.set("me", { me: true, x: ME.x, z: ME.z, ry: ME.ry, st: ME.st, seat: ME.seat, nick: P.nick, color: P.color, skin: P.skin, phase: S.phase, faceUid: "me", wear: P.wear, ttl: myTag(), gm: S.isOwner ? 1 : 0, lv: myLv(), rod: P.rod, reel: P.reel, emo: S.myEmo ? { e: S.myEmo.e, ts: S.myEmo.at } : null });
   for (const p of otherPeers()) {
     const bs = p.seat && SEAT[p.seat] && SEAT[p.seat].boat ? SEAT[p.seat] : null;
     desired.set(p.peer, bs ? { ...p, x: bs.x, z: bs.z, ry: bs.ry, me: false, faceUid: p.uid || "_" } : { ...p, me: false, faceUid: p.uid || "_" });
@@ -11429,7 +11441,7 @@ SHEETS.admintools = (body) => {
     return;
   }
   setHead("운영자 도구", "접속 " + (otherPeers(true).length + 1) + "명 · 회원 " + (S.members ? S.members.length : 0) + "명");
-  const tabs = [["notice", "공지 · 이벤트"], ["players", "플레이어"], ["chat", "채팅 관리"], ["me", "내 캐릭터"]];
+  const tabs = [["notice", "공지 · 이벤트"], ["players", "플레이어"], ["chat", "채팅 관리"], ["me", "내 캐릭터"], ["lab", "실험실"]];
   body.append(h("div", { class: "tabs", role: "tablist" }, tabs.map(([id, l]) => h("button", { role: "tab", "aria-selected": String(S.adminTab === id), onclick: () => { S.adminTab = id; refreshSheet(true); }, text: l }))));
   const t = S.adminTab;
   if (t === "notice") {
@@ -11470,6 +11482,29 @@ SHEETS.admintools = (body) => {
     body.append(h("div", { class: "muted", style: "font-size:12.5px", text: "최근 채팅 60개 · 지우면 모든 사람 화면에서 사라져요" }));
     for (const m of S.chat.slice().reverse().slice(0, 60)) body.append(h("div", { class: "listrow" }, h("div", { class: "grow" }, h("b", { text: m.nick }), h("div", { style: "font-size:13px", text: m.text || "" }), h("div", { class: "muted", style: "font-size:11px", text: new Date(m.ts).toLocaleString("ko-KR") })),
       armBtn("지우기", "한 번 더 누르면 지워요", async () => { try { await S.db.doc("chat/" + m.id).delete(); toast("지웠어요"); refreshSheet(true); } catch { toast("지우지 못했어요 · 보안 규칙을 확인해 주세요"); } })));
+  } else if (t === "lab") {
+    const tg = (label, key) => h("button", { "aria-pressed": String(!!LAB[key]), onclick: () => labSet(key, !LAB[key]), text: (LAB[key] ? "🟢 " : "⚪ ") + label });
+    const chipSet = (key, opts) => h("div", { class: "chips" }, opts.map(([v, l]) => h("button", { "aria-pressed": String(LAB[key] === v), onclick: () => labSet(key, v), text: l })));
+    body.append(h("div", { class: "muted", style: "font-size:12.5px;line-height:1.6", text: "이 기기에만 저장되는 테스트 설정이에요. 운영자 계정으로 접속했을 때만 적용돼요. 물고기 크기는 실제 크기가 아니라 화면에 그려지는 크기만 바뀌어요." }));
+    const fr = h("input", { type: "range", min: "0.3", max: "3", step: "0.1", value: String(LAB.fish), style: "flex:1", "aria-label": "물고기 그래픽 크기" });
+    fr.addEventListener("change", () => labSet("fish", Number(fr.value)));
+    body.append(h("div", { class: "sec", text: "🐟 물고기 그래픽 크기 ×" + LAB.fish.toFixed(1) }), h("div", { class: "row" }, fr, h("button", { class: "btn sm", onclick: () => labSet("fish", 1), text: "기본으로" })));
+    body.append(h("div", { class: "sec", text: "🎯 다음 캐스트 등급 고정 (한 번 쓰면 꺼져요)" }), chipSet("tier", [[-1, "끔"], [0, "일반"], [1, "고급"], [2, "희귀"], [3, "영웅"], [4, "전설"], [5, "신화"]]));
+    body.append(h("div", { class: "sec", text: "⭐ 경험치 배율" }), chipSet("xp", [[1, "×1"], [2, "×2"], [5, "×5"], [10, "×10"]]));
+    body.append(h("div", { class: "sec", text: "🏃 이동 속도" }), chipSet("move", [[0.5, "×0.5"], [1, "×1"], [1.5, "×1.5"], [2, "×2"], [3, "×3"]]));
+    body.append(h("div", { class: "sec", text: "🕐 시간 고정 (낚시 · 배경 · 시계까지)" }), chipSet("time", [[-1, "실제 시간"], [6, "아침 6시"], [12, "낮 12시"], [18, "저녁 18시"], [23, "밤 23시"], [2, "새벽 2시"]]));
+    body.append(h("div", { class: "sec", text: "🛡 파이팅 편의" }), h("div", { class: "chips" }, tg("과열 안 쌓임", "noHeat"), tg("줄 안 끊김", "noBreak"), tg("입질 즉시", "fastBite"), tg("항상 퍼펙트 캐스트", "perfect")));
+    body.append(h("div", { class: "sec", text: "🎁 한 번에 지급" }), h("div", { class: "row" },
+      h("button", { class: "btn sm", onclick: () => { for (const r of RODS) if (!P.rods.includes(r.id)) P.rods.push(r.id); for (const r of REELS) if (!P.reels.includes(r.id)) P.reels.push(r.id); for (const l of LINES) if (!P.lines.includes(l.id)) P.lines.push(l.id); for (const tc of TACKLES) for (let i = 0; i < 3; i++) P.gear.push({ uid: uid4(), id: tc.id, left: TACKLE_USES }); for (const tl of TOOLS) P.tools[tl.id] = true; markDirty(); toast("낚싯대 · 릴 · 줄 전부 + 채비 각 3개 + 도구 전부를 지급했어요"); }, text: "전 장비 지급" }),
+      h("button", { class: "btn sm", onclick: () => { for (const b of BAITS) if (b.id !== "worm") P.baits[b.id] = Math.max(P.baits[b.id] || 0, 999); markDirty(); toast("미끼를 종류마다 999개로 채웠어요"); }, text: "미끼 999개" }),
+      h("button", { class: "btn sm", onclick: () => { let n = 0; for (const id of Object.keys(CLOTH)) if (!P.closet.includes(id)) { P.closet.push(id); n++; } markDirty(); toast("옷 " + n + "벌을 새로 받았어요"); }, text: "전 의상 지급" })));
+    body.append(h("div", { class: "sec", text: "📚 기록 채우기" }), h("div", { class: "row" },
+      h("button", { class: "btn sm", onclick: () => { let n = 0; for (const f of allFish()) if (!P.dex[f.id]) { P.dex[f.id] = { n: 1, best: baseSize(f), bestK: 1 }; n++; } markDirty(); toast("도감에 " + n + "종을 채웠어요 (표시용 · 크기는 기본값)"); }, text: "도감 전부 채우기" }),
+      armBtn("도전과제 전부 달성", "한 번 더 누르면 전부 달성 처리해요", () => { let n = 0; for (const a of ACH) if (!P.ach[a.id]) { P.ach[a.id] = { t: Date.now(), c: false }; n++; } markDirty(); toast("도전과제 " + n + "개를 달성 처리했어요 · 보상은 과제 화면에서 받아요"); refreshSheet(true); })));
+    const ta = h("textarea", { class: "fbtext", rows: "3", placeholder: "가져올 세이브 JSON을 붙여넣어요" });
+    body.append(h("div", { class: "sec", text: "💾 세이브 백업 · 복원" }), h("div", { class: "row" },
+      h("button", { class: "btn sm", onclick: () => copyText(JSON.stringify(P), "세이브 JSON을 복사했어요"), text: "내보내기 (JSON 복사)" }),
+      armBtn("가져오기", "한 번 더 누르면 지금 세이브를 덮어써요", async () => { try { const o = JSON.parse(ta.value); if (!o || typeof o !== "object" || typeof o.nick !== "string") throw new Error("bad"); await S.db.doc("data/users/" + S.uid + "/profile").set(o); toast("가져왔어요 · 새로고침해요"); setTimeout(() => location.reload(), 700); } catch { toast("JSON이 올바르지 않아요"); } })), ta);
   } else {
     body.append(h("div", { class: "sec", text: "순간이동" }), h("div", { class: "row" }, PLACES.map(pl => h("button", { class: "btn sm", onclick: () => { closeSheet(); if (atHome()) leaveHouse(); setTimeout(() => { ME.x = pl.x; ME.z = pl.z; ME.target = null; presMove(true); if (cam.t) cam.t.set(ME.x, 1.1, ME.z); }, atHome() ? 800 : 0); }, text: pl.name }))));
     const lv = h("input", { type: "number", min: "1", max: String(LV_MAX), value: String(myLv()), style: "width:80px" });
