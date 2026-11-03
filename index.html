@@ -771,6 +771,7 @@ body.cinema #hint,body.cinema #standBtn,body.cinema #castBtn,body.cinema .toasts
 @media (max-width:560px){.ws-stage{flex-direction:column;align-items:center}.ws-bubble::before{display:none}.ws-choices{grid-template-columns:1fr}}
 .ws-sellall{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 8px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
 .ws-list{display:flex;flex-direction:column;gap:6px}
+.ws-tabs{margin-top:12px}.ws-chips{margin:10px 0 2px}.ws-row b .tierchip,.ws-row b .tier{margin-right:2px}
 .ws-row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.05)}
 .ws-row img{width:64px;height:32px;object-fit:contain}.ws-row small{display:block;font-size:11.5px;opacity:.7}
 /* ===== 인터페이스 개편 (v1.21) ===== */
@@ -1601,7 +1602,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.52.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.53.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -2171,7 +2172,7 @@ function normItem(it) {
   if (!it || typeof it !== "object") return null;
   const tier = clamp(Math.floor(Number(it.tier) || 0), 0, 5);
   return { id: isUid(it.id) ? it.id : uid4(), fishId: str(it.fishId, 80), name: str(it.name, 14) || "물고기", tier,
-    size: clamp(Number(it.size) || 1, 0.1, 200000), k: clamp(Number(it.k) || 1, 0.1, 100), price: clamp(Math.round(Number(it.price) || 1), 1, 2000000), ts: Number(it.ts) || Date.now(), hooked: !!it.hooked };
+    size: clamp(Number(it.size) || 1, 0.1, 200000), k: clamp(Number(it.k) || 1, 0.1, 100), price: clamp(Math.round(Number(it.price) || 1), 1, 2000000), ts: Number(it.ts) || Date.now(), hooked: !!it.hooked, ...(it.paid ? { paid: clamp(Math.round(Number(it.paid) || 0), 0, 50000000) } : {}) };
 }
 function normDish(d) {
   if (!d || typeof d !== "object") return null;
@@ -2386,7 +2387,7 @@ function fishMul(id, d) { d = d == null ? mktDay() : d; return id === todayFish(
 function fishTrend(id) { const d = mktDay(), now = fishMul(id, d), prev = rawFishMul(id, d - 1); return now > prev + .01 ? 1 : now < prev - .01 ? -1 : 0; }
 // 예전에 잡아 둔 물고기도 지금 값(v1.31 인상)으로 쳐 줘요
 function curPrice(it) { const f = findFish(it.fishId), k = clamp(Number(it.k) || 1, .1, 100); return !f ? it.price : f.shell ? Math.max(it.price, Math.round(f.price * Math.pow(Math.min(k, 3), 1.2))) : Math.max(it.price, priceFor(f, k)); }
-const fishSell = (it) => sellValue(Math.round(curPrice(it) * fishMul(it.fishId)));
+const fishSell = (it) => { const v = sellValue(Math.round(curPrice(it) * fishMul(it.fishId))); return it.paid ? Math.min(v, Math.round(it.paid * .85)) : v; };   // 시장에서 산 물고기는 산 값의 85%까지만 (v1.53)
 function mulTag(id) {   // 「×1.12 ▲」 · 오늘의 생선은 「오늘의 생선 ×1.5」
   if (id === todayFish()) return "⭐ 오늘의 생선 ×" + TODAY_FISH_MUL;
   const m = fishMul(id), tr = fishTrend(id);
@@ -7170,20 +7171,46 @@ const WH_TALK = [
   "포차거리 사장님들이 회 뜨는 솜씨가 좋아. 횟집 사장 직업 따면 너도 할 수 있어!",
   "내 눈? 안경 벗으면 콩알만 해. 허허허!",
 ];
+// (v1.53) 수산시장 사기: 도감의 모든 물고기를 오늘 시세 기준 기본가의 1.3배에 1마리씩 (보통 크기). 산 물고기는 되팔면 산 값의 85%까지만
+const MKT_BUY_MUL = 1.3;
+const mktBuyPrice = (f) => Math.max(1, Math.round(priceFor(f, 1) * Math.max(1, fishMul(f.id)) * MKT_BUY_MUL));
+function buyMarketFish(f) {
+  const price = mktBuyPrice(f);
+  if (P.bag.length >= BAG_MAX) { sfx("ui-error", .4); toast("가방이 가득 찼어요 (" + BAG_MAX + "마리)"); return; }
+  if (P.gold < price) { sfx("ui-error", .4); toast("돈이 부족해요"); return; }
+  P.gold -= price;
+  P.bag.unshift({ id: uid4(), fishId: f.id, name: f.name, tier: f.tier, size: Math.round(baseSize(f) * 10) / 10, k: 1, price: priceFor(f, 1), ts: Date.now(), hooked: false, paid: price });
+  markDirty(); sfx("coins", .4); try { ACT_FX.pay(price); } catch {}
+  S.wsLine = pick(["좋은 거 골랐네! 싱싱할 때 먹어~", "「" + f.name + "」 한 마리 나가요~!", "눈썰미 있구먼! 또 와~"]); refreshSheet(true);
+}
 function wholesaleSheet(body) {
+  const tab = S.wsTab || "sell";
   const fish = P.bag.filter(it => !isShell(it.fishId)).sort((a, b) => fishSell(b) - fishSell(a));
   const total = fish.reduce((s, it) => s + fishSell(it), 0);
-  setHead(WHOLESALER.name, "잡은 물고기를 여기서 팔아요");
-  const line = S.wsLine || (fish.length ? "어서 와! 물 좋은 거 있으면 다 쳐 줄게~" : "아직 잡은 게 없구먼? 부두에서 한 마리 낚아 와!");
+  setHead(WHOLESALER.name, "잡은 물고기를 팔고, 도감의 물고기를 사 가요");
+  const line = S.wsLine || (tab === "buy" ? "뭐든 다 있어! 오늘 시세보다 조금 비싸지만 싱싱하지~" : fish.length ? "어서 와! 물 좋은 거 있으면 다 쳐 줄게~" : "아직 잡은 게 없구먼? 부두에서 한 마리 낚아 와!");
   const face = WHOLESALER.faces ? WHOLESALER.faces.happy.userData.canvas.toDataURL() : "";
   body.append(h("div", { class: "ws-stage" }, h("div", { class: "ws-portrait" }, h("img", { src: face, alt: "" })),
     h("div", { class: "ws-bubble" }, h("b", { text: WHOLESALER.name }), h("p", { text: line }))));
-  if (!fish.length) { body.append(h("div", { class: "empty-note", text: "팔 물고기가 없어요." })); return; }
+  body.append(h("div", { class: "tabs seg-tabs ws-tabs", role: "tablist" }, [["sell", "🐟 팔기"], ["buy", "🛒 사기"]].map(([id, l]) => h("button", { role: "tab", "aria-selected": String(tab === id), onclick: () => { S.wsTab = id; S.wsLine = null; refreshSheet(true); }, text: l }))));
+  if (tab === "buy") {
+    const tf = S.wsTier == null ? -1 : S.wsTier;
+    body.append(h("div", { class: "chips ws-chips" }, [[-1, "전체"], ...TIERS.map((t, k) => [k, t.name])].map(([v, l]) => h("button", { "aria-pressed": String(tf === v), onclick: () => { S.wsTier = v; refreshSheet(true); }, text: l }))));
+    body.append(h("div", { class: "muted", style: "font-size:12px;margin:2px 0 8px", text: "오늘 시세 기준 보통 크기 1마리 값 × " + MKT_BUY_MUL + " · 산 물고기는 되팔면 산 값의 85%까지만 받아요 · 도감에는 안 올라가요" }));
+    const list = BUILTIN.filter(f => tf < 0 || f.tier === tf).sort((a, b) => a.tier - b.tier || mktBuyPrice(a) - mktBuyPrice(b));
+    body.append(h("div", { class: "ws-list" }, list.map(f => { const pr = mktBuyPrice(f), seen = !!(P.dex[f.id] && P.dex[f.id].n);
+      return h("div", { class: "ws-row" }, h("img", { src: fishArt(f).src, alt: "" }),
+        h("span", { class: "grow" }, h("b", null, tierChip(f.tier), " " + f.name), h("small", { text: mulTag(f.id) + (seen ? "" : " · 아직 못 낚아 봤어요") })),
+        h("b", { class: "num", text: won(pr) }),
+        h("button", { class: "btn sm pri", disabled: P.gold < pr || P.bag.length >= BAG_MAX, onclick: () => buyMarketFish(f), text: "사기" })); })));
+    return;
+  }
+  if (!fish.length) { body.append(h("div", { class: "empty-note", text: "팔 물고기가 없어요. 「🛒 사기」에서 물고기를 살 수도 있어요." })); return; }
   const sold = (n, sum) => { S.wsLine = pick(["고마워~ 또 와!", "허허, 물이 좋네! 다음에도 부탁해~", "이거 오늘 경매 1등 하겠구먼!"]) + " (" + n + "마리 · " + won(sum) + ")"; refreshSheet(true); };
   body.append(h("div", { class: "ws-sellall" }, h("span", null, "가방 물고기 ", h("b", { text: fish.length + "마리" }), " · 모두 ", h("b", { class: "num", text: won(total) })),
     h("button", { class: "btn pri", onclick: () => { const n = fish.length; sellItems(it => !isShell(it.fishId)); sold(n, total); }, text: "전부 팔기" })));
   body.append(h("div", { class: "ws-list" }, fish.map(it => h("div", { class: "ws-row" },
-    fishImg(it.fishId), h("span", { class: "grow" }, h("b", { text: it.name }), h("small", { text: fmtSize(it.size) + " · " + TIERS[it.tier].name })),
+    fishImg(it.fishId), h("span", { class: "grow" }, h("b", { text: it.name }), h("small", { text: fmtSize(it.size) + " · " + TIERS[it.tier].name + " · " + mulTag(it.fishId) + (it.paid ? " · 산 물고기" : "") })),
     h("b", { class: "num", text: won(fishSell(it)) }),
     h("button", { class: "btn sm", onclick: () => { const v = fishSell(it); sellItems(x => x.id === it.id); sold(1, v); }, text: "팔기" })))));
 }
@@ -11371,7 +11398,7 @@ Object.assign(TUTS, {
   sheet_offers: { icon: "🤝", title: "거래 · 주문", steps: ["다른 사람이 보낸 거래 제안이 여기 와요. 내용을 보고 「받기」나 「거절」을 눌러요."] },
   sheet_settings: { icon: "⚙️", title: "설정", steps: ["소리 · 그림자를 켜고 꺼요. 휴대폰이 느리면 「그림자」를 꺼 보세요. 계정 · 내 코드 · 오류 제보도 여기 있어요."] },
   sheet_stall: { icon: "🏮", title: "노점", steps: ["다른 사람이 연 횟집이에요. 차림표에서 회를 골라 사 먹을 수 있어요."] },
-  sheet_wholesale: { icon: "🐟", title: "도매상 왕눈이 사장", steps: ["수산시장 도매 카운터의 터줏대감이에요. 말을 걸면 잡은 물고기를 한 마리씩 또는 전부 팔 수 있어요."] },
+  sheet_wholesale: { icon: "🐟", title: "도매상 왕눈이 사장", steps: ["수산시장 도매 카운터의 터줏대감이에요. 「팔기」에서 잡은 물고기를 오늘 시세로 팔고, 「사기」에서 도감의 모든 물고기를 시세보다 조금 비싸게(1.3배) 살 수 있어요."] },
   sheet_mystall: { icon: "🏮", title: "내 횟집", steps: ["회를 상에 올리고 손님 주문에 맞는 회를 내 주세요. 빨리 내면 팁과 평판이 올라요.", "평판이 쌓이면 별이 오르고 손님이 더 자주 와요."] },
 });
 SHEETS.wholesale = wholesaleSheet;   // 수산시장 도매상 대화 (v1.46)
