@@ -790,6 +790,10 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 @keyframes rainbow{0%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}33%{box-shadow:0 0 0 2px #7b8cff,0 0 16px rgba(123,140,255,.6)}66%{box-shadow:0 0 0 2px #3fd6cc,0 0 16px rgba(63,214,204,.6)}100%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}}
 .tier.t3,.tier.t4,.tier.t5{background-image:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.65) 50%,transparent 65%),var(--tb,none);background-size:250% 100%,100% 100%;background-repeat:no-repeat;animation:tshine 2.6s ease-in-out infinite}
 .tier.t3{--tb:linear-gradient(var(--t3),var(--t3))}.tier.t4{--tb:linear-gradient(var(--t4),var(--t4))}.tier.t5{--tb:linear-gradient(90deg,#0f9f9a,#7b5cd6,#e0479a)}
+.ratebox{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:12px;background:rgba(127,214,224,.12);border:1px solid rgba(127,214,224,.35)}
+.ratetbl{display:grid;grid-template-columns:auto auto 1fr;gap:4px 10px;align-items:center;font-size:13px}
+.ratetbl .up{color:#2fae7f;font-weight:700}.ratetbl .down{color:#d8402a;font-weight:700}
+.fperks{font-size:11.5px;color:#cfe9f2;padding:2px 2px 0;text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .irow.g4{--gc:#f2b630;--gs:rgba(242,182,48,.5);animation:gpulse 2.2s ease-in-out infinite}.irow.g5{animation:rainbow 2.6s linear infinite}
 .itile.g3,.card.g3{--gc:#9a6ee0;--gs:rgba(154,110,224,.5);animation:gpulse 2.4s ease-in-out infinite;border-color:transparent}
 .itile.g4,.card.g4{--gc:#f2b630;--gs:rgba(242,182,48,.6);animation:gpulse 1.8s ease-in-out infinite;border-color:transparent}
@@ -848,6 +852,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
   <div class="fight" id="fight" hidden>
     <div class="fbox">
       <div class="fhead"><span class="fname" id="fightName"></span><span class="fcoop" id="fightCoop" hidden>함께 낚시 · 둘 다 버텨야 잡혀요</span><span class="fdist" id="fightDist">0m</span></div>
+      <div class="fperks" id="fightPerks" hidden></div>
       <div class="ftrack" title="물고기까지 남은 거리"><i id="fightProg"></i><svg class="ffish" id="fightFish" viewBox="0 0 34 20" aria-hidden="true"><path d="M31 10 Q24 1 13 4 L3 1 L6 10 L3 19 L13 16 Q24 19 31 10Z" fill="#f2a33a" stroke="#5a2f10" stroke-width="1.5"/><circle cx="25" cy="8.5" r="1.8" fill="#1d1714"/></svg></div>
       <div class="fgauge"><span>장력</span><div class="fbar"><i id="fightTen"></i><b class="lim" title="이 선을 넘으면 줄이 끊겨요"></b></div><span>과열</span><div class="fbar heat"><i id="fightHeat"></i></div></div>
       <div class="fmsg" id="fightMsg">천천히 감아요</div>
@@ -934,7 +939,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.26.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.27.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 10 },
   { name: "고급", base: 30 },
@@ -1330,6 +1335,14 @@ const RODS = [
   { id: "palace", name: "용궁 낚싯대", price: 90000, lv: 40, tens: 1.46, slots: 3, color: 0x3fd6cc, desc: "용궁에서 내려왔다는 옥빛 낚싯대 · 채비 3칸" },
   { id: "myth", name: "신화의 낚싯대", price: 150000, lv: 48, tens: 1.5, slots: 3, color: 0xe57aa8, desc: "신화 속 물고기도 버티는 마지막 낚싯대 · 채비 3칸" },
 ].sort((a, b) => a.lv - b.lv);
+/* 낚싯대 특성 (v1.27): 비쌀수록 확실히 좋아져요
+   jump = 점프할 때 감고 있으면 바늘이 빠질 확률 배율(1 = 40%) · calm = 몸부림 때 줄에 걸리는 장력 줄이기(충격 흡수) · tire = 물고기가 지치는 속도 */
+const ROD_PERK = {
+  bamboo: [1, 0, 1], lure: [.85, 0, 1.03], fiber: [.8, .04, 1.05], rock: [.7, .07, 1.07], carbon: [.65, .08, 1.1], surf: [.6, .1, 1.12], boat: [.55, .12, 1.14],
+  iridium: [.5, .14, 1.16], titan: [.45, .16, 1.19], obsidian: [.4, .18, 1.22], legend: [.32, .21, 1.26], abyss: [.26, .24, 1.3], palace: [.2, .27, 1.34], myth: [.12, .3, 1.4],
+};
+for (const r of RODS) { const [jump, calm, tire] = ROD_PERK[r.id] || [1, 0, 1]; Object.assign(r, { jump, calm, tire }); }
+const rodPerkText = (r) => r.id === "bamboo" ? "특별한 효과 없음" : "점프 때 바늘 빠짐 -" + Math.round((1 - r.jump) * 100) + "% · 몸부림 충격 -" + Math.round(r.calm * 100) + "% · 물고기가 " + Math.round((r.tire - 1) * 100) + "% 빨리 지쳐요";
 const REELS = [
   { id: "basic", name: "기본 릴", price: 0, lv: 1, heat: 1, cool: .12, speed: 2.2, color: 0x8a8f96, desc: "처음 받은 릴" },
   { id: "spin", name: "스피닝 릴", price: 1500, lv: 3, heat: .86, cool: .15, speed: 2.45, color: 0x2a78bb, desc: "덜 뜨거워지고 조금 빨리 감겨요" },
@@ -1346,8 +1359,10 @@ const TACKLES = [
   { id: "trap", name: "트랩 찌", price: 500, desc: "줄이 끌려 나갈 때 과열이 20% 덜 쌓여요" },
   { id: "cork", name: "코르크 찌", price: 750, desc: "물고기 체력 -15%" },
   { id: "lead", name: "납 찌", price: 750, desc: "물고기가 잠수할 때 당기는 힘 -20%" },
-  { id: "barbed", name: "미늘 바늘", price: 1000, lv: 5, desc: "점프할 때 바늘이 빠지지 않아요" },
+  { id: "barbed", name: "미늘 바늘", price: 1000, lv: 5, desc: "점프할 때 감고 있어도 바늘이 절대 안 빠져요 (점프가 어렵다면 이것!)" },
   { id: "lamp", name: "집어등", price: 900, lv: 8, desc: "밤에 입질까지 걸리는 시간 -30%" },
+  { id: "swivel", name: "회전 도래", price: 1200, lv: 6, desc: "몸부림 때 줄에 걸리는 충격 -25% · 영웅 이상 대물에 줄이 덜 끊겨요" },
+  { id: "shock", name: "쇼크 리더", price: 1500, lv: 10, desc: "줄이 끊기기 전까지 버티는 힘 +8 · 질긴 목줄" },
 ];
 const TOOLS = [
   { id: "net", name: "뜰채", price: 2500, lv: 5, desc: "남은 거리 3m부터 바로 건져 올려요" },
@@ -2385,6 +2400,8 @@ function landFish(r, perfect, auto) {
     sendInbox(f.owner, { type: "royalty", amount: Math.max(1, Math.round(price * ROYALTY)), fish: f.name, by: P.nick }).catch(() => {});
   }
   if (P.caught === 1 && !auto) setTimeout(() => coach("catch"), 1800);
+  if (P.caught === 8 && !(P.stats.digs > 0)) setTimeout(() => toast([h("b", { text: "🐚 갯벌 해변도 가 보세요!" }), h("div", { class: "muted", style: "font-size:12px", text: "거리 남쪽 끝에 갯벌이 있어요. 썰물 때 장화를 신고 호미로 조개를 캐요 (낚시 상점 「도구」)" }),
+    h("button", { class: "btn sm", style: "margin-top:6px", onclick: () => openSheet("travel"), text: "🗺️ 지도에서 보기" })], "lvup", 9000), 5200);
   if (f.tier >= 2 || k >= 1.8) postSys(P.nick + "님이 " + (k >= 1.8 ? sizeLabel(k) + " 개체 " : "") + TIERS[f.tier].name + " 「" + f.name + "」 " + fmtSize(size) + "를 낚았어요" + (perfect ? " (퍼펙트)" : "") + (f.user ? " · 방류: " + f.nick : ""));
   refreshSheet();
 }
@@ -2408,25 +2425,36 @@ const TIER_FIGHT = [
 const FIGHT_MSG = { rage: "몸부림! 지금은 무조건 손을 떼요", cruise: "천천히 감아요", run: "돌진! 무리하게 감지 마세요", jump: "점프! 손을 떼요", dive: "잠수하며 버티는 중", tired: "지쳤어요 · 지금 감아요!" };
 const STATE_W = { dart: { run: .45, jump: .25, dive: .05, cruise: .25 }, smooth: { run: .35, jump: .05, dive: .1, cruise: .5 }, sinker: { run: .25, jump: .02, dive: .45, cruise: .28 }, floater: { run: .2, jump: .38, dive: .02, cruise: .4 }, mixed: { run: .33, jump: .15, dive: .15, cruise: .37 } };
 S.autoDrag = lsGet("mn.autodrag", true); S.drag = lsGet("mn.drag", 3);
-function gearStats() {
-  const rod = curRod(), reel = curReel(), line = curLine();
-  return { lineMax: rod.tens + line.add, heatMul: reel.heat * (hasTackle("trap") ? .8 : 1), cool: reel.cool, speed: reel.speed,
-    lead: hasTackle("lead"), barbed: hasTackle("barbed"), stamMul: hasTackle("cork") ? .85 : 1, landAt: P.tools.net ? 3 : 1.2 };
+/* 장비 → 손맛 수치. ov 를 주면 「그 장비로 바꿨다면」을 계산해요(상점 예상 성공률)
+   낚싯대 특성(v1.27): jump = 점프 때 바늘 빠질 확률 배율 · calm = 몸부림 충격 흡수(장력) · tire = 물고기가 지치는 속도 */
+function gearStats(ov) {
+  ov = ov || {};
+  const rod = (ov.rod && RODS.find(r => r.id === ov.rod)) || curRod(), reel = (ov.reel && REELS.find(r => r.id === ov.reel)) || curReel(), line = (ov.line && LINES.find(r => r.id === ov.line)) || curLine();
+  const tk = (id) => ov.tackles ? ov.tackles.includes(id) : hasTackle(id);
+  return { lineMax: rod.tens + line.add + (tk("shock") ? .08 : 0), heatMul: reel.heat * (tk("trap") ? .8 : 1), cool: reel.cool, speed: reel.speed,
+    lead: tk("lead"), barbed: tk("barbed"), stamMul: tk("cork") ? .85 : 1, landAt: P.tools.net ? 3 : 1.2,
+    jump: rod.jump == null ? 1 : rod.jump, calm: Math.min(.45, (rod.calm || 0) + (tk("swivel") ? .25 : 0)), tire: rod.tire || 1 };
 }
-function startReel(r, opts) {
-  const coop = !!(opts && opts.coop), g = gearStats(), { diff, type } = behaviorOf(r.f);
+/* 손맛 싸움 시작 상태 (화면과 따로 · 시뮬레이션도 같이 씀) */
+function reelInit(r, opts, g) {
+  const coop = !!(opts && opts.coop), { diff, type } = behaviorOf(r.f);
   const tf = TIER_FIGHT[r.f.tier] || TIER_FIGHT[0], dn = clamp(diff / 130, 0, 1);
   const P0 = tf.p * (.9 + dn * .2) * (coop ? 1.08 : 1);
   const S0 = tf.s * (.85 + dn * .3) * (coop ? 1.2 : 1) * g.stamMul;
   if (coop) g.lineMax *= .96;
-  const now = performance.now();
-  Object.assign(REEL, { on: true, r, coop, g, type, tf, rage: 0, P: P0, S0, dist: tf.dist + Math.random() * 4, stam: 1, heat: 0, maxHeat: 0, tension: .3, F: .3,
-    st: "run", stT: 1.1, runBoost: .1, jumpChecked: false, hold: REEL.hold || false, drag: S.autoDrag ? 3 : S.drag, lineOut: 0, overT: 0, shook: false,
-    manual: !S.autoDrag, time: 0, t0: now, last: now, acc: 0, fx: null, fz: null, perfect: false });
-  REEL.dist0 = REEL.dist; r.manual = REEL.manual;
+  const dist = tf.dist + Math.random() * 4;
+  return { on: true, r, coop, g, type, tf, rage: 0, P: P0, S0, dist, dist0: dist, stam: 1, heat: 0, maxHeat: 0, tension: .3, F: .3,
+    st: "run", stT: 1.1, runBoost: .1, jumpChecked: false, hold: false, drag: S.autoDrag ? 3 : S.drag, lineOut: 0, overT: 0, shook: false,
+    manual: !S.autoDrag, time: 0, perfect: false };
+}
+function startReel(r, opts) {
+  const now = performance.now(), hold = REEL.hold || false;
+  Object.assign(REEL, reelInit(r, opts, gearStats()), { hold, t0: now, last: now, acc: 0, fx: null, fz: null, sim: false });
+  r.manual = REEL.manual; const type = REEL.type;
+  showFightPerks(REEL.g);
   setPhase("reel", 125000);
   const nm = $("fightName"); nm.textContent = "??? · " + TIERS[r.f.tier].name + " · " + MOTION_KO[type]; nm.style.background = cssVarCache.tiers[r.f.tier];
-  $("fightCoop").hidden = !coop;
+  $("fightCoop").hidden = !REEL.coop;
   $("fight").hidden = false; document.body.classList.add("fighting");
   $("fight").classList.toggle("boss", r.f.tier >= 3); $("fight").dataset.tier = r.f.tier;
   if (r.f.tier >= 3) { toast([h("b", { text: r.f.tier >= 5 ? "✨ 신화 속 물고기가 물었어요!!" : r.f.tier >= 4 ? "⚠ 전설급 대물이에요!" : "⚠ 대물 입질!" }), h("div", { class: "muted", style: "font-size:12px", text: "몸부림칠 땐 꼭 손을 떼요 · 약한 낚싯대와 줄로는 버티기 어려워요" })], "lvup", 4000); sfx("jingle-rare", .3); }
@@ -2435,7 +2463,7 @@ function startReel(r, opts) {
 }
 function nextFishState(R) {
   if (R.st === "tired") { if (R.stam > .32) { R.st = "cruise"; R.stT = 1.4; } else R.stT = 1.2; return; }
-  if (R.tf.rage && Math.random() < R.tf.rage && R.stam > .3) { R.st = "rage"; R.stT = 1.1 + Math.random() * .6; R.jumpChecked = false; sfx("splash", .45); fightJumpFx(); return; }
+  if (R.tf.rage && Math.random() < R.tf.rage && R.stam > .3) { R.st = "rage"; R.stT = 1.1 + Math.random() * .6; R.jumpChecked = false; if (!R.sim) { sfx("splash", .45); fightJumpFx(); } return; }
   const w0 = STATE_W[R.type] || STATE_W.mixed, w = { ...w0, run: w0.run * R.tf.run }, prev = R.st, wt = (k) => (k === prev && k !== "cruise") ? w[k] * .4 : w[k];
   let tot = 0; for (const k in w) tot += wt(k);
   let x = Math.random() * tot, pick = "cruise";
@@ -2443,23 +2471,24 @@ function nextFishState(R) {
   R.st = pick; R.jumpChecked = false;
   R.stT = pick === "run" ? .9 + Math.random() * 1.4 : pick === "jump" ? 1.1 : pick === "dive" ? 1.4 + Math.random() : 1.2 + Math.random() * 1.6;
   if (pick === "run") R.runBoost = Math.random() * R.tf.boost;
-  if (pick === "jump") { sfx("splash", .35); fightJumpFx(); }
+  if (pick === "jump" && !R.sim) { sfx("splash", .35); fightJumpFx(); }
 }
-function fightStep(dt) {
-  const R = REEL, g = R.g;
+function fightStep(dt, R) {
+  R = R || REEL; const g = R.g;
   R.stT -= dt;
   if (R.st !== "tired" && R.stam < .18) { R.st = "tired"; R.stT = 2.5; }
   if (R.stT <= 0) nextFishState(R);
   const st = R.st, P0 = R.P * (.45 + .55 * R.stam);
   const F = st === "rage" ? R.tf.rageF * (.8 + .2 * R.stam) : st === "run" ? P0 * (1 + R.runBoost) : st === "dive" ? P0 * .82 * (g.lead ? .8 : 1) : st === "jump" ? P0 * .5 : st === "tired" ? P0 * .25 : P0 * .38;
   R.F += (F - R.F) * Math.min(1, dt * 6);
-  if (S.autoDrag) { const need = R.F + (R.hold ? .3 : 0); let d = 1; while (d < 5 && DRAG[d - 1] < need - .04) d++; R.drag = d; }
+  // 자동 드랙: 감는 힘까지 버티는 가장 약한 칸 (v1.27: 예전엔 살짝 모자란 칸을 골라 지친 물고기를 감아도 줄이 조금씩 풀려 제자리걸음을 했어요)
+  if (R.sim || S.autoDrag) { const need = R.F + (R.hold ? .3 : 0); let d = 1; while (d < 5 && DRAG[d - 1] < need + .01) d++; R.drag = d; }
   const lim = DRAG[R.drag - 1], raw = R.F + (R.hold ? .3 : 0);
   let out = 0;
   if (raw > lim) {
     out = (raw - lim) * 6;
     R.tension = lim + (raw - lim) * .25;
-    R.heat += (out * .045 + (R.hold ? .25 : 0)) * g.heatMul * dt;
+    R.heat += (out * .045 + (R.hold ? .25 : 0)) * g.heatMul * (st === "rage" ? 1 - g.calm : 1) * dt;   // 몸부림 충격 흡수는 그때 쌓이는 과열도 줄여요
     R.dist += out * dt;
   } else {
     R.tension = raw;
@@ -2467,10 +2496,11 @@ function fightStep(dt) {
     if (R.hold) R.dist -= g.speed * (1 - Math.min(.85, R.F * .6)) * dt;
     else { R.dist += R.F * .7 * dt; R.stam = Math.min(1, R.stam + R.tf.regen * dt); }
   }
+  if (st === "rage" && g.calm) R.tension *= 1 - g.calm;   // 몸부림 충격 흡수: 물고기 힘(지치는 속도)은 그대로, 줄에 걸리는 장력만 줄어요
   R.lineOut = out;
-  R.stam = Math.max(0, R.stam - (R.F * (st === "run" || st === "rage" ? 1.4 : 1) + out * .05) / R.S0 * dt);
+  R.stam = Math.max(0, R.stam - (R.F * (st === "run" || st === "rage" ? 1.4 : 1) + out * .05) / R.S0 * g.tire * dt);
   R.maxHeat = Math.max(R.maxHeat, R.heat);
-  if (st === "jump" && R.hold && !R.jumpChecked && R.stT < .6) { R.jumpChecked = true; if (!g.barbed && R.tension > .55 && Math.random() < .4) { R.shook = true; return "shake"; } }
+  if (st === "jump" && R.hold && !R.jumpChecked && R.stT < .6) { R.jumpChecked = true; if (!g.barbed && R.tension > .55 && Math.random() < .4 * g.jump) { R.shook = true; return "shake"; } }
   if (R.tension > g.lineMax) return "snap";
   if (R.heat >= 1) { R.heat = 1; R.overT += dt; if (R.overT > .8) return "heat"; } else R.overT = 0;
   if (R.dist <= g.landAt) return "land";
@@ -2554,6 +2584,70 @@ function endReel(ok, silent, why) {
   else missFish(REEL.r, why || "놓쳤어요… " + TIERS[REEL.r.f.tier].name + " 물고기가 도망갔어요");
 }
 function reelHold(on) { if (REEL.on) REEL.hold = on; }
+/* ---------- 예상 성공률 (v1.27) ----------
+   그 장비로 손맛 싸움을 여러 번 돌려 본 결과. 사람처럼 0.3초 늦게 반응하고(점프 · 몸부림 · 돌진을 보고 손을 뗌), 자동 드랙을 써요.
+   등급마다 그 등급 물고기들을 돌아가며 30번. 장비 조합마다 저장해 두고, 화면이 멈추지 않게 등급별로 나눠 계산해요 */
+const SIM_CACHE = new Map(), SIM_N = 120, SIM_LAG = 18;
+function simRate(g, tier) {
+  // 장비끼리 공정하게 비교하려고 늘 같은 난수(같은 물고기 움직임)로 돌려요 → 차이는 장비 때문에만 생겨요
+  const rnd0 = Math.random; let seed = 12345 + tier * 7919;
+  Math.random = () => ((seed = (Math.imul(seed, 1103515245) + 12345) >>> 0) / 4294967296);
+  try { return simRun(g, tier); } finally { Math.random = rnd0; }
+}
+function simRun(g, tier) {
+  const pool = BUILTIN.filter(f => f.tier === tier); let win = 0;
+  for (let i = 0; i < SIM_N; i++) {
+    const R = reelInit({ f: pool[(i * 7) % pool.length], k: 1 }, null, { ...g }); R.sim = true;
+    const seen = []; let o = null;
+    while (!o && R.time < 120) {
+      seen.push(R.st); const st = seen.length > SIM_LAG ? seen.shift() : "run";
+      R.hold = (st === "cruise" || st === "tired" || st === "dive") && R.heat < .55 && R.tension / R.g.lineMax < .85;
+      R.time += 1 / 60; o = fightStep(1 / 60, R);
+    }
+    if (o === "land") win++;
+  }
+  return win / SIM_N;
+}
+const curGear = () => ({ rod: P.rod, reel: P.reel, line: P.line, tackles: equipped().map(x => x.id) });
+const gearKey = (ov) => [ov.rod, ov.reel, ov.line, ov.tackles.slice().sort().join("+"), P.tools.net ? 1 : 0].join("|");
+function simRates(ov, cb) {
+  const key = gearKey(ov); if (SIM_CACHE.has(key)) { cb(SIM_CACHE.get(key)); return; }
+  const g = gearStats(ov), out = {}; let t = 2;
+  const step = () => { out[t] = simRate(g, t); if (++t <= 5) setTimeout(step, 0); else { SIM_CACHE.set(key, out); cb(out); } };
+  setTimeout(step, 0);
+}
+/* 상점 진열대: 「지금 장비」 → 「이걸로 바꾸면」 등급별 예상 성공률 */
+function rateBox(cat, it) {
+  const box = h("div", { class: "ratebox" }, h("b", { text: "🎯 예상 성공률" }), h("div", { class: "muted", style: "font-size:12px", text: "손맛 싸움을 120번씩 돌려 보는 중…" }));
+  const cur = curGear(), nx = { ...cur, tackles: cur.tackles.slice() };
+  if (cat === "rod") { nx.rod = it.id; nx.tackles = nx.tackles.slice(0, it.slots); }
+  else if (cat === "reel") nx.reel = it.id; else if (cat === "line") nx.line = it.id;
+  else if (!nx.tackles.includes(it.id)) { const slots = curRod().slots; if (!slots) nx.tackles = []; else nx.tackles = nx.tackles.slice(0, slots - 1).concat(it.id); }
+  const same = gearKey(cur) === gearKey(nx), noSlot = cat === "tackle" && !curRod().slots;
+  simRates(cur, (a) => simRates(nx, (b) => {
+    if (!box.isConnected) return;
+    box.lastChild.remove();
+    const tbl = h("div", { class: "ratetbl" });
+    for (let t = 2; t <= 5; t++) {
+      const pa = Math.round(a[t] * 100), pb = Math.round(b[t] * 100), d = pb - pa;
+      tbl.append(h("span", null, tierChip(t)), h("span", { class: "num", text: pa + "%" }),
+        same ? h("span") : h("span", { class: "num " + (d >= 4 ? "up" : d <= -4 ? "down" : ""), text: "→ " + pb + "%" + (d >= 4 ? " ▲" + d : d <= -4 ? " ▼" + (-d) : " (비슷)") }));
+    }
+    box.append(h("div", { class: "muted", style: "font-size:11.5px", text: same ? "지금 쓰는 장비 그대로예요" : noSlot ? "지금 낚싯대는 채비 칸이 없어서 달 수 없어요" : "왼쪽 = 지금 장비 · 오른쪽 = 이걸로 바꾸면" }), tbl,
+      h("div", { class: "muted", style: "font-size:11px", text: "사람처럼 0.3초 늦게 반응한다고 쳤을 때예요. 점프 · 몸부림 때 손을 잘 떼면 더 잘 잡혀요" }));
+  }));
+  return box;
+}
+/* 손맛 화면: 지금 장비 효과 한 줄 */
+function showFightPerks(g) {
+  const el = $("fightPerks"); if (!el) return;
+  const out = [];
+  if (g.barbed) out.push("🪝 점프에도 안 빠짐"); else if (g.jump < 1) out.push("🪝 점프 빠짐 -" + Math.round((1 - g.jump) * 100) + "%");
+  if (g.calm > 0) out.push("🌀 몸부림 충격 -" + Math.round(g.calm * 100) + "%");
+  if (g.tire > 1) out.push("💨 빨리 지침 +" + Math.round((g.tire - 1) * 100) + "%");
+  if (g.stamMul < 1) out.push("코르크 체력 -15%"); if (g.lead) out.push("납 찌 잠수 -20%"); if (g.heatMul < curReel().heat) out.push("트랩 찌 과열 -20%");
+  el.textContent = out.join(" · "); el.hidden = !out.length;
+}
 function setDrag(n) { S.autoDrag = false; lsSet("mn.autodrag", false); S.drag = clamp(n, 1, 5); lsSet("mn.drag", S.drag); if (REEL.on) { REEL.drag = S.drag; REEL.manual = true; if (REEL.r) REEL.r.manual = true; drawFight(); } }
 
 /* ===================== 월드 배치 ===================== */
@@ -4935,6 +5029,13 @@ function buildDetails() {
     const rg = new T3.Group(); rg.position.set(x, 1.15, z + (z > 0 ? -.08 : .08)); det.add(rg);
     for (let i = 0; i < 8; i++) plain(GEOD.lseg || (GEOD.lseg = new T3.TorusGeometry(.28, .075, 8, 6, Math.PI / 4)), cmat(i % 2 ? 0xffffff : 0xe2402a), 0, 0, 0, rg).rotation.z = i * Math.PI / 4;
   }
+  // 길 안내 표지판 (처음 도착하는 거리 입구) · v1.27 — 갯벌 해변이 있는 줄 모르는 사람이 많아서. 처음 보는 방향(남쪽)이 「↑」
+  { plain(new T3.CylinderGeometry(.08, .1, 3.4, 8), cmat(0x5a3f2a), 4.55, 1.7, 31.6, det);
+    const boards = [["↑ 수산시장 · 명예의 전당 · 🐚 갯벌 해변", "#2f6f86"], ["← 낭만 부두 · 낚시 · ⛵ 멍낚호", "#c2402a"], ["→ 상점가 (낚시 상점 · 회 센터 …)", "#7a5a2a"], ["↓ 윗마을 (동사무소 · 부동산)", "#4a6a3a"]];
+    boards.forEach(([txt, col], k) => {
+      const tex = canvasTex(640, 96, (c) => { c.fillStyle = col; c.beginPath(); c.moveTo(14, 6); c.lineTo(626, 6); c.lineTo(634, 48); c.lineTo(626, 90); c.lineTo(14, 90); c.lineTo(6, 48); c.closePath(); c.fill(); c.strokeStyle = "#fff6dc"; c.lineWidth = 5; c.stroke(); c.fillStyle = "#fff6dc"; let px = 44; const ff = getComputedStyle(document.body).fontFamily; do { c.font = "700 " + px + "px " + ff; px -= 2; } while (c.measureText(txt).width > 590 && px > 20); c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(txt, 320, 51); }, 1, 1);
+      const m = new T3.Mesh(new T3.PlaneGeometry(3, .45), new T3.MeshBasicMaterial({ map: tex, transparent: true })); m.position.set(4.55, 3.05 - k * .55, 31.66); scene.add(m);
+    }); }
   // 상점 뒤 언덕 마을 · 나무
   const pastel = [0xf2e6d0, 0xe9d3c0, 0xd8e4ea, 0xf0dcdc, 0xe4ead2], roofs = [0xd8473a, 0x2f6f86, 0x3f6e58, 0xc98a4a, 0x6b6bd6];
   const hwin = bulbMat(0x8aa3b0, 0xffd89a), winG = new T3.PlaneGeometry(.5, .5);
@@ -6323,6 +6424,8 @@ function itemIcon(cat, it, size) {
     else if (it.id === "cork") { g.beginPath(); g.ellipse(x, y - s * .16, s * .18, s * .07, 0, 0, 7); g.fillStyle = "#d9a86a"; g.fill(); g.fillStyle = "#c99358"; g.fillRect(x - s * .18, y - s * .16, s * .36, s * .34); g.beginPath(); g.ellipse(x, y + s * .18, s * .18, s * .07, 0, 0, 7); g.fill(); olStroke(g, S2 * .6); g.fillStyle = "rgba(90,60,30,.35)"; for (let i = 0; i < 14; i++) { g.beginPath(); g.arc(x - s * .14 + (i * 37 % 28) / 100 * s, y - s * .1 + (i * 53 % 28) / 100 * s, s * .015, 0, 7); g.fill(); } g.beginPath(); g.ellipse(x, y - s * .16, s * .18, s * .07, 0, 0, 7); olStroke(g, S2 * .6); }
     else if (it.id === "lead") { g.beginPath(); g.moveTo(x, s * .16); g.quadraticCurveTo(x + s * .26, y + s * .12, x, s * .78); g.quadraticCurveTo(x - s * .26, y + s * .12, x, s * .16); g.fillStyle = "#8a9096"; g.fill(); olStroke(g, S2); g.beginPath(); g.ellipse(x - s * .06, y, s * .04, s * .1, 0, 0, 7); g.fillStyle = "rgba(255,255,255,.5)"; g.fill(); }
     else if (it.id === "barbed") { SICON.hook(g, x + s * .04, y + s * .04, S2 * 1.05); }
+    else if (it.id === "swivel") { for (const [dy, r0] of [[-.2, .11], [.2, .11]]) { g.beginPath(); g.arc(x, y + s * dy, s * r0, 0, 7); g.lineWidth = s * .05; g.strokeStyle = "#c8ccd2"; g.stroke(); g.lineWidth = s * .02; g.strokeStyle = OL; g.stroke(); } g.beginPath(); g.ellipse(x, y, s * .07, s * .12, 0, 0, 7); g.fillStyle = "#f2c230"; g.fill(); olStroke(g, S2 * .6); }
+    else if (it.id === "shock") { g.beginPath(); g.moveTo(x - s * .26, y + s * .26); g.bezierCurveTo(x - s * .1, y - s * .4, x + s * .1, y + s * .4, x + s * .26, y - s * .26); g.lineWidth = s * .07; g.strokeStyle = OL; g.lineCap = "round"; g.stroke(); g.lineWidth = s * .04; g.strokeStyle = "#7fd6e0"; g.stroke(); SICON.star(g, x + s * .2, y + s * .2, s * .16); }
     else { SICON.lantern(g, x, y, S2 * .95); }
   } else {
     if (it.id === "boots") { for (const dx of [-.1, .12]) { g.save(); g.translate(x + s * dx, y); g.beginPath(); g.moveTo(-s * .1, -s * .3); g.lineTo(s * .08, -s * .3); g.lineTo(s * .08, s * .14); g.lineTo(s * .2, s * .16); g.quadraticCurveTo(s * .24, s * .3, s * .1, s * .3); g.lineTo(-s * .12, s * .3); g.closePath(); g.fillStyle = "#f2c230"; g.fill(); olStroke(g, S2 * .7); g.fillStyle = "#3a3340"; g.fillRect(-s * .12, s * .25, s * .34, s * .05); g.restore(); } }
@@ -6347,7 +6450,7 @@ function itemState(c, it) {
 }
 function itemStat(c, it) {
   if (c === "bait") return "희귀 이상 " + rareP(it) + "%" + (it.p[4] ? " · 전설 " + it.p[4] + "%" : "") + (it.id === "legend" || it.id === "lure" ? " · 신화 가능" : "");
-  if (c === "rod") return "버티는 힘 " + Math.round(it.tens * 100) + " · 채비 " + it.slots + "칸";
+  if (c === "rod") return "버티는 힘 " + Math.round(it.tens * 100) + " · 채비 " + it.slots + "칸" + (it.id === "bamboo" ? "" : " · 점프 -" + Math.round((1 - it.jump) * 100) + "% · 몸부림 충격 -" + Math.round(it.calm * 100) + "%");
   if (c === "reel") return "과열 " + Math.round(it.heat * 100) + "% · 감기 " + it.speed.toFixed(1) + "m/s";
   if (c === "line") return it.add ? "줄 강도 +" + Math.round(it.add * 100) + "%" : "기본 강도";
   return it.desc;
@@ -6374,10 +6477,13 @@ function shopPreview(cat, it) {
     h("h3", { text: it.name }), h("div", { class: "muted", style: "font-size:12.5px;line-height:1.5", text: it.desc || itemStat(cat, it) }));
   const cmp = h("div", { class: "cmp" });
   if (cat === "bait") box.append(probBar(it.p), h("div", { class: "plegend" }, it.p.map((v, i) => h("span", { style: "--c:var(" + TIER_VARS[i] + ")", text: TIERS[i].name + " " + v + "%" }))));
-  if (cat === "rod") { const c0 = curRod(); cmp.append(...cmpRow("버티는 힘", c0.tens, it.tens, 1.4, v => Math.round(v * 100)), ...cmpRow("채비 칸", c0.slots, it.slots, 3, v => v + "칸")); }
+  if (cat === "rod") { const c0 = curRod(); cmp.append(...cmpRow("버티는 힘", c0.tens, it.tens, 1.5, v => Math.round(v * 100)), ...cmpRow("채비 칸", c0.slots, it.slots, 3, v => v + "칸"),
+    ...cmpRow("점프 버티기", 1 - c0.jump, 1 - it.jump, .9, v => Math.round(v * 100) + "%"), ...cmpRow("몸부림 충격 흡수", c0.calm, it.calm, .3, v => Math.round(v * 100) + "%"), ...cmpRow("빨리 지치게", c0.tire - 1, it.tire - 1, .4, v => "+" + Math.round(v * 100) + "%"));
+    box.append(h("div", { class: "muted", style: "font-size:12px", text: rodPerkText(it) })); }
   if (cat === "reel") { const c0 = curReel(); cmp.append(...cmpRow("과열 견딤", 1 / c0.heat, 1 / it.heat, 1.7, v => Math.round(v * 100)), ...cmpRow("식는 속도", c0.cool, it.cool, .24, v => Math.round(v * 100)), ...cmpRow("감는 속도", c0.speed, it.speed, 3.4, v => v.toFixed(1))); }
   if (cat === "line") { const c0 = curLine(); cmp.append(...cmpRow("줄 강도", 1 + c0.add, 1 + it.add, 1.2, v => Math.round(v * 100))); }
   if (cmp.children.length) box.append(cmp, h("div", { class: "muted", style: "font-size:11px", text: "검은 선 = 지금 쓰는 것" }));
+  if (["rod", "reel", "line", "tackle"].includes(cat)) box.append(rateBox(cat, it));
   const acts = h("div", { class: "acts" });
   if (locked) acts.append(h("span", { class: "tag", text: "낚시 Lv." + it.lv + "부터 · 지금 Lv." + myLv() }));
   else if (cat === "bait") {
@@ -6799,7 +6905,7 @@ function drawTownMap(cv) {
   E("🏆", HALL.x1 - 1.6, HALL.cz, 13);
   // 구역 이름
   T("낭만 부두", -31, -7.5, 10, "#4a3420", true); T("포차 거리", -6.8, 36.5, 9, "#8a3a1a", true); T("수산시장", -7, -50, 9, "#8a3a1a", true);
-  T("윗마을", 15.2, 74.5, 10, "#2f4a6a", true); T("명예의 전당", 13, -69.6, 9, "#7a5a10", true); T("갯벌 해변", -16, -100, 10, "#6a5030", true);
+  T("윗마을", 15.2, 74.5, 10, "#2f4a6a", true); T("명예의 전당", 13, -69.6, 9, "#7a5a10", true); T("갯벌 해변", -16, -104, 10, "#6a5030", true); T("🐚 조개 캐기 · 장화 + 호미", -16, -96.5, 8, "#6a5030");
   T(low ? "썰물 · 갯벌이 드러났어요" : "밀물 · 갯벌이 잠겼어요", -24, -92, 7.5, "#4a5a66"); T("낭만 거리", 0, 10, 8.5, "#ffffff");
   // 사람들: 다른 사람 = 점, 친구 = 이름
   for (const p of otherPeers(false)) {
