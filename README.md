@@ -2,6 +2,7 @@
 
 함께 낚시하고, 회를 팔고, 갯벌을 캐고, 주식과 복권까지 즐기는 **3D 멀티플레이 바닷가 마을 게임**이에요.
 
+- 🤝 **인수인계 · 함께 작업하기**: [HANDOFF.md](HANDOFF.md) · [WORK.md](WORK.md)
 - 📖 **전체 기능 정리**: [FEATURES.md](FEATURES.md)
 - 📝 **업데이트 로그**: [CHANGELOG.md](CHANGELOG.md)
 - 🌐 **웹사이트 서버 여는 법 (Firebase)**: [web/README.md](web/README.md)
@@ -14,6 +15,7 @@ a/                  ← 텍스처 · 소품 모델 · 배경음악(bgm-*.mp3)
 fish/               ← 3D 물고기 모델
 credits/            ← 에셋 출처
 tools/build_web.py  ← 게임을 웹사이트판(web/public)으로 만드는 스크립트
+tools/test/         ← 헤드리스 테스트 (가짜 서버 · 스모크 · 손맛 시뮬레이션)
 web/                ← Firebase 설정 · 보안 규칙 · platform.js (Firebase 연결)
 .github/workflows/  ← main에 올라오면 웹사이트에 자동 배포
 ```
