@@ -1,0 +1,55 @@
+rules_version = '2';
+// 어촌생활 · Firestore 보안 규칙
+// - 각자의 진행(data/users/<uid>)은 본인만 읽고 씀
+// - 방류권(grants) · 후원 안내(config)는 운영자(admins/<uid> 문서가 있는 사람)만 씀
+// - 우편함은 주인이 읽고, 보낸 사람(from)은 자기가 보낸 것만 만들고 취소함
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function me(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function old(ms) { return resource.data.ts is number && resource.data.ts < request.time.toMillis() - ms; }
+
+    match /data/users/{uid}/{rest=**} { allow read, write: if me(uid); }
+    match /admins/{uid} { allow read: if signedIn(); allow write: if false; }   // 콘솔에서 직접 만들어요
+    match /config/{id} { allow read: if signedIn(); allow write: if isAdmin(); }
+    match /grants/{uid} { allow read: if signedIn(); allow write: if isAdmin(); }
+    // 추천인 코드 찾기: 코드로 한 명만 조회 가능(목록 통째로 읽기는 운영자만)
+    match /members/{uid} { allow get: if me(uid) || isAdmin(); allow list: if isAdmin() || (signedIn() && request.query.limit <= 1); allow write: if me(uid); }
+    // 오류 제보 · 건의: 내 문서에만 쓰고, 운영자는 모두 읽음
+    match /feedback/{uid} {
+      allow read: if me(uid) || isAdmin();
+      allow write: if me(uid) && request.resource.data.items is list && request.resource.data.items.size() <= 20;
+    }
+    match /faces/{uid} { allow read: if signedIn(); allow write: if me(uid); }
+
+    match /chat/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.text is string && request.resource.data.text.size() <= 200;
+      allow delete: if signedIn() && old(172800000);          // 이틀 지난 채팅 정리
+    }
+    match /fish/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.owner == request.auth.uid;
+      allow update: if signedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reports']);
+      allow delete: if signedIn() && (resource.data.owner == request.auth.uid || isAdmin());
+    }
+    match /inbox/{uid}/items/{id} {
+      allow read: if me(uid) || (signedIn() && resource.data.from == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.from == request.auth.uid;
+      allow delete: if me(uid) || (signedIn() && resource.data.from == request.auth.uid);
+      allow update: if false;
+    }
+    match /trades/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.n is number;
+      allow delete: if signedIn() && old(86400000);
+    }
+    match /records/{id} { allow read, write: if signedIn(); }
+    // 명예의 전당: 각자 자기 기록만 올리고, 운영자는 지울 수 있음
+    match /rank/{uid} { allow read: if signedIn(); allow write: if me(uid); allow delete: if me(uid) || isAdmin(); }
+    match /stalls/{id} { allow read, write: if signedIn(); }
+    match /boat/{id} { allow read, write: if signedIn(); }
+    match /_locks/{id} { allow read, write: if signedIn(); }
+  }
+}

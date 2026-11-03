@@ -1,0 +1,9 @@
+# 빌드할 때 만들어지는 파일 (tools/build_web.py)
+web/public/index.html
+web/public/a/
+web/public/fish/
+# Firebase CLI
+web/.firebase/
+*.log
+node_modules/
+.DS_Store

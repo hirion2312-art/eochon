@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": ["**/.*"],
+    "headers": [
+      { "source": "**/*.@(jpg|png|ogg|mp3|json)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }] },
+      { "source": "**/*.@(html|js)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+    ]
+  },
+  "firestore": { "rules": "firestore.rules", "indexes": "firestore.indexes.json" },
+  "database": { "rules": "database.rules.json" }
+}
