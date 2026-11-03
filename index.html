@@ -1570,7 +1570,7 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.48.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.48.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -5976,11 +5976,19 @@ function resize3D() {
    동쪽으로 갈수록 언덕 → 숲 → 큰 산(봉우리 약 85m)이 이어져요. 남쪽 · 동쪽 · 북쪽 바닷가는 모래 해변과 바위 곶이 번갈아 나와요.
    땅은 높이 격자(TER) 한 장: 화면의 지형 메시와 캐릭터가 딛는 높이(groundY)가 같은 값을 써요. 마을 쪽(서쪽)은 높이 0으로 평평해요 */
 const ISLAND = [
-  [-31, 66], [-31, 40], [-30, 18], [-20, 15.5], [-10.4, 14], [-10.4, -14], [-20, -15.5], [-41, -17], [-43, -34], [-41, -52], [-28, -60], [-12, -64.5], [-3.2, -66.4],
-  [-1.6, -70], [-1.4, -96], [-1.6, -124], [2, -130], [14, -137], [38, -152], [66, -184], [104, -222], [150, -250], [196, -268], [236, -262], [262, -276], [300, -258], [342, -270],
+  [-31, 66], [-31, 40], [-30, 18], [-20, 15.5], [-10.4, 14], [-10.4, -14], [-20, -15.5], [-41, -17], [-43, -34], [-41, -52], [-28, -60], [-12, -64.5], [-10.6, -70.8],
+  [-1.6, -71.2], [-1.4, -96], [-1.6, -124], [2, -130], [14, -137], [38, -152], [66, -184], [104, -222], [150, -250], [196, -268], [236, -262], [262, -276], [300, -258], [342, -270],
   [388, -246], [432, -206], [470, -160], [500, -104], [516, -44], [508, 14], [526, 72], [504, 140], [464, 196], [418, 238], [362, 272], [306, 288], [258, 278], [214, 300], [168, 288],
   [124, 258], [86, 214], [52, 168], [24, 132], [2, 114], [-12, 100], [-22, 82],
 ];
+function openSea(x, z, m) {
+  m = m || 3;
+  if (inIsland(x, z) || coastInfo(x, z).d > -m) return false;
+  if (z < -62 && z > -134 && x > mudX(z) - m - 3) return false;              // 갯벌 해변 · 모래사장
+  if (x > -54 && x < -8 && Math.abs(z) < 13.5) return false;                 // 부두 · 선착장
+  for (const bw of BREAKWATERS) for (let i = 0; i < bw.pts.length - 1; i++) { const [x0, z0] = bw.pts[i], [x1, z1] = bw.pts[i + 1], dx = x1 - x0, dz = z1 - z0, t = clamp(((x - x0) * dx + (z - z0) * dz) / (dx * dx + dz * dz), 0, 1); if (Math.hypot(x - x0 - dx * t, z - z0 - dz * t) < m + 2.5) return false; }
+  return true;
+}
 function inIsland(x, z) { let c = false; for (let i = 0, j = ISLAND.length - 1; i < ISLAND.length; j = i++) { const [xi, zi] = ISLAND[i], [xj, zj] = ISLAND[j]; if ((zi > z) !== (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi) c = !c; } return c; }
 // 해안선까지 거리 (+ 섬 안 · − 바다) 와 가장 가까운 해안 점
 function coastInfo(x, z) {
@@ -6111,7 +6119,7 @@ function buildCoast() {
   }
   // 해안 바위 (마을 앞 물양장 · 시장 · 포차 바닷가 · 해변은 빼고)
   const rockG = [new T3.DodecahedronGeometry(1, 0), new T3.IcosahedronGeometry(1, 0)];
-  const town = (x, z) => (x > -45 && x < -8 && z > -56 && z < 70) || (x > -4 && x < 4 && z < -64);
+  const town = (x, z) => (x > -45 && x < -8 && z > -56 && z < 70) || (x > -4 && x < 4 && z < -64) || (z < -58 && z > -134 && x > mudX(z) - 6 && x < 6);   // 마을 · 도로 끝 · 갯벌 해변은 바위 없이
   for (let i = 0; i < ISLAND.length; i++) {
     const [x0, z0] = ISLAND[i], [x1, z1] = ISLAND[(i + 1) % ISLAND.length], L = Math.hypot(x1 - x0, z1 - z0);
     for (let d = 0; d < L; d += 2.4) {
@@ -6625,7 +6633,7 @@ function buildLife() {
     g.scale.setScalar(1.6); scene.add(g);
     GULLS.push({ g, wings, a: srnd() * 6.28, r: 10 + srnd() * 22, cx: -32 + (srnd() - .5) * 20, cz: (srnd() - .5) * 24, y: 9 + srnd() * 7, sp: (.18 + srnd() * .12) * (i % 2 ? 1 : -1), ph: srnd() * 6 });
   }
-  for (const [x, z, c] of [[-62, -24, 0x2f6f86], [-78, 16, 0xe2522c], [-26, -30, 0x3f6e58]]) {
+  for (const [x, z, c] of [[-26, 9.5, 0x2f6f86], [-84, 30, 0xe2522c], [-36, -10.5, 0x3f6e58]]) {   // 항구 안 2척 · 먼바다 1척
     const b = new T3.Group(); b.position.set(x, SEA_Y, z); b.rotation.y = srnd() * 6; scene.add(b);
     box(1.6, .55, 3.6, cmat(0xf4f1ea), 0, .2, 0, b); box(1.65, .2, 3.65, cmat(c), 0, -.05, 0, b); box(.9, .7, .9, cmat(c), 0, .8, -.6, b);
     plain(new T3.CylinderGeometry(.03, .03, 2.2, 5), cmat(0x2a2d33), 0, 1.4, .6, b);
@@ -7087,8 +7095,9 @@ function updateJumps(dt, t) {
   if (nextJump <= 0 && ids.length) {
     nextJump = rnd(2.5, 7);
     let x, z, tries = 0;
-    do { x = ME.x + rnd(-28, 4) - 12; z = ME.z + rnd(-22, 22); tries++; } while (tries < 8 && (x > -11 || (x > -53 && Math.abs(z) < 5.5) || (x > -53 && x < -45 && Math.abs(z) < 13)));
-    if (x <= -11) {
+    let ok = false;
+    do { const a = Math.random() * Math.PI * 2, r = rnd(10, 32); x = ME.x + Math.cos(a) * r; z = ME.z + Math.sin(a) * r; tries++; ok = openSea(x, z); } while (tries < 12 && !ok);
+    if (ok) {
       const id = pick(ids), f = findFish(id), m = fishMesh(id);
       if (m) {
         const k = clamp(.5 + (f ? f.tier : 0) * .35, .5, 2);
@@ -7200,8 +7209,8 @@ function buildBeach() {
   const c = document.createElement("canvas"); c.width = c.height = 128; const cg = c.getContext("2d");
   const gr = cg.createRadialGradient(64, 64, 20, 64, 64, 64); gr.addColorStop(0, "rgba(92,201,196,.85)"); gr.addColorStop(.75, "rgba(92,201,196,.7)"); gr.addColorStop(1, "rgba(92,201,196,0)");
   cg.fillStyle = gr; cg.fillRect(0, 0, 128, 128);
-  tideWater = new T3.Mesh(new T3.PlaneGeometry(70, 70), new T3.MeshBasicMaterial({ map: new T3.CanvasTexture(c), transparent: true, depthWrite: false }));
-  tideWater.rotation.x = -Math.PI / 2; tideWater.position.set(-30, -.12, -99); scene.add(tideWater);
+  tideWater = new T3.Mesh(new T3.PlaneGeometry(54, 58), new T3.MeshBasicMaterial({ map: new T3.CanvasTexture(c), transparent: true, depthWrite: false }));
+  tideWater.rotation.x = -Math.PI / 2; tideWater.position.set(-30, -.12, -98); scene.add(tideWater);
   // 바위·갈대·파라솔
   const rock = phong(0x8b857a);
   [[-34, -88], [-40, -108], [-22, -116], [-46, -96], [-12, -122], [-28, -78]].forEach(([x, z], i) => { const r = new T3.Mesh(new T3.DodecahedronGeometry(.7 + (i % 3) * .5, 0), rock); r.position.set(x, -.35, z); r.rotation.set(i, i * 2, 0); r.scale.y = .6; scene.add(r); });
@@ -7333,7 +7342,7 @@ function buildFar() {
   const bl = []; for (let z = -200; z <= 160; z += 6) bl.push(-227.3, 15.2, z, -232.7, 15.2, z);
   const bg = new T3.BufferGeometry(); bg.setAttribute("position", new T3.Float32BufferAttribute(bl, 3));
   const bpm = new T3.PointsMaterial({ color: 0xffe9b0, size: 1.4, transparent: true, opacity: 0 }); scene.add(new T3.Points(bg, bpm)); glow.push({ bridge: bpm });
-  [[-24, -22], [-36, 22], [-70, -40], [-90, 30]].forEach(([x, z], i) => {
+  [[-40, 11], [-66, -2], [-70, -40], [-90, 30]].forEach(([x, z], i) => {
     const b = new T3.Group();
     const c1 = new T3.Mesh(new T3.CylinderGeometry(.5, .8, 1.4, 8), phong(i % 2 ? 0xe2522c : 0xf4c542)); c1.position.y = .4; b.add(c1);
     const c2 = new T3.Mesh(new T3.ConeGeometry(.35, .9, 8), phong(0x333333)); c2.position.y = 1.5; b.add(c2);

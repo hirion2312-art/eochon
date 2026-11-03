@@ -121,6 +121,7 @@ node tools/test/fight_sim.js
 - **낭만포차거리** (v1.45): `POCHA`(8동, `POCHA_Z(i)`), `buildPocha` · `buildStallCounter`. `STALLS[i]`가 포차 카운터 자리(사장님 의자 = x - .95). 바깥 테이블은 `TABLES()`.
 - **어촌 수산시장** (v1.46 새로): `FMKT`(건물 범위 · `door` · `npc`), `buildFishMarket`, 지붕 `FMKT_ROOF`(간판 포함, 안에 들어가면 숨김 `marketRoofTick`), 매대 · 수조의 3D 물고기는 `decorateFishMarket`(모델 준비 뒤). **도매상 NPC** `WHOLESALER` · `buildWholesaler` · `wholesalerFace(mood)`(얼굴 캔버스) · `wholesalerTick` · 대화창 `SHEETS.wholesale = wholesaleSheet`(v1.47: 말 + 가방 물고기 팔기만)(SHEETS 선언 뒤에 등록해야 해요).
 - **윗마을 공원** (v1.46): 동사무소 · 부동산 · 주택가 대문은 지었던 코드만 빠졌어요(`OFFICE` · `REALTY` 상수는 남아 있음, 직업 창구 `goOffice`는 시트만 열어요). 공원 소품 `UP_PARK` · `UP_PARK_SOLID`.
+- **진짜 바다 판정** (v1.48.1): `openSea(x, z, 여유)` — 섬 · 갯벌 해변(`mudX`) · 부두 · 방파제를 빼요. 바다에 무언가를 띄울 땐 이걸로 확인해요(뛰어오르는 물고기 `updateJumps`가 씀).
 - **아래 막대 감정표현** (v1.47): `QUICK_DEF`에 `emote`(→ 숨은 `#emoteBtn` 클릭 → `#emotePop`). 이모지 아이콘(v1.46)은 되돌렸어요.
 - **지도** (v1.45): 마을 `MAP` · `drawTownMap`, 섬 전체 `IMAP` · `drawIslandMap`(`S.mapMode`).
   - 잠긴 기능의 도전과제(집 · `job1`)는 `ACH`에서 빠져요.
