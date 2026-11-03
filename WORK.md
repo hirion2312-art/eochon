@@ -7,6 +7,7 @@
 
 | 누가 | 무엇 | 건드리는 곳 | 시작 |
 |---|---|---|---|
+| Claude (두 번째 계정) | **메뉴 개편** — 내 캐릭터 동그란 메뉴를 메인 메뉴로 · 커뮤니티 · 업적 창 새로 · 내 정보에 나 관련 모으기 · 아래 막대 고정(설정 포함) · 퀵바 꾸미기 없애기 | `SHEETS.menu` · `menuTiles` · `ME_ACTIONS`/`openMeMenu` · `SHEETS.quickbar` · `SHEETS.profile` · `SHEETS.settings` · 새 `SHEETS.community`/`SHEETS.achieve` · 아래 막대(`QUICK_*` · `applyQuick`) · 오른쪽 위 설정 버튼과 그 CSS | 2026-11-03 |
 | Claude (원 작업자 계정) | **맵 전면 재구성: 섬 지형 + 한국 어촌 마을 (여수 포차거리 · 수산시장 대비)** | 3D 맵 전체(`init3D` · 지형 · 건물 · `walkable` · `PLACES` · 좌석/노점 좌표) — 동사무소 · 주택촌은 위치만 옮김 | 2026-11-03 |
 
 ## 다음에 할 일 (아무나 가져가요)
