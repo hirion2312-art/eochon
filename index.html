@@ -774,9 +774,6 @@ body.cinema #hint,body.cinema #standBtn,body.cinema #castBtn,body.cinema .toasts
 .ws-tabs{margin-top:12px}.ws-chips{margin:10px 0 2px}.ws-row b .tierchip,.ws-row b .tier{margin-right:2px}
 .ws-row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.05)}
 .ws-row img{width:64px;height:32px;object-fit:contain}.ws-row small{display:block;font-size:11.5px;opacity:.7}
-.restbar{position:fixed;left:50%;top:calc(var(--st, 12px) + 64px);transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:12px;padding:10px 12px 10px 16px;border-radius:16px;color:#fff;font-weight:700;font-size:14px}
-.restbar button{border:0;border-radius:12px;padding:10px 16px;font:800 14px/1 inherit;cursor:pointer;background:#2f8f5b;color:#fff}
-.restbar.open button{background:#e2522c}
 /* ===== 인터페이스 개편 (v1.21) ===== */
 .fx-ex{position:sticky;top:-16px;z-index:3;margin:-16px -18px 0;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--line)}
 .fx-bench{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start}
@@ -1523,7 +1520,6 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
   <div class="joy" id="joy" aria-label="이동 조이스틱"><i id="joyKnob"></i></div>
   <button class="actbtn" id="actBtn" hidden></button>
   <button class="actbtn soft" id="standBtn" hidden>일어나기</button>
-  <div class="restbar glass" id="restBar" hidden><span id="restBarTx"></span><button id="restBarBtn" type="button"></button></div>
   <div class="toasts" id="toasts" aria-live="polite"></div>
   <div class="boatbar glass" id="boatBar" hidden></div>
   <div class="homebar glass" id="homeBar" hidden></div>
@@ -1606,7 +1602,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.54.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.53.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -4975,11 +4971,6 @@ async function openRest(i) {   // 포차 앞에서 「차리기」 → 그 자�
   restMigrate(); walkInRest(); coach("rest");
   if (restVerify().length) console.warn("레시피 마진 검산 실패", restVerify());
 }
-// (v1.54) 장사 시작 · 종료: 내 포차 안에 있을 때 위에 뜨는 창. 시작해야 손님이 와요
-function setRestOpen(on) { S.restOpen = on; if (on) S.restNextGuest = Date.now() + 2000; sfx(on ? "ui-confirmation" : "ui-close", .45); toast(on ? "🏮 장사를 시작했어요! 손님이 들어와요" : "🌙 장사를 마쳤어요 · 새 손님은 오지 않아요"); restBarTick(); }
-function restBarTick() { const bar = $("restBar"); if (!bar) return; const show = atRest() && !S.title; bar.hidden = !show; if (!show) return;
-  bar.classList.toggle("open", !!S.restOpen); $("restBarTx").textContent = S.restOpen ? "🏮 영업 중" : "💤 준비 중"; $("restBarBtn").textContent = S.restOpen ? "장사 종료하기" : "장사 시작하기"; }
-setTimeout(() => { const b = $("restBarBtn"); if (b) b.addEventListener("click", () => setRestOpen(!S.restOpen)); setInterval(restBarTick, 400); }, 0);
 function walkInRest() { const p = restW(1.1, 2.0); walkTo(p.x, p.z, () => { const q = restW(.2, 0); walkTo(q.x, q.z); }); }
 const enterRest = openRest;
 function leaveRest() { if (!atRest()) return; const p = restW(4.2, 2.0); walkTo(p.x, p.z); }
@@ -5150,7 +5141,7 @@ function restTick(t, dt) {
   // 손님 오기 (가게 가까이 있을 때만 영업해요)
   const cap = REST_CFG.ticketCap[P.rest.lv], busy = S.restGuests.length;
   const freeSeats = REST_SEATS.map((s, i) => i).filter(i => !S.restGuests.some(gu => gu.si === i)).slice(0, REST_LV[P.rest.lv].seats);
-  if (S.restOpen && near && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length && d.tickets < REST_CFG.dayTickets) {
+  if (near && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length && d.tickets < REST_CFG.dayTickets) {
     const r = pickTicketRecipe();
     if (r) {
       const si = pick(freeSeats), seat = REST_SEATS[si];
