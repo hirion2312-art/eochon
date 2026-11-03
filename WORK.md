@@ -8,6 +8,7 @@
 | 누가 | 무엇 | 건드리는 곳 | 시작 |
 |---|---|---|---|
 | Claude (원 작업자 계정) | **전체 인터페이스 전면 개편** (HUD · 메뉴 · 가방 · 모든 시트 · 얼굴 꾸미기) | `index.html`의 CSS · HUD HTML · `SHEETS.*` · `openSheet` | 2026-11-03 |
+| Claude (두 번째 계정) | **맵 외관 다듬기** (윗마을 · 명예의 전당 · 집 마당: 배치 · 동선 · 소품) | `index.html`의 3D 월드 빌더 `buildUptown` · `buildRealty` · `buildHall` · `buildHomeScene` 과 그 충돌 판정(`uptownBlocked` · `hallBlocked` · `homeWalkable`) | 2026-11-03 |
 
 ## 다음에 할 일 (아무나 가져가요)
 
