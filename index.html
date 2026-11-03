@@ -1043,7 +1043,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.29.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.30.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 10 },
   { name: "고급", base: 30 },
@@ -2306,7 +2306,8 @@ function checkRecord(f, k, size) {
    미니게임: 누르고 있으면 초록 막대가 올라가고, 떼면 내려감. 물고기가 막대 안에 있으면 게이지가 차고 밖이면 줄어듦.
    게이지 100% = 포획, 0% = 놓침. 한 번도 안 놓치면 「퍼펙트」 크기 +10%.
    자동 챔질(또는 멍 모드)이면 입질을 놓쳐도 등급별 확률로 자동 포획. */
-const waitMs = () => (1.12 - .25 * (S.castPow || .6)) * (S.castPerfect ? .85 : 1) * (S.speed === "test" ? rnd(7000, 18000) : rnd(25000, 60000)) * (1 - buffVal("bite") / 100) * (hasTackle("spinner") ? 0.85 : 1) * (hasTackle("lamp") && isNight() ? .7 : 1) * (atSea() ? 0.75 : 1) * evMul("bite");
+const WAIT_MIN = 3000;   // 버프를 아무리 겹쳐도 입질까지 최소 3초
+const waitMs = () => Math.max(WAIT_MIN, (1.12 - .25 * (S.castPow || .6)) * (S.castPerfect ? .85 : 1) * (S.speed === "test" ? rnd(7000, 18000) : rnd(25000, 60000)) * (1 - buffVal("bite") / 100) * (hasTackle("spinner") ? 0.85 : 1) * (hasTackle("lamp") && isNight() ? .7 : 1) * (atSea() ? 0.75 : 1) * evMul("bite"));
 const BITE_MS = 2200, CAST_MS = 900, CATCH_MS = 2600, MISS_MS = 1400;
 const AUTO_RATE = [0.9, 0.7, 0.45, 0.25, 0.12, 0.04];
 /* 스타듀밸리 BobberBar 규칙 그대로: 트랙 568, 물고기 위치 0~532, 1초에 60번 계산 */
@@ -2382,11 +2383,26 @@ function startCast(pow, manual) {
 }
 function fishingNow() { const s = ME.seat && SEAT[ME.seat]; if (!s) return false; return s.kind === "pier" || (s.kind === "boat" && boatPose(Date.now()).phase === "sea"); }
 const autoOn = () => S.auto || S.mung;
+/* 자동 낚시 제한: 영웅 이상은 직접 싸워야 잡혀요 · 15분 동안 손을 안 대면 멈춰요 · 다른 탭에 가 있으면 쉬어요 */
+const AUTO_MAX_TIER = 3, AUTO_IDLE_MS = 15 * 60000;
+S.lastInput = Date.now();
+for (const ev of ["pointerdown", "keydown", "touchstart", "wheel"]) window.addEventListener(ev, () => { S.lastInput = Date.now(); }, { passive: true, capture: true });
+function autoIdleStop() {
+  if (S.mung) setMung(false);
+  if (S.auto) { S.auto = false; lsSet("mn.auto", false); try { setAutoLabel(); } catch {} }
+  setPhase("ready", 0); updateActionUI();
+  toast([h("b", { text: "💤 자리를 비운 것 같아 자동 낚시를 멈췄어요" }), h("div", { class: "muted", style: "font-size:12px", text: "15분 동안 화면을 안 누르면 멈춰요 · 다시 켜려면 설정에서 자동 챔질을 켜요" })], null, 9000);
+}
 function tick() {
   try { tickInner(); } catch (e) { console.warn("tick", e); setPhase("miss", MISS_MS); }
 }
 function tickInner() {
   if (S.coachOpen) { S.phaseEnd += 200; return; }   // 안내 카드가 떠 있으면 시간 멈춤
+  // 자동 낚시는 화면을 보고 있을 때만 · 오래 손을 안 대면 멈춤 (방치 낚시 막기)
+  if (autoOn() && fishingNow() && !REEL.on) {
+    if (document.hidden) { S.phaseEnd += 200; return; }
+    if (Date.now() - (S.lastInput || Date.now()) > AUTO_IDLE_MS) { autoIdleStop(); return; }
+  }
   if (inMudArea(ME.x, ME.z) && !tideLow()) { ME.target = null; ME.x = Math.min(-1.6, shoreX(ME.z) + .8); presMove(true); toast("밀물이 들어와서 모래사장으로 나왔어요"); }
   boatTick();
   if (!fishingNow()) {
@@ -2405,7 +2421,8 @@ function tickInner() {
     if (S.coop && S.coop.role === "host") { coopBiteMissed(); return; }
     if (autoOn()) {
       const r = rollFish(S.castBait);
-      if (Math.random() < AUTO_RATE[r.f.tier]) landFish(r, false, true);
+      if (r.f.tier >= AUTO_MAX_TIER) missFish(r, "⚠ " + TIERS[r.f.tier].name + " 대물이 물었다가 도망갔어요 · 대물은 자동 챔질로는 못 잡아요. 직접 챔질해 보세요!");
+      else if (Math.random() < AUTO_RATE[r.f.tier]) landFish(r, false, true);
       else missFish(r, "자동 챔질 실패 · " + TIERS[r.f.tier].name + " 물고기가 도망갔어요");
     } else missFish(null, "입질을 놓쳤어요. 「!」가 뜨면 챔질하세요");
   }
@@ -2898,9 +2915,14 @@ function stepMove(dt) {
     const sp = 5.5 * (running ? 1.85 : 1) * (S.joy && S.joy.m > .15 && !running ? .45 + .55 * S.joy.m : 1) * dt, stp = Math.min(sp, ME.target && !keys.size && !S.joy ? len : sp);
     const ux = dx / len * stp, uz = dz / len * stp;
     let nx = ME.x + ux, nz = ME.z + uz;
-    if (walkable(nx, nz)) { ME.x = nx; ME.z = nz; }
-    else if (walkable(ME.x + ux, ME.z)) ME.x += ux;
-    else if (walkable(ME.x, ME.z + uz)) ME.z += uz;
+    const ok = (x, z) => walkable(x, z) && !charBlocked(x, z);
+    if (charBlocked(nx, nz)) {   // 앞에 사람이 있으면 옆으로 비켜 걸어요
+      if (ME.target && Math.hypot(ME.target.x - ME.x, ME.target.z - ME.z) < 1.2) { ME.target = null; const cb = ME.onArrive; ME.onArrive = null; if (cb) cb(); }
+      else for (const a of [.7, -.7, 1.3, -1.3]) { const c = Math.cos(a), s2 = Math.sin(a), rx = ux * c - uz * s2, rz = ux * s2 + uz * c; if (ok(ME.x + rx, ME.z + rz)) { ME.x += rx; ME.z += rz; break; } }
+    }
+    else if (walkable(nx, nz)) { ME.x = nx; ME.z = nz; }
+    else if (ok(ME.x + ux, ME.z)) ME.x += ux;
+    else if (ok(ME.x, ME.z + uz)) ME.z += uz;
     else { ME.target = null; ME.onArrive = null; }
     ME.ry = lerpAngle(ME.ry, Math.atan2(dx, dz), Math.min(1, dt * 12));
     ME.moving = true; ME.st = running ? "run" : "walk";
@@ -4134,10 +4156,140 @@ function npcShopTick(t, dt) {
     const dx = s.tx - s.x, dz = s.tz - s.z, d = Math.hypot(dx, dz);
     if (d > .05) { const sp = Math.min(d, 1.3 * dt); s.x += dx / d * sp; s.z += dz / d * sp; s.ry = Math.atan2(dx, dz); s.walking = true; }
     else { s.walking = false; if (s.stall >= 0) s.ry = -Math.PI / 2; s.wait -= dt; if (s.wait <= 0) shopperNext(s); }
-    s.B.g.position.set(s.x, 0, s.z); s.B.g.rotation.y = s.ry;
+    const ps = sepPush(s, s.x + (s.sx || 0), s.z + (s.sz || 0), .75); s.sx = clamp((s.sx || 0) + (ps[0] - (s.sx || 0) * .6) * Math.min(1, dt * 4), -.9, .9); s.sz = clamp((s.sz || 0) + (ps[1] - (s.sz || 0) * .6) * Math.min(1, dt * 4), -.9, .9);
+    s.B.g.position.set(s.x + s.sx, 0, s.z + s.sz); s.B.g.rotation.y = s.ry;
     const sw = s.walking ? Math.sin(t * 9 + s.z) : 0;
     s.B.rig.position.y = Math.abs(sw) * .06; s.B.feet[0].position.z = .05 + sw * .12; s.B.feet[1].position.z = .05 - sw * .12;
   }
+}
+/* ===================== 마을 사람들 (NPC) =====================
+   접속한 사람마다 3명씩. 생김새와 걷는 길은 「그 사람 id + 시각」으로 정해져서 모두의 화면에 같은 자리에 보여요(통신 없이).
+   거리 · 부두 · 시장 · 포차 · 윗마을 · 명예의 전당 · 해변을 돌아다니고, 가끔 말을 해요 */
+const TOWN_NODES = {
+  r30: [5.3, 30], r18: [5.3, 18], r6: [5.3, 6], rm6: [5.3, -6], rm18: [5.3, -18], rm30: [5.3, -30], rm42: [5.3, -42], rm54: [5.3, -54], rm64: [5.3, -64],
+  l32: [-2.6, 32], c0: [-3, 0], pocha1: [-5.4, 14], pocha2: [-5.4, 26], mk1: [-4.6, -16], mk2: [-4.6, -30], mk3: [-4.6, -46], lm60: [-2.6, -62],
+  pier1: [-14, 0], pier2: [-28, .4], pier3: [-44, -.4], pierT: [-49, 6],
+  up1: [3, 44], up2: [8.6, 47], up3: [9.4, 58], up4: [9, 68], plaza: [14.2, 44.6], hall1: [7.4, -60.5], hall2: [12.8, -60.5], beach1: [-3, -73], beach2: [-7, -78],
+};
+const TOWN_EDGES = [["r30", "r18"], ["r18", "r6"], ["r6", "rm6"], ["rm6", "rm18"], ["rm18", "rm30"], ["rm30", "rm42"], ["rm42", "rm54"], ["rm54", "rm64"],
+  ["r30", "l32"], ["r30", "up1"], ["l32", "up1"], ["up1", "up2"], ["up2", "up3"], ["up3", "up4"], ["up2", "plaza"], ["l32", "pocha2"], ["pocha2", "pocha1"], ["pocha1", "c0"], ["r6", "c0"], ["rm6", "c0"],
+  ["c0", "pier1"], ["pier1", "pier2"], ["pier2", "pier3"], ["pier3", "pierT"], ["c0", "mk1"], ["rm18", "mk1"], ["mk1", "mk2"], ["mk2", "mk3"], ["mk3", "lm60"], ["rm54", "lm60"],
+  ["rm54", "hall1"], ["rm64", "hall1"], ["hall1", "hall2"], ["lm60", "beach1"], ["rm64", "beach1"], ["beach1", "beach2"]];
+const TOWN_ADJ = {}; for (const [a, b] of TOWN_EDGES) { (TOWN_ADJ[a] = TOWN_ADJ[a] || []).push(b); (TOWN_ADJ[b] = TOWN_ADJ[b] || []).push(a); }
+const STOP_NODES = new Set(["pier3", "pierT", "mk1", "mk2", "mk3", "pocha1", "pocha2", "up3", "up4", "plaza", "hall2", "beach2", "r18", "rm30"]);
+const TOWN_ROLES = [
+  { name: "어부 박씨", wear: { hat: "h-bucket", top: "t-rain", shoes: "s-boots" }, color: "#e2a33a", skin: "#d39a72", lines: ["오늘은 물때가 좋구먼", "갈치는 밤에 나와요", "배 타면 큰 놈 잡혀"] },
+  { name: "동네 할머니", wear: { hat: "h-straw", bottom: "b-overall" }, color: "#c2577e", skin: "#eab894", scale: .92, lines: ["어이구 잘 지내나?", "회 한 접시 먹고 가", "바람이 시원하네"] },
+  { name: "관광객", wear: { face: "f-sun", top: "t-hawaii", bottom: "b-shorts", shoes: "s-flip" }, color: "#2a78bb", skin: "#ffe3cf", lines: ["바다 너무 예쁘다!", "사진 찍어야지 📸", "회센터가 어디예요?"] },
+  { name: "학생", wear: { hat: "h-beanie", shoes: "s-sneak", back: "k-bag" }, color: "#2f8f5b", skin: "#f6d2b4", scale: .9, lines: ["숙제 하기 싫다…", "물고기 101종 다 모을 거야", "떡볶이 먹고 싶다"] },
+  { name: "해녀 이모", wear: { top: "t-vest", shoes: "s-boots" }, color: "#1f3a5c", skin: "#d39a72", lines: ["전복 따러 가야지", "물이 차갑네", "숨 참기는 자신 있어"] },
+  { name: "낚시 마니아", wear: { hat: "h-cap", back: "k-cooler", bottom: "b-jeans" }, color: "#d4701a", skin: "#f6d2b4", lines: ["몸부림칠 땐 손 떼요!", "드랙 조절이 생명이지", "오늘 참돔 시세 좋대요"] },
+  { name: "산책하는 아이", wear: { hat: "h-cap", shoes: "s-sneak" }, color: "#ffb347", skin: "#ffe3cf", scale: .78, lines: ["갈매기다!", "엄마 저거 봐!", "물고기 보러 갈래"] },
+  { name: "화가", wear: { hat: "h-beanie", face: "f-round", top: "t-marine" }, color: "#8448cc", skin: "#eab894", lines: ["노을 그리기 딱 좋네", "저 등대 색이 예뻐", "영감이 떠오른다"] },
+  { name: "택배 기사", wear: { hat: "h-cap", back: "k-bag", bottom: "b-jeans", shoes: "s-sneak" }, color: "#6a5a42", skin: "#d39a72", lines: ["택배 왔습니다~", "윗마을이 어디더라", "오늘도 바쁘다"] },
+  { name: "포차 사장님", wear: { face: "f-stache", bottom: "b-overall" }, color: "#e2522c", skin: "#a96e4b", lines: ["오늘 밤 포차 열어요!", "해물파전 맛있어요", "한잔하고 가요"] },
+  { name: "사진작가", wear: { hat: "h-bucket", face: "f-sun", back: "k-bag" }, color: "#3a3f48", skin: "#f6d2b4", lines: ["빛이 좋다", "찰칵!", "부두 풍경 최고네"] },
+  { name: "은퇴한 선장", wear: { hat: "h-crown", face: "f-stache", top: "t-marine" }, color: "#24427a", skin: "#eab894", lines: ["내가 젊었을 땐 말이야…", "바다는 정직해", "멍낚호도 내가 몰았지"] },
+];
+const TOWNFOLK = new Map();   // key → { B, dog, tag, x, z, ry, sx, sz, plan }
+const townRng = (seed) => () => ((seed = (Math.imul(seed ^ (seed >>> 15), 2246822519) + 0x9e3779b9) >>> 0) / 4294967296);
+function townPlan(key) {
+  const rnd = townRng(mixHash("town|" + key)), [own, kk] = key.split("#"), role = TOWN_ROLES[(mixHash("role|" + own) + (+kk || 0) * 5) % TOWN_ROLES.length], keys = Object.keys(TOWN_NODES);
+  let cur = keys[Math.floor(rnd() * keys.length)], prev = null; const legs = []; let T = 0; const sp = .95 + rnd() * .45;
+  for (let i = 0; i < 48; i++) {
+    const nx = TOWN_ADJ[cur].filter(n => n !== prev), nxt = (nx.length ? nx : TOWN_ADJ[cur])[Math.floor(rnd() * (nx.length || TOWN_ADJ[cur].length))];
+    const a = TOWN_NODES[cur], b = TOWN_NODES[nxt], d = Math.hypot(b[0] - a[0], b[1] - a[1]), dur = d / sp;
+    const dwell = STOP_NODES.has(nxt) ? 3 + rnd() * 9 : rnd() * 1.5;
+    legs.push({ a, b, t0: T, dur, dwell }); T += dur + dwell; prev = cur; cur = nxt;
+  }
+  // 마지막 칸에서 처음 칸으로 자연스럽게 돌아가게 시작점으로 걸어감
+  const last = legs[legs.length - 1].b, first = legs[0].a, dd = Math.hypot(first[0] - last[0], first[1] - last[1]);
+  legs.push({ a: last, b: first, t0: T, dur: dd / sp, dwell: 2 }); T += dd / sp + 2;
+  return { role, legs, T, off: rnd() * T, dog: rnd() < .3, dogCol: ["#c98d4b", "#f4f1ea", "#3a3a3a", "#e8c66a"][Math.floor(rnd() * 4)], talkOff: rnd() * 40 };
+}
+function townPos(plan, tSec) {
+  let t = (tSec + plan.off) % plan.T; if (t < 0) t += plan.T;
+  let lo = 0, hi = plan.legs.length - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (plan.legs[m].t0 <= t) lo = m; else hi = m - 1; }
+  const L = plan.legs[lo], u = t - L.t0;
+  if (u >= L.dur) return { x: L.b[0], z: L.b[1], ry: Math.atan2(L.b[0] - L.a[0], L.b[1] - L.a[1]), walk: false };
+  const q = u / L.dur; return { x: L.a[0] + (L.b[0] - L.a[0]) * q, z: L.a[1] + (L.b[1] - L.a[1]) * q, ry: Math.atan2(L.b[0] - L.a[0], L.b[1] - L.a[1]), walk: true };
+}
+function makeDog(col) {
+  const g = new T3.Group(), m = phong(new T3.Color(col).getHex()), dark = phong(0x2a2220);
+  const body = new T3.Mesh(new T3.SphereGeometry(.2, 12, 10), m); body.scale.set(.8, .75, 1.3); body.position.y = .3; g.add(body); outline(body, 1.08);
+  const head = new T3.Mesh(new T3.SphereGeometry(.15, 12, 10), m); head.position.set(0, .46, .26); g.add(head); outline(head, 1.08);
+  for (const sx of [-1, 1]) { const ear = new T3.Mesh(new T3.SphereGeometry(.06, 8, 6), dark); ear.scale.set(.7, 1.3, .5); ear.position.set(sx * .1, .55, .24); g.add(ear); }
+  const nose = new T3.Mesh(new T3.SphereGeometry(.03, 6, 5), dark); nose.position.set(0, .45, .41); g.add(nose);
+  const legs = []; for (const [lx, lz] of [[-.09, .14], [.09, .14], [-.09, -.14], [.09, -.14]]) { const l = new T3.Mesh(new T3.CylinderGeometry(.035, .035, .2, 6), m); l.position.set(lx, .1, lz); g.add(l); legs.push(l); }
+  const tail = new T3.Mesh(new T3.CylinderGeometry(.02, .03, .18, 6), m); tail.position.set(0, .4, -.28); tail.rotation.x = -.8; g.add(tail);
+  g.userData = { legs, tail }; scene.add(g); return g;
+}
+function townTag(F, text, talk) {
+  const key = (talk ? "t|" : "n|") + text; if (F.tag.userData.key === key) return;
+  const font = "700 26px 'IBM Plex Sans KR','Apple SD Gothic Neo',sans-serif", mg = townTag.g || (townTag.g = document.createElement("canvas").getContext("2d"));
+  mg.font = font; const cw = Math.ceil(mg.measureText(text).width) + 36, ch = 50;
+  paintSprite(F.tag, key, cw, ch, (g) => {
+    g.font = font; rrPath(g, 2, 2, cw - 4, ch - 4, 22);
+    g.fillStyle = talk ? "rgba(255,253,246,.96)" : "rgba(20,30,36,.62)"; g.fill(); if (talk) { g.lineWidth = 3; g.strokeStyle = "#3a2a10"; g.stroke(); }
+    g.fillStyle = talk ? "#2a1d10" : "#fff6e4"; g.textBaseline = "middle"; g.fillText(text, 18, ch / 2 + 1);
+  }, talk ? .3 : .24);
+}
+function townOwners() {
+  const ids = [S.uid || "solo"];
+  for (const p of otherPeers(true)) if (!p.home) ids.push(p.uid || p.peer);
+  return [...new Set(ids)].sort().slice(0, 8);   // 최대 24명
+}
+function townTick(t, dt) {
+  if (!T3 || !scene || !GEO.body) return;
+  const want = new Set(); for (const o of townOwners()) for (let k = 0; k < 3; k++) want.add(o + "#" + k);
+  for (const [key, F] of TOWNFOLK) if (!want.has(key)) { scene.remove(F.B.g); if (F.dog) scene.remove(F.dog); TOWNFOLK.delete(key); }
+  const vis = !atHome(), sec = Date.now() / 1000;
+  for (const key of want) {
+    let F = TOWNFOLK.get(key);
+    if (!F) {
+      const plan = townPlan(key), B = makeBody(); applyOutfit(B, normWear(plan.role.wear), plan.role.color);
+      B.skinM.color.set(plan.role.skin); B.faceMat.map = faceTexture("npc"); B.faceMat.needsUpdate = true; B.g.scale.setScalar(plan.role.scale || 1); scene.add(B.g);
+      const tag = makeText(); B.g.add(tag); tag.position.y = 1.95 / (plan.role.scale || 1);
+      F = { B, plan, tag, sx: 0, sz: 0, x: 0, z: 0, dog: plan.dog ? makeDog(plan.dogCol) : null }; TOWNFOLK.set(key, F);
+    }
+    F.B.g.visible = vis; if (F.dog) F.dog.visible = vis; if (!vis) continue;
+    const p = townPos(F.plan, sec);
+    // 겹치지 않게 살짝 비켜 감 (보기용 · 부드럽게)
+    const push = sepPush(F, p.x + F.sx, p.z + F.sz, .95); F.sx += (push[0] - F.sx * .6) * Math.min(1, dt * 4); F.sz += (push[1] - F.sz * .6) * Math.min(1, dt * 4);
+    F.sx = clamp(F.sx, -1.2, 1.2); F.sz = clamp(F.sz, -1.2, 1.2);
+    F.x = p.x + F.sx; F.z = p.z + F.sz;
+    F.B.g.position.set(F.x, groundY(F.x, F.z), F.z); F.B.g.rotation.y = lerpAngle(F.B.g.rotation.y, p.ry, Math.min(1, dt * 6));
+    const sw = p.walk ? Math.sin(t * 8 + F.plan.off) : 0;
+    F.B.rig.position.y = Math.abs(sw) * .05; F.B.feet[0].position.z = .05 + sw * .12; F.B.feet[1].position.z = .05 - sw * .12;
+    // 말하기: 40초마다 4초쯤 · 가까이 있을 때만 이름표가 보여요
+    const near = Math.hypot(F.x - ME.x, F.z - ME.z) < 11, talkI = Math.floor((sec + F.plan.talkOff) / 40), talking = ((sec + F.plan.talkOff) % 40) < 4.5 && near;
+    F.tag.visible = near;
+    if (near) townTag(F, talking ? F.plan.role.lines[talkI % F.plan.role.lines.length] : F.plan.role.name, talking);
+    if (F.dog) { const q = townPos(F.plan, sec - 1.1); const ox = Math.cos(q.ry) * .55, oz = -Math.sin(q.ry) * .55;
+      F.dog.position.set(q.x + ox + F.sx, groundY(q.x, q.z), q.z + oz + F.sz); F.dog.rotation.y = q.ry;
+      const ds = q.walk ? Math.sin(t * 14) : 0; F.dog.userData.legs.forEach((l, i) => { l.rotation.x = (i % 2 ? 1 : -1) * ds * .6; }); F.dog.userData.tail.rotation.z = Math.sin(t * 10) * .5; }
+  }
+  rebuildChars();
+}
+/* ---------- 겹침 방지 ---------- 모든 캐릭터 위치(지난 프레임)를 모아 두고, 서로 가까우면 밀어내요 */
+let CHARS = [];
+function rebuildChars() {
+  const out = [];
+  for (const [k, F] of folks) if (F.px != null && k !== "me" && F.g.visible !== false) out.push({ id: F, x: F.px + (F.sx || 0), z: F.pz + (F.sz || 0), seat: !!F.seated });
+  for (const F of TOWNFOLK.values()) if (F.B.g.visible) out.push({ id: F, x: F.x, z: F.z });
+  for (const s of SHOPPERS) if (s.B.g.visible) out.push({ id: s, x: s.x + (s.sx || 0), z: s.z + (s.sz || 0) });
+  CHARS = out;
+}
+function sepPush(self, x, z, R) {
+  let px = 0, pz = 0;
+  const all = CHARS.concat(atHome() ? [] : [{ id: "me", x: ME.x, z: ME.z }]);
+  for (const c of all) { if (c.id === self) continue; const dx = x - c.x, dz = z - c.z, d = Math.hypot(dx, dz); if (d < R && d > 1e-4) { const k = (R - d) / d; px += dx * k; pz += dz * k; } else if (d <= 1e-4 && self && typeof self === "object") { const a = self._ta ?? (self._ta = Math.random() * 6.283); px += Math.cos(a) * .3; pz += Math.sin(a) * .3; } }
+  return [px, pz];
+}
+function charBlocked(nx, nz) {
+  if (ME.seat || S.myStall >= 0) return false;
+  for (const c of CHARS) { if (c.seat) continue; const dn = Math.hypot(nx - c.x, nz - c.z); if (dn < .68 && dn < Math.hypot(ME.x - c.x, ME.z - c.z) - 1e-4) return true; }
+  return false;
 }
 /* 홍보 종이 그림 (세로 3:4) */
 function wrapText(g, text, maxW) {
@@ -6053,7 +6205,14 @@ function updateChar(F, f, t, dt, now) {
   const seat = f.seat ? SEAT[f.seat] : null;
   const stool = f.st === "stall", sitting = !!seat || stool;
   const fishing = seat && (seat.kind === "pier" || seat.kind === "boat");
-  F.g.position.set(F.px, seat && seat.kind === "boat" ? seat.y : seat && seat.kind === "table" ? .3 : stool ? .5 : groundY(F.px, F.pz), F.pz);
+  F.seated = sitting;
+  // 다른 사람끼리 겹치지 않게 보기 위치만 살짝 비켜요 (앉아 있으면 그대로)
+  if (!f.me && !sitting) { const pu = sepPush(F, F.px + (F.sx || 0), F.pz + (F.sz || 0), .72), kk = Math.min(1, dt * 5);
+    F.sx = clamp((F.sx || 0) + (pu[0] - (F.sx || 0) * .5) * kk, -.8, .8); F.sz = clamp((F.sz || 0) + (pu[1] - (F.sz || 0) * .5) * kk, -.8, .8);
+    if (!walkable(F.px + F.sx, F.pz + F.sz)) { F.sx *= .5; F.sz *= .5; } }
+  else F.sx = F.sz = 0;
+  const vx = F.px + (F.sx || 0), vz = F.pz + (F.sz || 0);
+  F.g.position.set(vx, seat && seat.kind === "boat" ? seat.y : seat && seat.kind === "table" ? .3 : stool ? .5 : groundY(vx, vz), vz);
   let shownRy = F.ry;
   if (f.me && !moving && !sitting && f.st === "idle" && now - (ME.stopAt || 0) > 1500) {
     F.faceCam = lerpAngle(F.faceCam ?? F.ry, Math.atan2(camera.position.x - F.px, camera.position.z - F.pz), Math.min(1, dt * 3)); shownRy = F.faceCam;
@@ -6280,7 +6439,7 @@ function loop3D(ms) {
   seaMat.uniforms.sunDir.value.copy(_v2); skyMat.uniforms.sunDir.value.copy(_v2);
   for (const b of buoys) { b.position.y = waveY(b.position.x, b.position.z, t) - .1; b.rotation.z = Math.sin(t + b.position.x) * .12; }
   for (const s of SWING) s.g.rotation.x = Math.sin(t * 1.4 + s.ph) * .07;
-  updateLife(dt, t); homeTick(t); npcShopTick(t, dt); updateFx(t, dt);
+  updateLife(dt, t); homeTick(t); npcShopTick(t, dt); townTick(t, dt); updateFx(t, dt);
   SWIM_T.value = t; updateJumps(dt, t); updateTide3D(dt); updateDust(dt);
   updateBoat3D(t, now);
   if (onBoat()) { const bs = SEAT[ME.seat]; ME.x = bs.x; ME.z = bs.z; ME.ry = bs.ry; }
@@ -8617,7 +8776,7 @@ SHEETS.settings = (body) => {
   body.append(h("div", { class: "sec", text: "낚시" }), h("div", { class: "setlist" },
     h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "입질 속도" }), h("small", { text: "찌를 던지고 입질이 올 때까지" })),
       h("div", { class: "seg" }, [["test", "빠르게 7–18초"], ["real", "느긋하게 25–60초"]].map(([v, l]) => h("button", { "aria-pressed": String(S.speed === v), onclick: () => { if (S.speed !== v) $("speedBtn").click(); refreshSheet(true); }, text: l })))),
-    toggleRow("자동 챔질", "입질을 놓쳐도 확률로 자동으로 낚아요 (경험치 60%)", S.auto, () => $("autoBtn").click()),
+    toggleRow("자동 챔질", "입질을 놓쳐도 확률로 자동으로 낚아요 · 경험치 60% · 영웅 이상 대물은 직접 잡아야 해요 · 15분 손을 안 대면 멈춰요", S.auto, () => $("autoBtn").click()),
     h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "자동 판매" }), h("small", { text: "가방에 들어오자마자 바로 팔기" })),
       h("div", { class: "seg" }, [[0, "끄기"], [1, "일반"], [2, "고급 이하"]].map(([v, l]) => h("button", { "aria-pressed": String((P.autoSell || 0) === v), onclick: () => { P.autoSell = v; markDirty(); refreshSheet(true); }, text: l }))))));
   const acct = h("div", { class: "setlist" },
