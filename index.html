@@ -715,6 +715,83 @@ body.cinema #hint,body.cinema #standBtn,body.cinema #castBtn,body.cinema .toasts
 .gd-faq summary{cursor:pointer;font-weight:700;font-size:14px}
 .gd-faq p{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--muted,#55606a)}
 @media (max-width:560px){.qb-grid{grid-template-columns:1fr}.gd-step{flex-wrap:wrap}.gd-step .btn{margin-left:36px}}
+/* ===== 가게마다 고유 화면 2탄 (v1.33): 선착장 승선권 · 의뢰 게시판 · 낚시 상점 페그보드 · 은행 전광판 ===== */
+/* 멍낚호: 승선권 */
+.bt-ticket{display:flex;border-radius:16px;overflow:hidden;background:#fdf8ec;box-shadow:0 2px 0 #d9c9a6,0 6px 18px rgba(20,40,60,.12);border:1.5px solid #e2d3b0}
+.bt-main{flex:1;padding:14px 16px;background:repeating-linear-gradient(135deg,rgba(31,95,138,.04) 0 10px,transparent 10px 20px)}
+.bt-head{display:flex;align-items:center;gap:10px}.bt-head b{font-size:17px;color:#1f3a5c;letter-spacing:.02em}.bt-head small{display:block;font-size:12px;color:#6b7780}
+.bt-logo{width:42px;height:42px;border-radius:50%;background:#1f5f8a;display:grid;place-items:center;font-size:22px;box-shadow:inset 0 0 0 3px #fdf8ec,0 0 0 2px #1f5f8a}
+.bt-perks{list-style:none;margin:12px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:6px}
+.bt-perks li{background:#fff;border:1px solid #e8dcc0;border-radius:10px;padding:7px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.bt-perks b{font-family:var(--f-mono);color:#1f5f8a;font-size:15px}.bt-perks span{font-size:11px;color:#6b5a3a;line-height:1.3}
+.bt-stub{flex:none;width:132px;padding:14px 12px;border-left:2px dashed #cdb98d;background:#1f5f8a;color:#fdf8ec;display:flex;flex-direction:column;justify-content:center;gap:4px;text-align:center;position:relative}
+.bt-stub::before,.bt-stub::after{content:"";position:absolute;left:-9px;width:16px;height:16px;border-radius:50%;background:var(--bg,#f4f7f8)}
+.bt-stub::before{top:-8px}.bt-stub::after{bottom:-8px}
+.bt-stub b{font-size:22px}.bt-stub small{font-size:11px;opacity:.85;line-height:1.35}
+.bt-deck{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:46px 26px 22px;background:linear-gradient(90deg,#b98a56,#c99a64 50%,#b98a56);border-radius:48% 48% 22px 22px / 26% 26% 22px 22px;border:4px solid #7a5232;box-shadow:inset 0 0 0 3px rgba(255,255,255,.18)}
+.bt-deck::before{content:"";position:absolute;inset:8px;border-radius:inherit;background:repeating-linear-gradient(90deg,transparent 0 22px,rgba(90,58,30,.25) 22px 24px);pointer-events:none}
+.bt-bow{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:800;color:#fff7e6;background:rgba(60,36,18,.55);padding:3px 10px;border-radius:999px}
+.bt-deck.sail .bt-bow{background:#1f5f8a}
+.bt-seat{position:relative;background:rgba(255,248,232,.92);border:2px dashed #8a6440;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:2px;min-height:68px}
+.bt-seat .bt-n{font-size:10.5px;color:#8a6440;font-weight:700}.bt-seat b{font-size:14px;color:#3a2a10}.bt-seat small{font-size:11.5px;color:#7a6a50}
+.bt-seat.on{border-style:solid;background:#fffdf6}.bt-seat.me{border-color:#e2522c;box-shadow:0 0 0 3px rgba(226,82,44,.2)}
+.bt-fuel{background:#1d2a33;color:#e8f1f7;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.bt-fuelhead{display:flex;justify-content:space-between;font-size:13px}.bt-fuel small{font-size:12px;opacity:.75}
+.bt-gauge{position:relative;height:16px;border-radius:8px;background:#0e171d;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.5)}
+.bt-gauge i{display:block;height:100%;background:linear-gradient(90deg,#f2a93b,#ffd84d);border-radius:8px;transition:width .5s}
+.bt-gauge u{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.18)}
+.bt-note{padding:10px 12px;border-radius:12px;background:#e8f3fb;color:#1f3a5c;font-size:13px}
+.bt-acts .btn.pri{font-size:15px;padding:12px 18px}
+@media (max-width:560px){.bt-ticket{flex-direction:column}.bt-stub{width:auto;border-left:0;border-top:2px dashed #cdb98d;flex-direction:row;justify-content:center;flex-wrap:wrap;gap:4px 10px}.bt-stub::before,.bt-stub::after{display:none}.bt-perks{grid-template-columns:1fr 1fr}.bt-deck{padding:44px 14px 16px}}
+/* 오늘의 의뢰: 코르크 게시판 */
+.qd-board{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;padding:22px 18px;border-radius:16px;background:radial-gradient(circle at 20% 30%,rgba(0,0,0,.06) 0 1px,transparent 2px) 0 0/9px 9px,radial-gradient(circle at 70% 60%,rgba(255,255,255,.12) 0 1px,transparent 2px) 0 0/7px 7px,#c08a55;border:8px solid #6e4a2a;box-shadow:inset 0 2px 8px rgba(0,0,0,.25)}
+.qd-note{position:relative;padding:20px 14px 14px;background:#fffbe8;border-radius:3px;box-shadow:0 6px 12px rgba(40,24,8,.28);display:flex;flex-direction:column;gap:6px;transform:rotate(-1.4deg);color:#2f2410}
+.qd-note.n1{background:#eaf6ff;transform:rotate(1.2deg)}.qd-note.n2{background:#fff0f3;transform:rotate(-.6deg)}
+.qd-pin{position:absolute;top:-7px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff9a8a,#d8473a 60%,#8a2016);box-shadow:0 2px 3px rgba(0,0,0,.35)}
+.qd-note.n1 .qd-pin{background:radial-gradient(circle at 35% 35%,#9ad0ff,#2a78bb 60%,#164a78)}.qd-note.n2 .qd-pin{background:radial-gradient(circle at 35% 35%,#b9f0c6,#2f8f5b 60%,#16502f)}
+.qd-from{font-size:11px;color:#8a7a5a}.qd-t{font-size:15px;line-height:1.4}
+.qd-prog{height:8px;border-radius:4px;background:rgba(0,0,0,.08);overflow:hidden}.qd-prog i{display:block;height:100%;background:#2f8f5b}
+.qd-num{font-size:12px;color:#6b5a3a}
+.qd-rew{display:flex;justify-content:space-between;align-items:baseline;border-top:1px dashed rgba(0,0,0,.18);padding-top:6px;font-size:12px;color:#6b5a3a}.qd-rew b{font-size:15px;color:#c2402a}
+.qd-note .btn{align-self:stretch}
+.qd-note.ready{box-shadow:0 0 0 3px #ffd84d,0 6px 12px rgba(40,24,8,.28)}
+.qd-note.claimed{opacity:.8}
+.qd-stamp{position:absolute;right:10px;bottom:14px;transform:rotate(-14deg);border:3px solid #c2402a;color:#c2402a;font-weight:900;font-size:18px;padding:2px 10px;border-radius:8px;letter-spacing:.1em;background:rgba(255,255,255,.4)}
+.qd-foot{margin-top:10px;font-size:12.5px;color:var(--muted,#6b7780)}
+/* 낚시 상점: 페그보드 벽 + 공구함 */
+.tbox{background:linear-gradient(180deg,#2f8f5b,#24724a);border:0;border-radius:14px;padding:10px;gap:8px;position:relative;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
+.tbox .tbox-lid{grid-column:1/-1;color:#eafff2;font-weight:800;font-size:12.5px;letter-spacing:.04em}
+.tbox .gi{background:#f4fbf6;border:0;box-shadow:0 2px 0 rgba(0,0,0,.15)}
+.peg .racks>.tabs{background:#6e4a2a;padding:6px;border-radius:12px;gap:6px}
+.peg .racks>.tabs button{background:#c99a64;color:#3a2410;border:0;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);font-weight:700}
+.peg .racks>.tabs button[aria-selected="true"]{background:#fff3d6;color:#3a2410;box-shadow:inset 0 0 0 2px #e2b43a}
+.pegwall{display:grid !important;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:22px 12px;padding:26px 14px 16px;border-radius:14px;background:radial-gradient(circle,#5a3e24 0 2.5px,transparent 3px) 0 0/22px 22px,#d7b588;border:6px solid #8a6440;box-shadow:inset 0 2px 10px rgba(0,0,0,.2)}
+.pegwall .irow{position:relative;display:flex !important;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:12px 8px 10px;background:#fffdf7;border:1.5px solid #e2d3b0;border-radius:10px 10px 12px 12px;box-shadow:0 5px 0 rgba(90,60,30,.18)}
+.pegwall .irow::before{content:"";position:absolute;top:-16px;left:50%;width:4px;height:16px;margin-left:-2px;background:#9aa3aa;border-radius:2px}
+.pegwall .irow::after{content:"";position:absolute;top:4px;left:50%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#d7b588;box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
+.pegwall .irow .iic{width:56px;height:56px;margin-top:6px}
+.pegwall .irow .inm{align-items:center;width:100%}.pegwall .irow .inm b,.pegwall .irow .inm small{white-space:normal;text-align:center}
+.pegwall .irow .inm small{font-size:11px;line-height:1.35}
+.pegwall .irow .ipr{background:#ffd84d;color:#3a2410;border-radius:6px;padding:3px 8px;font-weight:700;font-size:12px;transform:rotate(-2deg)}
+.pegwall .irow .ipr.tag.on{background:#1d5480;color:#fff}
+.pegwall .irow.on{border-color:#e2522c;box-shadow:0 0 0 3px rgba(226,82,44,.25),0 5px 0 rgba(90,60,30,.18);background:#fff}
+.pegwall .irow.locked{filter:grayscale(.7)}.pegwall .irow.locked .ipr{background:#9aa3aa;color:#fff}
+.peg .ishelf{background:#fffbea;border:1.5px solid #e2d3b0;border-radius:14px 14px 18px 18px;position:relative;box-shadow:0 8px 0 #c9a46b}
+.peg .ishelf::before{content:"가격표";position:absolute;top:-11px;left:16px;background:#e2522c;color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px}
+/* 은행: 통장 · 창구 · 시세 전광판 · 주문 전표 */
+.passbook{background:#f3f7fb;border:1.5px solid #b9cbe0;border-radius:6px 14px 14px 6px;border-left:10px solid #1f3a5c;padding:10px}
+.passbook .gi{background:#fff;border:0;border-bottom:1.5px dotted #b9cbe0;border-radius:0}
+.tabs.windows button{border-radius:10px 10px 0 0;border:1.5px solid #b9cbe0;border-bottom-width:4px;background:#eaf0f6;font-weight:700;color:#1f3a5c}
+.tabs.windows button[aria-selected="true"]{background:#1f3a5c;color:#ffd84d;border-color:#1f3a5c}
+.ticker{background:#0b1218;border-radius:14px;padding:8px;gap:4px !important;border:3px solid #2a3a46;box-shadow:inset 0 0 18px rgba(0,0,0,.6)}
+.ticker .irow{background:#111c24 !important;border:1px solid #1d2c37 !important;border-radius:8px;color:#d7e4ec}
+.ticker .irow .inm b{color:#ffd84d;font-family:var(--f-mono);letter-spacing:.02em}.ticker .irow .inm small{color:#7f95a5}
+.ticker .irow .num{font-family:var(--f-mono);color:#f4f7f8;text-shadow:0 0 6px rgba(255,255,255,.25)}
+.ticker .irow .up{color:#ff5a46 !important;text-shadow:0 0 6px rgba(255,90,70,.5)}.ticker .irow .down{color:#4aa0ff !important;text-shadow:0 0 6px rgba(74,160,255,.5)}
+.ticker .irow.on{border-color:#ffd84d !important;box-shadow:0 0 0 1px #ffd84d}
+.ticker .irow .spark{filter:brightness(1.4) saturate(1.3)}
+.bankx .slip{background:#fffef8;border:1.5px solid #d8d0c0;border-radius:4px;box-shadow:0 3px 0 #e0d8c8,0 6px 0 #ece6d8;position:relative;padding-top:36px !important}
+.bankx .slip::before{content:"주식 주문 전표";position:absolute;top:0;left:0;right:0;background:#1f3a5c;color:#ffd84d;font-size:11.5px;font-weight:800;letter-spacing:.12em;text-align:center;padding:4px 0}
 /* ===== 인터페이스 개편 (v1.21) ===== */
 .fx-ex{position:sticky;top:-16px;z-index:3;margin:-16px -18px 0;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--line)}
 .fx-bench{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start}
@@ -1114,7 +1191,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.32.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.33.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -3269,38 +3346,50 @@ function updateBoatBar(now) {
   bar.hidden = false; if (bar.textContent !== text) bar.textContent = text;
 }
 function boatSheet(body) {
-  const b = S.boat, mine = mySeatOnBoat(), paid = paidSum(b);
-  setHead("멍낚호", "최대 4명 · 5분 동안 깊은 바다에서 낚시 · 뱃삯 " + won(BOAT.price) + " (한 명이 다 내거나 나눠 내기)");
-  body.append(h("div", { class: "listrow", style: "flex-direction:column;align-items:stretch;gap:6px;line-height:1.55" },
-    h("b", { text: "깊은 바다에서는" }),
-    h("span", { class: "muted", style: "font-size:13px", text: "희귀 이상 물고기 확률 크게 상승(+30%p) · 개체 크기 ×1.15 · 입질 25% 빨라짐 · 깊은 바다 물고기(아귀, 산갈치, 상어류 등) 3배" })));
+  const b = S.boat, mine = mySeatOnBoat(), paid = paidSum(b), sailing = b.status === "sailing";
+  setHead("멍낚호 선착장", "4명까지 함께 타고 5분 동안 깊은 바다로 · 뱃삯 " + won(BOAT.price) + "은 한 명이 다 내거나 나눠 내요");
+  // 승선권: 왼쪽은 깊은 바다 혜택, 오른쪽 떼는 쪽은 뱃삯
+  body.append(h("div", { class: "bt-ticket" },
+    h("div", { class: "bt-main" },
+      h("div", { class: "bt-head" }, h("span", { class: "bt-logo", text: "⛵" }), h("div", null, h("b", { text: "멍낚호 승선권" }), h("small", { text: "부두 선착장 → 깊은 바다 → 부두 · 약 5분" }))),
+      h("ul", { class: "bt-perks" },
+        h("li", null, h("b", { text: "+30%p" }), h("span", { text: "희귀 이상 물고기" })),
+        h("li", null, h("b", { text: "×1.15" }), h("span", { text: "물고기 크기" })),
+        h("li", null, h("b", { text: "25%↑" }), h("span", { text: "입질 빨라짐" })),
+        h("li", null, h("b", { text: "3배" }), h("span", { text: "아귀 · 산갈치 · 상어류" })))),
+    h("div", { class: "bt-stub" }, h("small", { text: "뱃삯" }), h("b", { class: "num", text: won(BOAT.price) }), h("small", { text: "한 명이 다 내도, 나눠 내도 돼요" }))));
   if (!S.online) { body.append(h("div", { class: "empty-note", text: "배는 온라인에서만 탈 수 있어요." })); return; }
-  body.append(h("div", { class: "sec", text: b.status === "sailing" ? "출항 중" : "탑승 " + b.seats.length + "/4" }));
-  const seats = h("div", { class: "row" });
+  // 갑판 도면: 자리 4개
+  const deck = h("div", { class: "bt-deck" + (sailing ? " sail" : "") }, h("div", { class: "bt-bow", text: sailing ? "🌊 출항 중" : "⚓ 정박 중" }));
   for (let i = 0; i < BOAT.max; i++) {
-    const x = b.seats.find(s2 => s2.slot === i);
-    seats.append(h("span", { class: "btn sm", style: x ? "" : "opacity:.5", text: x ? x.nick + (b.paid[x.uid] ? " · " + won(b.paid[x.uid]) + "" : "") : "빈자리" }));
+    const x = b.seats.find(s2 => s2.slot === i), me = x && x.uid === S.uid;
+    deck.append(h("div", { class: "bt-seat" + (x ? " on" : "") + (me ? " me" : "") },
+      h("span", { class: "bt-n", text: (i + 1) + "번 자리" }),
+      h("b", { text: x ? x.nick + (me ? " (나)" : "") : "빈자리" }),
+      x ? h("small", { class: "num", text: b.paid[x.uid] ? won(b.paid[x.uid]) + " 냄" : "아직 안 냄" }) : h("small", { text: "누구나 탈 수 있어요" })));
   }
-  body.append(seats);
-  if (b.status === "sailing") {
+  body.append(h("div", { class: "sec", text: sailing ? "지금 배 위" : "탑승 " + b.seats.length + "/" + BOAT.max }), deck);
+  if (sailing) {
     const left = Math.max(0, b.tripStart + BOAT.dur - Date.now());
-    body.append(h("div", { class: "muted", text: "약 " + Math.ceil(left / 60000) + "분 뒤에 돌아와요." }));
+    body.append(h("div", { class: "bt-note", text: "약 " + Math.ceil(left / 60000) + "분 뒤에 부두로 돌아와요. 배 위에서는 자리에서 그대로 낚시해요." }));
     if (mine) body.append(h("div", { class: "row" }, h("button", { class: "btn", onclick: () => { closeSheet(); boatQuit(); }, text: "중도하차 · 구명보트로 먼저 돌아가기" })),
       h("div", { class: "muted", style: "font-size:12.5px", text: "뱃삯은 돌려받지 못해요. 남은 사람들은 계속 낚시하고, 모두 내리면 배도 바로 돌아와요." }));
     return;
   }
-  const pbar = h("div", { class: "pbar", style: "height:12px" }, h("i", { style: "width:" + Math.min(100, paid / BOAT.price * 100) + "%;background:var(--ok)" }));
-  body.append(h("div", { class: "row" }, h("span", { class: "muted", text: "모인 뱃삯" }), h("b", { class: "num", text: won(paid) + " / " + won(BOAT.price) + "" })), pbar);
-  const acts = h("div", { class: "row" });
-  if (!mine) acts.append(h("button", { class: "btn pri", disabled: b.seats.length >= BOAT.max || !!S.coop, onclick: () => boatJoin(), text: b.seats.length >= BOAT.max ? "꽉 찼어요" : "배에 타기" }));
+  // 뱃삯 모으기: 연료 눈금처럼
+  const pct = Math.min(100, paid / BOAT.price * 100);
+  body.append(h("div", { class: "bt-fuel" }, h("div", { class: "bt-fuelhead" }, h("span", { text: "⛽ 모인 뱃삯" }), h("b", { class: "num", text: won(paid) + " / " + won(BOAT.price) })),
+    h("div", { class: "bt-gauge" }, h("i", { style: "width:" + pct + "%" }), [25, 50, 75].map(v => h("u", { style: "left:" + v + "%" }))),
+    h("small", { text: pct >= 100 ? "곧 출항해요!" : "다 모이면 바로 출항해요 · 출항 전에 내리면 낸 돈은 돌려받아요" })));
+  const acts = h("div", { class: "row bt-acts" });
+  if (!mine) acts.append(h("button", { class: "btn pri", disabled: b.seats.length >= BOAT.max || !!S.coop, onclick: () => boatJoin(), text: b.seats.length >= BOAT.max ? "꽉 찼어요" : "🎫 배에 타기" }));
   else {
     const n = b.seats.length, share = Math.ceil(BOAT.price / n) - (b.paid[S.uid] || 0), remain = BOAT.price - paid;
     acts.append(h("button", { class: "btn pri", disabled: P.gold < remain, onclick: () => boatPay("all"), text: "내가 다 낼게요 (" + won(remain) + ")" }));
-    if (n > 1) acts.append(h("button", { class: "btn", disabled: share <= 0 || P.gold < share, onclick: () => boatPay("split"), text: share > 0 ? "더치페이 · 내 몫 " + won(Math.min(share, remain)) + "" : "내 몫은 냈어요" }));
+    if (n > 1) acts.append(h("button", { class: "btn", disabled: share <= 0 || P.gold < share, onclick: () => boatPay("split"), text: share > 0 ? "나눠 내기 · 내 몫 " + won(Math.min(share, remain)) : "내 몫은 냈어요" }));
     acts.append(h("button", { class: "btn", onclick: () => { closeSheet(); boatLeave(); }, text: "배에서 내리기" }));
   }
   body.append(acts);
-  body.append(h("div", { class: "muted", style: "font-size:12.5px", text: "뱃삯이 다 모이면 바로 출항해요. 출항 전에 내리면 낸 돈은 돌려받아요." }));
 };
 
 /* ===================== 함께 낚시 =====================
@@ -7091,7 +7180,7 @@ function itemStat(c, it) {
 function gearSummary() {
   const rod = curRod(), reel = curReel(), line = curLine(), b = BAITS.find(x => x.id === P.bait) || BAITS[0], eq = equipped();
   const gi = (l, v) => h("div", { class: "gi" }, h("span", { text: l }), h("b", { text: v }));
-  return h("div", { class: "gearbar shopsum" }, gi("미끼", b.name + (b.id === "worm" ? "" : " ×" + (P.baits[b.id] || 0))), gi("낚싯대", rod.name), gi("릴", reel.name), gi("낚싯줄", line.name),
+  return h("div", { class: "gearbar shopsum tbox" }, h("div", { class: "tbox-lid", text: "🧰 지금 내 채비" }), gi("미끼", b.name + (b.id === "worm" ? "" : " ×" + (P.baits[b.id] || 0))), gi("낚싯대", rod.name), gi("릴", reel.name), gi("낚싯줄", line.name),
     gi("채비 " + eq.length + "/" + rod.slots, eq.length ? eq.map(g => TACKLES.find(t => t.id === g.id).name).join(" · ") : rod.slots ? "비어 있음" : "달 수 없음"));
 }
 function cmpRow(label, cur, val, max, fmtv) {
@@ -7150,7 +7239,8 @@ SHEETS.shop = (body) => {
       h("img", { class: "iic", src: itemIcon(cat, it), alt: "" }), h("span", { class: "inm" }, h("b", { text: it.name }), h("small", { text: itemStat(cat, it) })),
       h("span", { class: "ipr" + (st.using ? " tag on" : ""), text: right }));
   }));
-  body.append(h("div", { class: "tshop" }, shopPreview(cat, sel), h("div", { class: "racks" },
+  rows.className = "ilist pegwall";
+  body.append(h("div", { class: "tshop peg" }, shopPreview(cat, sel), h("div", { class: "racks" },
     h("div", { class: "tabs", role: "tablist" }, SHOP_CATS.map(([id, l]) => h("button", { role: "tab", "aria-selected": String(cat === id), onclick: () => { S.shopTab = id; refreshSheet(true); }, text: l }))), rows)));
 };
 function buyBait(b, n) {
@@ -7487,16 +7577,22 @@ SHEETS.boat = boatSheet;
 /* ---------- 오늘의 의뢰 ---------- */
 SHEETS.quests = (body) => {
   ensureQuests();
-  setHead("오늘의 의뢰", "날마다 바뀌는 작은 목표 3개. 다 하면 보상을 받아요");
-  for (const q of P.quests.list) {
-    const done = q.have >= q.need;
-    body.append(h("div", { class: "listrow" },
-      h("div", { class: "grow" }, h("b", { text: questText(q) }),
-        h("div", { class: "pbar", style: "height:8px;margin-top:6px" }, h("i", { style: "width:" + Math.min(100, q.have / q.need * 100) + "%;background:var(--ok)" })),
-        h("div", { class: "muted num", style: "font-size:12px;margin-top:4px", text: (q.kind === "sell" ? won(q.have) + " / " + won(q.need) + "" : q.have + " / " + q.need) + " · 보상 " + won(q.reward) + "" })),
-      h("button", { class: "btn sm" + (done && !q.claimed ? " pri" : ""), disabled: !done || q.claimed, onclick: () => { if (q.claimed || q.have < q.need) return; q.claimed = true; P.gold += q.reward; stat("quests"); markDirty(); updateQuestCount(); refreshSheet(); toast("의뢰 보상 +" + won(q.reward) + ""); }, text: q.claimed ? "받음" : done ? "보상 받기" : "진행 중" })));
-  }
-  body.append(h("div", { class: "muted", style: "font-size:12.5px", text: "의뢰는 매일 자정에 새로 바뀌어요." }));
+  const list = P.quests.list, doneN = list.filter(q => q.claimed).length;
+  setHead("오늘의 의뢰", "마을 게시판에 붙은 오늘의 부탁 " + list.length + "장 · 다 하면 보상을 받아요 (" + doneN + "/" + list.length + ")");
+  const board = h("div", { class: "qd-board" });
+  list.forEach((q, k) => {
+    const done = q.have >= q.need, pct = Math.min(100, q.have / q.need * 100);
+    board.append(h("div", { class: "qd-note n" + (k % 3) + (q.claimed ? " claimed" : done ? " ready" : "") },
+      h("i", { class: "qd-pin", "aria-hidden": "true" }),
+      h("small", { class: "qd-from", text: ["어부 조합", "회 센터 이모", "동네 이장님"][k % 3] + "의 부탁" }),
+      h("b", { class: "qd-t", text: questText(q) }),
+      h("div", { class: "qd-prog" }, h("i", { style: "width:" + pct + "%" })),
+      h("div", { class: "qd-num num", text: q.kind === "sell" ? won(q.have) + " / " + won(q.need) : q.have + " / " + q.need }),
+      h("div", { class: "qd-rew" }, h("span", { text: "사례금" }), h("b", { class: "num", text: won(q.reward) })),
+      q.claimed ? h("span", { class: "qd-stamp", text: "완료" })
+        : h("button", { class: "btn sm" + (done ? " pri" : ""), disabled: !done, onclick: () => { if (q.claimed || q.have < q.need) return; q.claimed = true; P.gold += q.reward; stat("quests"); markDirty(); updateQuestCount(); sfx("coins", .5); try { ACT_FX.sell(q.reward); } catch {} refreshSheet(); toast("의뢰 보상 +" + won(q.reward)); }, text: done ? "사례금 받기" : "진행 중" })));
+  });
+  body.append(board, h("div", { class: "qd-foot", text: "📌 게시판은 매일 자정에 새 부탁으로 바뀌어요. 낚시 · 판매 · 퍼펙트처럼 평소에 하던 걸 하면 저절로 채워져요." }));
 };
 
 /* ---------- 이동 ---------- */
@@ -7673,9 +7769,9 @@ SHEETS.bank = (body) => {
   const t = mktTick(), sv = stockValue(), bal = bankBal();
   let cost = 0; for (const hld of Object.values(holdings())) cost += hld.cost;
   const gi = (l, v, cls) => h("div", { class: "gi" }, h("span", { text: l }), h("b", { class: cls || "", text: v }));
-  body.append(h("div", { class: "gearbar" }, gi("예금", won(bal) + ""), gi("주식 평가액", won(sv) + ""), gi("평가 손익", (sv - cost >= 0 ? "+" : "") + won(sv - cost) + "", "num " + (sv - cost > 0 ? "up" : sv - cost < 0 ? "down" : "")),
+  body.append(h("div", { class: "gearbar passbook" }, gi("예금", won(bal) + ""), gi("주식 평가액", won(sv) + ""), gi("평가 손익", (sv - cost >= 0 ? "+" : "") + won(sv - cost) + "", "num " + (sv - cost > 0 ? "up" : sv - cost < 0 ? "down" : "")),
     h("div", { class: "gi" }, h("span", { text: "다음 시세까지" }), h("b", { id: "mktCount", class: "num", text: Math.ceil((MKT_TICK - ((Date.now() - MKT_T0) % MKT_TICK)) / 1000) + "초" }))));
-  body.append(h("div", { class: "tabs", role: "tablist" }, [["stock", "📈 주식"], ["news", "📰 뉴스"], ["trades", "실시간 체결"], ["save", "🏦 예금"]].map(([id, l]) =>
+  body.append(h("div", { class: "tabs windows", role: "tablist" }, [["stock", "1번 창구 · 주식"], ["news", "2번 창구 · 뉴스"], ["trades", "체결 알림판"], ["save", "3번 창구 · 예금"]].map(([id, l]) =>
     h("button", { role: "tab", "aria-selected": String(S.bankTab === id), onclick: () => { S.bankTab = id; refreshSheet(true); }, text: l }))));
   if (S.bankTab === "stock") {
     const i = Math.max(0, stockIdx(S.bankSel)), st = STOCKS[i], px = priceAt(i, t), hist = Array.from({ length: 90 }, (_, k) => priceAt(i, t - 89 + k));
@@ -7702,7 +7798,8 @@ SHEETS.bank = (body) => {
         h("span", { class: "inm" }, h("b", { text: s2.name }), h("small", { text: s2.sec + (own ? " · 보유 " + fmt(own.n) + "주" : "") })), sp,
         h("span", { style: "display:flex;flex-direction:column;align-items:flex-end;gap:2px" }, h("b", { class: "num", text: won(p2) + "" }), chg(c2)));
     }));
-    body.append(h("div", { class: "tshop" }, left, rows));
+    rows.className = "ilist ticker"; left.classList.add("slip");
+    body.append(h("div", { class: "tshop bankx" }, left, rows));
   } else if (S.bankTab === "news") {
     const list = recentNews(15);
     body.append(h("div", { class: "muted", style: "font-size:12.5px", text: "뉴스는 6분마다 나와요. 좋은 뉴스는 그 종목을 몇 분에 걸쳐 끌어올리고, 나쁜 뉴스는 끌어내려요. 효과는 40분쯤 지나면 사라져요." }));
