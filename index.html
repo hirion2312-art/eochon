@@ -784,6 +784,27 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 .reel-name{align-self:flex-start;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;color:#fff;text-shadow:none}
 .reel-side span{font-size:13px;line-height:1.5}
 @media (prefers-reduced-motion:reduce){.hook{animation:none}.toast{animation:none}}
+/* v1.26 좋은 물고기 · 물건 반짝임 · 오늘의 생선 · 시세표 */
+@keyframes tshine{0%{background-position:160% 0}60%,100%{background-position:-60% 0}}
+@keyframes gpulse{0%,100%{box-shadow:0 0 0 1.5px var(--gc),0 0 8px var(--gs)}50%{box-shadow:0 0 0 2px var(--gc),0 0 18px var(--gs)}}
+@keyframes rainbow{0%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}33%{box-shadow:0 0 0 2px #7b8cff,0 0 16px rgba(123,140,255,.6)}66%{box-shadow:0 0 0 2px #3fd6cc,0 0 16px rgba(63,214,204,.6)}100%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}}
+.tier.t3,.tier.t4,.tier.t5{background-image:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.65) 50%,transparent 65%),var(--tb,none);background-size:250% 100%,100% 100%;background-repeat:no-repeat;animation:tshine 2.6s ease-in-out infinite}
+.tier.t3{--tb:linear-gradient(var(--t3),var(--t3))}.tier.t4{--tb:linear-gradient(var(--t4),var(--t4))}.tier.t5{--tb:linear-gradient(90deg,#0f9f9a,#7b5cd6,#e0479a)}
+.irow.g4{--gc:#f2b630;--gs:rgba(242,182,48,.5);animation:gpulse 2.2s ease-in-out infinite}.irow.g5{animation:rainbow 2.6s linear infinite}
+.itile.g3,.card.g3{--gc:#9a6ee0;--gs:rgba(154,110,224,.5);animation:gpulse 2.4s ease-in-out infinite;border-color:transparent}
+.itile.g4,.card.g4{--gc:#f2b630;--gs:rgba(242,182,48,.6);animation:gpulse 1.8s ease-in-out infinite;border-color:transparent}
+.itile.g5,.card.g5{animation:rainbow 2.4s linear infinite;border-color:transparent}
+.itile.gtoday,.card.gtoday{outline:2px dashed #f2c230;outline-offset:2px}
+.imul{font-size:10.5px;font-weight:700;color:var(--muted,#8a8f96);font-variant-numeric:tabular-nums}
+.imul.up,.mm.up{color:#d8402a}.imul.down,.mm.down{color:#2a78bb}.imul.today{color:#b8860b}
+.todaytag2{color:#b8860b;font-weight:700}
+.todaybox{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:linear-gradient(135deg,#fff6d6,#ffe2a8);color:#3a2a10;box-shadow:0 0 0 2px #f2c230,0 0 18px rgba(242,194,48,.45)}
+.todaybox img{width:96px;height:48px;object-fit:contain}.todaybox b{font-size:18px}.todaybox small{display:block;font-size:11.5px}
+.mktlist{display:flex;flex-direction:column;gap:4px}
+.mktrow{display:grid;grid-template-columns:56px 1fr auto 72px;align-items:center;gap:8px;padding:5px 8px;border-radius:12px;border:1px solid var(--line)}
+.mktrow img{width:56px;height:28px;object-fit:contain}.mktrow .mn{display:flex;gap:6px;align-items:center;min-width:0}.mktrow .mn b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mktrow .mp{font-weight:700}.mktrow .mm{text-align:right;font-size:12px;font-weight:700}
+@media (prefers-reduced-motion:reduce){.tier.t3,.tier.t4,.tier.t5,.itile.g3,.itile.g4,.itile.g5,.card.g3,.card.g4,.card.g5{animation:none}}
 </style>
 
 <div class="app" id="app">
@@ -913,7 +934,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.25.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.26.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 10 },
   { name: "고급", base: 30 },
@@ -1581,6 +1602,32 @@ function makeDish(item, q) {
 }
 function dishBuffLine(d) { return buffText(d.buff) + " · " + d.buff.min + "분"; }
 function sellValue(price) { return Math.round(price * (1 + buffVal("gold") / 100) * evMul("sell")); }
+/* ---------- 물고기 시세 (v1.26) ----------
+   주식처럼 종마다 날마다(한국 시각 자정) 바뀌는 시세 배율. 등급별 기본값(TIERS.base)은 그대로고 그 위에 ×0.7~×1.35가 붙어요.
+   날짜와 물고기로만 계산해서 같은 날엔 모두 같은 값이고, 어제 값과 이어지게 섞어서 너무 튀지 않아요.
+   「오늘의 생선」 1종(부두에서 잡히는 일반~희귀)은 시세 대신 ×1.5 */
+const TODAY_FISH_MUL = 1.5;
+const mktDay = (t) => Math.floor(((t || Date.now()) + 9 * 3600e3) / 864e5);
+const mixHash = (s) => { let x = hashStr(s); x ^= x >>> 16; x = Math.imul(x, 0x45d9f3b) >>> 0; x ^= x >>> 15; x = Math.imul(x, 0x2c1b3c6d) >>> 0; return (x ^ (x >>> 16)) >>> 0; };
+function todayFish(d) {
+  d = d == null ? mktDay() : d;
+  const pool = BUILTIN.filter(f => f.tier <= 2 && f.where !== "sea"), pickAt = (x) => mixHash("today|" + x) % pool.length;
+  let i = pickAt(d);
+  for (let k = 1; k <= 3; k++) if (i === pickAt(d - k)) i = (i + 7) % pool.length;   // 최근 3일과 겹치지 않게
+  return pool[i].id;
+}
+function rawFishMul(id, d) {
+  const r = (x) => (mixHash(x + "|" + id) % 10000) / 5000 - 1;
+  return clamp(1 + .2 * (.65 * r(d) + .35 * r(d - 1)) + .08 * r("w" + Math.floor(d / 7)), .7, 1.35);
+}
+function fishMul(id, d) { d = d == null ? mktDay() : d; return id === todayFish(d) ? TODAY_FISH_MUL : rawFishMul(id, d); }
+function fishTrend(id) { const d = mktDay(), now = fishMul(id, d), prev = rawFishMul(id, d - 1); return now > prev + .01 ? 1 : now < prev - .01 ? -1 : 0; }
+const fishSell = (it) => sellValue(Math.round(it.price * fishMul(it.fishId)));
+function mulTag(id) {   // 「×1.12 ▲」 · 오늘의 생선은 「오늘의 생선 ×1.5」
+  if (id === todayFish()) return "⭐ 오늘의 생선 ×" + TODAY_FISH_MUL;
+  const m = fishMul(id), tr = fishTrend(id);
+  return "시세 ×" + m.toFixed(2) + (tr > 0 ? " ▲" : tr < 0 ? " ▼" : "");
+}
 function renderBuffs() {
   const box = $("buffs"); const now = Date.now();
   P.buffs = P.buffs.filter(b => b.until > now);
@@ -2317,21 +2364,23 @@ function landFish(r, perfect, auto) {
   stat("t" + f.tier); if (k >= 2.2) stat("monster"); if (isNight()) stat("nightCatch"); if (perfect && !auto) stat("perfectFights"); if (r.manual && !auto) stat("manualWins"); if (r.coop) stat("coop");
   questProgress("catch"); if (f.tier >= 2) questProgress("tier2"); if (k >= 1.6) questProgress("big"); if (perfect) questProgress("perfect"); if (r.coop) questProgress("coop");
   checkRecord(f, k, size);
-  let sold = false; const sv = sellValue(price);
-  if (f.tier < P.autoSell && k < 1.6) { P.gold += sv; sold = true; }
+  let sold = false; const sv = fishSell(item), isToday = f.id === todayFish();
+  if (f.tier < P.autoSell && k < 1.6 && !isToday) { P.gold += sv; sold = true; }
   else if (P.bag.length >= BAG_MAX) { P.gold += sv; sold = true; toast("가방이 가득 차서 바로 팔았어요 (+" + won(sv) + ")"); }
   else P.bag.unshift(item);
   markDirty();
   S.lastCatch = { f, size, k, price, at: Date.now() };
   setPhase("catch", CATCH_MS);
   pushPresence({ catch: { id: f.id, n: f.name, t: f.tier, s: size, ts: Date.now() } });
-  sfx("splash", .5); sfx(f.tier >= 2 ? "jingle-rare" : "jingle-catch", .45);
+  sfx("splash", .5); sfx(["jingle-catch", "jingle-catch", "jingle-rare", "fanfare-hero", "fanfare-legend", "fanfare-myth"][f.tier] || "jingle-catch", f.tier >= 3 ? .5 : .45);
+  if (isToday) sfx("sparkle", .5);
   const art = fishArt(f);
   toast([h("img", { src: art.src, alt: "" }),
     h("div", null, h("div", null, tierChip(f.tier), " ", h("b", { text: f.name }), " ", h("span", { class: "num", text: fmtSize(size) })),
       h("div", { class: "muted", style: "font-size:12px" },
-        sizeLabel(k) + " 개체 ×" + k.toFixed(2) + " · " + (perfect ? "퍼펙트! · " : auto ? "자동 챔질 · " : "") + (sold ? "자동 판매 +" + won(sv) + "" : "가방에 넣었어요 · " + won(price) + "") + (firstTime ? " · 도감 신규!" : "")))],
-    "catch", 4600);
+        sizeLabel(k) + " 개체 ×" + k.toFixed(2) + " · " + (perfect ? "퍼펙트! · " : auto ? "자동 챔질 · " : "") + (sold ? "자동 판매 +" + won(sv) + "" : "가방에 넣었어요 · 지금 팔면 " + won(sv) + "") + (firstTime ? " · 도감 신규!" : "")),
+      h("div", { class: isToday ? "todaytag2" : "muted", style: "font-size:11.5px", text: mulTag(f.id) + (isToday ? " · 팔면 1.5배!" : "") }))],
+    f.tier >= 3 ? "lvup" : "catch", f.tier >= 3 ? 5600 : 4600);
   if (f.user && S.online && isUid(f.owner) && f.owner !== S.uid) {
     sendInbox(f.owner, { type: "royalty", amount: Math.max(1, Math.round(price * ROYALTY)), fish: f.name, by: P.nick }).catch(() => {});
   }
@@ -3686,6 +3735,57 @@ setInterval(() => {
   S.npcNext = Date.now() + 40000 + Math.random() * 30000; S.npcBusy = true;
   npcVisit().catch((e) => console.warn("npc", e)).finally(() => { S.npcBusy = false; });
 }, 5000);
+/* ---------- 낚시 이펙트 (v1.26) ----------
+   희귀 이상을 낚으면 낚은 사람 둘레에: 희귀 = 반짝이 · 영웅 = 반짝이 + 금빛 고리 · 전설 = + 빛기둥 · 신화 = 무지개 빛기둥 + 별가루.
+   오늘의 생선은 금빛 반짝이. 다른 사람이 낚아도 그 사람 자리에서 보여요(updateChar 에서 catch 를 보고 띄움) */
+const FX = [], FX_COL = [0xffffff, 0xffffff, 0x6fd0ff, 0xb98aff, 0xffc83a, 0xff7ad9];
+let SPARK_TEX = null;
+function sparkTex() {
+  if (SPARK_TEX) return SPARK_TEX;
+  const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d"), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(.25, "rgba(255,255,255,.85)"); gr.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  g.fillStyle = "rgba(255,255,255,.9)"; g.fillRect(30, 4, 4, 56); g.fillRect(4, 30, 56, 4);   // 십자 반짝
+  return (SPARK_TEX = new T3.CanvasTexture(c));
+}
+function spawnCatchFx(x, z, tier, today) {
+  if (!T3 || !scene || (tier < 2 && !today)) return;
+  const now = performance.now() / 1000, col = today && tier < 2 ? 0xffd84d : FX_COL[tier], n = today && tier < 2 ? 36 : [0, 0, 44, 70, 110, 170][tier];
+  const pos = new Float32Array(n * 3), vel = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, sp = 1.2 + Math.random() * (1.4 + tier * .35);
+    pos.set([x, 1.3, z], i * 3); vel.set([Math.cos(a) * sp * .6, 2.2 + Math.random() * (2 + tier * .5), Math.sin(a) * sp * .6], i * 3);
+  }
+  const geo = new T3.BufferGeometry(); geo.setAttribute("position", new T3.BufferAttribute(pos, 3));
+  const pm = new T3.PointsMaterial({ size: .28 + tier * .03, map: sparkTex(), color: col, transparent: true, depthWrite: false, blending: T3.AdditiveBlending });
+  const pts = new T3.Points(geo, pm); scene.add(pts);
+  FX.push({ o: pts, kind: "pts", vel, t0: now, dur: 1.6 + tier * .25, rainbow: tier >= 5 });
+  if (tier >= 3) {
+    const ring = new T3.Mesh(new T3.TorusGeometry(.7, .07, 6, 48), new T3.MeshBasicMaterial({ color: tier >= 4 ? 0xffd84d : col, transparent: true, depthWrite: false, blending: T3.AdditiveBlending }));
+    ring.rotation.x = Math.PI / 2; ring.position.set(x, .25, z); scene.add(ring);
+    FX.push({ o: ring, kind: "ring", t0: now, dur: 1.6, rainbow: tier >= 5 });
+  }
+  if (tier >= 4) {
+    const c = document.createElement("canvas"); c.width = 4; c.height = 128; const g = c.getContext("2d"), gr = g.createLinearGradient(0, 0, 0, 128);
+    gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(.6, "rgba(255,255,255,.55)"); gr.addColorStop(1, "rgba(255,255,255,.9)"); g.fillStyle = gr; g.fillRect(0, 0, 4, 128);
+    const pil = new T3.Mesh(new T3.CylinderGeometry(.55, .95, 16, 24, 1, true), new T3.MeshBasicMaterial({ map: new T3.CanvasTexture(c), color: col, transparent: true, depthWrite: false, side: T3.DoubleSide, blending: T3.AdditiveBlending }));
+    pil.position.set(x, 8, z); scene.add(pil);
+    FX.push({ o: pil, kind: "pillar", t0: now, dur: tier >= 5 ? 4.2 : 3.2, rainbow: tier >= 5 });
+  }
+}
+function updateFx(t, dt) {
+  const now = performance.now() / 1000;
+  for (let i = FX.length - 1; i >= 0; i--) {
+    const e = FX[i], p = (now - e.t0) / e.dur, m = e.o.material;
+    if (p >= 1) { scene.remove(e.o); e.o.geometry.dispose(); if (m.map && m.map !== SPARK_TEX) m.map.dispose(); m.dispose(); FX.splice(i, 1); continue; }
+    if (e.rainbow) m.color.setHSL((t * .35 + i * .1) % 1, .85, .62);
+    if (e.kind === "pts") {
+      const a = e.o.geometry.attributes.position, v = e.vel;
+      for (let k = 0; k < a.count; k++) { v[k * 3 + 1] -= 3.2 * dt; a.array[k * 3] += v[k * 3] * dt; a.array[k * 3 + 1] = Math.max(.1, a.array[k * 3 + 1] + v[k * 3 + 1] * dt); a.array[k * 3 + 2] += v[k * 3 + 2] * dt; }
+      a.needsUpdate = true; m.opacity = 1 - p * p;
+    } else if (e.kind === "ring") { e.o.scale.setScalar(1 + p * 4); m.opacity = (1 - p) * .9; }
+    else { const s = p < .15 ? p / .15 : 1; e.o.scale.set(s, 1, s); m.opacity = (p < .15 ? p / .15 : 1 - (p - .15) / .85) * .75; e.o.rotation.y += dt * .8; }
+  }
+}
 // 시장 길을 오가는 손님 캐릭터 (장사 중인 노점 앞에 멈춰 구경해요)
 const SHOPPERS = [];
 const SHOP_FRONT_X = -5.15;
@@ -5587,6 +5687,7 @@ function makeChar(faceKey) {
   const reelM = new T3.Mesh(GEO.reel || (GEO.reel = new T3.CylinderGeometry(.075, .075, .07, 14)), reelMat); reelM.rotation.z = Math.PI / 2; reelM.position.set(.07, .42, 0); rod.add(reelM);
   const grip = new T3.Mesh(GEO.grip || (GEO.grip = new T3.CylinderGeometry(.05, .055, .5, 8)), phong(0x6b4a2e)); grip.position.y = .25; rod.add(grip);
   const tip = new T3.Object3D(); tip.position.y = 2.6; rod.add(tip);
+  { const gl = new T3.Sprite(new T3.SpriteMaterial({ map: sparkTex(), transparent: true, depthWrite: false, blending: T3.AdditiveBlending })); gl.scale.setScalar(.45); gl.visible = false; tip.add(gl); rodMat.userData.glow = gl; }   // 좋은 낚싯대 끝 반짝임
   pivot.rotation.x = 0.95; pivot.visible = false;
   const hit = new T3.Mesh(GEO.hit, MAT.hit); g.add(hit);
   scene.add(g);
@@ -5667,7 +5768,11 @@ function updateChar(F, f, t, dt, now) {
   if (f.st === "dig") { const q = Math.sin(t * 11); F.rig.rotation.x = .38 + q * .08; F.hands[0].position.set(-.16, .32 + q * .08, .5); F.hands[1].position.set(.16, .32 + q * .08, .5); }
   F.head.rotation.z = Math.sin(t * .9 + F.px) * .05;
   F.pivot.visible = !!fishing && f.phase !== "idle";
-  { const rk = (f.rod || "bamboo") + "|" + (f.reel || "basic"); if (F.rodKey !== rk) { F.rodKey = rk; F.rodMat.color.setHex((RODS.find(r => r.id === f.rod) || RODS[0]).color); F.reelMat.color.setHex((REELS.find(r => r.id === f.reel) || REELS[0]).color); } }
+  { const rk = (f.rod || "bamboo") + "|" + (f.reel || "basic"); if (F.rodKey !== rk) { F.rodKey = rk; const rd = RODS.find(r => r.id === f.rod) || RODS[0], prem = rd.lv >= 25;
+      F.rodMat.color.setHex(rd.color); F.rodMat.emissive.setHex(prem ? rd.color : 0); F.rodMat.emissiveIntensity = prem ? .45 : 1;   // 전설 이상 낚싯대는 은은하게 빛남
+      const gl = F.rodMat.userData.glow; if (gl) { gl.visible = prem; gl.material.color.setHex(rd.color === 0x1b1b1f || rd.color === 0x23356e ? 0xbfd8ff : rd.color); }
+      F.reelMat.color.setHex((REELS.find(r => r.id === f.reel) || REELS[0]).color); } }
+  { const gl = F.rodMat.userData.glow; if (gl && gl.visible) gl.scale.setScalar(.42 + Math.sin(t * 4 + F.px) * .12); }
   const fighting = f.phase === "bite" || f.phase === "reel" || f.phase === "catch";
   const targetRx = f.me && REEL.on ? .62 - Math.min(1.3, REEL.tension) * .32 + Math.sin(t * 24) * .025 * REEL.tension : fighting ? .55 + Math.sin(t * 18) * .05 : .95;
   const chP = f.me ? (S.charge ? S.charge.p : 0) : .75;
@@ -5725,11 +5830,12 @@ function updateChar(F, f, t, dt, now) {
                       : (f.bubble && seen && now - seen.bAt < 5500 ? f.bubble.t : null);
   let ci = null, holding = false;
   if (f.me && S.lastCatch && now - S.lastCatch.at < 3800) ci = { n: S.lastCatch.f.name, t: S.lastCatch.f.tier, s: S.lastCatch.size, f: S.lastCatch.f, at: S.lastCatch.at };
-  else if (!f.me && f.catch && seen && now - seen.cAt < 4500) ci = { n: str(f.catch.n, 12), t: clamp(Math.floor(Number(f.catch.t) || 0), 0, 4), s: Number(f.catch.s) || 0, f: typeof f.catch.id === "string" ? findFish(f.catch.id) : null, at: seen.cAt };
+  else if (!f.me && f.catch && seen && now - seen.cAt < 4500) ci = { n: str(f.catch.n, 12), t: clamp(Math.floor(Number(f.catch.t) || 0), 0, 5), s: Number(f.catch.s) || 0, f: typeof f.catch.id === "string" ? findFish(f.catch.id) : null, at: seen.cAt };
   if (!ci) {
     if (f.me && S.show && now - S.show.at < 12000) { const it = S.show.item; ci = { n: it.name, t: it.tier, s: it.size, f: findFish(it.fishId), at: S.show.at }; holding = true; }
-    else if (!f.me && f.show && seen && now - seen.sAt < 12000) { ci = { n: str(f.show.n, 12), t: clamp(Math.floor(Number(f.show.t) || 0), 0, 4), s: Number(f.show.s) || 0, f: typeof f.show.id === "string" ? findFish(f.show.id) : null, at: seen.sAt }; holding = true; }
+    else if (!f.me && f.show && seen && now - seen.sAt < 12000) { ci = { n: str(f.show.n, 12), t: clamp(Math.floor(Number(f.show.t) || 0), 0, 5), s: Number(f.show.s) || 0, f: typeof f.show.id === "string" ? findFish(f.show.id) : null, at: seen.sAt }; holding = true; }
   }
+  if (ci && !holding && F.fxAt !== ci.at) { F.fxAt = ci.at; spawnCatchFx(F.px, F.pz, ci.t, !!ci.f && ci.f.id === todayFish()); }   // 낚은 순간 한 번
   let y = 2.2;
   if (ci) {
     const md = ci.f && FISH3D.get(ci.f.id);
@@ -5849,7 +5955,7 @@ function loop3D(ms) {
   seaMat.uniforms.sunDir.value.copy(_v2); skyMat.uniforms.sunDir.value.copy(_v2);
   for (const b of buoys) { b.position.y = waveY(b.position.x, b.position.z, t) - .1; b.rotation.z = Math.sin(t + b.position.x) * .12; }
   for (const s of SWING) s.g.rotation.x = Math.sin(t * 1.4 + s.ph) * .07;
-  updateLife(dt, t); homeTick(t); npcShopTick(t, dt);
+  updateLife(dt, t); homeTick(t); npcShopTick(t, dt); updateFx(t, dt);
   SWIM_T.value = t; updateJumps(dt, t); updateTide3D(dt); updateDust(dt);
   updateBoat3D(t, now);
   if (onBoat()) { const bs = SEAT[ME.seat]; ME.x = bs.x; ME.z = bs.z; ME.ry = bs.ry; }
@@ -6196,7 +6302,7 @@ function itemIcon(cat, it, size) {
     g.beginPath(); g.arc(s * .1, s * .14, s * .07, 0, 7); g.fillStyle = "#c8ccd2"; g.fill(); olStroke(g, S2 * .6);
     g.restore();
     g.beginPath(); g.moveTo(s * .8, s * .2); g.quadraticCurveTo(s * .9, s * .55, s * .78, s * .82); g.lineWidth = s * .012; g.strokeStyle = "rgba(60,60,60,.6)"; g.stroke();
-    if (it.id === "legend") SICON.star(g, s * .22, s * .22, s * .2);
+    if ((it.lv || 1) >= 25) SICON.star(g, s * .22, s * .22, s * .2);   // 전설 이상 낚싯대
   } else if (cat === "reel") {
     const col = hex(it.color);
     g.beginPath(); g.arc(x - s * .04, y + s * .02, s * .27, 0, 7); g.fillStyle = col; g.fill(); olStroke(g, S2);
@@ -6300,7 +6406,8 @@ SHEETS.shop = (body) => {
   const rows = h("div", { class: "ilist" }, list.map(it => {
     const st = itemState(cat, it), locked = itemLocked(it);
     const right = locked ? "Lv." + it.lv : st.using ? "사용 중" : (cat === "bait" || cat === "tackle") ? (st.count ? "보유 " + st.count : (it.price ? won(it.price) + "" : "무료")) : st.own ? "보유" : (it.price ? won(it.price) + "" : "기본");
-    return h("button", { class: "irow" + (it === sel ? " on" : "") + (locked ? " locked" : ""), onclick: () => { S.shopSel = { cat, id: it.id }; sfx("ui-click", .25); refreshSheet(true); } },
+    const grade = (cat === "rod" || cat === "reel") && (it.lv || 1) >= 40 ? " g5" : (cat === "rod" || cat === "reel") && (it.lv || 1) >= 20 ? " g4" : cat === "bait" && it.id === "legend" ? " g4" : "";   // 좋은 장비는 빛나요
+    return h("button", { class: "irow" + grade + (it === sel ? " on" : "") + (locked ? " locked" : ""), onclick: () => { S.shopSel = { cat, id: it.id }; sfx("ui-click", .25); refreshSheet(true); } },
       h("img", { class: "iic", src: itemIcon(cat, it), alt: "" }), h("span", { class: "inm" }, h("b", { text: it.name }), h("small", { text: itemStat(cat, it) })),
       h("span", { class: "ipr" + (st.using ? " tag on" : ""), text: right }));
   }));
@@ -6393,9 +6500,9 @@ function buyWear() {
 /* ---------- 가방 (물고기 / 회) ---------- */
 function sellItems(pred) {
   let sum = 0, n = 0;
-  P.bag = P.bag.filter(it => { if (pred(it)) { sum += sellValue(it.price); n++; return false; } return true; });
+  P.bag = P.bag.filter(it => { if (pred(it)) { sum += fishSell(it); n++; return false; } return true; });
   if (!n) { toast("팔 물고기가 없어요"); return; }
-  P.gold += sum; stat("soldGold", sum); markDirty(); refreshSheet(); questProgress("sell", sum);
+  P.gold += sum; stat("soldGold", sum); markDirty(); refreshSheet(); questProgress("sell", sum); sfx("coins", .5);
   toast(n + "마리를 팔아 " + won(sum) + "을 받았어요");
 }
 function cutSashimi(item) {
@@ -6416,7 +6523,7 @@ SHEETS.bag = (body) => {
   for (const id of [...S.bagSel]) if (!P.bag.some(x => x.id === id) && !P.dishes.some(x => x.id === id)) S.bagSel.delete(id);
   const tabs = [["fish", "물고기 " + P.bag.length + "/" + BAG_MAX], ["dish", "회 " + P.dishes.length + "/" + DISH_MAX], ["bait", "미끼"], ["gear", "장비"]];
   if (!tabs.some(t => t[0] === S.bagTab)) S.bagTab = "fish";
-  setHead("가방", "가진 돈 " + won(P.gold) + (buffVal("gold") ? " · 판매가 +" + buffVal("gold") + "%" : "") + (eventOn("sell15") ? " · 판매가 1.5배 이벤트" : ""));
+  setHead("가방", "가진 돈 " + won(P.gold) + (buffVal("gold") ? " · 판매가 +" + buffVal("gold") + "%" : "") + (eventOn("sell15") ? " · 판매가 1.5배 이벤트" : "") + " · ⭐ 오늘의 생선 「" + (findFish(todayFish()) || {}).name + "」 ×1.5 · 시세는 자정마다 바뀌어요");
   body.append(h("div", { class: "tabs seg-tabs", role: "tablist" }, tabs.map(([id, l]) => h("button", { role: "tab", "aria-selected": String(S.bagTab === id), onclick: () => { S.bagTab = id; S.bagSel = new Set(); refreshSheet(true); }, text: l }))));
   const bar = h("div", { class: "abar" });
   if (S.bagTab === "fish") {
@@ -6429,13 +6536,14 @@ SHEETS.bag = (body) => {
     if (!P.bag.length) body.append(h("div", { class: "empty-note big" }, h("div", { style: "font-size:40px", text: "🎣" }), "가방이 비어 있어요.", h("br"), "부두의 빈자리에 앉아 낚시를 시작해 보세요."));
     else if (!list.length) body.append(h("div", { class: "empty-note", text: "이 조건에 맞는 물고기가 없어요." }));
     else body.append(h("div", { class: "itemgrid" }, list.map(it => { const sel = S.bagSel.has(it.id);
-      return h("button", { class: "itile" + (sel ? " on" : ""), "aria-pressed": String(sel), onclick: () => { sel ? S.bagSel.delete(it.id) : S.bagSel.add(it.id); refreshSheet(true); } },
+      return h("button", { class: "itile" + (sel ? " on" : "") + (it.tier >= 3 ? " g" + it.tier : "") + (it.fishId === todayFish() ? " gtoday" : ""), "aria-pressed": String(sel), onclick: () => { sel ? S.bagSel.delete(it.id) : S.bagSel.add(it.id); refreshSheet(true); } },
         h("span", { class: "chk", "aria-hidden": "true", text: sel ? "✓" : "" }),
         h("span", { class: "ipic" }, fishImg(it.fishId)),
         h("span", { class: "inm2" }, h("b", { text: it.name }), tierChip(it.tier)),
         h("span", { class: "isub num", text: fmtSize(it.size) + (it.k >= 1.4 ? " · " + sizeLabel(it.k) : "") }),
-        h("span", { class: "ipr num", text: won(sellValue(it.price)) })); })));
-    const chosen = P.bag.filter(x => S.bagSel.has(x.id)), sum = (arr) => arr.reduce((a, b) => a + sellValue(b.price), 0);
+        h("span", { class: "ipr num", text: won(fishSell(it)) }),
+        h("span", { class: "imul" + (it.fishId === todayFish() ? " today" : fishTrend(it.fishId) > 0 ? " up" : fishTrend(it.fishId) < 0 ? " down" : ""), text: it.fishId === todayFish() ? "⭐ 오늘의 생선 ×1.5" : mulTag(it.fishId).replace("시세 ", "") })); })));
+    const chosen = P.bag.filter(x => S.bagSel.has(x.id)), sum = (arr) => arr.reduce((a, b) => a + fishSell(b), 0);
     if (chosen.length) {
       bar.append(...[h("span", { class: "abinfo" }, h("b", { text: chosen.length + "마리 고름" }), h("small", { class: "num", text: "합계 " + won(sum(chosen)) })),
         h("button", { class: "btn pri", onclick: () => { const ids = new Set(chosen.map(x => x.id)); S.bagSel = new Set(); sellItems(x => ids.has(x.id)); }, text: "팔기" }),
@@ -6517,7 +6625,7 @@ SHEETS.sashimi = (body) => {
   else if (cut) {
     const d = makeDish(sel), full = P.dishes.length >= DISH_MAX;
     board.append(h("div", { class: "ibig" }, h("img", { class: "wide", src: fishArt(findFish(sel.fishId) || BUILTIN[0]).src, alt: "" }), h("span", { class: "arrow", text: "🔪" })),
-      h("h3", { text: sel.name + " → " + d.name }), h("div", null, tierChip(sel.tier), " ", h("span", { class: "num muted", text: fmtSize(sel.size) + " · 팔면 " + won(sellValue(sel.price)) + "" })),
+      h("h3", { text: sel.name + " → " + d.name }), h("div", null, tierChip(sel.tier), " ", h("span", { class: "num muted", text: fmtSize(sel.size) + " · 팔면 " + won(fishSell(sel)) + "" })),
       h("span", { class: "bchip", text: "먹으면 " + dishBuffLine(d) }),
       h("div", { class: "acts" }, h("button", { class: "btn pri", disabled: full, onclick: () => { cutSashimi(sel); sfx("ui-confirmation", .4); }, text: full ? "회 보관함이 가득 찼어요" : "회 뜨기" })));
   } else {
@@ -6552,7 +6660,9 @@ SHEETS.dex = (body) => {
   setHead("도감", "기본 " + base.filter(f => known(f.id)).length + "/" + base.length + " · 방류된 물고기 " + mine.filter(f => visible(f) && known(f.id)).length + "/" + mine.filter(visible).length);
   body.append(h("div", { class: "tabs", role: "tablist" },
     h("button", { role: "tab", "aria-selected": String(S.dexTab === "base"), onclick: () => { S.dexTab = "base"; refreshSheet(true); }, text: "기본 물고기" }),
-    h("button", { role: "tab", "aria-selected": String(S.dexTab === "user"), onclick: () => { S.dexTab = "user"; refreshSheet(true); }, text: "유저가 방류한 물고기 " + mine.filter(visible).length })));
+    h("button", { role: "tab", "aria-selected": String(S.dexTab === "user"), onclick: () => { S.dexTab = "user"; refreshSheet(true); }, text: "유저가 방류한 물고기 " + mine.filter(visible).length }),
+    h("button", { role: "tab", "aria-selected": String(S.dexTab === "market"), onclick: () => { S.dexTab = "market"; refreshSheet(true); }, text: "📈 오늘의 시세" })));
+  if (S.dexTab === "market") { body.append(marketBoard()); return; }
   const grid = h("div", { class: "grid" });
   if (S.dexTab === "base") {
     const tf = S.dexTier == null ? -1 : S.dexTier;
@@ -6567,15 +6677,35 @@ SHEETS.dex = (body) => {
   }
   body.append(grid);
 };
+/* 오늘의 시세표: 오늘의 생선 + 종별 시세(높은 순). 기준가는 보통 크기(×1.00) 한 마리를 팔 때 */
+function marketBoard() {
+  const wrap = h("div"), tf = findFish(todayFish()), now = new Date(Date.now() + 9 * 3600e3), left = 24 * 60 - (now.getUTCHours() * 60 + now.getUTCMinutes());
+  wrap.append(h("div", { class: "todaybox" },
+    h("img", { src: fishArt(tf).src, alt: "" }),
+    h("div", null, h("small", { text: "⭐ 오늘의 생선" }), h("b", { text: tf.name + " " }), tierChip(tf.tier),
+      h("div", { class: "num", text: "팔면 ×" + TODAY_FISH_MUL + " · 보통 크기 " + won(sellValue(Math.round(priceFor(tf, 1) * TODAY_FISH_MUL))) }),
+      h("small", { class: "muted", text: (tf.where ? WHERE_KO[tf.where] + " · " : "") + "자정까지 " + Math.floor(left / 60) + "시간 " + (left % 60) + "분" }))));
+  const rows = BUILTIN.filter(f => f.id !== tf.id).map(f => ({ f, m: fishMul(f.id), tr: fishTrend(f.id) })).sort((a, b) => b.m - a.m);
+  const known = (id) => P.dex[id] && P.dex[id].n > 0;
+  wrap.append(h("div", { class: "muted", style: "font-size:12px;margin:10px 2px 6px", text: "시세는 한국 시각 자정마다 바뀌고 모두에게 같아요 · 등급별 기본값에 시세가 붙어요(대부분 ×0.8 ~ ×1.2) · 값은 보통 크기 한 마리 기준" }));
+  const list = h("div", { class: "mktlist" });
+  for (const { f, m, tr } of rows) list.append(h("div", { class: "mktrow" },
+    h("img", { src: fishArt(f).src, alt: "" }), h("span", { class: "mn" }, h("b", { text: known(f.id) ? f.name : "???" }), tierChip(f.tier)),
+    h("span", { class: "num mp", text: won(sellValue(Math.round(priceFor(f, 1) * m))) }),
+    h("span", { class: "num mm " + (tr > 0 ? "up" : tr < 0 ? "down" : ""), text: "×" + m.toFixed(2) + (tr > 0 ? " ▲" : tr < 0 ? " ▼" : " −") })));
+  wrap.append(list);
+  return wrap;
+}
 function dexCard(f, isKnown) {
   const d = P.dex[f.id];
   const mineFish = f.user && f.owner && f.owner === S.uid;
   const showArt = isKnown || mineFish;
-  const card = h("div", { class: "card" },
+  const card = h("div", { class: "card" + (showArt && f.tier >= 3 ? " g" + f.tier : "") + (f.id === todayFish() ? " gtoday" : "") },
     h("div", { class: "pic" + (showArt ? "" : " unknown") }, h("img", { src: fishArt(f).src, alt: "" })),
     h("div", { class: "nm" }, h("span", { text: showArt ? f.name : "???" }), tierChip(f.tier)),
     h("div", { class: "meta" }, h("span", { class: "num", text: "기준 " + fmtSize(baseSize(f)) }), h("span", { class: "num", text: d ? d.n + "마리" : "미발견" })));
   if (d) card.append(h("div", { class: "meta" }, h("span", { text: "내 최대" }), h("span", { class: "num", text: fmtSize(d.best) + (d.bestK ? " ×" + d.bestK.toFixed(2) : "") })));
+  if (!f.user) card.append(h("div", { class: "meta" }, h("span", { text: "오늘 시세" }), h("span", { class: "num" + (f.id === todayFish() ? " todaytag2" : ""), text: mulTag(f.id).replace("시세 ", "") })));
   const rec = S.records && S.records.get(f.id);
   if (rec) card.append(h("div", { class: "meta" }, h("span", { text: "부두 기록" }), h("span", { class: "num", text: "×" + rec.k.toFixed(2) + " · " + rec.nick })));
   if (showArt && f.desc) card.append(h("div", { class: "desc", text: f.desc }));
@@ -8999,6 +9129,10 @@ function enterGame() {
   setTimeout(() => coach("welcome"), 700);
   updateHint();
   maybeAttendPopup();
+  setTimeout(() => {   // 하루 한 번 오늘의 생선 안내
+    const d = String(mktDay()); if (lsGet("mn.todayFish", "") === d) return; lsSet("mn.todayFish", d);
+    const tf = findFish(todayFish()); if (tf) toast([h("img", { src: fishArt(tf).src, alt: "" }), h("div", null, h("b", { text: "⭐ 오늘의 생선 「" + tf.name + "」" }), h("div", { class: "muted", style: "font-size:12px", text: "오늘 낚아서 팔면 1.5배! · 도감 「📈 오늘의 시세」에서 다른 물고기 시세도 볼 수 있어요" }))], "lvup", 6500);
+  }, 6000);
   setTimeout(applyPendingRef, 2500);
   setTimeout(() => { pushRank(true); setTimeout(() => loadRanks(true), 1200); }, 3000);
 }

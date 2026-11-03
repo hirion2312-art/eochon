@@ -110,6 +110,8 @@ node tools/test/fight_sim.js
 - **마을 손님(NPC)** (v1.25): `npcVisit` 이 노점 사장님 쪽 화면에서만 노점을 잠그고(`stallEdit(…, quiet)`) 사요. 물고기 값의 1.3배(`NPC_SALE_CAP`)까지, 하루 40접시(`NPC_SALE_MAX`, `P.npcSales`). 시장 길 손님 캐릭터 `SHOPPERS`는 보기용(각자 화면).
   - 잠긴 기능의 도전과제(집 · `job1`)는 `ACH`에서 빠져요.
 - **돈이 과하게 풀리지 않게** (v1.23.0): 공짜 돈(출석 · 보물 상자 · 초대 · 예금 이자 · 도전과제)은 낚시 벌이(초반 한 시간 ≈ 27만원)를 넘지 않게 맞췄어요. 새 보상을 넣을 때도 이 기준으로 봐요.
+- **물고기 시세** (v1.26): 물고기를 파는 곳은 모두 `fishSell(item)`을 써요(= `sellValue(price × fishMul(fishId))`). 새로 파는 곳을 만들면 이걸 써요. 시세는 `rawFishMul`(날짜 + 물고기 해시), 오늘의 생선은 `todayFish()` ×1.5. 조개 · 회(노점)는 시세와 따로예요.
+- **이펙트**: `spawnCatchFx(x, z, tier, today)` · `updateFx` (loop3D). 화면 빛남은 CSS 클래스 `g3` `g4` `g5` `gtoday`.
 - **새 물고기 모델**은 `fish/models2.json`(2묶음, 나중에 불러옴)에 넣어요. `BUILTIN` 항목에 `pack: 2`를 달면 2묶음에서 찾아요. 모델은 CC0만 쓰고 `credits/`에 기록해요.
 
 - **직업은 부수입 방식**이에요. 낚시 · 갯벌 · 밭은 누구나 할 수 있어요.
