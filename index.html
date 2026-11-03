@@ -676,45 +676,8 @@ body.cinema #hint,body.cinema #standBtn,body.cinema #castBtn,body.cinema .toasts
 #guideBtn.hot{animation:gdPulse 1.4s ease-in-out infinite;border-color:#ffd84d}
 #guideBtn #guideTx{color:#ffe08a;font-weight:700}
 @keyframes gdPulse{50%{box-shadow:0 0 0 4px rgba(255,216,77,.28)}}
-.qb-help{background:#fff8e6;border:1px solid #f0dcaa;border-radius:14px;padding:12px 14px;font-size:13.5px;color:#4a3a1a}
-.qb-help ol{margin:6px 0 0;padding-left:20px;line-height:1.6}
-.qb-prev{display:flex;gap:6px;padding:10px;border-radius:20px;background:#1d2a33;overflow-x:auto}
-.qb-slot{flex:1 0 74px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:14px;background:rgba(255,255,255,.08);color:#f4efe6;font-size:12px}
-.qb-slot .ico{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.qb-slot.empty{border:1.5px dashed rgba(255,255,255,.28);background:none;color:rgba(255,255,255,.45);justify-content:center}
-.qb-slot.fixed{background:rgba(255,216,77,.16);color:#ffe08a}
-.qb-slot small{font-size:10px;opacity:.7}
-.qb-ctl{display:flex;gap:2px}
-.qb-ctl button{width:22px;height:22px;border-radius:7px;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:10px;cursor:pointer;padding:0}
-.qb-ctl button.x{background:rgba(226,82,44,.75)}
-.qb-ctl button:disabled{opacity:.25;cursor:default}
-.qb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
-.qb-item{display:flex;align-items:center;gap:10px;text-align:left;padding:10px 12px;border-radius:14px;border:1.5px solid var(--line,#e2dacd);background:var(--card,#fff);cursor:pointer;color:inherit}
-.qb-item .qb-ico{flex:none;width:38px;height:38px;border-radius:12px;background:#eef3f6;display:grid;place-items:center}
-.qb-item .ico{width:22px;height:22px;stroke:#1d2a33;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.qb-item b{display:block;font-size:14px}.qb-item small{display:block;font-size:12px;color:var(--muted,#6b7780);margin-top:1px}
-.qb-item .qb-tag{flex:none;font-size:12px;font-weight:700;color:#1d6fb8}
-.qb-item.on{border-color:#2f8f5b;background:#f0faf3}.qb-item.on .qb-tag{color:#2f8f5b}
-.qb-item:disabled{opacity:.55;cursor:not-allowed}
-.gd-bar{height:10px;border-radius:5px;background:#ece5d8;overflow:hidden;margin-bottom:12px}.gd-bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd84d,#f2a93b);border-radius:5px;transition:width .5s}
-.gd-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-.gd-step{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--card,#fff);border:1.5px solid var(--line,#e8e1d4)}
-.gd-step .gd-n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#ece5d8;font-weight:800;font-size:13px;color:#6b5a3a}
-.gd-step .gd-ico{font-size:22px;flex:none}
-.gd-step b{font-size:14.5px}.gd-step p{margin:4px 0 0;font-size:13px;line-height:1.55;color:var(--muted,#5f6a72)}
-.gd-step.now{border-color:#e2b43a;background:#fffaf0;box-shadow:0 2px 0 #f0dcaa}
-.gd-step.now .gd-n{background:#ffd84d;color:#3a2a10}
-.gd-step.ready{border-color:#2f8f5b;background:#f0faf3}.gd-step.ready .gd-n{background:#2f8f5b;color:#fff}
-.gd-step.got{opacity:.6}.gd-step.got .gd-n{background:#2f8f5b;color:#fff}
-.gd-step .btn{flex:none;white-space:nowrap}
 @media (min-width:821px){.dock[data-n="6"] button{min-width:50px;padding-left:6px;padding-right:6px}}
 .dock button>span:not(.badge):not(.cnt){white-space:nowrap}
-.gd-step .gd-tag{font-size:12px;font-weight:700;color:#2f8f5b}
-.gd-faq{display:flex;flex-direction:column;gap:6px}
-.gd-faq details{border-radius:12px;border:1px solid var(--line,#e8e1d4);background:var(--card,#fff);padding:10px 12px}
-.gd-faq summary{cursor:pointer;font-weight:700;font-size:14px}
-.gd-faq p{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--muted,#55606a)}
-@media (max-width:560px){.qb-grid{grid-template-columns:1fr}.gd-step{flex-wrap:wrap}.gd-step .btn{margin-left:36px}}
 /* ===== 가게마다 고유 화면 2탄 (v1.33): 선착장 승선권 · 의뢰 게시판 · 낚시 상점 페그보드 · 은행 전광판 ===== */
 /* 멍낚호: 승선권 */
 .bt-ticket{display:flex;border-radius:16px;overflow:hidden;background:#fdf8ec;box-shadow:0 2px 0 #d9c9a6,0 6px 18px rgba(20,40,60,.12);border:1.5px solid #e2d3b0}
@@ -935,23 +898,7 @@ body.titling .overlay{z-index:60}
 #eventBtn{position:relative}
 #eventBtn.hot::after{content:"";position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#ff5a3c;box-shadow:0 0 0 2px rgba(0,0,0,.25);animation:evpulse 1.4s ease-in-out infinite}
 @keyframes evpulse{50%{transform:scale(1.35)}}
-.attgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.attday{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px 8px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);text-align:center;min-height:132px}
-.attday.big{background:linear-gradient(160deg,#fff4d8,#ffe2b0);border-color:#e8b02a;color:#3a2a10}
-.attday.big .dn{color:#8a6a2a}
-.attday .dn{font-size:11.5px;font-weight:700;color:var(--muted)}
-.attday .pic{width:64px;height:64px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:radial-gradient(circle at 50% 45%,#fff6ea,#f0dccd)}
-.attday .pic img{max-width:60px;max-height:60px;border:2px solid #fff;border-radius:10px}
-.attday .emo{font-size:30px}
-.attday .rw{font-size:11.5px;line-height:1.35;word-break:keep-all}
-.attday.got{opacity:.62}
-.attday.got .stamp{position:absolute;inset:auto;top:34px;left:50%;transform:translateX(-50%) rotate(-14deg);border:3px solid #d8382c;color:#d8382c;border-radius:10px;padding:2px 8px;font-weight:800;font-size:15px;background:rgba(255,255,255,.75)}
-.attday.just .stamp{animation:stampin .45s cubic-bezier(.3,1.6,.5,1) both}
-@keyframes stampin{from{transform:translateX(-50%) rotate(-14deg) scale(2.2);opacity:0}}
-.attday.today{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
-.attday .todaytag{font-size:11px;font-weight:700;color:#fff;background:var(--accent);border-radius:999px;padding:1px 8px}
 .btn.lg{font-size:16px;padding:12px 22px}
-.refcard{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;border:1.5px dashed var(--line);border-radius:16px;background:var(--surface)}
 .refcode{font-size:34px;letter-spacing:.22em;color:var(--ink)}
 .listrow .emo{font-size:22px;flex:none}
 .fbtext{width:100%;box-sizing:border-box;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface);color:inherit;resize:vertical}
@@ -1026,6 +973,92 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 .reel-name{align-self:flex-start;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;color:#fff;text-shadow:none}
 .reel-side span{font-size:13px;line-height:1.5}
 @media (prefers-reduced-motion:reduce){.hook{animation:none}.toast{animation:none}}
+/* ===== v1.37 UI 개편 3탄: 출석 · 친구 초대 · 퀵바 꾸미기 · 초보 수첩 ===== */
+.gd2-cover .grow,.gd2-now .grow,.att2sethead .grow,.att2inv .grow,.rme .grow,.ahero .grow,.fcta .grow{flex:1;min-width:0}
+/* 출석 = 종이 도장판 (어두운 창 위에 놓인 크림색 카드) */
+.att2card{position:relative;padding:14px 14px 16px;border-radius:18px;background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(150,120,70,.09) 27px 28px),linear-gradient(170deg,#fffaf0,#f6ead2);color:#3a2c18;box-shadow:0 6px 0 #d9c49a,0 14px 26px rgba(0,0,0,.28)}
+.att2card::before{content:"";position:absolute;left:18px;right:18px;top:-7px;height:14px;background:radial-gradient(circle,#13202a 4px,transparent 4.5px) 0 0/22px 14px repeat-x}
+.att2top{display:flex;justify-content:space-between;align-items:baseline;margin:4px 2px 10px}.att2top b{font-family:var(--f-display);font-weight:400;font-size:20px}.att2top span{font-weight:800;color:#b5482a}
+.att2grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 8px}
+.att2day{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.att2day .dn{font-size:11.5px;font-weight:800;color:#8a6a3a}
+.att2day .hole{position:relative;width:76px;height:76px;border-radius:50%;display:grid;place-items:center;border:2.5px dashed #c9ad7a;background:rgba(255,255,255,.6)}
+.att2day .hole img{width:54px;height:54px;border-radius:50%;object-fit:cover}.att2day .emo{font-size:30px}
+.att2day .rw{font-size:11px;line-height:1.35;color:#6a5434;word-break:keep-all}
+.att2day .ink{position:absolute;inset:4px;border-radius:50%;display:grid;place-items:center;border:3.5px solid rgba(208,48,36,.85);color:rgba(208,48,36,.92);font-family:var(--f-display);font-size:19px;background:rgba(255,240,232,.55);transform:rotate(-16deg)}
+.att2day.got .hole img,.att2day.got .hole .emo{opacity:.45}
+.att2day.just .ink{animation:stamp2 .5s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes stamp2{from{transform:rotate(-16deg) scale(2.3);opacity:0}}
+.att2day.today .hole{border:3px solid #e2522c;background:#fff;--gc:#e2522c;--gs:rgba(226,82,44,.45);animation:gpulse 1.6s ease-in-out infinite}
+.att2day .todaytag{font-size:10.5px;font-weight:800;color:#fff;background:#e2522c;border-radius:999px;padding:1px 8px}
+.att2day.big{grid-column:span 2}.att2day.big .hole{width:100%;max-width:190px;height:76px;border-radius:16px;border-color:#e0a82a;background:linear-gradient(135deg,#fff1c2,#ffd77a)}
+.att2day.big .hole .emo{font-size:40px}.att2day.big .ink{inset:4px 30px;border-radius:14px}.att2day.big .dn{color:#b5482a}
+.att2sethead{display:flex;gap:10px;align-items:center;margin:16px 2px 8px}.att2sethead small{display:block;color:var(--muted);font-size:12px}
+.att2set{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.att2piece{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);text-align:center}
+.att2piece img{width:52px;height:52px;border-radius:12px;filter:grayscale(1) brightness(.6)}.att2piece b{font-size:12px}.att2piece small{font-size:10.5px;color:var(--muted)}
+.att2piece.have img{filter:none}.att2piece.have{border-color:#c9ad7a}.att2piece.worn{border-color:#2fae7f;box-shadow:0 0 0 2px rgba(47,174,127,.25)}.att2piece.worn small{color:#2fae7f;font-weight:800}
+.att2inv{display:flex;gap:12px;align-items:center;width:100%;margin-top:14px;padding:12px 14px;border-radius:16px;border:1.5px solid rgba(224,106,146,.45);background:rgba(224,106,146,.1);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.att2inv .emo{font-size:26px}.att2inv small{display:block;color:var(--muted);font-size:12px}.att2inv .chev{font-size:22px;color:var(--muted)}
+/* 친구 초대 = 초대장 + 떼는 쪽 */
+.inv-ticket{display:grid;grid-template-columns:1fr 200px;border-radius:18px;overflow:hidden;box-shadow:0 12px 26px rgba(0,0,0,.28)}
+.inv-letter{display:flex;flex-direction:column;gap:6px;padding:16px 18px;background:linear-gradient(160deg,#fff7ee,#ffe6dc);color:#4a2a22;font-size:13px;line-height:1.5}
+.inv-letter small{font-weight:800;letter-spacing:.12em;color:#c0506a}.inv-letter .inv-to{font-family:var(--f-display);font-weight:400;font-size:21px;line-height:1.25;color:#3a1c18}
+.inv-stub{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 10px;background:#e06a92;color:#fff;border-left:2.5px dashed rgba(255,255,255,.7)}
+.inv-stub small{font-weight:700;opacity:.9}.inv-stub .refcode{font-size:27px;letter-spacing:.16em;color:#fff}
+.inv-stub .btn{width:100%;max-width:150px}.inv-stub .btn:not(.pri){background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.5);color:#fff}
+.inv-flow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.inv-step{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;padding:12px 8px;border-radius:16px;border:1.5px solid var(--line);background:var(--bg)}
+.inv-step:not(:last-child)::after{content:"›";position:absolute;right:-9px;top:38%;font-size:22px;color:var(--muted);z-index:1}
+.inv-step .inv-n{position:absolute;left:8px;top:6px;font-size:11px;font-weight:800;color:var(--muted)}.inv-step .emo{font-size:26px}.inv-step b{font-size:13.5px}.inv-step small{font-size:11.5px;color:var(--muted);line-height:1.4}
+.inv-prog{margin-top:14px;padding:12px 14px 30px;border-radius:16px;border:1.5px solid var(--line);background:var(--bg)}
+.inv-track{position:relative;height:10px;margin:10px 4px 0;border-radius:5px;background:rgba(127,127,127,.22)}.inv-track>i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#e06a92,#f2c230)}
+.inv-mark{position:absolute;top:14px;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap}.inv-mark::before{content:"";position:absolute;left:50%;top:-12px;width:3px;height:10px;margin-left:-1.5px;background:var(--surface)}
+.inv-mark.end{transform:translateX(-100%)}.inv-mark.end::before{left:100%}.inv-mark.on{color:#f2c230}
+.inv-enter{padding:12px 14px;border-radius:16px;border:1.5px dashed var(--line)}.inv-enter small{display:block;margin-top:6px;font-size:12px}
+@media (max-width:560px){.inv-ticket{grid-template-columns:1fr}.inv-stub{border-left:0;border-top:2.5px dashed rgba(255,255,255,.7);flex-direction:row;flex-wrap:wrap}.inv-stub .btn{width:auto}.inv-flow{grid-template-columns:1fr}.inv-step{flex-direction:row;text-align:left;gap:10px;padding:10px 12px 10px 26px}.inv-step small{margin-left:auto;text-align:right}.inv-step:not(:last-child)::after{content:none}
+  .att2grid{gap:8px 4px}.att2day .hole{width:64px;height:64px}.att2day .hole img{width:46px;height:46px}.att2set{grid-template-columns:repeat(5,1fr);gap:4px}.att2piece img{width:40px;height:40px}}
+/* 퀵바 꾸미기 = 작업대: 바다 위에 진짜 막대 모양 미리보기 */
+.qb2-stage{position:relative;padding:22px 12px 12px;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#3f7f9a,#1d4458)}
+.qb2-sea{position:absolute;inset:0;background:repeating-radial-gradient(ellipse at 50% 120%,rgba(255,255,255,.07) 0 6px,transparent 6px 22px);pointer-events:none}
+.qb2-bar{position:relative;display:flex;justify-content:center;gap:4px;margin:0 auto;width:100%;max-width:600px;box-sizing:border-box;padding:7px 8px;border-radius:24px;background:var(--hud2-bg,#fffaf1);box-shadow:0 10px 26px rgba(0,0,0,.3)}
+.qb2-slot{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;white-space:nowrap;padding:6px 6px 5px;border:0;border-radius:16px;background:transparent;color:var(--hud2-ink,#2a2420);font:inherit;font-weight:800;font-size:11.5px;cursor:pointer;transition:transform .12s,background .12s}
+.qb2-slot:hover{background:rgba(42,36,32,.06)}.qb2-slot.sel{background:rgba(226,82,44,.14);transform:translateY(-6px);box-shadow:0 0 0 2px #e2522c}
+.qb2-slot.empty{cursor:default;color:#a89a86}.qb2-slot.empty .qb2-ico{background:none;border:2px dashed #cbbda6;color:#a89a86;font-size:18px}
+.qb2-slot.fixed{cursor:default}
+.qb2-ico{display:grid;place-items:center;width:36px;height:36px;border-radius:13px;background:var(--qc,#8a8f96);box-sizing:border-box;box-shadow:0 3px 0 rgba(0,0,0,.14);flex:none}
+.qb2-ico .ico{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.qb2-tools{position:relative;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;margin-top:12px;padding:8px 10px;border-radius:14px;background:rgba(10,24,32,.55);color:#fff}
+.qb2-tools b{margin-right:4px}.qb2-tools.hint{font-size:12.5px;color:rgba(255,255,255,.85)}.qb2-tools .btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff}.qb2-tools .btn.danger{background:#e2522c;border-color:#e2522c}
+.qb2-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.qb2-item{display:flex;align-items:center;gap:10px;text-align:left;padding:10px 12px;border-radius:16px;border:1.5px solid var(--line);background:var(--bg);color:inherit;font:inherit;cursor:pointer}
+.qb2-item .grow{flex:1;min-width:0}.qb2-item b{display:block;font-size:14px}.qb2-item small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.qb2-item .qb2-tag{flex:none;min-width:30px;height:30px;padding:0 8px;border-radius:999px;display:grid;place-items:center;font-size:12px;font-weight:800;background:rgba(127,127,127,.18);color:var(--muted)}
+.qb2-item.on{border-color:var(--qc);background:color-mix(in srgb,var(--qc) 14%,var(--bg))}.qb2-item.on .qb2-tag{background:var(--qc);color:#fff}
+.qb2-item:disabled{opacity:.45;cursor:not-allowed}
+@media (max-width:560px){.qb2-bar{padding:6px 4px}.qb2-slot{padding:5px 1px 4px;font-size:10.5px}.qb2-ico{width:30px;height:30px;border-radius:11px}.qb2-ico .ico{width:18px;height:18px}.qb2-grid{grid-template-columns:1fr}}
+/* 초보 수첩 = 공책 표지 + 지금 할 일 한 장 + 점선으로 이어진 여정 */
+.gd2-cover{display:flex;gap:14px;align-items:center;padding:14px;border-radius:18px;border-left:10px solid #2f7a5a;background:linear-gradient(135deg,rgba(63,143,106,.24),rgba(63,143,106,.06));box-shadow:inset 0 0 0 1.5px rgba(63,143,106,.4)}
+.gd2-cover .pring{background:conic-gradient(#3fbf86 calc(var(--p) * 360deg),rgba(127,127,127,.22) 0)}.gd2-cover small{display:block;color:var(--muted);font-size:12.5px}
+.gd2-now{display:flex;gap:14px;align-items:center;margin-top:10px;padding:16px;border-radius:18px;border:2px solid #e8b923;background:linear-gradient(135deg,rgba(242,194,48,.16),rgba(242,194,48,.04))}
+.gd2-now.ready{border-color:#e2522c;background:linear-gradient(135deg,rgba(226,82,44,.18),rgba(226,82,44,.04))}
+.gd2-now .gd2-big{font-size:44px;flex:none}.gd2-now small{display:block;font-weight:800;color:#e8b923;font-size:12px}.gd2-now.ready small{color:#ff8a5c}
+.gd2-now b{font-size:18px}.gd2-now p{margin:4px 0 0;font-size:13px;line-height:1.55;color:var(--muted)}.gd2-now .btn{flex:none}
+.gd2-path{list-style:none;margin:0;padding:0;position:relative}
+.gd2-path::before{content:"";position:absolute;left:15px;top:14px;bottom:14px;border-left:2.5px dashed var(--line)}
+.gd2-st{position:relative;display:flex;gap:10px;align-items:flex-start;padding:4px 0}
+.gd2-dot{position:relative;z-index:1;flex:none;width:32px;height:32px;margin-top:4px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--surface);box-shadow:0 0 0 2px var(--line);color:var(--muted)}
+.gd2-st.done .gd2-dot{background:#2fae7f;box-shadow:none;color:#fff}.gd2-st.now .gd2-dot{background:#f2c230;box-shadow:0 0 0 4px rgba(242,194,48,.25);color:#3a2a10}
+.gd2-st.ready .gd2-dot{background:#e2522c;color:#fff;--gc:#e2522c;--gs:rgba(226,82,44,.5);animation:gpulse 1.6s ease-in-out infinite}
+.gd2-st details{flex:1;min-width:0;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);padding:8px 12px}
+.gd2-st summary{display:flex;gap:8px;align-items:center;cursor:pointer;list-style:none}.gd2-st summary::-webkit-details-marker{display:none}
+.gd2-st summary b{flex:1;font-size:14px}.gd2-ico{font-size:20px}.gd2-rw{font-size:12px;font-weight:800;color:#f2c230}
+.gd2-st.done details{opacity:.6}.gd2-st.done .gd2-rw{color:#2fae7f}.gd2-st.ready details{border-color:#e2522c}
+.gd2-st p{margin:6px 0 8px;font-size:13px;line-height:1.55;color:var(--muted)}
+.gd2-faq{display:flex;flex-direction:column;gap:6px}
+.gd2-faq details{border-radius:12px;border:1.5px solid var(--line);background:var(--bg);padding:10px 12px}.gd2-faq summary{cursor:pointer;font-weight:700;font-size:14px}
+.gd2-faq p{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--muted)}
+@media (max-width:560px){.gd2-now{flex-wrap:wrap}.gd2-now .gd2-big{font-size:36px}.gd2-now .btn{width:100%}.gd2-cover{flex-wrap:wrap}.gd2-cover .btn{width:100%}}
 /* ===== v1.36 UI 개편 2탄: 창마다 맞춤 디자인 ===== */
 .navatar{border-radius:50%;flex:none;display:block}
 /* 친구 = 연락처: 지금 접속한 친구를 먼저, 무엇을 하는지 배지로 */
@@ -1343,7 +1376,7 @@ body.mlock .xhair{display:block}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.36.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.37.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -8300,32 +8333,46 @@ function claimAttend() {
   toast([h("b", { text: "🎁 출석 " + (day + 1) + "일차 도장!" }), h("div", { class: "muted", style: "font-size:12px", text: attendParts(r).join(" · ") })], "lvup", 4500);
   refreshSheet(true);
 }
+/* ---------- 출석: 도장판 — 종이 카드에 하루 하나씩 빨간 도장, 7일째는 큰 선물 상자 ---------- */
 SHEETS.attend = (body) => {
   const n = P.attend.n, can = attendCan();
-  setHead("🎁 새내기 출석 이벤트", attendDone() ? "7일 출석 완료! 새내기 어부 세트를 모두 모았어요" : "하루에 한 번 들어오면 도장 하나 · 7번 모으면 새내기 어부 세트 완성 (연속 아니어도 돼요)");
+  setHead("🎁 새내기 출석 도장판", attendDone() ? "7일 출석 완료! 새내기 어부 세트를 모두 모았어요" : "하루에 한 번 들어오면 도장 하나 · 연속이 아니어도 돼요 · 자정에 바뀌어요");
   clothThumbs();
-  const grid = h("div", { class: "attgrid" });
+  const card = h("div", { class: "att2card" },
+    h("div", { class: "att2top" }, h("b", { text: "새내기 어부 출석 도장판" }), h("span", { class: "num", text: n + " / 7" })));
+  const grid = h("div", { class: "att2grid" });
   ATTEND.forEach((r, i) => {
     const got = i < n, today = i === n && can, big = i === 6;
     const pic = r.cloth && CLOTH_THUMB.get(r.cloth) ? h("img", { src: CLOTH_THUMB.get(r.cloth), alt: "" }) : h("span", { class: "emo", text: r.ico || "🎁" });
-    grid.append(h("div", { class: "attday" + (got ? " got" : "") + (today ? " today" : "") + (big ? " big" : "") + (S.attendJust === i ? " just" : "") },
-      h("span", { class: "dn", text: (i + 1) + "일차" }), h("span", { class: "pic" }, pic),
+    grid.append(h("div", { class: "att2day" + (got ? " got" : "") + (today ? " today" : "") + (big ? " big" : "") + (S.attendJust === i ? " just" : "") },
+      h("span", { class: "dn", text: big ? "7일째 · 큰 선물" : (i + 1) + "일째" }),
+      h("span", { class: "hole" }, big && !got ? h("span", { class: "emo", text: "🎁" }) : pic,
+        got ? h("span", { class: "ink", "aria-label": "받음", text: "출석" }) : null),
       h("span", { class: "rw", text: attendParts(r).join(" · ") }),
-      got ? h("span", { class: "stamp", "aria-label": "받음", text: "받음" }) : today ? h("span", { class: "todaytag", text: "오늘" }) : null));
+      today ? h("span", { class: "todaytag", text: "오늘 찍어요" }) : null));
   });
-  body.append(grid);
-  const row = h("div", { class: "row", style: "justify-content:center" });
-  if (can) row.append(h("button", { class: "btn pri lg", onclick: claimAttend, text: (n + 1) + "일차 도장 찍고 받기" }));
-  else if (!attendDone()) row.append(h("span", { class: "muted", text: "오늘 도장은 받았어요. 내일 또 들러 주세요! (자정에 바뀌어요)" }));
+  card.append(grid);
+  body.append(card);
+  const row = h("div", { class: "row", style: "justify-content:center;margin-top:12px" });
+  if (can) row.append(h("button", { class: "btn pri lg", onclick: claimAttend, text: "🔴 " + (n + 1) + "일째 도장 찍기" }));
+  else if (!attendDone()) row.append(h("span", { class: "muted", text: "오늘 도장은 찍었어요. 내일 또 들러 주세요!" }));
   const just = S.attendJust != null && ATTEND[S.attendJust] && ATTEND[S.attendJust].cloth;
   if (just && P.wear[CLOTH[just].slot] !== just) row.append(h("button", { class: "btn", onclick: () => { wearItem(just); toast(CLOTH[just].name + "을(를) 입었어요"); refreshSheet(true); }, text: "받은 옷 바로 입기" }));
-  const owned = ROOKIE_SET.filter(id => P.closet.includes(id));
-  if (owned.length >= 2 && !owned.every(id => Object.values(P.wear).includes(id))) row.append(h("button", { class: "btn", onclick: () => { owned.forEach(wearItem); toast("새내기 어부 세트를 입었어요"); refreshSheet(true); }, text: "가진 세트 모두 입기 (" + owned.length + "/5)" }));
   body.append(row);
-  body.append(h("div", { class: "listrow", style: "flex-direction:column;align-items:stretch;gap:4px" },
-    h("b", { text: "👕 새내기 어부 세트" }),
-    h("span", { class: "muted", style: "font-size:12.5px", text: "모자 · 조끼 · 작업 바지 · 고무장화 · 망태기. 상점에서는 팔지 않는 이벤트 한정 의상이에요. 받은 옷은 옷가게에서도 갈아입을 수 있어요." })));
-  body.append(h("div", { class: "row" }, h("button", { class: "btn sm", onclick: () => openSheet("invite"), text: "🤝 친구 초대하고 선물 받기" })));
+  // 새내기 어부 세트 모음: 5벌 중 무엇을 가졌는지 한눈에
+  const owned = ROOKIE_SET.filter(id => P.closet.includes(id));
+  const setRow = h("div", { class: "att2set" });
+  for (const id of ROOKIE_SET) {
+    const c = CLOTH[id], have = P.closet.includes(id), day = ATTEND.findIndex(r => r.cloth === id) + 1, worn = Object.values(P.wear).includes(id);
+    setRow.append(h("div", { class: "att2piece" + (have ? " have" : "") + (worn ? " worn" : "") },
+      CLOTH_THUMB.get(id) ? h("img", { src: CLOTH_THUMB.get(id), alt: "" }) : h("span", { class: "emo", text: "👕" }),
+      h("b", { text: c ? c.name.replace("새내기 ", "") : id }), h("small", { text: worn ? "입는 중" : have ? "가짐" : day + "일째에 받아요" })));
+  }
+  body.append(h("div", { class: "att2sethead" }, h("div", { class: "grow" }, h("b", { text: "👕 새내기 어부 세트 " + owned.length + " / " + ROOKIE_SET.length }),
+    h("small", { text: "상점에서는 팔지 않는 출석 한정 옷이에요 · 옷가게에서도 갈아입을 수 있어요" })),
+    owned.length >= 2 && !owned.every(id => Object.values(P.wear).includes(id)) ? h("button", { class: "btn sm pri", onclick: () => { owned.forEach(wearItem); toast("새내기 어부 세트를 입었어요"); refreshSheet(true); }, text: "가진 것 모두 입기" }) : null), setRow);
+  body.append(h("button", { class: "att2inv", onclick: () => openSheet("invite") }, h("span", { class: "emo", text: "💌" }),
+    h("span", { class: "grow" }, h("b", { text: "친구를 초대하면 둘 다 선물" }), h("small", { text: "친구는 바로 " + won(REF_GIFT.gold) + " · 나는 친구가 Lv." + REF_PAYLV + "가 되면 " + won(REF_BONUS) })), h("span", { class: "chev", text: "›" })));
 };
 function maybeAttendPopup() {
   let tries = 0;
@@ -8387,20 +8434,30 @@ function onReferral(v) {
 const refLink = () => location.origin + location.pathname + "?ref=" + myCode();
 async function copyText(t, ok) { try { await navigator.clipboard.writeText(t); toast(ok); } catch { prompt("복사해서 보내 주세요", t); } }
 SHEETS.invite = (body) => {
-  setHead("🤝 친구 초대", "추천인 코드로 친구를 데려오면 둘 다 선물을 받아요");
+  setHead("💌 친구 초대", "초대장을 보내서 친구를 데려오면 둘 다 선물을 받아요");
   const code = myCode(), web = !!window.EOCHON_FIREBASE;
   const done = Object.values(P.invited).filter(x => x === 2).length, wait = Object.values(P.invited).filter(x => x === 1).length;
-  body.append(h("div", { class: "refcard" },
-    h("span", { class: "muted", text: "내 추천인 코드" }),
-    h("b", { class: "refcode num", text: S.online ? code : "------" }),
-    h("div", { class: "row", style: "justify-content:center" },
-      h("button", { class: "btn pri", disabled: !S.online, onclick: () => copyText(code, "코드 " + code + "를 복사했어요"), text: "코드 복사" }),
-      web ? h("button", { class: "btn", disabled: !S.online, onclick: () => copyText("어촌생활에서 같이 낚시해요! 이 링크로 들어오면 선물을 받아요 🎣 " + refLink(), "초대 링크를 복사했어요"), text: "초대 링크 복사" }) : null),
-    h("span", { class: "muted", style: "font-size:12.5px", text: "초대한 친구 " + done + "명" + (wait ? " · Lv." + REF_PAYLV + " 기다리는 중 " + wait + "명" : "") })));
-  body.append(h("div", { class: "sec", text: "선물" }), h("div", { class: "ilist" },
-    h("div", { class: "listrow" }, h("span", { class: "emo", text: "🎁" }), h("div", { class: "grow" }, h("b", { text: "초대받은 친구" }), h("div", { class: "muted", style: "font-size:12.5px", text: "코드를 넣는 즉시 " + won(REF_GIFT.gold) + " · 새우 " + REF_GIFT.shrimp + "개 · 크릴 " + REF_GIFT.krill + "개, 그리고 서로 친구가 돼요" }))),
-    h("div", { class: "listrow" }, h("span", { class: "emo", text: "💰" }), h("div", { class: "grow" }, h("b", { text: "초대한 나" }), h("div", { class: "muted", style: "font-size:12.5px", text: "친구가 낚시 Lv." + REF_PAYLV + "가 되면 " + won(REF_BONUS) + " (최대 " + REF_CAP + "명) · 3명, 10명 초대하면 칭호 「홍보대사」 「어촌 이장님」" })))));
-  body.append(h("div", { class: "sec", text: "추천인 코드 입력" }));
+  // 초대장: 왼쪽 편지 + 오른쪽 떼는 쪽(코드)
+  body.append(h("div", { class: "inv-ticket" },
+    h("div", { class: "inv-letter" }, h("small", { text: "어촌생활 초대장" }), h("b", { class: "inv-to", text: P.nick + "님이 같이 낚시하재요 🎣" }),
+      h("span", { text: "이 코드를 넣으면 바로 " + won(REF_GIFT.gold) + " · 새우 " + REF_GIFT.shrimp + "개 · 크릴 " + REF_GIFT.krill + "개를 받고, 저랑 친구가 돼요." })),
+    h("div", { class: "inv-stub" }, h("small", { text: "추천인 코드" }), h("b", { class: "refcode num", text: S.online ? code : "------" }),
+      h("button", { class: "btn pri sm", disabled: !S.online, onclick: () => copyText(code, "코드 " + code + "를 복사했어요"), text: "코드 복사" }),
+      web ? h("button", { class: "btn sm", disabled: !S.online, onclick: () => copyText("어촌생활에서 같이 낚시해요! 이 링크로 들어오면 선물을 받아요 🎣 " + refLink(), "초대 링크를 복사했어요"), text: "링크 복사" }) : null)));
+  // 이렇게 받아요: 3단계 흐름
+  const step = (n, ico, t, s) => h("div", { class: "inv-step" }, h("span", { class: "inv-n", text: n }), h("span", { class: "emo", text: ico }), h("b", { text: t }), h("small", { text: s }));
+  body.append(h("div", { class: "sec", text: "이렇게 받아요" }), h("div", { class: "inv-flow" },
+    step("1", "📨", "코드 보내기", "메신저로 코드나 링크를 보내요"),
+    step("2", "🎁", "친구가 입력", "친구는 바로 " + won(REF_GIFT.gold) + " + 미끼 · 서로 친구"),
+    step("3", "💰", "친구가 Lv." + REF_PAYLV, "나에게 " + won(REF_BONUS) + " (최대 " + REF_CAP + "명)")));
+  // 초대한 수 → 칭호 눈금
+  body.append(h("div", { class: "inv-prog" },
+    h("div", { class: "row", style: "justify-content:space-between" }, h("b", { text: "초대한 친구 " + done + "명" }), h("small", { class: "muted", text: wait ? "Lv." + REF_PAYLV + " 기다리는 중 " + wait + "명" : "Lv." + REF_PAYLV + "가 되면 한 명으로 세요" })),
+    h("div", { class: "inv-track" }, h("i", { style: "width:" + clamp(done / REF_CAP, 0, 1) * 100 + "%" }),
+      h("span", { class: "inv-mark" + (done >= 3 ? " on" : ""), style: "left:30%", text: "3명 · 홍보대사" }),
+      h("span", { class: "inv-mark end" + (done >= 10 ? " on" : ""), style: "left:100%", text: "10명 · 어촌 이장님" }))));
+  // 내가 받은 초대장
+  body.append(h("div", { class: "sec", text: "초대장을 받았나요?" }));
   if (P.ref) body.append(h("div", { class: "listrow" }, h("span", { class: "emo", text: "✅" }), h("div", { class: "grow" }, h("b", { text: P.ref.nick + "님의 초대로 왔어요" }),
     h("div", { class: "muted", style: "font-size:12.5px", text: P.ref.paid ? "Lv." + REF_PAYLV + " 보상도 " + P.ref.nick + "님께 전달됐어요" : "낚시 Lv." + REF_PAYLV + "가 되면 " + P.ref.nick + "님도 보상을 받아요" }))));
   else if (myLv() >= REF_MAXLV) body.append(h("div", { class: "muted", style: "font-size:13px", text: "추천인 코드는 Lv." + REF_MAXLV + " 전의 새내기만 입력할 수 있어요." }));
@@ -8408,8 +8465,8 @@ SHEETS.invite = (body) => {
     const inp = h("input", { maxlength: "6", placeholder: "친구 코드 6자리", "aria-label": "추천인 코드", autocapitalize: "characters", style: "text-transform:uppercase;letter-spacing:.2em" }), err = h("div", { class: "nerr" });
     const go = async (e) => { const b = e && e.currentTarget; if (b) b.disabled = true; err.textContent = "확인 중…"; const m = await claimRef(inp.value); err.textContent = m; if (b) b.disabled = false; };
     inp.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
-    body.append(h("div", { class: "nickedit" }, inp, h("button", { class: "btn sm pri", disabled: !S.online, onclick: go, text: "등록" })), err,
-      h("div", { class: "muted", style: "font-size:12px", text: "한 계정에 한 번만, Lv." + REF_MAXLV + " 전까지 입력할 수 있어요." }));
+    body.append(h("div", { class: "inv-enter" }, h("div", { class: "nickedit" }, inp, h("button", { class: "btn sm pri", disabled: !S.online, onclick: go, text: "등록" })), err,
+      h("small", { class: "muted", text: "한 계정에 한 번만, Lv." + REF_MAXLV + " 전까지 입력할 수 있어요." })));
   }
 };
 function applyPendingRef() {
@@ -9639,7 +9696,7 @@ function applyQuick() {
   const map = { bag: '[data-open="bag"]', dex: '[data-open="dex"]', travel: '[data-open="travel"]', friends: '[data-open="friends"]', home: "#homeDockBtn" };
   for (const [id, sel] of Object.entries(map)) { const el = dock.querySelector(sel); if (el && !el.dataset.q) el.dataset.q = id; }
   P.quick = normQuick(P.quick);
-  for (const q of QUICK_ITEMS) { const b = quickBtnFor(q.id), k = P.quick.indexOf(q.id); b.hidden = k < 0; b.style.order = k < 0 ? 50 : k; }
+  for (const q of QUICK_ITEMS) { const b = quickBtnFor(q.id), k = P.quick.indexOf(q.id); b.hidden = k < 0; b.style.order = k < 0 ? 50 : k; if (QCOL[q.id]) b.style.setProperty("--qc", QCOL[q.id]); }
   const chat = dock.querySelector(".chatonly"); if (chat) chat.style.order = 40;
   const menu = dock.querySelector(".menubtn"); if (menu) menu.style.order = 60;
   dock.dataset.n = P.quick.length;
@@ -9650,34 +9707,39 @@ function updateQuickBadges() {
   set("quests", questDone()); set("ach", achClaimable()); set("attend", attendCan() ? 1 : 0); set("offers", S.offersIn.size); set("guide", guideReady());
 }
 function setQuick(list) { P.quick = normQuick(list); markDirty(); applyQuick(); refreshSheet(); }
+// 칸마다 아이콘 색 (아래 막대와 꾸미기 화면이 같은 색을 써요)
+const QCOL = { bag: "#c9783a", dex: "#2a8a9a", travel: "#4f9a52", friends: "#e06a92", home: "#e2952c", quests: "#8a5a34", guide: "#3f8f6a", shop: "#2a78bb", sashimi: "#d8402a",
+  ach: "#d9a514", rank: "#7a5ad6", attend: "#e2522c", offers: "#1f9a8a", emote: "#ef8a3a", card: "#5a6ad6", profile: "#3a8fd0", settings: "#6b7780" };
+/* ---------- 퀵바 꾸미기: 작업대 — 진짜 막대 모양 미리보기에서 칸을 골라 옮기고, 아래 상자에서 넣고 빼요 ---------- */
 SHEETS.quickbar = (body) => {
-  setHead("퀵바 꾸미기", "화면 아래 막대에 자주 쓰는 메뉴를 넣어 두세요 · 최대 " + QUICK_MAX + "개");
+  setHead("퀵바 꾸미기", "화면 아래 막대에 자주 쓰는 메뉴를 최대 " + QUICK_MAX + "개 넣어요 · 막대를 꾹 눌러도 열려요");
   const cur = normQuick(P.quick);
-  body.append(h("div", { class: "qb-help" },
-    h("b", { text: "이렇게 바꿔요" }),
-    h("ol", null, h("li", { text: "아래 「넣을 수 있는 메뉴」에서 ＋를 누르면 막대에 들어가요." }), h("li", { text: "막대 미리보기의 ◀ ▶로 자리를 옮기고, ✕로 빼요." }), h("li", { text: "「메뉴」 칸은 항상 맨 오른쪽에 있어요. 다른 모든 기능은 메뉴 안에도 있어요." }))));
-  // 미리보기 막대
-  const prev = h("div", { class: "qb-prev", role: "list", "aria-label": "지금 퀵바" });
-  cur.forEach((id, k) => {
-    const q = QUICK[id];
-    prev.append(h("div", { class: "qb-slot", role: "listitem" },
-      h("span", { class: "qb-ico", html: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + qIcon(id) + '</svg>' }), h("b", { text: q.name }),
-      h("div", { class: "qb-ctl" },
-        h("button", { "aria-label": q.name + " 왼쪽으로", disabled: k === 0, onclick: () => { const a = cur.slice(); [a[k - 1], a[k]] = [a[k], a[k - 1]]; setQuick(a); }, text: "◀" }),
-        h("button", { class: "x", "aria-label": q.name + " 빼기", onclick: () => setQuick(cur.filter(x => x !== id)), text: "✕" }),
-        h("button", { "aria-label": q.name + " 오른쪽으로", disabled: k === cur.length - 1, onclick: () => { const a = cur.slice(); [a[k + 1], a[k]] = [a[k], a[k + 1]]; setQuick(a); }, text: "▶" }))));
-  });
-  for (let k = cur.length; k < QUICK_MAX; k++) prev.append(h("div", { class: "qb-slot empty", text: "빈 칸" }));
-  prev.append(h("div", { class: "qb-slot fixed" }, h("span", { class: "qb-ico", html: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg>' }), h("b", { text: "메뉴" }), h("small", { text: "고정" })));
-  body.append(h("div", { class: "sec", text: "지금 퀵바 (" + cur.length + "/" + QUICK_MAX + ")" }), prev);
-  body.append(h("div", { class: "sec", text: "넣을 수 있는 메뉴" }), h("div", { class: "qb-grid" }, QUICK_ITEMS.map(q => {
-    const on = cur.includes(q.id), full = cur.length >= QUICK_MAX;
-    return h("button", { class: "qb-item" + (on ? " on" : ""), disabled: !on && full, onclick: () => setQuick(on ? cur.filter(x => x !== q.id) : cur.concat(q.id)), title: on ? "눌러서 빼기" : full ? "칸이 다 찼어요 · 하나를 먼저 빼 주세요" : "눌러서 넣기" },
-      h("span", { class: "qb-ico", html: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + qIcon(q.id) + '</svg>' }),
-      h("span", { class: "grow" }, h("b", { text: q.name }), h("small", { text: q.d })),
-      h("span", { class: "qb-tag", text: on ? "✓ 들어 있음" : full ? "꽉 찼어요" : "＋ 넣기" }));
-  })));
-  body.append(h("div", { class: "row", style: "justify-content:center;margin-top:12px" }, h("button", { class: "btn sm", onclick: () => { setQuick(QUICK_DEF); toast("퀵바를 처음 모양으로 되돌렸어요"); }, text: "처음 모양으로 되돌리기" })));
+  if (!cur.includes(S.qbSel)) S.qbSel = null;
+  const sel = S.qbSel, k = cur.indexOf(sel);
+  const ico = (id, svg) => h("span", { class: "qb2-ico", style: "--qc:" + (QCOL[id] || "#2a3440"), html: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + (svg || qIcon(id)) + '</svg>' });
+  const move = (d) => { const a = cur.slice(); [a[k + d], a[k]] = [a[k], a[k + d]]; setQuick(a); };
+  // 미리보기: 게임 화면 아래 막대와 똑같은 모양
+  const bar = h("div", { class: "qb2-bar", role: "list", "aria-label": "지금 퀵바" });
+  cur.forEach((id) => bar.append(h("button", { class: "qb2-slot" + (id === sel ? " sel" : ""), role: "listitem", "aria-pressed": String(id === sel), onclick: () => { S.qbSel = id === sel ? null : id; refreshSheet(); } }, ico(id), h("span", { text: QUICK[id].short || QUICK[id].name }))));
+  for (let i = cur.length; i < QUICK_MAX; i++) bar.append(h("div", { class: "qb2-slot empty", "aria-label": "빈 칸" }, h("span", { class: "qb2-ico" }, "＋"), h("span", { text: "빈 칸" })));
+  bar.append(h("div", { class: "qb2-slot fixed", title: "메뉴는 항상 맨 오른쪽" }, ico("menu", '<rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/>'), h("span", { text: "메뉴" })));
+  body.append(h("div", { class: "qb2-stage" }, h("div", { class: "qb2-sea" }), bar,
+    sel ? h("div", { class: "qb2-tools" }, h("b", { text: QUICK[sel].name + " · " + (k + 1) + "번째" }),
+      h("button", { class: "btn sm", disabled: k === 0, onclick: () => move(-1), text: "◀ 앞으로" }),
+      h("button", { class: "btn sm", disabled: k === cur.length - 1, onclick: () => move(1), text: "뒤로 ▶" }),
+      h("button", { class: "btn sm danger", onclick: () => { S.qbSel = null; setQuick(cur.filter(x => x !== sel)); }, text: "✕ 빼기" }))
+      : h("div", { class: "qb2-tools hint", text: "막대의 칸을 누르면 자리를 옮기거나 뺄 수 있어요 · 「메뉴」는 늘 맨 오른쪽" })));
+  // 넣을 수 있는 메뉴 상자
+  const full = cur.length >= QUICK_MAX;
+  body.append(h("div", { class: "sec", text: "넣을 수 있는 메뉴 · " + cur.length + " / " + QUICK_MAX + (full ? " (꽉 찼어요 — 하나를 빼야 넣을 수 있어요)" : "") }),
+    h("div", { class: "qb2-grid" }, QUICK_ITEMS.map(q => {
+      const on = cur.includes(q.id);
+      return h("button", { class: "qb2-item" + (on ? " on" : ""), style: "--qc:" + (QCOL[q.id] || "#6b7780"), disabled: !on && full, onclick: () => { if (on && S.qbSel === q.id) S.qbSel = null; setQuick(on ? cur.filter(x => x !== q.id) : cur.concat(q.id)); },
+        title: on ? "눌러서 빼기" : full ? "칸이 다 찼어요 · 하나를 먼저 빼 주세요" : "눌러서 넣기" },
+        ico(q.id), h("span", { class: "grow" }, h("b", { text: q.name }), h("small", { text: q.d })),
+        h("span", { class: "qb2-tag", text: on ? (cur.indexOf(q.id) + 1) + "번째 ✓" : "＋" }));
+    })));
+  body.append(h("div", { class: "row", style: "justify-content:center;margin-top:12px" }, h("button", { class: "btn sm ghost", onclick: () => { S.qbSel = null; setQuick(QUICK_DEF); toast("퀵바를 처음 모양으로 되돌렸어요"); }, text: "처음 모양으로 되돌리기" })));
 };
 function qIcon(id) {
   if (QSVG[id]) return QSVG[id];
@@ -9730,20 +9792,35 @@ const FAQ = [
 ];
 SHEETS.guide = (body) => {
   const g = guideState(), doneN = GUIDE_STEPS.filter(s => g[s.id]).length;
-  setHead("초보 어부 수첩", "위에서부터 하나씩 해 보세요 · 끝낼 때마다 용돈을 드려요 (" + doneN + "/" + GUIDE_STEPS.length + ")");
-  body.append(h("div", { class: "gd-bar" }, h("i", { style: "width:" + (doneN / GUIDE_STEPS.length * 100) + "%" })));
-  const cur = GUIDE_STEPS.find(s => !g[s.id]);
-  body.append(h("ol", { class: "gd-list" }, GUIDE_STEPS.map((s, k) => {
-    const got = !!g[s.id], ok = safeDone(s), now = s === cur;
-    return h("li", { class: "gd-step" + (got ? " got" : ok ? " ready" : now ? " now" : "") },
-      h("span", { class: "gd-n", text: got ? "✓" : String(k + 1) }),
-      h("span", { class: "gd-ico", "aria-hidden": "true", text: s.ico }),
-      h("div", { class: "grow" }, h("b", { text: s.t }), (now || ok) && !got ? h("p", { text: s.how }) : null),
-      got ? h("span", { class: "gd-tag", text: "완료" })
-        : ok ? h("button", { class: "btn sm pri", onclick: () => claimGuide(s), text: "+" + won(s.reward) + " 받기" })
-        : h("button", { class: "btn sm", onclick: () => s.go(), text: "가 보기 ›" }));
+  const total = GUIDE_STEPS.reduce((a, s) => a + s.reward, 0), got = GUIDE_STEPS.filter(s => g[s.id]).reduce((a, s) => a + s.reward, 0);
+  setHead("📘 초보 어부 수첩", "위에서부터 하나씩 해 보세요 · 끝낼 때마다 용돈을 드려요");
+  const ready = GUIDE_STEPS.filter(s => !g[s.id] && safeDone(s)), cur = GUIDE_STEPS.find(s => !g[s.id] && !safeDone(s));
+  // 수첩 표지: 몇 개 했는지 고리 + 받은 용돈
+  body.append(h("div", { class: "gd2-cover" },
+    h("div", { class: "pring sm", style: "--p:" + (doneN / GUIDE_STEPS.length).toFixed(3) }, h("span", { class: "aring", text: doneN + "/" + GUIDE_STEPS.length })),
+    h("div", { class: "grow" }, h("b", { text: doneN >= GUIDE_STEPS.length ? "수첩을 다 채웠어요! 이제 어엿한 어부예요" : "초보 어부 " + (doneN + 1) + "번째 페이지" }),
+      h("small", { text: "받은 용돈 " + won(got) + " / 모두 " + won(total) })),
+    ready.length > 1 ? h("button", { class: "btn pri", onclick: () => ready.forEach(claimGuide), text: "🎁 모두 받기 +" + won(ready.reduce((a, s) => a + s.reward, 0)) }) : null));
+  // 지금 할 일: 크게 한 장
+  const focus = ready[0] || cur;
+  if (focus) {
+    const ok = ready.includes(focus);
+    body.append(h("div", { class: "gd2-now" + (ok ? " ready" : "") },
+      h("span", { class: "gd2-big", "aria-hidden": "true", text: focus.ico }),
+      h("div", { class: "grow" }, h("small", { text: ok ? "다 했어요! 용돈을 받으세요" : "지금 할 일 · " + (GUIDE_STEPS.indexOf(focus) + 1) + "단계" }), h("b", { text: focus.t }), h("p", { text: focus.how })),
+      ok ? h("button", { class: "btn pri", onclick: () => claimGuide(focus), text: "+" + won(focus.reward) + " 받기" })
+        : h("button", { class: "btn pri", onclick: () => focus.go(), text: "가 보기 ›" })));
+  }
+  // 여정: 점과 선으로 이어진 10단계
+  body.append(h("div", { class: "sec", text: "수첩 전체" }), h("ol", { class: "gd2-path" }, GUIDE_STEPS.map((s, k) => {
+    const done = !!g[s.id], ok = !done && safeDone(s), now = s === cur;
+    return h("li", { class: "gd2-st" + (done ? " done" : ok ? " ready" : now ? " now" : "") },
+      h("span", { class: "gd2-dot", text: done ? "✓" : String(k + 1) }),
+      h("details", { class: "grow" }, h("summary", null, h("span", { class: "gd2-ico", text: s.ico }), h("b", { text: s.t }),
+        h("span", { class: "gd2-rw num", text: done ? "받음" : "+" + won(s.reward) })), h("p", { text: s.how }),
+        !done ? (ok ? h("button", { class: "btn sm pri", onclick: () => claimGuide(s), text: "+" + won(s.reward) + " 받기" }) : h("button", { class: "btn sm", onclick: () => s.go(), text: "가 보기 ›" })) : null));
   })));
-  body.append(h("div", { class: "sec", text: "궁금한 것 모음" }), h("div", { class: "gd-faq" }, FAQ.map(([q, a]) => h("details", null, h("summary", { text: q }), h("p", { text: a })))));
+  body.append(h("div", { class: "sec", text: "❓ 궁금한 것 모음" }), h("div", { class: "gd2-faq" }, FAQ.map(([q, a]) => h("details", null, h("summary", { text: q }), h("p", { text: a })))));
 };
 // 시트 머리의 「?」: 그 화면 설명을 언제든 다시 보기
 function showHelp(name) { const id = "sheet_" + name; if (!TUTS[id] || coachQ.includes(id) || (S.coach && S.coach.id === id)) return; coachQ.push(id); if (!S.coach) nextCoach(); }
