@@ -1623,7 +1623,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.72.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.72.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -3101,7 +3101,7 @@ const FISH_BEHAVIOR = {
 function behaviorOf(f) {
   const b = FISH_BEHAVIOR[f.id];
   if (b) return { diff: b[0], type: b[1] };
-  return { diff: [25, 45, 65, 85, 105, 125][f.tier], type: ["mixed", "dart", "smooth", "sinker", "floater"][hashStr(f.id) % 5] };
+  return { diff: [25, 45, 65, 85, 105, 125, 145, 168, 195, 225][Math.min(f.tier, 9)], type: ["mixed", "dart", "smooth", "sinker", "floater"][hashStr(f.id) % 5] };
 }
 const randInt = (a, b) => Math.floor(a + Math.random() * (b - a));
 S.auto = false;   // 자동 챔질은 없앴어요 (v1.42) · 멍 모드만 자동으로 낚아요
@@ -3346,6 +3346,10 @@ const TIER_FIGHT = [
   { p: .8, s: 26, dist: 20, run: 1.35, boost: .32, regen: .05, rage: .11, rageF: 1.17 },
   { p: .95, s: 38, dist: 24, run: 1.5, boost: .38, regen: .065, rage: .2, rageF: 1.36 },
   { p: 1.0, s: 40, dist: 26, run: 1.5, boost: .4, regen: .07, rage: .22, rageF: 1.46 },
+  { p: 1.0, s: 48, dist: 30, run: 1.6, boost: .44, regen: .08, rage: .28, rageF: 1.55 },
+  { p: 1.0, s: 58, dist: 34, run: 1.72, boost: .48, regen: .09, rage: .35, rageF: 1.66 },
+  { p: 1.0, s: 72, dist: 39, run: 1.85, boost: .53, regen: .105, rage: .43, rageF: 1.78 },
+  { p: 1.0, s: 90, dist: 45, run: 2.0, boost: .58, regen: .12, rage: .52, rageF: 1.92 },
 ];
 const FIGHT_MSG = { rage: "몸부림! 지금은 무조건 손을 떼요", cruise: "천천히 감아요", run: "돌진! 무리하게 감지 마세요", jump: "점프! 손을 떼요", dive: "잠수하며 버티는 중", tired: "지쳤어요 · 지금 감아요!" };
 const STATE_W = { dart: { run: .45, jump: .25, dive: .05, cruise: .25 }, smooth: { run: .35, jump: .05, dive: .1, cruise: .5 }, sinker: { run: .25, jump: .02, dive: .45, cruise: .28 }, floater: { run: .2, jump: .38, dive: .02, cruise: .4 }, mixed: { run: .33, jump: .15, dive: .15, cruise: .37 } };
