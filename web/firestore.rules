@@ -46,7 +46,15 @@ service cloud.firestore {
       allow create: if signedIn() && request.resource.data.n is number;
       allow delete: if signedIn() && old(86400000);
     }
-    match /records/{id} { allow read: if signedIn(); allow write: if signedIn() && id != "rank_o3AuPPbNNePHSeZWfDfAd4Llezq1"; }  // 운영자 본인 랭킹 등록 제외 (2026-11-03 본인 요청)
+    // 운영자 본인 랭킹 등록 제외 (2026-11-03 본인 요청): 두 계정 UID + 닉네임 '비빔밥' 기록 쓰기 차단
+    match /records/{id} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && !(request.resource.data.get("uid", "") in ["o3AuPPbNNePHSeZWfDfAd4Llezq1", "kMrrRZrMsGVvpAxTfF6M0NZm9Cr1"])
+        && request.resource.data.get("nick", "") != "비빔밥"
+        && !(id in ["rank_o3AuPPbNNePHSeZWfDfAd4Llezq1", "rank_kMrrRZrMsGVvpAxTfF6M0NZm9Cr1"]);
+      allow delete: if signedIn();
+    }
     // 마이 홈: 집 모양은 주인만 쓰고 모두 읽음, 방명록은 쓴 사람이 자기 이름으로만
     match /houses/{uid} { allow read: if signedIn(); allow write: if me(uid); }
     match /guestbook/{id} {
@@ -55,7 +63,7 @@ service cloud.firestore {
       allow delete: if signedIn() && (resource.data.from == request.auth.uid || resource.data.host == request.auth.uid || isAdmin());
     }
     // 명예의 전당: 각자 자기 기록만 올리고, 운영자는 지울 수 있음
-    match /rank/{uid} { allow read: if signedIn(); allow write: if me(uid); allow delete: if me(uid) || isAdmin(); }
+    match /rank/{uid} { allow read: if signedIn(); allow write: if me(uid) && !(uid in ["o3AuPPbNNePHSeZWfDfAd4Llezq1", "kMrrRZrMsGVvpAxTfF6M0NZm9Cr1"]); allow delete: if me(uid) || isAdmin(); }
     match /stalls/{id} { allow read, write: if signedIn(); }
     match /boat/{id} { allow read, write: if signedIn(); }
     match /_locks/{id} { allow read, write: if signedIn(); }
