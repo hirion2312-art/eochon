@@ -913,7 +913,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.21.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.22.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 10 },
   { name: "고급", base: 30 },
@@ -4683,17 +4683,20 @@ function buildDetails() {
   // 상점 뒤 언덕 마을 · 나무
   const pastel = [0xf2e6d0, 0xe9d3c0, 0xd8e4ea, 0xf0dcdc, 0xe4ead2], roofs = [0xd8473a, 0x2f6f86, 0x3f6e58, 0xc98a4a, 0x6b6bd6];
   const hwin = bulbMat(0x8aa3b0, 0xffd89a), winG = new T3.PlaneGeometry(.5, .5);
+  const keepOut = (x, z) => (x < 26.5 && z > 37 && z < 75) || (x < 23.5 && z > -70 && z < -52);   // 윗마을 · 명예의 전당 자리는 비워 둠
   for (let i = 0; i < 26; i++) {
     const x = 21 + srnd() * 22, z = -64 + i * 4.9 + (srnd() - .5) * 2, w = 2.4 + srnd() * 1.4, hh = 1.8 + srnd() * 1.6;
+    if (keepOut(x, z)) continue;
     plain(new T3.BoxGeometry(w, hh, w * .9), cmat(pastel[i % 5]), x, hh / 2, z, det);
     plain(new T3.ConeGeometry(w * .82, w * .55, 4), cmat(roofs[(i * 3) % 5]), x, hh + w * .27, z, det).rotation.y = Math.PI / 4;
     plain(winG, hwin, x - w / 2 - .01, hh * .55, z, det).rotation.y = -Math.PI / 2;
   }
   const trunk = new T3.CylinderGeometry(.14, .2, 1.4, 6), pine = new T3.ConeGeometry(1, 2.6, 7), ball = new T3.IcosahedronGeometry(1.1, 1), leafCols = [0x5e9a52, 0x6fa85e, 0x4f8a4a];
   for (let i = 0; i < 34; i++) {
-    const x = 17 + srnd() * 28, z = -66 + srnd() * 130, isPine = srnd() < .5;
+    const x = 17 + srnd() * 28, z = -66 + srnd() * 130, isPine = srnd() < .5, sc = .8 + srnd() * .6;
+    if (keepOut(x, z)) continue;
     plain(trunk, cmat(0x7a5a3c), x, .7, z, det);
-    plain(isPine ? pine : ball, cmat(leafCols[i % 3]), x, isPine ? 2.4 : 2.1, z, det).scale.setScalar(.8 + srnd() * .6);
+    plain(isPine ? pine : ball, cmat(leafCols[i % 3]), x, isPine ? 2.4 : 2.1, z, det).scale.setScalar(sc);
   }
 }
 /* 하늘의 구름 · 갈매기 · 먼바다에 묶인 배 (움직이는 것들) */
@@ -6865,8 +6868,13 @@ const RANK_CATS = [
 // 동상 자리: 가운데 길 양옆으로 3개씩, 길을 바라봄
 const STATUE_SPOTS = [[9.4, -56.6], [12.8, -56.6], [16.2, -56.6], [9.4, -64.4], [12.8, -64.4], [16.2, -64.4]].map(([x, z], i) => ({ x, z, i, face: z > HALL.cz ? -1 : 1 }));
 const inHall = (x, z) => x > HALL.x0 && x < HALL.x1 && z > HALL.z0 && z < HALL.z1;
+// 카펫 양옆 정원등 · 안쪽 모서리 토피어리 · 입구 화분
+const HALL_LIGHTS = [11.1, 14.5, 17.4].flatMap(x => [[x, HALL.cz - 1.45], [x, HALL.cz + 1.45]]);
+const HALL_POTS = [[18.3, -55.6, 1], [18.3, -65.4, 1], [7.25, HALL.cz - 3.4, 0], [7.25, HALL.cz + 3.4, 0]];
+const HALL_SOLID = [...HALL_LIGHTS.map(([x, z]) => [x, z, .22, .22]), ...HALL_POTS.map(([x, z]) => [x, z, .38, .38])];
 function hallBlocked(x, z) {
   for (const s of STATUE_SPOTS) if (Math.abs(x - s.x) < 1.15 && Math.abs(z - s.z) < 1.15) return true;
+  if (solidHit(HALL_SOLID, x, z)) return true;
   return x > 18.2 && Math.abs(z - HALL.cz) < 2.6;   // 랭킹판
 }
 function myBig() {
@@ -6970,6 +6978,10 @@ function buildHall() {
     const sp = new T3.SpotLight(0xffe2a8, 0, 7, .5, .6, 1.4); sp.position.set(s.x, 5.5, s.z + s.face * 1.6); sp.target.position.set(s.x, 1.8, s.z); scene.add(sp); scene.add(sp.target); glow.push({ light: sp, val: 1.4 });
     return { s, g, plaque, statue: null, key: "" };
   });
+  // 정원등 · 토피어리 · 입구 화분 · 화단 바깥 나무
+  for (const [x, z] of HALL_LIGHTS) propBollard(x, z);
+  for (const [x, z, top] of HALL_POTS) propPot(x, z, null, !!top);
+  [[21.4, -56.4], [21.6, -64.6], [9, -68.7], [15.6, -68.9]].forEach(([x, z], k) => propTree(x, z, .9 + (k % 2) * .2, null, k % 2 === 1));
   HALL_OBJ = { spots, board, bm, dirty: true, boardKey: "" };
 }
 const STATUE_MAT = {};
@@ -7140,23 +7152,131 @@ SHEETS.office = (body) => {
       h("div", { class: "listrow" }, h("span", { class: "emo", text: "💡" }), h("div", { class: "grow" }, h("b", { text: "건의사항" }), h("div", { class: "muted", style: "font-size:12.5px", text: "있었으면 하는 기능이나 바뀌었으면 하는 점" })), h("button", { class: "btn sm pri", onclick: () => openSheet("feedback", "idea"), text: "쓰기" })));
   }
 };
-/* 윗마을: 거리 북쪽 끝 너머 새 구역 (동사무소 · 부동산 공사장) */
+/* ---------- 마을 소품 (윗마을 · 명예의 전당 · 집 마당이 함께 써요) ----------
+   집 마당은 들어갈 때마다 새로 지어서 지오메트리를 그때그때 만들어요(나갈 때 정리됨). 전구 재질은 하나를 같이 써서 밤에 함께 켜져요 */
+const PROP_BULB = {};
+const propBulb = () => PROP_BULB.m || (PROP_BULB.m = bulbMat(0x8a8a80, 0xffe2a8));
+const propAdd = (m, x, y, z, parent) => { m.position.set(x, y, z); (parent || scene).add(m); return m; };
+function propTree(x, z, s, parent, pine) {
+  s = s || 1;
+  cyl(.13 * s, .19 * s, 1.5 * s, 7, cmat(0x7a5a3c), x, .75 * s, z, parent);
+  if (pine) { for (let k = 0; k < 3; k++) cyl(0, (1.05 - k * .25) * s, (1.3 - k * .15) * s, 8, cmat(0x4f8a4a), x, (1.75 + k * .62) * s, z, parent); return; }
+  const leaf = [0x5e9a52, 0x6fa85e, 0x4f8a4a];
+  for (const [dx, dy, dz, r, c] of [[0, 2.15, 0, 1, 0], [.5, 1.85, .25, .68, 1], [-.45, 1.95, -.3, .7, 2], [.1, 2.75, -.1, .6, 1]])
+    propAdd(new T3.Mesh(new T3.IcosahedronGeometry(r * s, 1), cmat(leaf[c])), x + dx * s, dy * s, z + dz * s, parent);
+}
+/* 가로등: arm 은 등이 뻗는 쪽 [dx, dz] (길 위로 내밀기) */
+function propLamp(x, z, arm, parent) {
+  const iron = cmat(0x2a2d33), [ax, az] = arm || [0, 0];
+  cyl(.16, .2, .3, 8, iron, x, .15, z, parent);
+  cyl(.06, .08, 3.6, 6, iron, x, 1.9, z, parent);
+  if (ax || az) box(.7 * Math.abs(ax) + .07, .07, .7 * Math.abs(az) + .07, iron, x + ax * .35, 3.68, z + az * .35, parent);
+  const lx = x + ax * .7, lz = z + az * .7;
+  cyl(.12, .24, .16, 8, iron, lx, 3.62, lz, parent);
+  propAdd(new T3.Mesh(new T3.SphereGeometry(.17, 10, 8), propBulb()), lx, 3.46, lz, parent);
+}
+/* 키 작은 정원등 */
+function propBollard(x, z, parent) {
+  const iron = cmat(0x2a2d33);
+  cyl(.08, .1, .62, 8, iron, x, .36, z, parent);
+  propAdd(new T3.Mesh(new T3.CylinderGeometry(.11, .11, .16, 8), propBulb()), x, .75, z, parent);
+  cyl(.15, .15, .05, 8, iron, x, .85, z, parent);
+}
+/* 벤치: ry 로 앉는 쪽 방향 (0 = -z 를 봄, -π/2 = +x 를 봄) */
+function propBench(x, z, ry, parent) {
+  const g = new T3.Group(); g.position.set(x, .1, z); g.rotation.y = ry; (parent || scene).add(g);
+  const wood = cmat(0xb07a48), iron = cmat(0x2a2d33);
+  for (let k = 0; k < 3; k++) box(1.6, .06, .15, wood, 0, .46, -.17 + k * .17, g);
+  for (let k = 0; k < 2; k++) box(1.6, .06, .15, wood, 0, .68 + k * .17, .27, g).rotation.x = -.18;
+  for (const sx of [-.7, .7]) { box(.07, .46, .52, iron, sx, .23, .02, g); box(.07, .56, .07, iron, sx, .7, .3, g); }
+}
+/* 네모 화단 (관목 + 꽃). h 가 낮으면 땅에 붙은 꽃밭 */
+function propPlanter(x, z, w, d, parent, h) {
+  h = h == null ? .45 : h;
+  box(w, h, d, cmat(0x8a6a4a), x, .08 + h / 2, z, parent); box(w - .14, .05, d - .14, cmat(0x4a3424), x, .08 + h, z, parent);
+  const cols = [0xff7a8a, 0xffd84d, 0xffffff, 0xb38af0, 0xff9a3c]; let s = Math.abs(Math.round(x * 31 + z * 17)) % 233280 + 3;
+  const r = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  const nx = Math.max(1, Math.round(w / .45)), nz = Math.max(1, Math.round(d / .45)), y = .08 + h + .16;
+  for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+    const b = propAdd(new T3.Mesh(new T3.IcosahedronGeometry(.23, 1), cmat(0x4f8f4a)), x - w / 2 + (i + .5) * w / nx + (r() - .5) * .1, y, z - d / 2 + (j + .5) * d / nz + (r() - .5) * .1, parent);
+    b.scale.y = .7 + r() * .35;
+    if (r() < .7) propAdd(new T3.Mesh(new T3.IcosahedronGeometry(.08, 0), cmat(cols[Math.floor(r() * cols.length)])), b.position.x + (r() - .5) * .2, y + .19, b.position.z + (r() - .5) * .2, parent);
+  }
+}
+/* 둥근 화분 (topiary = 동그랗게 다듬은 키 큰 나무) */
+function propPot(x, z, parent, topiary) {
+  cyl(.3, .23, .5, 12, cmat(0xc2603a), x, .35, z, parent);
+  cyl(.32, .32, .06, 12, cmat(0xa84e2e), x, .6, z, parent);
+  if (topiary) {
+    cyl(.05, .06, .9, 6, cmat(0x7a5a3c), x, 1.05, z, parent);
+    for (const [y, r] of [[1.1, .42], [1.75, .34], [2.25, .24]]) propAdd(new T3.Mesh(new T3.IcosahedronGeometry(r, 1), cmat(0x3f7f45)), x, y, z, parent);
+    return;
+  }
+  propAdd(new T3.Mesh(new T3.IcosahedronGeometry(.34, 1), cmat(0x4f8f4a)), x, .88, z, parent);
+  for (let k = 0; k < 5; k++) propAdd(new T3.Mesh(new T3.IcosahedronGeometry(.07, 0), cmat([0xff7a8a, 0xffd84d, 0xffffff][k % 3])), x + Math.cos(k * 1.3) * .24, 1.05 + (k % 2) * .08, z + Math.sin(k * 1.3) * .24, parent);
+}
+function propFountain(x, z, parent) {
+  const stone = cmat(0xd9d2c4), dark = cmat(0xb8ae9a), water = cmat(0x7fc4d8);
+  cyl(1.75, 1.85, .5, 28, stone, x, .35, z, parent);
+  propAdd(new T3.Mesh(new T3.CylinderGeometry(1.58, 1.58, .03, 28), water), x, .6, z, parent);
+  propAdd(new T3.Mesh(new T3.TorusGeometry(1.68, .1, 6, 32), dark), x, .62, z, parent).rotation.x = Math.PI / 2;
+  cyl(.24, .32, 1.2, 10, stone, x, 1.1, z, parent);
+  cyl(.78, .5, .2, 18, stone, x, 1.78, z, parent);
+  propAdd(new T3.Mesh(new T3.CylinderGeometry(.66, .66, .03, 18), water), x, 1.88, z, parent);
+  cyl(.08, .12, .42, 8, stone, x, 2.08, z, parent);
+  const jet = propAdd(new T3.Mesh(new T3.SphereGeometry(.2, 10, 8), cmat(0xbfe6f0)), x, 2.42, z, parent); jet.scale.y = 1.6;
+  for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; propAdd(new T3.Mesh(new T3.SphereGeometry(.07, 6, 5), cmat(0xbfe6f0)), x + Math.cos(a) * .7, 1.6, z + Math.sin(a) * .7, parent).scale.y = 2.4; }
+}
+/* 걸을 수 없는 소품 자리: [x, z, 반너비 x, 반너비 z] */
+const solidHit = (list, x, z) => list.some(b => Math.abs(x - b[0]) < b[2] && Math.abs(z - b[1]) < b[3]);
+const benchSolid = ([x, z, ry]) => Math.abs(Math.sin(ry)) > .5 ? [x, z, .4, .9] : [x, z, .9, .4];
+
+/* 윗마을: 거리 북쪽 끝 너머 구역 (동사무소 · 부동산 · 주택가 대문)
+   거리 쪽(서쪽)에 남북으로 돌길이 있고, 길에서 각 건물 문으로 갈라져요. 남쪽엔 분수 광장, 두 건물 사이엔 정원 */
 const UPTOWN = { x0: 6.4, x1: 24, z0: 40, z1: 72 };
 const OFFICE = { x: 17, z: 52, w: 9, d: 10.4, door: { x: 11.2, z: 52 } };
 const REALTY_LOT = { x0: 13, x1: 21.5, z0: 61.5, z1: 70.5 };
+const UP = {
+  fountain: [17.6, 43.4],
+  trees: [[23, 41.6], [22.9, 49.2], [22.9, 59.6], [22.9, 69.6]],
+  lamps: [42, 48.4, 56.4, 62.6, 69.4].map(z => [11.45, z]),
+  pots: [[11.9, 49.7], [11.9, 54.3], [12.9, 64.1], [12.9, 67.9]],
+  beds: [[17.4, 59.6, 6.4, .9], [13.4, 41.1, 1.8, .8]],
+  benches: [[14.1, 43.4, -Math.PI / 2], [21.1, 43.4, Math.PI / 2], [7.2, 57.6, -Math.PI / 2], [7.2, 63.6, -Math.PI / 2]],
+  flag: [12.4, 59.6],
+};
+const UP_SOLID = [
+  [UP.fountain[0], UP.fountain[1], 1.95, 1.95],
+  ...UP.trees.map(([x, z]) => [x, z, .5, .5]), ...UP.lamps.map(([x, z]) => [x, z, .28, .28]), ...UP.pots.map(([x, z]) => [x, z, .38, .38]),
+  ...UP.beds.map(([x, z, w, d]) => [x, z, w / 2 + .15, d / 2 + .15]), ...UP.benches.map(benchSolid), [UP.flag[0], UP.flag[1], .2, .2],
+];
 const inUptown = (x, z) => x > UPTOWN.x0 && x < UPTOWN.x1 && z > UPTOWN.z0 && z < UPTOWN.z1;
 function uptownBlocked(x, z) {
   if (Math.abs(x - OFFICE.x) < OFFICE.w / 2 + .5 && Math.abs(z - OFFICE.z) < OFFICE.d / 2 + .5) return true;
+  if (solidHit(UP_SOLID, x, z)) return true;
   return x > REALTY_LOT.x0 && x < REALTY_LOT.x1 && z > REALTY_LOT.z0 && z < REALTY_LOT.z1;
 }
 function buildUptown() {
   const U = UPTOWN, cx = (U.x0 + U.x1) / 2, cz = (U.z0 + U.z1) / 2;
   const floor = box(U.x1 - U.x0, .1, U.z1 - U.z0, lam(0xffffff, { map: imgTex("a/pavers.jpg", 4, 8) }), cx, .05, cz); grounds.push(floor);
-  // 길 끝 차단봉 + 둘레 화단
+  // 돌길 (거리 → 동사무소 · 부동산 · 주택가 대문) + 분수 광장 바닥
+  const slab = (w, d, x, z, rx, rz) => box(w, .03, d, lam(0xffffff, { map: imgTex("a/slabs.jpg", rx, rz) }), x, .115, z);
+  slab(3.2, 31, 9.5, 55.9, 1, 9); slab(1.6, 2.8, 11.9, 52, .5, 1); slab(2.6, 2.4, 12.4, 66, 1, 1);
+  cyl(3.3, 3.3, .03, 36, cmat(0xcdbfa6), UP.fountain[0], .115, UP.fountain[1]);
+  propAdd(new T3.Mesh(new T3.TorusGeometry(3.3, .07, 4, 48), cmat(0xa89a82)), UP.fountain[0], .13, UP.fountain[1]).rotation.x = Math.PI / 2;
+  // 길 끝 차단봉 + 둘레 화단 (남쪽은 길 입구만 열어 둠)
   for (let x = -3.5; x <= 3.6; x += 1.4) { cyl(.12, .12, .8, 8, phong(0xf4f1ea), x, .4, 74.6); box(.26, .12, .26, phong(0xe2522c), x, .62, 74.6); }
   const rim = phong(0xd9cdb6), hedge = phong(0x5f9a52);
   box(U.x1 - U.x0, .5, .7, rim, cx, .25, U.z1 + .35); box(U.x1 - U.x0 - .2, .45, .5, hedge, cx, .62, U.z1 + .35);
   box(.7, .5, U.z1 - U.z0, rim, U.x1 + .35, .25, cz); box(.5, .45, U.z1 - U.z0 - .2, hedge, U.x1 + .35, .62, cz);
+  box(U.x1 - 11.6 + .7, .5, .7, rim, (11.6 + U.x1 + .7) / 2, .25, U.z0 - .35); box(U.x1 - 11.6 + .5, .45, .5, hedge, (11.6 + U.x1 + .7) / 2, .62, U.z0 - .35);
+  // 소품
+  propFountain(UP.fountain[0], UP.fountain[1]);
+  UP.trees.forEach(([x, z], k) => propTree(x, z, .95 + (k % 2) * .15, null, k === 2));
+  for (const [x, z] of UP.lamps) propLamp(x, z, [-1, 0]);
+  for (const [x, z] of UP.pots) propPot(x, z);
+  for (const [x, z, w, d] of UP.beds) propPlanter(x, z, w, d);
+  for (const [x, z, ry] of UP.benches) propBench(x, z, ry);
   // 동사무소 건물
   const O = OFFICE, g = new T3.Group(); g.position.set(O.x, 0, O.z); scene.add(g);
   box(O.w, 6.6, O.d, phong(0xf1e6cf), 0, 3.3, 0, g);
@@ -7169,13 +7289,13 @@ function buildUptown() {
   box(.1, .1, 2.4, phong(0x2f4a6a), -O.w / 2 - .08, 2.55, 0, g);
   for (let k = 0; k < 3; k++) box(.5, .12, 3.4 - k * .3, phong(0xd9d2c4), -O.w / 2 - .25 - (2 - k) * .45, .06 + k * .12, 0, g);   // 계단
   const sign = makeSign(5.2, 1.25, SIGNS.office); sign.position.set(O.x - O.w / 2 - .06, 3.35 + .02, O.z); sign.rotation.y = -Math.PI / 2; scene.add(sign);
-  // 마을 깃발 (물고기 깃발) + 게시판
-  cyl(.06, .07, 6, 8, phong(0xd9d9d9), 10.2, 3, 57.6);
+  // 마을 깃발 (물고기 깃발, 두 건물 사이 정원) + 게시판 (거리 쪽을 보게)
+  const [fx, fz] = UP.flag;
+  cyl(.06, .07, 6, 8, phong(0xd9d9d9), fx, 3, fz); cyl(.22, .26, .2, 10, cmat(0xb8ae9a), fx, .2, fz);
   const flag = new T3.Mesh(new T3.PlaneGeometry(1.6, 1), new T3.MeshBasicMaterial({ side: T3.DoubleSide, map: canvasTex(128, 80, (c) => { c.fillStyle = "#2f6f86"; c.fillRect(0, 0, 128, 80); c.fillStyle = "#fff6dc"; c.beginPath(); c.ellipse(60, 40, 30, 16, 0, 0, 7); c.fill(); c.beginPath(); c.moveTo(86, 40); c.lineTo(108, 24); c.lineTo(108, 56); c.fill(); c.fillStyle = "#132f38"; c.beginPath(); c.arc(44, 36, 4, 0, 7); c.fill(); }, 1, 1) }));
-  flag.position.set(10.2, 5.4, 58.42); flag.rotation.y = Math.PI / 2; scene.add(flag); UPTOWN_FLAG.m = flag;
-  const board = makeSign(1.8, 1.2, SIGNS.notice, { cw: 512 }); board.position.set(10.6, 1.5, 46.2); board.rotation.y = -Math.PI / 2; scene.add(board);
-  cyl(.05, .05, 1.8, 6, phong(0x5a3f2a), 10.62, .9, 45.4); cyl(.05, .05, 1.8, 6, phong(0x5a3f2a), 10.62, .9, 47);
-  for (const z of [44, 60]) { box(1.6, .1, .5, phong(0x9a6a40), 9.4, .5, z); for (const dx of [-.65, .65]) box(.1, .5, .45, phong(0x3a2a20), 9.4 + dx, .25, z); }
+  flag.position.set(fx, 5.4, fz + .82); flag.rotation.y = Math.PI / 2; scene.add(flag); UPTOWN_FLAG.m = flag;
+  const board = makeSign(1.8, 1.2, SIGNS.notice, { cw: 512 }); board.position.set(7.05, 1.5, 47.6); board.rotation.y = -Math.PI / 2; scene.add(board);
+  cyl(.05, .05, 1.8, 6, phong(0x5a3f2a), 7.07, .9, 46.8); cyl(.05, .05, 1.8, 6, phong(0x5a3f2a), 7.07, .9, 48.4);
   const hit = new T3.Mesh(new T3.BoxGeometry(O.w, 6.6, O.d), MAT.hit); hit.position.set(O.x, 3.3, O.z); hit.userData.pick = { kind: "office" }; scene.add(hit); pickables.push(hit);
   buildRealty();
 }
@@ -7223,6 +7343,7 @@ function homeWalkable(x, z) {
   const hm = S.homeDoc; if (!hm) return false;
   const G = homeGeom(hm);
   if (x < G.yardX0 + .4 || x > G.yardX1 - .4 || z < G.yardZ0 + .4 || z > G.yardZ1 - .4) return false;
+  if (HOMEG && HOMEG.block && solidHit(HOMEG.block, x, z)) return false;   // 마당 나무 · 꽃밭 · 정원등
   const inRoom = x > G.x0 + .15 && x < G.x1 - .15 && z > G.z0 + .15 && z < G.z1 - .15;
   const nearWall = x > G.x0 - .25 && x < G.x1 + .25 && z > G.z0 - .25 && z < G.z1 + .25 && !inRoom;
   if (nearWall) return Math.abs(x - HOME.x) < .75 && z > G.z1 - .5;   // 문틈
@@ -7293,6 +7414,22 @@ function buildHomeScene() {
   // 텃밭 (다음 업데이트)
   hm.plotsAt = [];
   for (let k = 0; k < H.plots; k++) { const col = k % 4, row = Math.floor(k / 4), side = col < 2 ? -1 : 1; const x = HOME.x + side * (2.6 + (col % 2) * 1.2), z = G.z1 + 1.8 + row * 1.2; hm.plotsAt.push({ x, z }); box(1, .12, 1, phong(0x7a5a3c), x, .06, z, root); }
+  // 마당 꾸미기: 나무 · 집 앞 관목 · 담장 아래 꽃밭 · 디딤돌 옆 정원등 · 대문 기둥 · 울타리 밖 숲
+  const block = HOMEG.block = [];
+  [[G.x0 - 3, G.z0 - 3.2], [G.x1 + 3, G.z0 - 3.2], [G.yardX0 + 1.8, G.z1 + 5.8], [G.yardX1 - 1.8, G.z1 + 5.8]].forEach(([x, z], k) => { propTree(x, z, .85 + (k % 2) * .2, root, k === 1 || k === 2); block.push([x, z, .5, .5]); });
+  for (const s of [-1, 1]) {
+    for (let x = HOME.x + s * 1.3; Math.abs(x - HOME.x) < H.w / 2 - .3; x += s * .9) propAdd(new T3.Mesh(new T3.IcosahedronGeometry(.32, 1), cmat(0x4f8f4a)), x, .3, G.z1 + .5, root).scale.y = .8;
+    const xa = HOME.x + s * 3.7, xb = s < 0 ? G.yardX0 + .6 : G.yardX1 - .6, bx = (xa + xb) / 2, bw = Math.abs(xb - xa);
+    propPlanter(bx, G.yardZ1 - .65, bw, .6, root, .14); block.push([bx, G.yardZ1 - .65, bw / 2 + .1, .4]);
+    for (const z of [G.z1 + 2.4, G.z1 + 6.4]) { propBollard(HOME.x + s * .85, z, root); block.push([HOME.x + s * .85, z, .2, .2]); }
+    const px = HOME.x + s * 1.45; box(.36, 1.1, .36, cmat(0xd9cdb6), px, .55, G.yardZ1, root); box(.44, .08, .44, cmat(0x8a7a66), px, 1.14, G.yardZ1, root);
+    propAdd(new T3.Mesh(new T3.SphereGeometry(.15, 10, 8), propBulb()), px, 1.32, G.yardZ1, root);
+  }
+  for (let k = 0; k < 18; k++) {
+    const a = k / 18 * Math.PI * 2 + (k % 3) * .17, r = 21 + (k * 7 % 5) * 2.6, x = HOME.x + Math.cos(a) * r, z = HOME.z + Math.sin(a) * r;
+    if (Math.abs(x - HOME.x) < 6 && z > HOME.z) continue;   // 대문 앞은 시원하게 비워 둠
+    propTree(x, z, .9 + (k % 4) * .15, root, k % 3 === 0);
+  }
   // 방
   const floorM = lam(new T3.Color(FLOORS[hm.floor][1]).getHex()), wallM = phong(new T3.Color(WALLS[hm.wall]).getHex()), trim = phong(0x6a4a2a);
   const fl = box(H.w, .1, H.d, floorM, HOME.x, .06, HOME.z, root); HOMEG.grounds.push(fl);
