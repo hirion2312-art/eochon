@@ -1615,7 +1615,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.66.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.67.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -5207,10 +5207,10 @@ function restTick(t, dt) {
   const near = restNear(), now = Date.now(), d = restDay();
   if (S.restOpen && now - (S.lastInput || now) > REST_IDLE_MS) { setRestOpen(false); toast([h("b", { text: "💤 자리를 비운 것 같아 장사를 마쳤어요" }), h("div", { class: "muted", style: "font-size:12px", text: "15분 동안 화면을 안 누르면 손님 · 알바가 멈춰요 · 다시 하려면 「장사 시작」" })], null, 9000); }   // 돈 복사 방지 (v1.58)
   if (near !== !!S.restNearOn) { S.restNearOn = near; updateRestBar(); }
-  // 손님 오기 (가게 가까이 있을 때만 영업해요)
+  // 손님 오기 (v1.67: 주인이 멀리 있어도 영업해요 · 단, 15분 무입력 자동 종료는 돈 복사 방지라 그대로예요)
   const cap = REST_LV[P.rest.lv].tickets, busy = S.restGuests.length;
   const freeSeats = REST_SEATS.map((s, i) => i).filter(i => !S.restGuests.some(gu => gu.si === i)).slice(0, REST_LV[P.rest.lv].seats);
-  if (S.restOpen && near && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length && d.tickets < REST_CFG.dayTickets) {
+  if (S.restOpen && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length && d.tickets < REST_CFG.dayTickets) {
     const r = pickTicketRecipe();
     if (r) {
       const si = pick(freeSeats), seat = REST_SEATS[si];
@@ -5515,7 +5515,7 @@ function tryPlateDry(it) { const pl = restK().plate; return !pl.dish && plateCom
 function restStaffTick(t, dt) {
   if (S.restSlot < 0 || !P.rest.staff.length) return;
   if (S.restStaffB.size !== P.rest.staff.length) restStaffSync();
-  const now = Date.now(), working = S.restOpen && restNear();
+  const now = Date.now(), working = S.restOpen;   // v1.67: 주인이 근처에 없어도 알바가 일해요
   for (const s of P.rest.staff) {
     const sb = S.restStaffB.get(s.id); if (!sb) continue;
     if (sb.busy && now >= sb.busy) { const fn = sb.fn; sb.busy = 0; sb.fn = null; sb.act = ""; try { fn && fn(); } catch (e) { console.warn("staff", e); } restChanged(); }
