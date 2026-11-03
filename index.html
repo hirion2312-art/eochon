@@ -1344,6 +1344,9 @@ input,select,textarea{background-color:rgba(255,255,255,.07);border-color:var(--
 .tier.t4{color:#2e2200}
 /* 메뉴 타일 · 카드도 비치는 유리 조각처럼 */
 .mtile,.card,.listrow{box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+/* v1.40: 오른쪽 아래 낚시 현황판 · 걸어 다닐 때 조작 안내는 없앴어요 (의뢰 · 출석 · 초보 수첩은 아래 막대 · 메뉴에 있어요) */
+.hud.stat{display:none!important}
+#hint.idle{display:none}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 </style>
 
@@ -1469,7 +1472,7 @@ input,select,textarea{background-color:rgba(255,255,255,.07);border-color:var(--
   <button class="cutskip" type="button">건너뛰기 ▶</button>
 </div>
 <div class="xhair" aria-hidden="true"></div>
-<div class="mlocktip" id="mlockTip" hidden>🖱️ 마우스로 둘러봐요 · 가운데 점으로 가리키고 클릭 · 이동은 WASD · <b>Esc</b>로 커서 꺼내기</div>
+<div class="mlocktip" id="mlockTip" hidden>🖱️ 마우스로 둘러봐요 · 가운데 점으로 가리키고 클릭 · 이동은 WASD · <b>우클릭</b>이나 <b>Alt</b>로 커서 꺼내기 · 다시 고정</div>
 <div class="fade" id="fade" hidden></div>
 <div class="coach" id="coach" hidden role="dialog" aria-modal="true" aria-label="안내"><div class="ccard" id="coachCard"></div></div>
 
@@ -1486,7 +1489,7 @@ input,select,textarea{background-color:rgba(255,255,255,.07);border-color:var(--
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.39.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.40.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -3470,7 +3473,7 @@ function updateActionUI() {
   if (showStand) sb.textContent = S.card ? "명함 거두기" : coopGuest ? "함께 낚시 그만" : onBoat() ? (S.boat.status === "sailing" ? "중도하차" : "배에서 내리기") : S.myStall >= 0 ? (npcActive(S.stalls[S.myStall]) ? "알바에게 맡기고 자리 뜨기" : "노점 닫기") : "일어나기";
   syncUIState();
 }
-function doAction() { if (curAction) { const a = curAction; curAction = null; a.run(); actKey = ""; } }
+function doAction() { if (curAction) { const a = curAction; curAction = null; a.run(); actKey = "-"; } }   // 다음 프레임에 버튼을 꼭 다시 그려요 (팔고 나서 할 일이 없으면 숨김)
 let lockHintAt = 0;
 function lockedHint() {
   if (Date.now() - lockHintAt < 4000) return;
@@ -7452,6 +7455,7 @@ function bindInput() {
   const ptrs = new Map(); let down = null, pinch0 = 0, dist0 = 10;
   cv.addEventListener("pointerdown", (e) => {
     // 마우스 고정 시점: 잠기지 않았으면 이 클릭으로 잠그고, 잠긴 동안 클릭은 가운데 점을 누른 거예요
+    if (e.pointerType === "mouse" && S.mouseLook && e.button === 2) return;   // 오른쪽 버튼은 커서 꺼내기/고정 (마우스 고정 시점)
     if (e.pointerType === "mouse" && S.mouseLook && !S.title && e.button === 0) {
       if (!mouseLocked()) { try { cv.requestPointerLock(); } catch {} return; }
       const r = cv.getBoundingClientRect(); tapAt(r.left + r.width / 2, r.top + r.height / 2); return;
@@ -7638,6 +7642,7 @@ function syncUIState() {
 function updateHint() {
   const hint = $("hint");
   if (!R) return;
+  hint.classList.toggle("idle", !(S.coop && S.coop.stage !== "inviting") && !onBoat() && !fishingNow() && !(S.myStall >= 0) && !ME.seat);   // 그냥 걸어 다닐 땐 조작 안내를 띄우지 않아요 (v1.40)
   if (S.coop && S.coop.stage !== "inviting") hint.textContent = "함께 낚시 중 · 「!」가 뜨면 둘 중 누구든 챔질 → 둘 다 손맛을 버텨야 잡혀요";
   else if (onBoat()) hint.textContent = S.boat.status === "sailing" ? "멍낚호 · 깊은 바다에 도착하면 자동으로 낚시를 시작해요" : "멍낚호 탑승 중 · 뱃삯이 모이면 바로 출항해요";
   else if (fishingNow()) hint.textContent = S.phase === "ready" || S.phase === "charge" ? "꾹 눌렀다가 초록 칸에서 떼면 완벽한 캐스팅! 멀리 던질수록 좋은 물고기" : "「!」가 뜨면 챔질 → 꾹 눌러 감고, 돌진·점프하면 손 떼기 · 과열을 조심해요";
@@ -9819,7 +9824,7 @@ SHEETS.settings = (body) => {
   body.append(h("div", { class: "sec", text: "소리 · 화면" }), h("div", { class: "setlist" },
     toggleRow("🔊 물소리 · 효과음 · 음악", "바닷소리와 배경음악", S.sound, () => $("soundBtn").click()),
     toggleRow("🌗 그림자", "끄면 오래된 휴대폰에서 더 부드러워요", S.hq, () => setHq(!S.hq)),
-    matchMedia("(pointer: fine)").matches ? toggleRow("🖱️ 마우스 고정 시점", "화면을 클릭하면 커서가 숨고 마우스대로 시점이 돌아요 · 가운데 점으로 가리키고 클릭 · Esc로 풀기 · 끄면 끌어서 돌리고 클릭한 곳으로 걸어요", S.mouseLook, () => { S.mouseLook = !S.mouseLook; lsSet("mn.mlook", S.mouseLook); if (!S.mouseLook) unlockMouse(); refreshSheet(true); }) : null,
+    matchMedia("(pointer: fine)").matches ? toggleRow("🖱️ 마우스 고정 시점", "화면을 클릭하면 커서가 숨고 마우스대로 시점이 돌아요 · 가운데 점으로 가리키고 클릭 · 우클릭이나 Alt로 커서 꺼내기/다시 고정 · 끄면 끌어서 돌리고 클릭한 곳으로 걸어요", S.mouseLook, () => { S.mouseLook = !S.mouseLook; lsSet("mn.mlook", S.mouseLook); if (!S.mouseLook) unlockMouse(); refreshSheet(true); }) : null,
     h("button", { class: "setrow", onclick: () => { closeSheet(); setMung(true); } }, h("span", { class: "grow" }, h("b", { text: "🧘 멍 모드" }), h("small", { text: "화면만 보며 멍 때리기 · 끝내기 버튼으로 돌아와요" })), h("span", { class: "chev", text: "›" }))));
   body.append(h("div", { class: "sec", text: "낚시" }), h("div", { class: "setlist" },
     h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "⏱️ 입질 속도" }), h("small", { text: "찌를 던지고 입질이 올 때까지" })),
@@ -10971,7 +10976,8 @@ function endArrival() {
   fade(() => { $("cutscene").hidden = true; $("cutscene").classList.remove("play", "end"); c.done(); });
 }
 /* ---------- 마우스 고정 시점 (PC) ----------
-   화면을 클릭하면 커서가 숨고 마우스대로 시점이 돌아요. 가운데 점이 가리키는 곳을 클릭하면 그곳을 누른 거예요. Esc로 풀려요.
+   화면을 클릭하면 커서가 숨고 마우스대로 시점이 돌아요. 가운데 점이 가리키는 곳을 클릭하면 그곳을 누른 거예요.
+   커서 꺼내기 · 다시 고정: 마우스 오른쪽 버튼 또는 Alt (v1.40 — Esc까지 손을 옮기지 않아도 돼요). Esc도 그대로 돼요.
    창 · 안내 카드가 뜨면 저절로 풀려요. 설정에서 끌 수 있어요 */
 S.mouseLook = matchMedia("(pointer: fine)").matches && lsGet("mn.mlook", true);
 const mouseLocked = () => document.pointerLockElement === cv;
@@ -10980,6 +10986,20 @@ document.addEventListener("pointerlockchange", () => {
   const on = mouseLocked(); document.body.classList.toggle("mlock", on);
   if (on) { const tip = $("mlockTip"); tip.hidden = false; clearTimeout(tip._t); tip._t = setTimeout(() => { tip.hidden = true; }, 4200); }
 });
+function lockMouse() { if (!S.mouseLook || S.title || S.sheet || S.coach || S.cut || S.creating) return; try { const q = cv.requestPointerLock(); if (q && q.catch) q.catch(() => {}); } catch {} }
+function toggleMouse() { if (mouseLocked()) unlockMouse(); else lockMouse(); }
+// 오른쪽 버튼: 잠겨 있으면 커서를 꺼내고, 풀려 있을 때 게임 화면에서 누르면 다시 고정
+document.addEventListener("mousedown", (e) => {
+  if (e.button !== 2 || !S.mouseLook || S.title) return;
+  if (mouseLocked() || e.target === cv) { e.preventDefault(); e.stopPropagation(); toggleMouse(); }
+}, true);
+cv.addEventListener("contextmenu", (e) => { if (S.mouseLook) e.preventDefault(); });
+// Alt: 누를 때마다 커서 꺼내기 ↔ 다시 고정 (채팅 · 글 쓰는 중엔 안 해요)
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Alt" || !S.mouseLook || S.title || (e.target && e.target.closest && e.target.closest("input,textarea,select"))) return;
+  e.preventDefault(); if (!e.repeat) toggleMouse();
+});
+document.addEventListener("keyup", (e) => { if (e.key === "Alt" && S.mouseLook) e.preventDefault(); });   // 브라우저 메뉴가 뜨지 않게
 document.addEventListener("mousemove", (e) => {
   if (!mouseLocked() || S.title) return;
   cam.yawGoal = null; cam.yaw -= e.movementX * .0026; cam.pitch = clamp(cam.pitch + e.movementY * .002, .08, 1.25);
