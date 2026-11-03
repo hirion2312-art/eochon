@@ -7,3 +7,7 @@ web/.firebase/
 *.log
 node_modules/
 .DS_Store
+
+# 원본 에셋 묶음 · 기획 PDF (저장소에는 고른 것만 a/rest/에)
+restaurant-assets-*.zip
+*.pdf
