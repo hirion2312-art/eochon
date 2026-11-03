@@ -1601,7 +1601,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.50.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.50.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -5003,7 +5003,7 @@ async function enterRest(i) {
   fade(() => {
     S.homeHost = "rest"; S.homeDoc = null; S.restSlot = i; S.restDoor = { x: STALLS[i].x + 2.6, z: STALLS[i].z };
     buildRestScene(true);
-    ME.x = REST_CFG.O.x; ME.z = REST_CFG.O.z + RD - 1; ME.ry = Math.PI; ME.target = null; ME.st = "idle";
+    ME.x = REST_CFG.O.x; ME.z = REST_CFG.O.z + RD - 2; ME.ry = Math.PI; ME.target = null; ME.st = "idle";
     cam.yawGoal = 0; if (cam.t) cam.t.set(ME.x, 1.1, ME.z);
     // 다른 사람에게는 포차 문 앞에 서 있는 것으로 보여요 (안은 나만의 공간)
     pushPresence({ x: S.restDoor.x, z: S.restDoor.z, ry: -Math.PI / 2, st: "idle", seat: null, rest: i + 1 });
