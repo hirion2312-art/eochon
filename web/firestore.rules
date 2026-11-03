@@ -46,6 +46,13 @@ service cloud.firestore {
       allow delete: if signedIn() && old(86400000);
     }
     match /records/{id} { allow read, write: if signedIn(); }
+    // 마이 홈: 집 모양은 주인만 쓰고 모두 읽음, 방명록은 쓴 사람이 자기 이름으로만
+    match /houses/{uid} { allow read: if signedIn(); allow write: if me(uid); }
+    match /guestbook/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.from == request.auth.uid && request.resource.data.text is string && request.resource.data.text.size() <= 100;
+      allow delete: if signedIn() && (resource.data.from == request.auth.uid || resource.data.host == request.auth.uid || isAdmin());
+    }
     // 명예의 전당: 각자 자기 기록만 올리고, 운영자는 지울 수 있음
     match /rank/{uid} { allow read: if signedIn(); allow write: if me(uid); allow delete: if me(uid) || isAdmin(); }
     match /stalls/{id} { allow read, write: if signedIn(); }
