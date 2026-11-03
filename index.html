@@ -1615,7 +1615,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.61.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.61.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -5421,9 +5421,22 @@ function plateCompatible(items) {   // 이 재료들이 접시에 함께 담겨�
   const cands = (S.restTickets || []).filter(t => !t.served).map(t => RECIPE[t.r]);
   return cands.some(r => items.every(it => itemFits(r, it)) && r.ing.every(([id, n]) => items.filter(it => it.fish === id).length <= n));
 }
-function staffTarget(it) {   // 이 재료가 갈 다음 곳: 조리 스테이션 또는 접시
-  const r = (S.restTickets || []).filter(t => !t.served).map(t => RECIPE[t.r]).find(r => r.ing.some(([id]) => id === it.fish) && (!r.chop || it.chopped));
-  if (!r) return null;
+function staffFocus() {   // 알바가 지금 만들 요리 하나 · 새 주문이 와도 이걸 끝낼 때까지 바꾸지 않아요 (v1.61.1 순서 꼬임 수정)
+  const tks = (S.restTickets || []).filter(t => !t.served).sort((a, b) => a.t0 - b.t0); if (!tks.length) return null;
+  const k = restK();
+  if (k.plate.dish) { const tk = tks.find(t => t.r === k.plate.dish.id); if (tk) return tk; }
+  if (k.plate.items.length) { const tk = tks.find(t => k.plate.items.every(it => itemFits(RECIPE[t.r], it))); if (tk) return tk; }
+  const blocked = (tk) => RECIPE[tk.r].ing.some(([id, n]) => kitchenCount(id) < n && !P.bag.some(b => b.fishId === id) && !canAutoBuy(id));   // 재료가 아예 없어 만들 수 없는 주문
+  const inK = new Set(); if (k.board[0]) inK.add(k.board[0].it.fish); for (const s of ["boil", "fry", "grill"]) for (const x of k[s]) inK.add(x.it.fish);
+  if (inK.size) { const tk = tks.find(t => !blocked(t) && RECIPE[t.r].ing.some(([id]) => inK.has(id))); if (tk) return tk; }   // 이미 시작한 요리 먼저
+  for (const tk of tks) if (!blocked(tk)) return tk;   // 만들 수 있는 가장 오래된 주문
+  return tks[0];
+}
+const staffFocusHas = (it) => { const tk = staffFocus(); return !!tk && RECIPE[tk.r].ing.some(([id]) => id === it.fish); };
+function staffTarget(it) {   // 이 재료가 갈 다음 곳: 조리 스테이션 또는 접시 (지금 만드는 요리 기준)
+  const tk = staffFocus(); if (!tk) return null;
+  const r = RECIPE[tk.r];
+  if (!r.ing.some(([id]) => id === it.fish) || (r.chop && !it.chopped)) return null;
   if (r.cook && it.cook !== r.cook) return r.cook;
   return "plate";
 }
@@ -5435,13 +5448,10 @@ function tryPlate(it, sf) {
   if (done) { let q = done.cook && pl.items.every(x => x.q === "perfect") ? "perfect" : "normal"; if (q === "normal" && sf && Math.random() < REST_STAFF[sf.g].up) q = "perfect"; pl.dish = { id: done.id, q, items: pl.items }; pl.items = []; restSnd("complete_1", .45); }
   return true;
 }
-function staffNeed() {   // 주문에 필요한데 주방에 아직 없는 어종 (오래된 주문 먼저)
-  const tks = (S.restTickets || []).filter(t => !t.served).sort((a, b) => a.t0 - b.t0), have = new Map();
-  for (const tk of tks) for (const [id, n] of RECIPE[tk.r].ing) {
-    const inK = kitchenCount(id) + (have.get(id) || 0);
-    let need = 0; for (const t2 of tks) for (const [id2, n2] of RECIPE[t2.r].ing) if (id2 === id) need += n2;
-    if (need > inK && (P.bag.some(b => b.fishId === id) || canAutoBuy(id))) return { id, r: RECIPE[tk.r] };
-  }
+function staffNeed() {   // 지금 만드는 요리에 필요한데 주방에 아직 없는 어종
+  const tk = staffFocus(); if (!tk) return null;
+  const r = RECIPE[tk.r];
+  for (const [id, n] of r.ing) if (kitchenCount(id) < n && (P.bag.some(b => b.fishId === id) || canAutoBuy(id))) return { id, r };
   return null;
 }
 function staffStep(s, sb) {   // 할 일 하나를 골라요 · 역할은 "먼저 할 일"만 정하고, 무슨 역할이든 혼자서 처음부터 끝까지 다 만들 수 있어요 (v1.61)
@@ -5451,6 +5461,9 @@ function staffStep(s, sb) {   // 할 일 하나를 골라요 · 역할은 "먼�
     for (const id of ["boil", "fry", "grill"]) for (const x of k[id]) {
       const g = cookGauge(x); if (g < 1) continue;
       const inWin = g <= 1 + REST_CFG.perfectWin; if (perfectOnly && !inWin) continue;
+      const fc = staffFocus(), fr = fc ? RECIPE[fc.r] : null;
+      const forPlate = !!fr && fr.ing.some(([fid]) => fid === x.it.fish) && (!fr.cook || fr.cook === id);
+      if (fr && !forPlate) { doIt(700, id, "정리", () => { if (!k[id].includes(x)) return; k[id] = k[id].filter(y => y !== x); returnToBag(x.it); }); return true; }   // 지금 만드는 요리의 재료가 아니면 도로 가방에 · 순서가 꼬이지 않게
       if (!tryPlateDry(x.it)) continue;
       doIt(700, id, "꺼내기", () => { if (!k[id].includes(x)) return; x.it.cook = id; x.it.q = inWin && Math.random() < G.perfect ? "perfect" : "normal"; k[id] = k[id].filter(y => y !== x); if (!tryPlate(x.it, s)) k.board.length ? returnToBag(x.it) : (k.board = [{ it: x.it, t0: 0 }]); });
       return true;
@@ -5461,6 +5474,7 @@ function staffStep(s, sb) {   // 할 일 하나를 골라요 · 역할은 "먼�
     if (k.plate.dish) { const tk = (S.restTickets || []).find(t => t.r === k.plate.dish.id && !t.served); if (tk) { doIt(1300, "pass", "서빙", () => { const pd = k.plate.dish; if (!pd) return; k.plate.dish = null; serveDish({ dish: pd.id, q: pd.q, items: pd.items }, true); }); return true; } }
     if (cookTake(false)) return true;
     const b = k.board[0];
+    if (b && staffFocus() && !staffFocusHas(b.it)) { doIt(600, "board", "정리", () => { if (k.board[0] !== b) return; k.board = []; returnToBag(b.it); }); return true; }   // 다른 요리 재료가 도마를 막고 있으면 치워요
     if (b && b.it.chopped) { const tg = staffTarget(b.it);
       if (tg === "plate" && tryPlateDry(b.it)) { doIt(900, "plate", "담기", () => { if (k.board[0] !== b) return; k.board = []; if (!tryPlate(b.it, s)) k.board = [b]; }); return true; }
       if (tg && tg !== "plate" && k[tg].length < REST_CFG.stationCap[tg]) { doIt(900, tg, COOK_KO[tg], () => { if (k.board[0] !== b) return; k.board = []; k[tg].push({ it: b.it, t0: Date.now(), cook0: tg }); restSnd(tg === "boil" ? "boil_1" : tg === "fry" ? "fry_1" : "grill_1", .3); }); return true; } }
@@ -5468,7 +5482,7 @@ function staffStep(s, sb) {   // 할 일 하나를 골라요 · 역할은 "먼�
   };
   const stepPrep = () => {   // 썰기 · 냉장고에서 재료 가져오기
     const b = k.board[0];
-    if (b && !b.it.chopped) { doIt(330, "board", "썰기", () => { if (k.board[0] !== b) return; b.it.hits++; restSnd("chop_" + (1 + (b.it.hits % 4)), .25); if (b.it.hits >= chopHitsFor(b.it.fish)) b.it.chopped = true; }); return true; }
+    if (b && !b.it.chopped && (!staffFocus() || staffFocusHas(b.it))) { doIt(330, "board", "썰기", () => { if (k.board[0] !== b) return; b.it.hits++; restSnd("chop_" + (1 + (b.it.hits % 4)), .25); if (b.it.hits >= chopHitsFor(b.it.fish)) b.it.chopped = true; }); return true; }
     const nd = staffNeed(); if (!nd) return false;
     if (nd.r.chop) { if (k.board.length) return false; doIt(1400, "fridge", "재료 꺼내기", () => { if (k.board.length) return; const it = staffTake(nd.id); if (it) k.board = [{ it, t0: 0 }]; }); return true; }
     const st = nd.r.cook; if (st && k[st].length < REST_CFG.stationCap[st]) { doIt(1400, "fridge", "재료 꺼내기", () => { const it = staffTake(nd.id); if (it) { k[st].push({ it, t0: Date.now(), cook0: st }); restSnd("fry_1", .3); } }); return true; }
