@@ -1615,7 +1615,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.61.2";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.62.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -1626,14 +1626,15 @@ const TIERS = [
 ];
 const TIER_VARS = ["--t0", "--t1", "--t2", "--t3", "--t4", "--t5"];
 const BAITS = [
-  { id: "worm",   name: "지렁이",     price: 0,    p: [80, 18, 2, 0, 0],      note: "무료 · 무한" },
-  { id: "shrimp", name: "새우",       price: 10,   p: [60, 30, 9, 1, 0] },
-  { id: "krill",  name: "크릴",       price: 25,   p: [50, 32, 15, 2.7, .3], lv: 2 },
-  { id: "paste",  name: "특제 떡밥",  price: 50,   p: [40, 35, 20, 4.5, 0.5], lv: 3 },
-  { id: "squid",  name: "생오징어",   price: 120,  p: [28, 32, 28, 10, 2], lv: 6 },
-  { id: "lure",   name: "황금 루어",  price: 300,  p: [20, 30, 30, 17, 3], lv: 9 },
-  { id: "legend", name: "전설의 미끼", price: 2000, p: [0, 10, 40, 35, 15], lv: 16 },
+  { id: "worm",   name: "지렁이",     price: 0,    p: [80, 18, 2, 0, 0],      note: "무료 · 무한", desc: "기본 미끼예요. 공짜라 떨어질 걱정이 없고, 대신 좋은 물고기는 거의 안 물어요." },
+  { id: "shrimp", name: "새우",       price: 10,   p: [60, 30, 9, 1, 0], desc: "지렁이보다 한 단계 위예요. 고급 물고기가 부쩍 늘어요." },
+  { id: "krill",  name: "크릴",       price: 25,   p: [50, 32, 15, 2.7, .3], lv: 2, desc: "희귀가 가끔 물고, 전설도 아주 가끔 나와요." },
+  { id: "paste",  name: "특제 떡밥",  price: 50,   p: [40, 35, 20, 4.5, 0.5], lv: 3, desc: "비법 반죽 떡밥이에요. 희귀 이상이 네 번에 한 번꼴로 물어요." },
+  { id: "squid",  name: "생오징어",   price: 120,  p: [28, 32, 28, 10, 2], lv: 6, desc: "싱싱한 오징어예요. 영웅급이 제법 나오는 대물 미끼예요." },
+  { id: "lure",   name: "황금 루어",  price: 300,  p: [20, 30, 30, 17, 3], lv: 9, desc: "금빛으로 번쩍여 대물을 부르고, 아주 가끔 신화급도 물어요." },
+  { id: "legend", name: "전설의 미끼", price: 2000, p: [0, 10, 40, 35, 15], lv: 16, desc: "전설 그 자체예요. 일반 물고기는 절대 안 물어요." },
 ];
+const MYTH_CHANCE = { lure: .0015, legend: .006 };   // 신화 등급 확률 · 상점 설명에도 이 숫자를 그대로 보여요
 const RELEASE = [
   { name: "피라미급", cost: 1000,   tier: 0, min: 5,   max: 30 },
   { name: "붕어급",   cost: 5000,   tier: 1, min: 20,  max: 60 },
@@ -1996,21 +1997,21 @@ const HAIRS = ["#2a2220", "#6b4226", "#c98d4b", "#e8c66a", "#7a4fa0", "#3d6fb0",
 const DISH_MAX = 30;
 
 const RODS = [
-  { id: "bamboo", name: "대나무 낚싯대", price: 0, lv: 1, tens: 1.0, slots: 0, color: 0xc9a25a, desc: "처음 받은 낚싯대. 채비는 달 수 없어요." },
-  { id: "fiber", name: "유리섬유 낚싯대", price: 1800, lv: 3, tens: 1.1, slots: 1, color: 0x2f8f5b, desc: "조금 더 버텨요 · 채비 1칸" },
-  { id: "carbon", name: "카본 낚싯대", price: 4200, lv: 7, tens: 1.18, slots: 1, color: 0x23356e, desc: "가볍고 질겨요 · 채비 1칸" },
-  { id: "iridium", name: "이리듐 낚싯대", price: 9000, lv: 12, tens: 1.27, slots: 2, color: 0x8448cc, desc: "대물을 위한 낚싯대 · 채비 2칸" },
-  { id: "legend", name: "전설의 낚싯대", price: 30000, lv: 25, tens: 1.38, slots: 3, color: 0xf2c230, desc: "바다의 왕을 노리는 낚싯대 · 채비 3칸" },
+  { id: "bamboo", name: "대나무 낚싯대", price: 0, lv: 1, tens: 1.0, slots: 0, color: 0xc9a25a, desc: "처음 받은 낚싯대예요. 채비는 달 수 없어요." },
+  { id: "fiber", name: "유리섬유 낚싯대", price: 1800, lv: 3, tens: 1.1, slots: 1, color: 0x2f8f5b, desc: "무난한 입문 낚싯대예요. 채비 1칸을 달 수 있어요." },
+  { id: "carbon", name: "카본 낚싯대", price: 4200, lv: 7, tens: 1.18, slots: 1, color: 0x23356e, desc: "가볍고 질긴 낚싯대예요. 오래 들고 있어도 편해요." },
+  { id: "iridium", name: "이리듐 낚싯대", price: 9000, lv: 12, tens: 1.27, slots: 2, color: 0x8448cc, desc: "대물을 위한 낚싯대예요. 채비 2칸을 달 수 있어요." },
+  { id: "legend", name: "전설의 낚싯대", price: 30000, lv: 25, tens: 1.38, slots: 3, color: 0xf2c230, desc: "바다의 왕을 노리는 낚싯대예요. 채비 3칸." },
   // v1.23 새 낚싯대 (레벨 구간 사이 · 최상위)
-  { id: "lure", name: "초보 루어대", price: 600, lv: 2, tens: 1.04, slots: 0, color: 0xe2522c, desc: "가볍게 휘두르는 연습용 · 대나무보다 조금 더 버텨요" },
-  { id: "rock", name: "갯바위 낚싯대", price: 3000, lv: 5, tens: 1.14, slots: 1, color: 0x6a5a4a, desc: "거친 바위틈 대물을 버티는 낚싯대 · 채비 1칸" },
-  { id: "surf", name: "원투 낚싯대", price: 6000, lv: 9, tens: 1.21, slots: 1, color: 0x178a8a, desc: "멀리 던지는 긴 낚싯대 · 채비 1칸" },
-  { id: "boat", name: "선상 낚싯대", price: 7500, lv: 11, tens: 1.24, slots: 2, color: 0x2a78bb, desc: "배 위에서 쓰는 짧고 굵은 낚싯대 · 채비 2칸" },
-  { id: "titan", name: "티타늄 지깅대", price: 14000, lv: 15, tens: 1.3, slots: 2, color: 0xa7adb3, desc: "깊은 바다 지깅용 · 채비 2칸" },
-  { id: "obsidian", name: "흑요석 낚싯대", price: 20000, lv: 19, tens: 1.34, slots: 2, color: 0x1b1b1f, desc: "검게 빛나는 단단한 낚싯대 · 채비 2칸" },
-  { id: "abyss", name: "심해의 낚싯대", price: 50000, lv: 32, tens: 1.42, slots: 3, color: 0x23356e, desc: "심해의 거물과 겨루는 낚싯대 · 채비 3칸" },
-  { id: "palace", name: "용궁 낚싯대", price: 90000, lv: 40, tens: 1.46, slots: 3, color: 0x3fd6cc, desc: "용궁에서 내려왔다는 옥빛 낚싯대 · 채비 3칸" },
-  { id: "myth", name: "신화의 낚싯대", price: 150000, lv: 48, tens: 1.5, slots: 3, color: 0xe57aa8, desc: "신화 속 물고기도 버티는 마지막 낚싯대 · 채비 3칸" },
+  { id: "lure", name: "초보 루어대", price: 600, lv: 2, tens: 1.04, slots: 0, color: 0xe2522c, desc: "가볍게 휘두르는 연습용이에요. 대나무보다 조금 더 버텨요." },
+  { id: "rock", name: "갯바위 낚싯대", price: 3000, lv: 5, tens: 1.14, slots: 1, color: 0x6a5a4a, desc: "거친 바위틈의 대물을 버티는 낚싯대예요." },
+  { id: "surf", name: "원투 낚싯대", price: 6000, lv: 9, tens: 1.21, slots: 1, color: 0x178a8a, desc: "멀리 던지는 긴 낚싯대예요." },
+  { id: "boat", name: "선상 낚싯대", price: 7500, lv: 11, tens: 1.24, slots: 2, color: 0x2a78bb, desc: "배 위에서 쓰는 짧고 굵은 낚싯대예요. 채비 2칸." },
+  { id: "titan", name: "티타늄 지깅대", price: 14000, lv: 15, tens: 1.3, slots: 2, color: 0xa7adb3, desc: "깊은 바다 지깅용이에요. 무거운 대물에 강해요." },
+  { id: "obsidian", name: "흑요석 낚싯대", price: 20000, lv: 19, tens: 1.34, slots: 2, color: 0x1b1b1f, desc: "검게 빛나는 단단한 낚싯대예요. 채비 2칸." },
+  { id: "abyss", name: "심해의 낚싯대", price: 50000, lv: 32, tens: 1.42, slots: 3, color: 0x23356e, desc: "심해의 거물과 겨루는 낚싯대예요. 채비 3칸." },
+  { id: "palace", name: "용궁 낚싯대", price: 90000, lv: 40, tens: 1.46, slots: 3, color: 0x3fd6cc, desc: "용궁에서 내려왔다는 옥빛 낚싯대예요. 채비 3칸." },
+  { id: "myth", name: "신화의 낚싯대", price: 150000, lv: 48, tens: 1.5, slots: 3, color: 0xe57aa8, desc: "신화 속 물고기도 버텨 내는 마지막 낚싯대예요. 채비 3칸." },
 ].sort((a, b) => a.lv - b.lv);
 /* 낚싯대 특성 (v1.27): 비쌀수록 확실히 좋아져요
    jump = 점프할 때 감고 있으면 바늘이 빠질 확률 배율(1 = 40%) · calm = 몸부림 때 줄에 걸리는 장력 줄이기(충격 흡수) · tire = 물고기가 지치는 속도 */
@@ -2021,28 +2022,28 @@ const ROD_PERK = {
 for (const r of RODS) { const [jump, calm, tire] = ROD_PERK[r.id] || [1, 0, 1]; Object.assign(r, { jump, calm, tire }); }
 const rodPerkText = (r) => r.id === "bamboo" ? "특별한 효과 없음" : "점프 때 바늘 빠짐 -" + Math.round((1 - r.jump) * 100) + "% · 몸부림 충격 -" + Math.round(r.calm * 100) + "% · 물고기가 " + Math.round((r.tire - 1) * 100) + "% 빨리 지쳐요";
 const REELS = [
-  { id: "basic", name: "기본 릴", price: 0, lv: 1, heat: 1, cool: .12, speed: 2.2, color: 0x8a8f96, desc: "처음 받은 릴" },
-  { id: "spin", name: "스피닝 릴", price: 1500, lv: 3, heat: .86, cool: .15, speed: 2.45, color: 0x2a78bb, desc: "덜 뜨거워지고 조금 빨리 감겨요" },
-  { id: "bait", name: "베이트 릴", price: 6000, lv: 10, heat: .72, cool: .19, speed: 2.7, color: 0xe2522c, desc: "과열에 강한 대물용 릴" },
-  { id: "power", name: "전동 릴", price: 18000, lv: 20, heat: .62, cool: .23, speed: 3.3, color: 0xf2c230, desc: "모터가 감아 줘요. 빠르고 잘 식어요" },
+  { id: "basic", name: "기본 릴", price: 0, lv: 1, heat: 1, cool: .12, speed: 2.2, color: 0x8a8f96, desc: "처음 받은 릴이에요. 무난하지만 큰 물고기와는 오래 싸우기 버거워요" },
+  { id: "spin", name: "스피닝 릴", price: 1500, lv: 3, heat: .86, cool: .15, speed: 2.45, color: 0x2a78bb, desc: "과열이 천천히 쌓이고 조금 빨리 감겨요" },
+  { id: "bait", name: "베이트 릴", price: 6000, lv: 10, heat: .72, cool: .19, speed: 2.7, color: 0xe2522c, desc: "과열에 강하고 잘 식어요. 큰 물고기와 오래 싸울 때 좋아요" },
+  { id: "power", name: "전동 릴", price: 18000, lv: 20, heat: .62, cool: .23, speed: 3.3, color: 0xf2c230, desc: "모터가 감아 줘요. 가장 빠르고 가장 잘 식는 최고급 릴이에요" },
 ];
 const LINES = [
-  { id: "nylon", name: "나일론 줄", price: 0, lv: 1, add: 0, color: "#e9e4d8", desc: "기본 낚싯줄" },
-  { id: "carbon", name: "카본 줄", price: 1200, lv: 4, add: .08, color: "#7fd6e0", desc: "끊어지기 전까지 8% 더 버텨요" },
-  { id: "pe", name: "합사", price: 5000, lv: 14, add: .16, color: "#ff8a3c", desc: "여러 가닥을 꼰 질긴 줄 · 16% 더 버텨요" },
+  { id: "nylon", name: "나일론 줄", price: 0, lv: 1, add: 0, color: "#e9e4d8", desc: "처음 받은 기본 낚싯줄이에요" },
+  { id: "carbon", name: "카본 줄", price: 1200, lv: 4, add: .08, color: "#7fd6e0", desc: "끊어지기 전까지 8% 더 버텨요. 가성비가 좋아요" },
+  { id: "pe", name: "합사", price: 5000, lv: 14, add: .16, color: "#ff8a3c", desc: "여러 가닥을 꼰 가장 질긴 줄이에요. 16% 더 버텨요" },
 ];
 const TACKLES = [
-  { id: "spinner", name: "스피너", price: 500, desc: "입질까지 걸리는 시간 -15%" },
-  { id: "trap", name: "트랩 찌", price: 500, desc: "줄이 끌려 나갈 때 과열이 20% 덜 쌓여요" },
-  { id: "cork", name: "코르크 찌", price: 750, desc: "물고기 체력 -15%" },
-  { id: "lead", name: "납 찌", price: 750, desc: "물고기가 잠수할 때 당기는 힘 -20%" },
+  { id: "spinner", name: "스피너", price: 500, desc: "입질이 15% 빨리 와요. 기다리는 시간이 줄어요" },
+  { id: "trap", name: "트랩 찌", price: 500, desc: "물고기가 줄을 끌고 나갈 때 과열이 20% 덜 쌓여요" },
+  { id: "cork", name: "코르크 찌", price: 750, desc: "물고기 체력이 15% 줄어요. 싸움이 그만큼 짧아져요" },
+  { id: "lead", name: "납 찌", price: 750, desc: "물고기가 잠수할 때 당기는 힘이 20% 줄어요" },
   { id: "barbed", name: "미늘 바늘", price: 1000, lv: 5, desc: "점프할 때 감고 있어도 바늘이 절대 안 빠져요 (점프가 어렵다면 이것!)" },
-  { id: "lamp", name: "집어등", price: 900, lv: 8, desc: "밤에 입질까지 걸리는 시간 -30%" },
-  { id: "swivel", name: "회전 도래", price: 1200, lv: 6, desc: "몸부림 때 줄에 걸리는 충격 -25% · 영웅 이상 대물에 줄이 덜 끊겨요" },
-  { id: "shock", name: "쇼크 리더", price: 1500, lv: 10, desc: "줄이 끊기기 전까지 버티는 힘 +8 · 질긴 목줄" },
+  { id: "lamp", name: "집어등", price: 900, lv: 8, desc: "밤에만 켜져요. 밤 입질이 30% 빨리 와요" },
+  { id: "swivel", name: "회전 도래", price: 1200, lv: 6, desc: "몸부림 때 줄에 걸리는 충격 -25%. 영웅 이상 대물에게 줄이 덜 끊겨요" },
+  { id: "shock", name: "쇼크 리더", price: 1500, lv: 10, desc: "줄이 끊기기 전까지 버티는 힘 +8%. 질긴 목줄이에요" },
 ];
 const TOOLS = [
-  { id: "net", name: "뜰채", price: 2500, lv: 5, desc: "남은 거리 3m부터 바로 건져 올려요" },
+  { id: "net", name: "뜰채", price: 2500, lv: 5, desc: "물고기를 거의 다 당겼을 때, 남은 거리 3m부터 바로 건져 올려요. 파이팅을 짧게 끝내요" },
   { id: "boots", name: "갯벌 장화", price: 800, lv: 1, desc: "썰물 때 갯벌에 들어갈 수 있어요" },
   { id: "hoe", name: "호미", price: 600, lv: 1, desc: "갯벌에서 바지락·맛조개·꽃게를 캐요" },
  { id: "license", name: "장사자격증", price: 20000, lv: 1, desc: "낭만포차에서 가게를 열 자격 · 한 번만 사면 평생 써요" },
@@ -3156,7 +3157,7 @@ function rollFish(baitId, opts) {
   const deep = atSea();
   const bait = BAITS.find(b => b.id === baitId) || BAITS[0];
   let tier = weighted(luckProbs(bait.p, (deep ? 30 : 0) + (S.castPow || 0) * 6 + (S.castPerfect ? 8 : 0) + (eventOn("rare") ? 15 : 0)));
-  { const mc = (baitId === "legend" ? .006 : baitId === "lure" ? .0015 : 0) * (deep ? 2 : 1) * (isNight() ? 1.5 : 1) * (eventOn("rare") ? 2 : 1); if (Math.random() < mc) tier = 5; }
+  { const mc = (MYTH_CHANCE[baitId] || 0) * (deep ? 2 : 1) * (isNight() ? 1.5 : 1) * (eventOn("rare") ? 2 : 1); if (Math.random() < mc) tier = 5; }
   const pool = allFish().filter(f => habitatW(f) > 0);
   let cands = pool.filter(f => f.tier === tier);
   while (!cands.length && tier > 0) { tier--; cands = pool.filter(f => f.tier === tier); }
@@ -9419,9 +9420,9 @@ function itemState(c, it) {
   return { own: !!P.tools[it.id], using: !!P.tools[it.id] };
 }
 function itemStat(c, it) {
-  if (c === "bait") return "희귀 이상 " + rareP(it) + "%" + (it.p[4] ? " · 전설 " + it.p[4] + "%" : "") + (it.id === "legend" || it.id === "lure" ? " · 신화 가능" : "");
+  if (c === "bait") return "희귀 이상 " + rareP(it) + "%" + (it.p[4] ? " · 전설 " + it.p[4] + "%" : "") + (MYTH_CHANCE[it.id] ? " · 신화 " + (Math.round(MYTH_CHANCE[it.id] * 10000) / 100) + "%" : "");
   if (c === "rod") return "버티는 힘 " + Math.round(it.tens * 100) + " · 채비 " + it.slots + "칸" + (it.id === "bamboo" ? "" : " · 점프 -" + Math.round((1 - it.jump) * 100) + "% · 몸부림 충격 -" + Math.round(it.calm * 100) + "%");
-  if (c === "reel") return "과열 " + Math.round(it.heat * 100) + "% · 감기 " + it.speed.toFixed(1) + "m/s";
+  if (c === "reel") return "과열 " + Math.round(it.heat * 100) + "% · 식기 " + Math.round(it.cool * 100) + " · 감기 " + it.speed.toFixed(1) + "m/s";
   if (c === "line") return it.add ? "줄 강도 +" + Math.round(it.add * 100) + "%" : "기본 강도";
   return it.desc;
 }
@@ -9447,10 +9448,12 @@ function shopPreview(cat, it) {
     h("h3", { text: it.name }), h("div", { class: "muted", style: "font-size:12.5px;line-height:1.5", text: it.desc || itemStat(cat, it) }));
   const cmp = h("div", { class: "cmp" });
   if (cat === "bait") box.append(probBar(it.p), h("div", { class: "plegend" }, it.p.map((v, i) => h("span", { style: "--c:var(" + TIER_VARS[i] + ")", text: TIERS[i].name + " " + v + "%" }))));
+  if (cat === "bait") { const mc = MYTH_CHANCE[it.id]; box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: mc ? "✨ 신화 " + (Math.round(mc * 10000) / 100) + "% · 심해에선 ×2, 밤엔 ×1.5, 희귀 축제 땐 ×2까지 올라가요" : "✨ 신화 등급은 이 미끼로는 안 나와요 · 황금 루어와 전설의 미끼만 신화를 노릴 수 있어요" }),
+    h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: "위 확률은 기본값이에요. 캐스트를 잘 던지거나 심해 · 이벤트에선 낮은 등급 확률이 위쪽으로 올라가고, 뽑힌 등급의 물고기가 지금 장소 · 시간에 없으면 아래 등급이 나와요." })); }
   if (cat === "rod") { const c0 = curRod(); cmp.append(...cmpRow("버티는 힘", c0.tens, it.tens, 1.5, v => Math.round(v * 100)), ...cmpRow("채비 칸", c0.slots, it.slots, 3, v => v + "칸"),
     ...cmpRow("점프 버티기", 1 - c0.jump, 1 - it.jump, .9, v => Math.round(v * 100) + "%"), ...cmpRow("몸부림 충격 흡수", c0.calm, it.calm, .3, v => Math.round(v * 100) + "%"), ...cmpRow("빨리 지치게", c0.tire - 1, it.tire - 1, .4, v => "+" + Math.round(v * 100) + "%"));
     box.append(h("div", { class: "muted", style: "font-size:12px", text: rodPerkText(it) })); }
-  if (cat === "reel") { const c0 = curReel(); cmp.append(...cmpRow("과열 견딤", 1 / c0.heat, 1 / it.heat, 1.7, v => Math.round(v * 100)), ...cmpRow("식는 속도", c0.cool, it.cool, .24, v => Math.round(v * 100)), ...cmpRow("감는 속도", c0.speed, it.speed, 3.4, v => v.toFixed(1))); }
+  if (cat === "reel") { const c0 = curReel(); cmp.append(...cmpRow("과열 견딤", 1 / c0.heat, 1 / it.heat, 1.7, v => Math.round(v * 100)), ...cmpRow("식는 속도", c0.cool, it.cool, .24, v => Math.round(v * 100)), ...cmpRow("감는 속도", c0.speed, it.speed, 3.4, v => v.toFixed(1))); box.append(h("div", { class: "muted", style: "font-size:12px", text: "과열 속도는 낮을수록, 식는 속도와 감는 속도는 높을수록 좋아요" })); }
   if (cat === "line") { const c0 = curLine(); cmp.append(...cmpRow("줄 강도", 1 + c0.add, 1 + it.add, 1.2, v => Math.round(v * 100))); }
   if (cmp.children.length) box.append(cmp, h("div", { class: "muted", style: "font-size:11px", text: "검은 선 = 지금 쓰는 것" }));
   if (["rod", "reel", "line", "tackle"].includes(cat)) box.append(rateBox(cat, it));
