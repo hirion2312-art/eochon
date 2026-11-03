@@ -1570,7 +1570,7 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.47.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.48.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -3462,9 +3462,10 @@ function stepMove(dt) {
   const len = Math.hypot(dx, dz);
   const was = ME.moving;
   if (len > 0.001) {
-    S.keyHold = keys.size ? (S.keyHold || 0) + dt : 0;   // 달리기 키는 없앴어요 (v1.42) · 1초 넘게 걸으면 저절로 달려요
-    const running = S.keyHold > 1 || (S.joy && S.joy.m > .92) || (ME.target && !keys.size && S.walkRun);
-    const sp = 5.5 * (running ? 1.85 : 1) * (S.joy && S.joy.m > .15 && !running ? .45 + .55 * S.joy.m : 1) * dt, stp = Math.min(sp, ME.target && !keys.size && !S.joy ? len : sp);
+    // (v1.48) PC: 기본은 걷기, Shift를 누르고 있으면 달리기 · 휴대폰: 조이스틱을 살짝 밀면 걷기, 끝까지(75% 넘게) 밀면 달리기
+    const joyOn = S.joy && S.joy.m > .15;
+    const running = joyOn ? S.joy.m > .75 : keys.size ? !!S.shift : !!(ME.target && (S.shift || S.walkRun));
+    const sp = 5.5 * (running ? 1.85 : 1) * (joyOn && !running ? .55 + .45 * Math.min(1, S.joy.m / .75) : 1) * dt, stp = Math.min(sp, ME.target && !keys.size && !S.joy ? len : sp);
     const ux = dx / len * stp, uz = dz / len * stp;
     let nx = ME.x + ux, nz = ME.z + uz;
     const ok = (x, z) => walkable(x, z) && !charBlocked(x, z);
@@ -6348,8 +6349,6 @@ function buildFishMarket() {
   for (let k = 0; k < 8; k++) { const st = box(2.2, .08, 1.0, cmat(k % 2 ? 0xf4f2ec : 0x2a7fa8), x1 + 1.0, 3.9 - .35, FMKT.door[0] + .5 + k * 1.0, det); st.rotation.z = -.32; }
   for (const z of FMKT.door) cyl(.06, .06, 3.4, 6, dark, x1 + 2.0, 1.7, z, det);
   const sg = makeSign(8.4, 2.2, SIGNS.market); sg.position.set(x1 + .2, H + 1.15, cz); sg.rotation.y = Math.PI / 2; FMKT_ROOF.add(sg);   // 안에 들어가면 지붕과 같이 숨김
-  [["자연산 활어", "#d8382c", z1 - 1.6], ["당일 경매 · 도매", "#1d5a7a", z0 + 1.6]].forEach(([t, c, z]) => { const bn = makeSign(.95, 3.0, { shape: "board", fill: { type: "grad", c: ["#fffaf0", "#f4ead6"] }, frame: { c }, t: { text: t.split("").join("\n"), font: "hyeon", color: c, size: .16, y: .5 } }, { cw: 200 });
-    bn.position.set(x1 + .2, 2.6, z); bn.rotation.y = Math.PI / 2; scene.add(bn); });
   // 가운데 얼음 매대
   plain(new T3.BoxGeometry(6.4, .85, 2.2), steel, -22, .43, -33, det); plain(new T3.BoxGeometry(6.2, .16, 2.0), cmat(0xeaf7fb), -22, .93, -33, det);
   for (let x = -24.9; x <= -19.1; x += .38) plain(GEOD.ice || (GEOD.ice = new T3.IcosahedronGeometry(.09, 0)), cmat(0xf4fbfd), x, 1.02, -33 + (Math.abs(x * 7) % 1.4 - .7), det);
@@ -6382,7 +6381,6 @@ function buildFishMarket() {
   const pl = new T3.PointLight(0xffd2a0, 0, 22, 1.6); pl.position.set(cx, 4, cz); scene.add(pl); glow.push({ light: pl, val: 1.2 });
   // 시장 앞 광장 (큰길 산책로와 이어짐)
   const pz = box(5, .06, L + 2, lam(0xffffff, { map: imgTex("a/slabs.jpg", 1.6, 7) }), -12.5, .035, cz); grounds.push(pz);
-  buildWholesaler();
 }
 // 진짜 물고기 모델이 준비되면 매대 · 수조를 채움 (직접 만든 3D 물고기)
 function decorateFishMarket() {
@@ -6451,7 +6449,7 @@ function buildWholesaler() {
 }
 const WH_CALLS = ["싱싱한 거 들어왔어~!", "자, 잡은 거 있으면 가져와!", "오늘 참돔 물 좋다~", "어이 거기 젊은 양반!", "눈 크다고 놀라지 마, 안경 때문이여!"];
 function wholesalerTick(t) {
-  const W = WHOLESALER; if (!W.B) return;
+  const W = WHOLESALER; if (!W.B) { if (GEO.body && GEO.head) buildWholesaler(); return; }   // 캐릭터 몸 모양(GEO)이 만들어진 다음에 세워요
   const near = Math.hypot(ME.x - FMKT.npc.x, ME.z - FMKT.npc.z), talking = S.sheet === "wholesale";
   W.B.rig.position.y = Math.abs(Math.sin(t * 1.6)) * .03; W.B.head.rotation.z = Math.sin(t * .9) * .06;
   const want = Math.atan2(ME.x - FMKT.npc.x, ME.z - FMKT.npc.z); W.B.g.rotation.y = near < 9 ? lerpAngle(W.B.g.rotation.y, want, .08) : lerpAngle(W.B.g.rotation.y, Math.PI / 2, .03);
@@ -11432,7 +11430,9 @@ document.addEventListener("keydown", (e) => {
   if (e.code === "KeyE" && !S.sheet) { doAction(); return; }
   if (KEYMAP[e.code] && !S.sheet) { keys.add(KEYMAP[e.code]); e.preventDefault(); }
 });
-document.addEventListener("keyup", (e) => { if (KEYMAP[e.code]) keys.delete(KEYMAP[e.code]); if (e.code === "Space") { reelHold(false); if (S.charge) releaseCast(); } });
+document.addEventListener("keydown", (e) => { if (e.key === "Shift") S.shift = true; }, true);
+window.addEventListener("blur", () => { S.shift = false; keys.clear(); });
+document.addEventListener("keyup", (e) => { if (e.key === "Shift") S.shift = false; if (KEYMAP[e.code]) keys.delete(KEYMAP[e.code]); if (e.code === "Space") { reelHold(false); if (S.charge) releaseCast(); } });
 { const rb = $("reelBtn");
   rb.addEventListener("pointerdown", (e) => { e.preventDefault(); try { rb.setPointerCapture(e.pointerId); } catch {} reelHold(true); });
   for (const ev of ["pointerup", "pointercancel", "lostpointercapture"]) rb.addEventListener(ev, () => reelHold(false));
