@@ -106,7 +106,8 @@ node tools/test/fight_sim.js
 
 - **출시 때 동사무소 · 마이 홈은 잠가요** (v1.23.0). `index.html`의 `LOCKED = { office: true, home: true }` 한 줄로 열고 닫아요.
   - 잠금은 `openSheet` · `goOffice` · `goRealty` · `enterHouse` 입구에서 막아요. 운영자(`S.isOwner`)는 시험용으로 통과해요.
-  - 동사무소가 잠긴 동안 `isJob("sashimi")`는 모두에게 참이라 누구나 회를 뜨고 노점을 열어요. 열 때는 이 점을 같이 확인해요.
+  - **회 뜨기 · 노점 판매는 누구나** 해요(v1.25, 운영자 결정). `isJob("sashimi")`는 잠금과 상관없이 늘 참이에요.
+- **마을 손님(NPC)** (v1.25): `npcVisit` 이 노점 사장님 쪽 화면에서만 노점을 잠그고(`stallEdit(…, quiet)`) 사요. 물고기 값의 1.3배(`NPC_SALE_CAP`)까지, 하루 40접시(`NPC_SALE_MAX`, `P.npcSales`). 시장 길 손님 캐릭터 `SHOPPERS`는 보기용(각자 화면).
   - 잠긴 기능의 도전과제(집 · `job1`)는 `ACH`에서 빠져요.
 - **돈이 과하게 풀리지 않게** (v1.23.0): 공짜 돈(출석 · 보물 상자 · 초대 · 예금 이자 · 도전과제)은 낚시 벌이(초반 한 시간 ≈ 27만원)를 넘지 않게 맞췄어요. 새 보상을 넣을 때도 이 기준으로 봐요.
 - **새 물고기 모델**은 `fish/models2.json`(2묶음, 나중에 불러옴)에 넣어요. `BUILTIN` 항목에 `pack: 2`를 달면 2묶음에서 찾아요. 모델은 CC0만 쓰고 `credits/`에 기록해요.
