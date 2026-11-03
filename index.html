@@ -550,6 +550,125 @@ body.athome .stat,body.athome #runBtn{display:none}
 .contract .muted{color:#6b5a48}
 .sigpad{width:100%;max-width:480px;aspect-ratio:480/140;border-radius:10px;border:1px solid #d9cdb6;touch-action:none;cursor:crosshair;align-self:center}
 @media (max-width:820px){.homebar{top:calc(var(--st) + 44px);font-size:12px}.decobar{bottom:calc(env(safe-area-inset-bottom,0px) + 64px)}}
+/* ===== 인터페이스 개편 (v1.21) ===== */
+.fx-ex{position:sticky;top:-16px;z-index:3;margin:-16px -18px 0;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--line)}
+.fx-bench{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start}
+.fx-left{display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center}
+.fx-left .facepreview{width:170px;height:170px}
+.fx-right{display:flex;flex-direction:column;gap:8px;min-width:0}
+.fx-parts{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.fx-part{display:flex;flex-direction:column;align-items:center;gap:3px;border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:6px 4px;font-size:11.5px;font-weight:600;color:inherit;font-family:inherit}
+.fx-part canvas{width:100%;max-width:56px;height:auto;background:#f2d3b8;border-radius:6px}
+.fx-part[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+.fx-padhead{display:flex;gap:8px;align-items:center}
+.fx-pad{border-radius:16px;padding:10px;background:#f2d3b8 radial-gradient(circle at 50% 50%,rgba(255,255,255,.3),transparent 70%);border:2px dashed rgba(138,90,58,.35);display:flex;justify-content:center}
+.fx-pad canvas{max-width:420px;touch-action:none;cursor:crosshair;border-radius:10px;background:rgba(255,255,255,.18)}
+.fx-tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+@media (max-width:820px){
+  .fx-ex{margin:-14px -14px 0;padding:8px 14px;top:-14px}
+  .fx-bench{grid-template-columns:1fr;gap:10px}
+  .fx-left{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left;gap:4px 10px}
+  .fx-left .facepreview{width:88px;height:88px}
+  .fx-part{font-size:10.5px;padding:5px 2px}
+  /* 가게 진열대: 휴대폰에서는 아래에 붙는 작은 계산대로 (목록이 먼저 보이게) */
+  .tshop{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+  .tshop>.racks{order:1}
+  .tshop>.ishelf{order:2;position:sticky;bottom:-14px;z-index:3;margin:0 -14px -14px;border-radius:18px 18px 0 0;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 10px;box-shadow:0 -8px 20px rgba(0,0,0,.16)}
+  .tshop>.ishelf .ibig{min-height:0;flex:none;gap:4px}
+  .tshop>.ishelf .ibig img{width:52px;height:52px;border-radius:14px;border-width:3px}
+  .tshop>.ishelf .ibig img.wide{width:84px;height:44px}
+  .tshop>.ishelf .ibig .arrow{font-size:16px}
+  .tshop>.ishelf h3{font-size:16px;flex:1 1 120px;min-width:0}
+  .tshop>.ishelf>.muted{flex-basis:100%;font-size:12px!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tshop>.ishelf .plegend,.tshop>.ishelf .cmp{display:none}
+  .tshop>.ishelf .pbar{flex-basis:100%}
+  .tshop>.ishelf .acts{flex-basis:100%}
+  .tshop>.ishelf .acts .btn{flex:1}
+  .dollcv{height:170px}
+}
+.sbody>*{flex-shrink:0}
+.dock button{gap:2px}
+.dock button>span:not(.badge):not(.cnt){font-size:11.5px;line-height:1.1}
+.dock .menubtn{color:#ffd77a}
+.dock .badge{top:1px;right:calc(50% - 24px)}
+.sheet>header{gap:10px}
+.sheet>header .back{flex:none;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-size:26px;line-height:1;color:var(--ink);padding:0 0 3px}
+.close{min-height:40px;padding:6px 16px;font-weight:700}
+.btn{min-height:38px;padding:7px 14px;border-radius:11px;font-weight:600}
+.btn.sm{min-height:32px;padding:5px 11px;border-radius:9px;font-size:12.5px}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.full{width:100%}
+.btn.pri:not(:disabled):hover{filter:brightness(1.06)}
+.tabs button{min-height:34px;font-weight:600}
+.sbody>.tabs:first-child,.sbody>.seg-tabs{position:sticky;top:-16px;z-index:3;margin:-16px -18px 0;padding:12px 18px 10px;background:var(--surface);border-bottom:1px solid var(--line)}
+.seg-tabs{flex-wrap:nowrap;overflow-x:auto}
+.seg-tabs button{flex:1 0 auto}
+.sec{font-size:15px;margin:6px 0 -6px;color:var(--ink)}
+.empty-note.big{padding:28px 18px;font-size:14px;line-height:1.7}
+/* 메뉴 타일 */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px}
+.mtile{position:relative;display:flex;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:12px;color:inherit;font:inherit;cursor:pointer;min-height:64px}
+.mtile:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.mtile .mi{font-size:26px;width:36px;text-align:center;flex:none}
+.mtile .mt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mtile .mt b{font-size:14px}
+.mtile .mt small{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mdot{position:absolute;top:8px;right:8px;min-width:20px;height:20px;border-radius:10px;background:#e2402a;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px}
+/* 설정 */
+.setlist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg)}
+.setrow{display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;color:inherit;font:inherit;text-align:left;width:100%;flex-wrap:wrap}
+.setrow:last-child{border-bottom:0}
+button.setrow{cursor:pointer}
+button.setrow:hover{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+.setrow .grow{flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.setrow .seg{margin-left:auto}
+.setrow small{font-size:12px;color:var(--muted)}
+.setrow.danger b{color:#d8382c}
+.setrow .chev{font-size:20px;color:var(--muted)}
+.switch{width:46px;height:28px;border-radius:14px;background:var(--line);position:relative;flex:none;transition:background .15s}
+.switch i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .15s}
+.switch.on{background:var(--ok)}.switch.on i{left:21px}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:7px 12px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+/* 가방 · 아이템 타일 */
+.toolrow2{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:4px 11px;font-size:12px;font-weight:600;color:var(--muted);min-height:30px}
+.chips button[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 14%,var(--bg));border-color:var(--accent);color:var(--ink)}
+.itemgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
+.itile{position:relative;display:flex;flex-direction:column;gap:4px;border:1.5px solid var(--line);background:var(--bg);border-radius:14px;padding:8px;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.itile.static{cursor:default}
+.itile.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent);background:color-mix(in srgb,var(--accent) 6%,var(--bg))}
+.itile .chk{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:var(--surface);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;z-index:1}
+.itile.on .chk{background:var(--accent);border-color:var(--accent)}
+.itile.static .chk{display:none}
+.ipic{height:64px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:linear-gradient(180deg,color-mix(in srgb,var(--sea) 14%,transparent),color-mix(in srgb,var(--sea) 30%,transparent))}
+.ipic img{max-width:100%;max-height:58px}
+.inm2{display:flex;justify-content:space-between;align-items:center;gap:4px}
+.inm2 b{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.isub{font-size:11.5px;color:var(--muted)}
+.ipr{font-size:13px;font-weight:700;color:var(--ink)}
+.irow.static{cursor:default}
+/* 아래 고정 행동 바 */
+.abar{position:sticky;bottom:-16px;z-index:3;margin:4px -18px -16px;padding:10px 18px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:0 -6px 16px rgba(0,0,0,.06)}
+.abinfo{display:flex;flex-direction:column;gap:1px;margin-right:auto;min-width:120px}
+.abinfo b{font-size:14px}.abinfo small{font-size:11.5px;color:var(--muted)}
+@media (max-width:820px){
+  .sheet>header{padding:10px 12px 10px 14px}
+  .sheet h2{font-size:19px}
+  .sheet .sub{font-size:11.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .shopban{height:40px}
+  .sbody{padding:14px 14px}
+  .sbody>.tabs:first-child,.sbody>.seg-tabs{margin:-14px -14px 0;padding:10px 14px 8px;top:-14px}
+  .abar{margin:4px -14px -14px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));bottom:-14px}
+  .trybar{margin:0 -14px -14px;bottom:-14px}
+  .itemgrid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
+  .ipic{height:52px}.ipic img{max-height:46px}
+  .mgrid{grid-template-columns:1fr 1fr}
+  .mtile{padding:10px;min-height:58px}.mtile .mi{font-size:22px;width:28px}
+  .dock button>span:not(.badge):not(.cnt){font-size:10.5px}
+}
 .counter{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:14px;background:linear-gradient(180deg,#2f4a6a,#22374f);color:#fff}
 .counter .ticket{align-self:flex-start;font-size:12px;padding:2px 10px;border-radius:6px;background:#fff6dc;color:#2f4a6a;font-weight:700}
 .counter .tabs button{border-color:rgba(255,255,255,.35);color:#fff}
@@ -749,14 +868,15 @@ details.guidebox summary{cursor:pointer;font-weight:700}
     <button id="eventBtn" data-open="attend" hidden>🎁 출석 <b id="attendCount">0/7</b></button>
   </div>
 
-  <nav class="hud dock glass" aria-label="메뉴">
-    <button data-open="travel"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>이동</button>
-    <button data-open="bag"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>가방<span class="cnt" id="bagCount">0/40</span></button>
-    <button data-open="dex"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/></svg>도감<span class="cnt" id="dexCount">0</span></button>
-    <button data-open="offers" id="offersBtn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h12l-3-3"/><path d="M17 16H5l3 3"/></svg>거래<span class="badge" id="offerBadge" hidden>0</span></button>
-    <button id="emoteBtn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 11V5a1.5 1.5 0 0 1 3 0v6"/><path d="M14 11V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.5A5.5 5.5 0 0 1 5 14.5V11a1.5 1.5 0 0 1 3 0"/></svg>인사</button>
-    <button data-open="face"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/><path d="M9 9.5h.01M15 9.5h.01"/></svg>꾸미기</button>
-    <button class="chatonly" id="chatDockBtn"><span class="badge" id="chatBadge" hidden>0</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H9l-4 4z"/></svg>채팅</button>
+  <nav class="hud dock glass" aria-label="주요 메뉴">
+    <button data-open="bag"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>가방</span><span class="cnt" id="bagCount">0/40</span></button>
+    <button data-open="dex"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/></svg><span>도감</span><span class="cnt" id="dexCount">0</span></button>
+    <button data-open="travel"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>지도</span></button>
+    <button data-open="friends"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5A5 5 0 0 1 21 19"/></svg><span>친구</span><span class="badge" id="friendBadge" hidden>0</span></button>
+    <button id="homeDockBtn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg><span id="homeDockTx">우리 집</span></button>
+    <button class="chatonly" id="chatDockBtn"><span class="badge" id="chatBadge" hidden>0</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H9l-4 4z"/></svg><span>채팅</span></button>
+    <button data-open="menu" class="menubtn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span>메뉴</span><span class="badge" id="menuBadge" hidden>0</span></button>
+    <span hidden><button id="emoteBtn"></button><button data-open="offers" id="offersBtn"><span class="badge" id="offerBadge" hidden>0</span></button></span>
   </nav>
 </div>
 
@@ -773,7 +893,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
     <label class="tsound"><input type="checkbox" id="tSound" checked> 물소리·효과음 켜고 시작</label>
     <button class="tstart" id="tStart" type="button" disabled>불러오는 중…</button>
     <div class="tlinks"><button type="button" id="tBug">🐞 오류 제보</button><button type="button" id="tIdea">💡 건의하기</button><button type="button" id="tInvite">🤝 초대 코드</button></div>
-    <div class="tfoot"><span id="tVer">v1.20.0</span> · Enter 키로도 들어갈 수 있어요</div>
+    <div class="tfoot"><span id="tVer">v1.21.0</span> · Enter 키로도 들어갈 수 있어요</div>
   </div>
 </div>
 
@@ -782,7 +902,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 
 <div class="overlay" id="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-    <header><div style="min-width:0"><img id="sheetBan" class="shopban" alt="" hidden><h2 id="sheetTitle"></h2><div class="sub" id="sheetSub"></div></div><span class="goldchip" id="sheetGold" hidden></span><button class="close" id="sheetClose">닫기</button></header>
+    <header><button class="back" id="sheetBack" hidden aria-label="뒤로">‹</button><div style="min-width:0;flex:1"><img id="sheetBan" class="shopban" alt="" hidden><h2 id="sheetTitle"></h2><div class="sub" id="sheetSub"></div></div><span class="goldchip" id="sheetGold" hidden></span><button class="close" id="sheetClose">닫기</button></header>
     <div class="sbody" id="sheetBody"></div>
   </div>
 </div>
@@ -793,7 +913,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.20.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.21.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 10 },
   { name: "고급", base: 30 },
@@ -5769,6 +5889,9 @@ function updateHud() {
   $("bagCount").textContent = P.bag.length + "/" + BAG_MAX; $("bagLine").textContent = P.bag.length + "/" + BAG_MAX;
   $("caughtCount").textContent = fmt(P.caught || 0);
   drawAvatar();
+  { const mb = $("menuBadge"), n = menuBadgeCount(); mb.hidden = !n; mb.textContent = n > 9 ? "9+" : n;
+    const on = S.peers ? otherPeers(true).filter(p => p.uid && isFriend(p.uid)).length : 0, fb = $("friendBadge"); fb.hidden = !on; fb.textContent = on;
+    $("homeDockTx").textContent = atHome() ? "나가기" : P.home && P.home.tier >= 0 ? "우리 집" : "집 구하기"; }
   $("dexCount").textContent = Object.keys(P.dex).filter(id => findFish(id)).length + "/" + allFish().length;
   renderBuffs();
 }
@@ -5801,8 +5924,10 @@ function updateHint() {
 
 /* ===================== 시트 ===================== */
 const SHEETS = {};
-function openSheet(name, arg) {
+S.sheetStack = [];
+function openSheet(name, arg, opt) {
   closeMeMenu();
+  if (!(opt && opt.back)) { if (S.sheet && S.sheet !== name && SHEETS[name]) S.sheetStack.push([S.sheet, S.sheetArg]); else if (!S.sheet) S.sheetStack = []; }
   if (name === "dish") { S.bagTab = "dish"; name = "bag"; }
   if (!SHEETS[name]) { toast("이 가게는 곧 문을 열어요"); return; }
   sfx("ui-open", .4);
@@ -5810,12 +5935,14 @@ function openSheet(name, arg) {
   document.querySelector(".sheet").classList.toggle("wide", ["realty", "storage", "studio", "face", "admin", "clothes", "shop", "sashimi", "mystall", "stall", "stallopen", "lotto", "bank"].includes(name));
   if (name === "clothes" && S.sheet !== "clothes") S.tryWear = null;
   S.sheet = name; S.sheetArg = arg;
+  S.sheetStack = S.sheetStack.slice(-8); $("sheetBack").hidden = !S.sheetStack.length;
   $("overlay").hidden = false;
   refreshSheet(true);
   $("sheetClose").focus();
   coach("sheet_" + name);
 }
-function closeSheet() { if (S.sheet) sfx("ui-close", .35); S.tryWear = null; S.sheet = null; $("overlay").hidden = true; }
+function closeSheet() { if (S.sheet) sfx("ui-close", .35); S.tryWear = null; S.sheet = null; S.sheetStack = []; $("overlay").hidden = true; }
+function sheetBack() { const prev = S.sheetStack.pop(); if (!prev) { closeSheet(); return; } openSheet(prev[0], prev[1], { back: true }); }
 /* 가게 화면 머리: 그 가게 간판 그림 + 가게 색 + 보유 골드 */
 function shopTheme(name, arg) {
   if (name === "shop") return { spec: SHOP_SIGNS.bait, key: "bait", accent: "#1d5480" };
@@ -6124,45 +6251,69 @@ function eatDish(d) {
   toast("「" + d.name + "」를 먹었어요 · " + buffText(d.buff) + " (" + d.buff.min + "분)");
 }
 SHEETS.bag = (body) => {
-  const tabs = h("div", { class: "tabs", role: "tablist" },
-    h("button", { role: "tab", "aria-selected": String(S.bagTab === "fish"), onclick: () => { S.bagTab = "fish"; refreshSheet(true); }, text: "물고기 " + P.bag.length + "/" + BAG_MAX }),
-    h("button", { role: "tab", "aria-selected": String(S.bagTab === "dish"), onclick: () => { S.bagTab = "dish"; refreshSheet(true); }, text: "회 " + P.dishes.length + "/" + DISH_MAX }));
-  if (S.bagTab === "dish") {
-    setHead("가방 · 회", "회를 먹으면 일정 시간 능력치가 올라요. 같은 종류는 더 센 효과로 바뀌고 시간이 늘어나요.");
-    body.append(tabs);
-    if (!P.dishes.length) { body.append(h("div", { class: "empty-note", text: "회가 없어요. 물고기 탭에서 「회 뜨기」를 누르거나 시장 노점에서 사 보세요." })); return; }
-    const grid = h("div", { class: "grid" });
-    for (const d of P.dishes) {
-      grid.append(h("div", { class: "card" }, h("div", { class: "pic" }, fishImg(d.fishId)),
-        h("div", { class: "nm" }, h("span", { text: d.name }), tierChip(d.tier)),
-        h("div", { class: "desc", text: "먹으면 " + dishBuffLine(d) }),
-        P.listing[d.id] ? h("div", { class: "meta" }, h("span", { text: "노점에 올림" }), h("span", { class: "num", text: won(P.listing[d.id]) + "" })) : null,
-        h("div", { class: "acts" }, h("button", { class: "btn sm pri", onclick: () => eatDish(d), text: "먹기" }))));
+  S.bagSel = S.bagSel || new Set();
+  for (const id of [...S.bagSel]) if (!P.bag.some(x => x.id === id) && !P.dishes.some(x => x.id === id)) S.bagSel.delete(id);
+  const tabs = [["fish", "물고기 " + P.bag.length + "/" + BAG_MAX], ["dish", "회 " + P.dishes.length + "/" + DISH_MAX], ["bait", "미끼"], ["gear", "장비"]];
+  if (!tabs.some(t => t[0] === S.bagTab)) S.bagTab = "fish";
+  setHead("가방", "가진 돈 " + won(P.gold) + (buffVal("gold") ? " · 판매가 +" + buffVal("gold") + "%" : "") + (eventOn("sell15") ? " · 판매가 1.5배 이벤트" : ""));
+  body.append(h("div", { class: "tabs seg-tabs", role: "tablist" }, tabs.map(([id, l]) => h("button", { role: "tab", "aria-selected": String(S.bagTab === id), onclick: () => { S.bagTab = id; S.bagSel = new Set(); refreshSheet(true); }, text: l }))));
+  const bar = h("div", { class: "abar" });
+  if (S.bagTab === "fish") {
+    const f = S.bagFilter || "all", srt = S.bagSort || "new";
+    body.append(h("div", { class: "toolrow2" },
+      h("div", { class: "chips" }, [["all", "전체"], ["0", "일반"], ["1", "고급"], ["2+", "희귀 이상"]].map(([v, l]) => h("button", { "aria-pressed": String(f === v), onclick: () => { S.bagFilter = v; refreshSheet(true); }, text: l }))),
+      h("div", { class: "chips" }, [["new", "최신순"], ["price", "비싼순"], ["tier", "등급순"]].map(([v, l]) => h("button", { "aria-pressed": String(srt === v), onclick: () => { S.bagSort = v; refreshSheet(true); }, text: l })))));
+    let list = P.bag.filter(it => f === "all" || (f === "2+" ? it.tier >= 2 : String(it.tier) === f));
+    list = list.slice().sort((a, b) => srt === "price" ? b.price - a.price : srt === "tier" ? b.tier - a.tier || b.price - a.price : b.ts - a.ts);
+    if (!P.bag.length) body.append(h("div", { class: "empty-note big" }, h("div", { style: "font-size:40px", text: "🎣" }), "가방이 비어 있어요.", h("br"), "부두의 빈자리에 앉아 낚시를 시작해 보세요."));
+    else if (!list.length) body.append(h("div", { class: "empty-note", text: "이 조건에 맞는 물고기가 없어요." }));
+    else body.append(h("div", { class: "itemgrid" }, list.map(it => { const sel = S.bagSel.has(it.id);
+      return h("button", { class: "itile" + (sel ? " on" : ""), "aria-pressed": String(sel), onclick: () => { sel ? S.bagSel.delete(it.id) : S.bagSel.add(it.id); refreshSheet(true); } },
+        h("span", { class: "chk", "aria-hidden": "true", text: sel ? "✓" : "" }),
+        h("span", { class: "ipic" }, fishImg(it.fishId)),
+        h("span", { class: "inm2" }, h("b", { text: it.name }), tierChip(it.tier)),
+        h("span", { class: "isub num", text: fmtSize(it.size) + (it.k >= 1.4 ? " · " + sizeLabel(it.k) : "") }),
+        h("span", { class: "ipr num", text: won(sellValue(it.price)) })); })));
+    const chosen = P.bag.filter(x => S.bagSel.has(x.id)), sum = (arr) => arr.reduce((a, b) => a + sellValue(b.price), 0);
+    if (chosen.length) {
+      bar.append(...[h("span", { class: "abinfo" }, h("b", { text: chosen.length + "마리 고름" }), h("small", { class: "num", text: "합계 " + won(sum(chosen)) })),
+        h("button", { class: "btn pri", onclick: () => { const ids = new Set(chosen.map(x => x.id)); S.bagSel = new Set(); sellItems(x => ids.has(x.id)); }, text: "팔기" }),
+        chosen.length === 1 && isJob("sashimi") ? h("button", { class: "btn", onclick: () => { S.bagSel = new Set(); cutSashimi(chosen[0]); }, text: "회 뜨기" }) : null,
+        chosen.length === 1 ? h("button", { class: "btn", onclick: () => { brag(chosen[0]); }, text: "자랑하기" }) : null,
+        h("button", { class: "btn ghost", onclick: () => { S.bagSel = new Set(); refreshSheet(true); }, text: "취소" })].filter(Boolean));
+    } else if (P.bag.length) {
+      const low = P.bag.filter(i => i.tier <= 1);
+      bar.append(h("span", { class: "abinfo" }, h("b", { text: "눌러서 골라요" }), h("small", { text: "여러 마리를 고르면 한 번에 팔 수 있어요" })),
+        h("button", { class: "btn", disabled: !low.length, onclick: () => sellItems(i => i.tier <= 1), text: "일반·고급 팔기 · " + won(sum(low)) }),
+        h("button", { class: "btn pri", onclick: () => sellItems(() => true), text: "전부 팔기 · " + won(sum(P.bag)) }));
     }
-    body.append(grid); return;
+  } else if (S.bagTab === "dish") {
+    if (!P.dishes.length) body.append(h("div", { class: "empty-note big" }, h("div", { style: "font-size:40px", text: "🍣" }), "회가 없어요.", h("br"), isJob("sashimi") ? "회 센터에서 물고기를 회로 떠요." : "회 센터 손님 창구나 시장 노점에서 사 먹어요."));
+    else body.append(h("div", { class: "itemgrid" }, P.dishes.map(d => h("div", { class: "itile static" },
+      h("span", { class: "ipic" }, fishImg(d.fishId)), h("span", { class: "inm2" }, h("b", { text: d.name }), tierChip(d.tier)),
+      h("span", { class: "isub", text: dishBuffLine(d) }),
+      h("button", { class: "btn pri full", onclick: () => eatDish(d), text: "먹기" })))));
+    const act = P.buffs.filter(b => b.until > Date.now());
+    bar.append(h("span", { class: "abinfo" }, h("b", { text: act.length ? "지금 효과 " + act.length + "개" : "효과 없음" }), h("small", { text: act.map(b => buffText(b) + " " + fmtLeft(b.until - Date.now())).join(" · ") || "회를 먹으면 잠깐 능력치가 올라요" })));
+  } else if (S.bagTab === "bait") {
+    const owned = BAITS.filter(b => b.id === "worm" || (P.baits[b.id] || 0) > 0);
+    body.append(h("div", { class: "ilist" }, owned.map(b => { const using = (P.bait || "worm") === b.id;
+      return h("div", { class: "irow static" + (using ? " on" : "") }, h("img", { class: "iic", src: itemIcon("bait", b, 96), alt: "" }),
+        h("span", { class: "inm" }, h("b", { text: b.name }), h("small", { text: (b.id === "worm" ? "무료 · 무한" : (P.baits[b.id] || 0) + "개") + " · " + itemStat("bait", b) })),
+        using ? h("span", { class: "tag on", text: "쓰는 중" }) : h("button", { class: "btn sm pri", onclick: () => { P.bait = b.id; markDirty(); updateHud(); refreshSheet(true); toast(b.name + "로 낚을게요"); }, text: "이걸로 낚기" })); })));
+    bar.append(h("span", { class: "abinfo" }, h("b", { text: "미끼가 더 필요하면" }), h("small", { text: "상점가 「낚시 상점」에서 사요" })), h("button", { class: "btn", onclick: () => { closeSheet(); goBuilding("bait"); }, text: "낚시 상점 가기" }));
+  } else {
+    const rows = [["rod", "낚싯대", RODS, P.rods, P.rod], ["reel", "릴", REELS, P.reels, P.reel], ["line", "낚싯줄", LINES, P.lines, P.line]];
+    for (const [cat, label, all, own, cur] of rows) {
+      body.append(h("div", { class: "sec", text: label }), h("div", { class: "ilist" }, all.filter(x => own.includes(x.id)).map(x => h("div", { class: "irow static" + (x.id === cur ? " on" : "") },
+        h("img", { class: "iic", src: itemIcon(cat, x, 96), alt: "" }), h("span", { class: "inm" }, h("b", { text: x.name }), h("small", { text: itemStat(cat, x) })),
+        x.id === cur ? h("span", { class: "tag on", text: "쓰는 중" }) : h("button", { class: "btn sm pri", onclick: () => { P[cat] = x.id; markDirty(); pushPresence({ rod: P.rod, reel: P.reel }); refreshSheet(true); toast(x.name + "로 바꿨어요"); }, text: "바꾸기" })))));
+    }
+    const tools = TOOLS.filter(t => P.tools[t.id]);
+    body.append(h("div", { class: "sec", text: "도구 · 채비" }), h("div", { class: "muted", style: "font-size:13px", text: (tools.length ? "도구: " + tools.map(t => t.name).join(" · ") : "도구 없음") + " · 채비 " + P.equip.length + "개 장착 (낚시 상점에서 달고 빼요)" }));
+    bar.append(h("span", { class: "abinfo" }, h("b", { text: "더 좋은 장비" }), h("small", { text: "레벨이 오르면 낚시 상점에서 열려요" })), h("button", { class: "btn", onclick: () => { closeSheet(); goBuilding("bait"); }, text: "낚시 상점 가기" }));
   }
-  setHead("가방 · 물고기", "가방이 가득 차면 새로 낚은 물고기는 바로 팔려요" + (buffVal("gold") ? " · 판매가 +" + buffVal("gold") + "% 적용 중" : ""));
-  body.append(tabs);
-  const total = P.bag.reduce((a, b) => a + sellValue(b.price), 0);
-  body.append(h("div", { class: "row" },
-    h("button", { class: "btn pri", disabled: !P.bag.length, onclick: () => sellItems(() => true), text: "전부 판매 (" + won(total) + ")" }),
-    h("button", { class: "btn", disabled: !P.bag.some(i => i.tier === 0), onclick: () => sellItems(i => i.tier === 0), text: "일반만 판매" }),
-    h("label", { class: "muted", for: "autoSell", style: "margin-left:auto;font-size:12.5px", text: "자동 판매" }),
-    (() => { const s = h("select", { id: "autoSell", class: "btn" },
-      h("option", { value: "0", text: "끄기" }), h("option", { value: "1", text: "일반" }), h("option", { value: "2", text: "고급 이하" }));
-      s.value = String(P.autoSell || 0); s.addEventListener("change", () => { P.autoSell = Number(s.value); markDirty(); }); return s; })()));
-  if (!P.bag.length) { body.append(h("div", { class: "empty-note", text: "가방이 비어 있어요. 부두의 빈자리(+)에 앉아 낚시를 시작해 보세요." })); return; }
-  const grid = h("div", { class: "grid" });
-  for (const it of P.bag) {
-    grid.append(h("div", { class: "card" }, h("div", { class: "pic" }, fishImg(it.fishId)),
-      h("div", { class: "nm" }, h("span", { text: it.name }), tierChip(it.tier)),
-      h("div", { class: "meta" }, h("span", { class: "num", text: fmtSize(it.size) + " · " + sizeLabel(it.k || 1) + " ×" + (it.k || 1).toFixed(2) + (it.hooked ? " ✓" : "") }), h("span", { class: "num", text: won(sellValue(it.price)) + "" })),
-      h("div", { class: "acts" },
-        h("button", { class: "btn sm", onclick: () => sellItems(x => x.id === it.id), text: "판매" }),
-        h("button", { class: "btn sm", onclick: () => cutSashimi(it), text: "회 뜨기" }),
-        h("button", { class: "btn sm", onclick: () => brag(it), text: "자랑" }))));
-  }
-  body.append(grid);
+  if (bar.children.length) body.append(bar);
 };
 
 /* ---------- 회 센터: 도마(왼쪽) 위에서 회를 뜨고 먹음 ---------- */
@@ -7548,6 +7699,83 @@ SHEETS.admintools = (body) => {
       h("button", { class: "btn sm", onclick: () => { P.attend.last = ""; markDirty(); toast("오늘 출석을 다시 받을 수 있어요"); }, text: "출석 다시 받기" })));
   }
 };
+/* ===================== 전체 메뉴 · 설정 =====================
+   숨어 있던 기능을 한곳에 모아요. 받을 것이 있는 칸에는 빨간 점 */
+function questDone() { return P.quests && Array.isArray(P.quests.list) ? P.quests.list.filter(q => q.have >= q.need && !q.claimed).length : 0; }
+function menuTiles() {
+  const fr = Object.keys(P.friends).length, onF = otherPeers(true).filter(p => p.uid && isFriend(p.uid)).length;
+  return [
+    ["나", [
+      { ico: "🙂", t: "내 정보", s: "레벨 · 기록 · 닉네임", go: () => openSheet("profile") },
+      { ico: "🏆", t: "도전과제", s: ACH.filter(a => P.ach[a.id]).length + "/" + ACH.length + " 달성", n: achClaimable(), go: () => openSheet("ach") },
+      { ico: "🎨", t: "얼굴 꾸미기", s: "눈 · 입 · 표정 그리기", go: () => openSheet("face") },
+      { ico: "🎒", t: "가방", s: P.bag.length + "/" + BAG_MAX + " · 회 " + P.dishes.length, go: () => openSheet("bag") },
+    ]],
+    ["오늘 할 일", [
+      { ico: "📜", t: "오늘의 의뢰", s: P.quests && P.quests.list ? P.quests.list.filter(q => q.claimed).length + "/" + P.quests.list.length + " 완료" : "", n: questDone(), go: () => openSheet("quests") },
+      { ico: "🎁", t: "출석 이벤트", s: attendDone() ? "7일 완료" : P.attend.n + "/7일", n: attendCan() ? 1 : 0, go: () => openSheet("attend") },
+      { ico: "🏅", t: "명예의 전당", s: "분야별 랭킹", go: () => openSheet("rank") },
+      { ico: "📖", t: "도감", s: dexCount() + "종 발견", go: () => openSheet("dex") },
+    ]],
+    ["사람들", [
+      { ico: "👫", t: "친구", s: fr + "명 · 접속 " + onF, go: () => openSheet("friends") },
+      { ico: "🤝", t: "거래 · 주문", s: "받은 제안 " + S.offersIn.size, n: S.offersIn.size, go: () => openSheet("offers") },
+      { ico: "👋", t: "인사하기", s: "손 흔들기 · 박수 · 축하", go: () => { closeSheet(); $("emotePop").hidden = false; } },
+      { ico: "🪪", t: "명함 내밀기", s: S.card ? "내밀고 있어요" : "받으면 친구가 돼요", go: () => { closeSheet(); S.card ? stopCard() : startCard(); } },
+      { ico: "💌", t: "친구 초대", s: "추천인 코드 · 선물", go: () => openSheet("invite") },
+    ]],
+    ["마을", [
+      { ico: "🗺️", t: "지도 · 이동", s: "장소를 눌러 바로 가기", go: () => openSheet("travel") },
+      { ico: "🏠", t: atHome() ? "마을로 나가기" : P.home.tier >= 0 ? "우리 집 가기" : "집 구하기", s: P.home.tier >= 0 ? HOUSES[P.home.tier].name : "윗마을 부동산", go: () => { closeSheet(); atHome() ? leaveHouse() : P.home.tier >= 0 ? enterHouse(S.uid) : goRealty(); } },
+      { ico: "🪪", t: "동사무소", s: P.job.id ? JOB[P.job.id].name : "직업 등록", go: () => { closeSheet(); goOffice(); } },
+    ]],
+    ["도움", [
+      { ico: "⚙️", t: "설정", s: "소리 · 입질 속도 · 그림자 · 계정", go: () => openSheet("settings") },
+      { ico: "🐞", t: "오류 제보 · 건의", s: "운영자에게 보내기", go: () => openSheet("feedback") },
+      { ico: "🧭", t: "안내 다시 보기", s: "처음 하는 것 설명", go: () => { closeSheet(); $("tutBtn").click(); } },
+      S.isOwner ? { ico: "🛠️", t: "운영자 도구", s: "공지 · 이벤트 · 플레이어", go: () => openSheet("admintools") } : null,
+    ].filter(Boolean)],
+  ];
+}
+function menuBadgeCount() { return achClaimable() + questDone() + (attendCan() ? 1 : 0) + S.offersIn.size; }
+SHEETS.menu = (body) => {
+  setHead("메뉴", P.nick + " · Lv." + myLv() + " · " + won(P.gold));
+  for (const [sec, tiles] of menuTiles()) {
+    body.append(h("div", { class: "sec", text: sec }), h("div", { class: "mgrid" }, tiles.map(t => h("button", { class: "mtile", onclick: t.go },
+      h("span", { class: "mi", "aria-hidden": "true", text: t.ico }), h("span", { class: "mt" }, h("b", { text: t.t }), t.s ? h("small", { text: t.s }) : null),
+      t.n ? h("span", { class: "mdot", text: String(t.n) }) : null))));
+  }
+};
+function toggleRow(label, desc, on, fn) {
+  return h("button", { class: "setrow", role: "switch", "aria-checked": String(!!on), onclick: () => { fn(); refreshSheet(true); } },
+    h("span", { class: "grow" }, h("b", { text: label }), desc ? h("small", { text: desc }) : null), h("span", { class: "switch" + (on ? " on" : "") }, h("i")));
+}
+SHEETS.settings = (body) => {
+  setHead("설정", S.online ? "온라인 · 모두와 함께" : "혼자 모드 · 이 기기에만 저장");
+  body.append(h("div", { class: "sec", text: "소리 · 화면" }), h("div", { class: "setlist" },
+    toggleRow("물소리 · 효과음 · 음악", "바닷소리와 배경음악", S.sound, () => $("soundBtn").click()),
+    toggleRow("그림자", "끄면 오래된 휴대폰에서 더 부드러워요", S.hq, () => setHq(!S.hq)),
+    h("button", { class: "setrow", onclick: () => { closeSheet(); setMung(true); } }, h("span", { class: "grow" }, h("b", { text: "멍 모드" }), h("small", { text: "화면만 보며 멍 때리기 · 끝내기 버튼으로 돌아와요" })), h("span", { class: "chev", text: "›" }))));
+  body.append(h("div", { class: "sec", text: "낚시" }), h("div", { class: "setlist" },
+    h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "입질 속도" }), h("small", { text: "찌를 던지고 입질이 올 때까지" })),
+      h("div", { class: "seg" }, [["test", "빠르게 7–18초"], ["real", "느긋하게 25–60초"]].map(([v, l]) => h("button", { "aria-pressed": String(S.speed === v), onclick: () => { if (S.speed !== v) $("speedBtn").click(); refreshSheet(true); }, text: l })))),
+    toggleRow("자동 챔질", "입질을 놓쳐도 확률로 자동으로 낚아요 (경험치 60%)", S.auto, () => $("autoBtn").click()),
+    h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "자동 판매" }), h("small", { text: "가방에 들어오자마자 바로 팔기" })),
+      h("div", { class: "seg" }, [[0, "끄기"], [1, "일반"], [2, "고급 이하"]].map(([v, l]) => h("button", { "aria-pressed": String((P.autoSell || 0) === v), onclick: () => { P.autoSell = v; markDirty(); refreshSheet(true); }, text: l }))))));
+  const acct = h("div", { class: "setlist" },
+    h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "계정" }), h("small", { text: window.WEB_ACCT ? window.WEB_ACCT + "로 로그인됨" : S.online ? "claude.ai 계정" : "로그인 안 됨" }))),
+    h("button", { class: "setrow", onclick: () => $("codeBtn").click() }, h("span", { class: "grow" }, h("b", { text: "내 코드 " + (S.uid ? myCode() : "------") }), h("small", { text: "후원 · 친구 초대에 쓰는 코드 · 눌러서 복사" })), h("span", { class: "chev", text: "⧉" })));
+  const wl = $("webLink"), wo = $("webLogout");
+  if (wl) acct.append(h("button", { class: "setrow", onclick: () => wl.click() }, h("span", { class: "grow" }, h("b", { text: "구글 계정에 연결" }), h("small", { text: "게스트 진행을 다른 기기에서도 이어 하기" })), h("span", { class: "chev", text: "›" })));
+  if (wo) acct.append(h("button", { class: "setrow danger", onclick: () => wo.click() }, h("span", { class: "grow" }, h("b", { text: "로그아웃" })), h("span", { class: "chev", text: "›" })));
+  body.append(h("div", { class: "sec", text: "계정" }), acct);
+  const more = h("div", { class: "setlist" },
+    h("button", { class: "setrow", onclick: () => { closeSheet(); $("tutBtn").click(); } }, h("span", { class: "grow" }, h("b", { text: "안내 다시 보기" }), h("small", { text: "처음 하는 것 설명을 처음부터" })), h("span", { class: "chev", text: "›" })),
+    h("button", { class: "setrow", onclick: () => openSheet("feedback") }, h("span", { class: "grow" }, h("b", { text: "오류 제보 · 건의" })), h("span", { class: "chev", text: "›" })));
+  if (S.isOwner) for (const [id, l] of [["admintools", "운영자 도구"], ["admin", "후원자 관리 (방류권)"], ["fbadmin", "제보함"]]) more.append(h("button", { class: "setrow", onclick: () => openSheet(id) }, h("span", { class: "grow" }, h("b", { text: l })), h("span", { class: "chev", text: "›" })));
+  else more.append(h("button", { class: "setrow", onclick: () => openSheet("admintools") }, h("span", { class: "grow" }, h("b", { text: "운영자 권한 받기" }), h("small", { text: "운영자라면 여기서 계정 ID를 확인해요" })), h("span", { class: "chev", text: "›" })));
+  body.append(h("div", { class: "sec", text: "더 보기" }), more, h("div", { class: "muted", style: "font-size:12px;text-align:center", text: "어촌생활 v" + GAME_VER }));
+};
 /* ---------- 친구 ---------- */
 SHEETS.friends = (body) => {
   const peers = otherPeers(true);
@@ -7793,8 +8021,10 @@ function makePad(part, w, hh, label, src, defName, set) {
     e.preventDefault(); c.setPointerCapture(e.pointerId); padSnap(pad); last = pos(e); line(last, last);
     if (faceEd.focus !== part) { faceEd.focus = part; markFocus(); }
   });
-  c.addEventListener("pointermove", (e) => { if (!last) return; const p = pos(e); line(last, p); last = p; });
-  const end = () => { if (last) { last = null; renderFacePreview(); } };
+  let lastPrev = 0;
+  c.addEventListener("pointermove", (e) => { if (!last) return; const p = pos(e); line(last, p); last = p; if (performance.now() - lastPrev > 90) { lastPrev = performance.now(); renderFacePreview(); } });
+  const MIR = { le: "re", re: "le", bl: "br", br: "bl" };
+  const end = () => { if (last) { last = null; if (faceEd.sym && MIR[part] && pad.set.pads[MIR[part]]) mirrorPad(pad, pad.set.pads[MIR[part]]); renderFacePreview(); } };
   c.addEventListener("pointerup", end); c.addEventListener("pointercancel", end);
   return pad;
 }
@@ -7858,48 +8088,48 @@ function mirrorPad(from, to) {
   to.g.save(); to.g.translate(to.w, 0); to.g.scale(-1, 1); to.g.drawImage(from.c, 0, 0); to.g.restore(); renderFacePreview();
 }
 SHEETS.face = (body) => {
-  setHead("얼굴 공방", "표정 5가지를 그려 두면 상황에 맞춰 얼굴이 저절로 바뀌어요. 저장하면 모든 낚시꾼에게 보여요");
+  setHead("얼굴 공방", "부위를 고르고 큰 칸에 그려요 · 표정 5가지 · 저장하면 모두에게 보여요");
   if (!faceEd.preview) { faceEd.preview = document.createElement("canvas"); faceEd.preview.width = faceEd.preview.height = 400; faceEd.preview.className = "facepreview"; }
   if (!Object.keys(faceEd.sets).length) { faceEd.skin = P.skin; faceEd.shirt = P.color; }
   const set = ensureSet(faceEd.ex), exInfo = EXPRS.find(e => e.id === faceEd.ex);
+  if (!set.pads[faceEd.focus]) faceEd.focus = "le";
   renderFacePreview();
-  // 표정 탭
-  const extabs = h("div", { class: "extabs", role: "tablist" }, EXPRS.map(e => h("button", { class: "extab", role: "tab", "data-ex": e.id, "aria-selected": String(faceEd.ex === e.id),
-    onclick: () => { faceEd.ex = e.id; if (!ensureSet(e.id).pads[faceEd.focus]) faceEd.focus = "le"; refreshSheet(true); } }, exMini(e.id), h("span", { text: e.name }))));
+  // 1) 표정 고르기
+  body.append(h("div", { class: "extabs fx-ex", role: "tablist" }, EXPRS.map(e => h("button", { class: "extab", role: "tab", "aria-selected": String(faceEd.ex === e.id),
+    onclick: () => { faceEd.ex = e.id; refreshSheet(true); } }, exMini(e.id), h("span", { text: e.name })))));
+  // 2) 작업대: 미리보기 + 부위 버튼 + 큰 그리기 칸
+  const pad = set.pads[faceEd.focus];
+  const big = h("div", { class: "fx-pad" }); pad.c.style.width = "100%"; pad.c.style.height = "auto"; pad.c.style.aspectRatio = pad.w + " / " + pad.hh; big.append(pad.c);
+  const parts = h("div", { class: "fx-parts" }, FACE_PARTS.map(([p, label]) => { const pd = set.pads[p]; const ic = document.createElement("canvas"); ic.width = pd.w; ic.height = pd.hh; ic.getContext("2d").drawImage(pd.c, 0, 0);
+    return h("button", { class: "fx-part", "aria-pressed": String(faceEd.focus === p), onclick: () => { faceEd.focus = p; refreshSheet(true); } }, ic, h("span", { text: label.replace("오른쪽 ", "오른 ").replace("왼쪽 ", "왼 ") })); }));
   const custom = faceEd.ex === "base" || (!set.reset && (set.saved || set.dirty));
-  const exRow = h("div", { class: "exinfo" },
-    h("div", null, h("b", { text: exInfo.name + " 표정" }), h("div", { class: "muted", style: "font-size:12.5px", text: "언제 나와요: " + exInfo.when })),
-    faceEd.ex === "base" ? null : h("div", { class: "row" },
-      h("span", { class: "tag" + (custom ? " on" : ""), text: custom ? "직접 그린 표정" : "기본 제공 표정" }),
-      h("button", { class: "btn sm", onclick: () => { const base = ensureSet("base"); for (const [p] of FACE_PARTS) { const pd = set.pads[p]; padSnap(pd); pd.g.clearRect(0, 0, pd.w, pd.hh); pd.g.drawImage(base.pads[p].c, 0, 0); } refreshSheet(true); }, text: "기본 얼굴 복사해 오기" }),
-      h("button", { class: "btn sm", onclick: () => { for (const [p] of FACE_PARTS) { const pd = set.pads[p]; pd.undo = []; pd.g.clearRect(0, 0, pd.w, pd.hh); pd.def(pd.g, pd.w, pd.hh); } set.dirty = false; set.reset = true; refreshSheet(true); }, text: "기본 제공 표정으로" })));
-  const tools = h("div", { class: "toolrow" },
-    ...[["pen", "펜"], ["eraser", "지우개"]].map(([id, l]) => h("button", { class: "btn sm", "aria-pressed": String(faceEd.tool === id), onclick: () => { faceEd.tool = id; refreshSheet(true); }, text: l })),
-    ...[[2.5, "가늘게"], [4, "보통"], [7, "굵게"]].map(([s, l]) => h("button", { class: "btn sm", "aria-pressed": String(faceEd.size === s), onclick: () => { faceEd.size = s; refreshSheet(true); }, text: l })),
-    h("button", { class: "btn sm", onclick: () => { mirrorPad(set.pads.le, set.pads.re); mirrorPad(set.pads.bl, set.pads.br); }, text: "왼쪽 → 오른쪽 대칭 복사" }));
-  const sw = h("div", { class: "swatches" }, FACE_COLORS.map(c => h("button", { style: "background:" + c, "aria-label": "색 " + c, "aria-pressed": String(faceEd.color === c), onclick: () => { faceEd.color = c; if (faceEd.tool === "eraser") faceEd.tool = "pen"; refreshSheet(true); } })));
-  const padEl = (p) => h("div", { class: "pad" + (faceEd.focus === p.part ? " focus" : ""), "data-part": p.part, onclick: () => { if (faceEd.focus !== p.part) { faceEd.focus = p.part; markFocus(); } } }, h("span", { text: p.label }), p.c,
-    h("div", { class: "mini" },
-      h("button", { class: "btn sm", onclick: () => { const u = p.undo.pop(); if (u) { p.g.putImageData(u, 0, 0); renderFacePreview(); } }, text: "되돌리기" }),
-      h("button", { class: "btn sm", onclick: () => { padSnap(p); p.g.clearRect(0, 0, p.w, p.hh); renderFacePreview(); }, text: "지우기" })));
-  const pads = h("div", { class: "facegrid" },
-    h("div", { class: "pads" }, padEl(set.pads.bl), padEl(set.pads.br)),
-    h("div", { class: "pads" }, padEl(set.pads.le), padEl(set.pads.re)),
-    h("div", { class: "pads" }, padEl(set.pads.mo)));
+  body.append(h("div", { class: "fx-bench" },
+    h("div", { class: "fx-left" }, faceEd.preview, h("b", { text: exInfo.name + " 표정" }), h("small", { class: "muted", text: "나와요: " + exInfo.when }),
+      faceEd.ex === "base" ? null : h("div", { class: "row", style: "justify-content:center" },
+        h("button", { class: "btn sm", onclick: () => { const base = ensureSet("base"); for (const [p] of FACE_PARTS) { const pd = set.pads[p]; padSnap(pd); pd.g.clearRect(0, 0, pd.w, pd.hh); pd.g.drawImage(base.pads[p].c, 0, 0); } renderFacePreview(); refreshSheet(true); }, text: "기본 얼굴 복사" }),
+        h("button", { class: "btn sm", onclick: () => { for (const [p] of FACE_PARTS) { const pd = set.pads[p]; pd.undo = []; pd.g.clearRect(0, 0, pd.w, pd.hh); pd.def(pd.g, pd.w, pd.hh); } set.dirty = false; set.reset = true; renderFacePreview(); refreshSheet(true); }, text: custom ? "기본 제공으로" : "기본 제공 표정" }))),
+    h("div", { class: "fx-right" }, h("div", { class: "muted", style: "font-size:12px", text: "그릴 부위" }), parts,
+      h("div", { class: "fx-padhead" }, h("b", { text: pad.label }), faceEd.sym && ["le", "re", "bl", "br"].includes(pad.part) ? h("span", { class: "tag on", text: "대칭 그리기 켜짐" }) : null), big)));
+  // 3) 도구 (붙어 있는 도구 막대)
+  const tools = h("div", { class: "fx-tools" },
+    h("div", { class: "seg" }, [["pen", "✏️ 펜"], ["eraser", "🧽 지우개"]].map(([id, l]) => h("button", { "aria-pressed": String(faceEd.tool === id), onclick: () => { faceEd.tool = id; refreshSheet(true); }, text: l }))),
+    h("div", { class: "seg" }, [[2.5, "가늘게"], [4, "보통"], [7, "굵게"]].map(([sz, l]) => h("button", { "aria-pressed": String(faceEd.size === sz), onclick: () => { faceEd.size = sz; refreshSheet(true); }, text: l }))),
+    h("button", { class: "btn sm", onclick: () => { const u = pad.undo.pop(); if (u) { pad.g.putImageData(u, 0, 0); renderFacePreview(); refreshSheet(true); } }, text: "↶ 되돌리기" }),
+    h("button", { class: "btn sm", onclick: () => { padSnap(pad); pad.g.clearRect(0, 0, pad.w, pad.hh); renderFacePreview(); refreshSheet(true); }, text: "이 칸 지우기" }),
+    h("button", { class: "btn sm" + (faceEd.sym ? " pri" : ""), "aria-pressed": String(!!faceEd.sym), onclick: () => { faceEd.sym = !faceEd.sym; toast(faceEd.sym ? "대칭 그리기: 한쪽 눈·눈썹을 그리면 반대쪽도 똑같이" : "대칭 그리기를 껐어요"); refreshSheet(true); }, text: "⇋ 대칭 그리기" }));
+  const sw = h("div", { class: "swatches" }, FACE_COLORS.map(c => h("button", { style: "background:" + c, "aria-label": "색 " + c, "aria-pressed": String(faceEd.color === c), onclick: () => { faceEd.color = c; faceEd.tool = "pen"; refreshSheet(true); } })));
   stampRowEl = h("div", { class: "stamps" }); renderStampRow();
-  const skinPick = h("input", { type: "color", id: "skinPick", value: faceEd.skin, "aria-label": "피부색 직접 고르기", style: "width:40px;height:32px;border:1px solid var(--line);border-radius:8px;padding:0;background:none" });
+  body.append(h("div", { class: "sec", text: "도구 · 색" }), tools, sw, h("div", { class: "sec", text: "모양 도장 · 눌러서 바로 찍기" }), stampRowEl);
+  // 4) 피부색 · 옷 색
+  const skinPick = h("input", { type: "color", value: faceEd.skin, "aria-label": "피부색 직접 고르기", style: "width:40px;height:32px;border:1px solid var(--line);border-radius:8px;padding:0" });
   skinPick.addEventListener("input", () => { faceEd.skin = skinPick.value; renderFacePreview(); });
   skinPick.addEventListener("change", () => refreshSheet(true));
-  const skins = h("div", { class: "swatches", style: "align-items:center" }, SKINS.map((c, i) => h("button", { style: "background:" + c, "aria-label": "피부색 " + (i + 1), "aria-pressed": String(faceEd.skin === c), onclick: () => { faceEd.skin = c; refreshSheet(true); } })),
-    h("span", { class: "muted", style: "font-size:12px;margin-left:4px", text: "직접 고르기" }), skinPick);
-  const shirts = h("div", { class: "swatches" }, COLORS.map(c => h("button", { style: "background:" + c, "aria-label": "옷 색 " + c, "aria-pressed": String(faceEd.shirt === c), onclick: () => { faceEd.shirt = c; refreshSheet(true); } })));
-  const err = h("div", { class: "err" });
-  body.append(extabs, h("div", { class: "facewrap" },
-    h("div", { style: "display:flex;flex-direction:column;gap:10px;align-items:center" }, faceEd.preview, h("span", { class: "muted", style: "font-size:12px", text: exInfo.name + " 표정 미리보기" })),
-    h("div", { style: "display:flex;flex-direction:column;gap:12px;min-width:0" }, exRow, tools, sw, pads, stampRowEl,
-      h("div", { class: "field" }, h("label", { text: "피부색" }), skins),
-      h("div", { class: "field" }, h("label", { text: "옷 색 (상의를 안 입었을 때)" }), shirts),
-      h("div", { class: "row" }, h("button", { class: "btn pri", onclick: () => saveFace(err), text: "얼굴·표정 모두 저장" })), err)));
+  body.append(h("div", { class: "sec", text: "피부색" }), h("div", { class: "swatches", style: "align-items:center" }, SKINS.map((c, i) => h("button", { style: "background:" + c, "aria-label": "피부색 " + (i + 1), "aria-pressed": String(faceEd.skin === c), onclick: () => { faceEd.skin = c; refreshSheet(true); } })), skinPick),
+    h("div", { class: "sec", text: "옷 색 (상의를 안 입었을 때)" }), h("div", { class: "swatches" }, COLORS.map(c => h("button", { style: "background:" + c, "aria-label": "옷 색 " + c, "aria-pressed": String(faceEd.shirt === c), onclick: () => { faceEd.shirt = c; refreshSheet(true); } }))));
+  // 5) 저장 (아래 고정)
+  const err = h("div", { class: "err" }), changed = Object.values(faceEd.sets).some(x => x.dirty) || faceEd.skin !== P.skin || faceEd.shirt !== P.color;
+  body.append(h("div", { class: "abar" }, h("span", { class: "abinfo" }, h("b", { text: changed ? "고친 곳이 있어요" : "저장된 얼굴이에요" }), h("small", { text: "표정 " + EXPRS.length + "가지를 한 번에 저장해요" }), err),
+    h("button", { class: "btn pri", onclick: () => saveFace(err), text: "얼굴 저장하기" })));
 };
 async function saveFace(err) {
   const base = ensureSet("base");
@@ -8241,6 +8471,8 @@ function saveLocalFish() { lsSet("mn.fish", S.userFish.map(f => ({ id: f.docId, 
 /* ===================== 버튼·키 연결 ===================== */
 document.addEventListener("click", (e) => { const o = e.target.closest("[data-open]"); if (o) openSheet(o.dataset.open); });
 $("sheetClose").addEventListener("click", closeSheet);
+$("sheetBack").addEventListener("click", sheetBack);
+$("homeDockBtn").addEventListener("click", () => { if (atHome()) leaveHouse(); else if (P.home.tier >= 0) enterHouse(S.uid); else { toast("아직 집이 없어요 · 윗마을 부동산에서 살 수 있어요"); goRealty(); } });
 $("overlay").addEventListener("click", (e) => { if (e.target === $("overlay")) closeSheet(); });
 $("hookBtn").addEventListener("pointerdown", (e) => { e.preventDefault(); hook(); reelHold(true); });
 { const cb = $("castBtn");
@@ -8273,7 +8505,7 @@ $("codeBtn").addEventListener("click", () => {
   const code = myCode();
   try { navigator.clipboard.writeText(code).then(() => toast("후원 코드 " + code + "를 복사했어요"), () => toast("내 후원 코드: " + code)); } catch { toast("내 후원 코드: " + code); }
 });
-$("setBtn").addEventListener("click", (e) => { e.stopPropagation(); const p = $("settingsPop"); p.hidden = !p.hidden; $("setBtn").setAttribute("aria-expanded", String(!p.hidden)); });
+$("setBtn").addEventListener("click", (e) => { e.stopPropagation(); if (S.sheet === "settings") closeSheet(); else openSheet("settings"); });
 document.addEventListener("pointerdown", (e) => { if (!e.target.closest("#settingsPop,#setBtn")) closePop(); });
 $("chatToggle").addEventListener("click", () => { const c = $("chatBox"); const min = c.classList.toggle("min"); c.classList.remove("big"); $("chatToggle").textContent = min ? "펼치기" : "접기"; $("chatToggle").setAttribute("aria-expanded", String(!min)); });
 $("chatDockBtn").addEventListener("click", () => {
