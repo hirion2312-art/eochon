@@ -1235,6 +1235,51 @@ body.mlock .xhair{display:block}
 .mktrow img{width:56px;height:28px;object-fit:contain}.mktrow .mn{display:flex;gap:6px;align-items:center;min-width:0}.mktrow .mn b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mktrow .mp{font-weight:700}.mktrow .mm{text-align:right;font-size:12px;font-weight:700}
 @media (prefers-reduced-motion:reduce){.tier.t3,.tier.t4,.tier.t5,.itile.g3,.itile.g4,.itile.g5,.card.g3,.card.g4,.card.g5{animation:none}}
+/* ===================== v1.38.1 UI 겹침 방지 ===================== */
+.toasts{z-index:65}
+body.has-notice .place,body.on-boat .place,body.athome .place,body.has-coop .place{opacity:0;pointer-events:none}
+.noticebar{top:calc(var(--st) + 4px);z-index:7}
+.boatbar{top:calc(var(--st) + 4px);z-index:6}
+body.has-notice .boatbar{top:calc(var(--st) + 44px)}
+.homebar{top:calc(var(--st) + 8px);z-index:6}
+body.has-notice .homebar{top:calc(var(--st) + 48px)}
+.coop{top:calc(var(--st) + 52px);z-index:8}
+body.has-notice .coop,body.on-boat .coop,body.athome .coop{top:calc(var(--st) + 92px)}
+body.has-notice.on-boat .coop,body.has-notice.athome .coop{top:calc(var(--st) + 132px)}
+body.has-notice .toasts,body.on-boat .toasts,body.athome .toasts{top:calc(var(--st) + 54px)}
+body.has-notice.on-boat .toasts,body.has-notice.athome .toasts{top:calc(var(--st) + 94px)}
+body.has-coop .toasts{top:calc(var(--st) + 188px)}
+body.has-notice .mlocktip,body.on-boat .mlocktip,body.athome .mlocktip{top:calc(var(--st) + 96px)}
+.hud.chat{width:min(340px,calc(50% - 265px))}
+.runbtn{bottom:calc(var(--sb) + 260px)}
+@media (min-width:821px) and (max-width:1120px){
+  .hud.dock{gap:3px;padding:6px 8px}
+  .hud.dock button{min-width:52px;padding:6px 8px;font-size:11px}
+  .hud.chat{width:min(270px,calc(50% - 225px))}
+  .hud.stat{min-width:154px;padding:10px 12px}
+}
+body.biting .hint,body.has-act .hint,body.has-stand .hint,body.deco .hint,body.emote-open .hint,body.me-open .hint,body.sheet-open .hint,body.chat-open .hint{opacity:0;pointer-events:none}
+body.deco .hud.chat,body.deco .actbtn,body.deco .joy,body.deco .runbtn{display:none!important}
+body.emote-open .actbtn,body.emote-open .castb,body.emote-open .hook,body.me-open .actbtn,body.me-open .castb,body.me-open .hook,body.sheet-open .actbtn,body.sheet-open .castb,body.sheet-open .hook{opacity:0;pointer-events:none}
+@media (max-width:820px){
+  .noticebar{top:calc(var(--st) + 46px)}
+  .homebar{top:calc(var(--st) + 46px)}
+  body.has-notice .homebar{top:calc(var(--st) + 84px)}
+  .boatbar{top:calc(var(--st) + 84px)}
+  body.has-notice .boatbar{top:calc(var(--st) + 120px)}
+  .place{top:calc(var(--st) + 82px)}
+  .coop{top:calc(var(--st) + 88px)}
+  body.has-notice .coop,body.on-boat .coop,body.athome .coop{top:calc(var(--st) + 126px)}
+  .toasts{top:calc(var(--st) + 86px)}
+  body.has-notice .toasts,body.on-boat .toasts,body.athome .toasts{top:calc(var(--st) + 124px)}
+  body.has-coop .toasts{top:calc(var(--st) + 210px)}
+  body.athome .hud.stat{top:calc(var(--st) + 88px)}
+  body.has-notice.athome .hud.stat{top:calc(var(--st) + 124px)}
+  body.seated .joy,body.seated .runbtn,body.chat-open .joy,body.chat-open .runbtn,body.chat-open .actbtn{display:none!important}
+  .actbtn{max-width:calc(100vw - 28px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body:not(.seated):not(.casting):not(.fighting) .actbtn{max-width:calc(100vw - 248px);bottom:calc(env(safe-area-inset-bottom,0px) + 74px);font-size:15.5px;padding:10px 18px}
+  body:not(.seated):not(.casting):not(.fighting) .actbtn.soft.up{bottom:calc(env(safe-area-inset-bottom,0px) + 128px)}
+}
 </style>
 
 <div class="app" id="app">
@@ -1376,7 +1421,7 @@ body.mlock .xhair{display:block}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.38.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.38.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -2479,6 +2524,7 @@ function coach(id) {
 function nextCoach() {
   const id = coachQ.shift(); const box = $("coach");
   if (!id) { S.coach = null; S.coachOpen = false; box.hidden = true; return; }
+  if (S.sheet && !id.startsWith("sheet_")) { coachQ.unshift(id); S.coach = null; S.coachOpen = false; box.hidden = true; return; }
   S.coach = { id, step: 0 }; S.coachOpen = true; box.hidden = false; drawCoach(); sfx("ui-open", .3);
 }
 function drawCoach() {
@@ -2676,7 +2722,7 @@ S.auto = lsGet("mn.auto", false);
 function setPhase(ph, dur) {
   if (S.phase === "bite" && ph !== "bite") S.hookHideAt = Date.now();
   S.phase = ph; S.phaseStart = Date.now(); S.phaseEnd = S.phaseStart + dur;
-  $("hookBtn").hidden = ph !== "bite";
+  $("hookBtn").hidden = ph !== "bite"; syncUIState();
   pushPresence({ phase: ph });
 }
 /* 캐스팅: 앉으면 「꾹 눌러 던지기」. 누르는 동안 힘이 0→100→0으로 오가고, 떼는 순간의 힘만큼 멀리 날아감.
@@ -3357,6 +3403,7 @@ function updateActionUI() {
   sb.hidden = !showStand;
   sb.classList.toggle("up", showStand && !btn.hidden);
   if (showStand) sb.textContent = S.card ? "명함 거두기" : coopGuest ? "함께 낚시 그만" : onBoat() ? (S.boat.status === "sailing" ? "중도하차" : "배에서 내리기") : S.myStall >= 0 ? (npcActive(S.stalls[S.myStall]) ? "알바에게 맡기고 자리 뜨기" : "노점 닫기") : "일어나기";
+  syncUIState();
 }
 function doAction() { if (curAction) { const a = curAction; curAction = null; a.run(); actKey = ""; } }
 let lockHintAt = 0;
@@ -3521,7 +3568,7 @@ async function boatEditQuiet(fn) {
 }
 function updateBoatBar(now) {
   const bar = $("boatBar"); if (!bar) return;
-  if (!onBoat()) { bar.hidden = true; return; }
+  if (!onBoat()) { if (!bar.hidden) { bar.hidden = true; syncUIState(); } return; }
   const b = S.boat, p = boatPose(now);
   let text;
   if (b.status !== "sailing") text = "멍낚호 탑승 중 · " + b.seats.length + "/4명 · 뱃삯 " + fmt(paidSum(b)) + " / " + won(BOAT.price) + "";
@@ -3529,7 +3576,7 @@ function updateBoatBar(now) {
     const left = Math.max(0, b.tripStart + BOAT.dur - now), mm = Math.floor(left / 60000), ss = Math.floor(left / 1000) % 60;
     text = (p.phase === "out" ? "깊은 바다로 가는 중" : p.phase === "back" ? "부두로 돌아가는 중" : "깊은 바다 · 좋은 물고기 확률↑") + " · " + mm + ":" + String(ss).padStart(2, "0");
   }
-  bar.hidden = false; if (bar.textContent !== text) bar.textContent = text;
+  bar.hidden = false; if (bar.textContent !== text) bar.textContent = text; syncUIState();
 }
 function boatSheet(body) {
   const b = S.boat, mine = mySeatOnBoat(), paid = paidSum(b), sailing = b.status === "sailing";
@@ -3592,7 +3639,7 @@ function coopEnd(msg, notify) {
   clearTimeout(S.coop.timer); clearTimeout(S.coop.voteTimer);
   if (REEL.on && REEL.coop) endReel(false, true);
   S.coop = null;
-  $("coopPanel").hidden = true; $("coopInvite").hidden = true;
+  $("coopPanel").hidden = true; syncUIState(); $("coopInvite").hidden = true; syncUIState();
   if (role === "guest") { ME.st = "idle"; S.phase = "idle"; $("hookBtn").hidden = true; pushPresence({ st: "idle", phase: "idle", coop: null }); }
   else if (role === "host" && fishingNow()) { S.phase = "idle"; pushPresence({ coop: null }); }
   if (msg) toast(msg);
@@ -3612,12 +3659,12 @@ function showInvite(inv) {
     h("span", { class: "sub", text: "하나의 낚싯대를 둘이 같이 잡아요. 더 어렵지만 기준보다 1.5배 이상 큰 물고기가 나와요." }),
     h("div", { class: "row" },
       h("button", { class: "pri", onclick: () => acceptInvite(inv), text: "같이 할래요" }),
-      h("button", { onclick: () => { box.hidden = true; S.room && S.room.emit("coop", { k: "decline", to: inv.peer }).catch(() => {}); }, text: "괜찮아요" })));
+      h("button", { onclick: () => { box.hidden = true; syncUIState(); S.room && S.room.emit("coop", { k: "decline", to: inv.peer }).catch(() => {}); }, text: "괜찮아요" })));
   box.hidden = false;
-  clearTimeout(box._t); box._t = setTimeout(() => { box.hidden = true; }, 20000);
+  clearTimeout(box._t); box._t = setTimeout(() => { box.hidden = true; syncUIState(); }, 20000); syncUIState();
 }
 function acceptInvite(inv) {
-  $("coopInvite").hidden = true;
+  $("coopInvite").hidden = true; syncUIState();
   if (S.coop || !fishingNow() || onBoat() || REEL.on) { toast("지금은 함께 낚시를 시작할 수 없어요"); return; }
   S.coop = { role: "host", other: inv.peer, otherUid: inv.uid, otherNick: inv.nick, stage: "vote", round: 1 };
   coopSend("accept");
@@ -3646,7 +3693,7 @@ function openVote() {
         h("button", { class: c.myPick && c.myPick !== (c.role === "host" ? "host" : "guest") ? "pri" : "", disabled: !!c.myPick, onclick: () => pickTaker("them"), text: c.otherNick + "님이 가져요" })),
       h("button", { class: "quiet", onclick: () => coopEnd("함께 낚시를 그만뒀어요", true), text: "함께 낚시 그만하기" }));
   };
-  c.renderVote = render; render(); box.hidden = false;
+  c.renderVote = render; render(); box.hidden = false; syncUIState();
   clearTimeout(c.voteTimer);
   c.voteTimer = setTimeout(() => { if (S.coop && S.coop.stage === "vote") coopEnd("시간 안에 정하지 않아서 함께 낚시가 끝났어요", true); }, 25000);
 }
@@ -3661,7 +3708,7 @@ function checkVote() {
   clearTimeout(c.voteTimer);
   if (c.myPick !== c.theirPick) { coopEnd("둘의 의견이 달라서 함께 낚시가 취소됐어요", true); return; }
   c.taker = c.myPick; c.stage = "play";
-  $("coopPanel").hidden = true;
+  $("coopPanel").hidden = true; syncUIState();
   const takerName = (c.taker === c.role) ? "내가" : c.otherNick + "님이";
   toast("이번 물고기는 " + takerName + " 가져가요. 입질을 기다려요!");
   if (c.role === "host") readyCast();
@@ -3807,14 +3854,14 @@ const ME_ACTIONS = [
   { svg: ICO.profile, label: () => "내 정보", run: () => openSheet("profile") },
   { svg: ICO.bag, label: () => "가방", run: () => openSheet("bag") },
   { svg: '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>', label: () => atHome() ? "마을로" : isLocked("home") ? "우리 집 🚧" : P.home.tier >= 0 ? "우리 집" : "집 구하기", run: () => atHome() ? leaveHouse() : P.home.tier >= 0 ? enterHouse(S.uid) : (toast("윗마을 부동산에서 집을 살 수 있어요"), goRealty()) },
-  { svg: ICO.emote, label: () => "인사", run: () => { $("emotePop").hidden = false; } },
+  { svg: ICO.emote, label: () => "인사", run: () => { closeFloatingUI("emote"); $("emotePop").hidden = false; syncUIState(); } },
   { svg: ICO.face, label: () => "꾸미기", run: () => openSheet("face") },
   { svg: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M8 20h8"/>', hot: () => achClaimable() > 0, label: () => "도전과제" + (achClaimable() ? " " + achClaimable() : ""), run: () => openSheet("ach") },
 ];
 const ringR = () => matchMedia("(max-width: 820px)").matches ? 88 : 104;
 function openMeMenu() {
   if (S.mung || !R) return;
-  S.meMenu = true;
+  S.meMenu = true; closeFloatingUI("me"); syncUIState();
   const ring = $("meRing"), rr = ringR();
   ring.replaceChildren(...ME_ACTIONS.map((a, i) => {
     const ang = -Math.PI / 2 + i * Math.PI * 2 / ME_ACTIONS.length;
@@ -3829,7 +3876,7 @@ function openMeMenu() {
 }
 function closeMeMenu() {
   if (!S.meMenu) return;
-  S.meMenu = false;
+  S.meMenu = false; syncUIState();
   const ring = $("meRing"); ring.classList.remove("on");
   setTimeout(() => { if (!S.meMenu) ring.hidden = true; }, 220);
 }
@@ -3862,7 +3909,7 @@ function doEmote(e) {
   if (!EMOTES[e]) return;
   S.myEmo = { e, at: Date.now() };
   pushPresence({ emo: { e, ts: Date.now() } });
-  $("emotePop").hidden = true;
+  $("emotePop").hidden = true; syncUIState();
 }
 
 /* ===================== 접속자 (room presence) ===================== */
@@ -7499,6 +7546,30 @@ function drawAvatar() {
   for (const im of pend) im.addEventListener("load", drawAvatar, { once: true });
 }
 function closePop() { const p = $("settingsPop"); if (p && !p.hidden) { p.hidden = true; $("setBtn").setAttribute("aria-expanded", "false"); } }
+function closeFloatingUI(keep) {
+  if (keep !== "pop") closePop();
+  if (keep !== "me") closeMeMenu();
+  if (keep !== "emote") { const ep = $("emotePop"); if (ep && !ep.hidden) ep.hidden = true; }
+  if (keep !== "deco" && S.deco && keep === "sheet") { S.deco = null; renderDecoBar(); if (atHome()) updateHomeBar(); }
+  if (keep !== "chat" && typeof MOBILE === "function" && MOBILE()) { const cb = $("chatBox"); if (cb && !cb.classList.contains("min")) { cb.classList.add("min"); cb.classList.remove("big"); } }
+  syncUIState();
+}
+function syncUIState() {
+  const b = document.body; if (!b) return;
+  const nb = $("noticeBar"), bb = $("boatBar"), ci = $("coopInvite"), cp = $("coopPanel"), ep = $("emotePop"), db = $("decoBar"), ab = $("actBtn"), sb = $("standBtn"), cb = $("chatBox");
+  b.classList.toggle("has-notice", !!(nb && !nb.hidden));
+  b.classList.toggle("on-boat", !!(bb && !bb.hidden));
+  b.classList.toggle("has-coop", !!((ci && !ci.hidden) || (cp && !cp.hidden)));
+  b.classList.toggle("deco", !!(db && !db.hidden));
+  b.classList.toggle("seated", !!(ME.seat || S.myStall >= 0 || (S.coop && S.coop.stage !== "inviting")));
+  b.classList.toggle("biting", S.phase === "bite");
+  b.classList.toggle("has-act", !!(ab && !ab.hidden));
+  b.classList.toggle("has-stand", !!(sb && !sb.hidden));
+  b.classList.toggle("sheet-open", !!S.sheet);
+  b.classList.toggle("me-open", !!S.meMenu);
+  b.classList.toggle("emote-open", !!(ep && !ep.hidden));
+  b.classList.toggle("chat-open", !!(typeof MOBILE === "function" && MOBILE() && cb && !cb.classList.contains("min")));
+}
 function updateHint() {
   const hint = $("hint");
   if (!R) return;
@@ -7521,7 +7592,7 @@ function openSheet(name, arg, opt) {
   if (name === "dish") { S.bagTab = "dish"; name = "bag"; }
   if (!SHEETS[name]) { toast("이 가게는 곧 문을 열어요"); return; }
   sfx("ui-open", .4);
-  closePop();
+  closeFloatingUI("sheet");
   document.querySelector(".sheet").classList.toggle("wide", ["realty", "storage", "studio", "face", "admin", "clothes", "shop", "sashimi", "mystall", "stall", "stallopen", "lotto", "bank"].includes(name));
   if (name === "clothes" && S.sheet !== "clothes") S.tryWear = null;
   S.sheet = name; S.sheetArg = arg;
@@ -7529,9 +7600,9 @@ function openSheet(name, arg, opt) {
   $("overlay").hidden = false; $("sheetHelp").hidden = !TUTS["sheet_" + name];
   refreshSheet(true);
   $("sheetClose").focus();
-  coach("sheet_" + name);
+  syncUIState();
 }
-function closeSheet() { if (S.sheet) sfx("ui-close", .35); S.tryWear = null; S.sheet = null; S.sheetStack = []; $("overlay").hidden = true; }
+function closeSheet() { if (S.sheet) sfx("ui-close", .35); S.tryWear = null; S.sheet = null; S.sheetStack = []; $("overlay").hidden = true; syncUIState(); if (!S.coach && coachQ.length) nextCoach(); }
 function sheetBack() { const prev = S.sheetStack.pop(); if (!prev) { closeSheet(); return; } openSheet(prev[0], prev[1], { back: true }); }
 /* 가게 화면 머리: 그 가게 간판 그림 + 가게 색 + 보유 골드 */
 function shopTheme(name, arg) {
@@ -9301,11 +9372,11 @@ function leaveHouse() {
 }
 function updateHomeBar() {
   const bar = $("homeBar"); document.body.classList.toggle("athome", atHome());
-  if (!atHome()) { bar.hidden = true; return; }
+  if (!atHome()) { bar.hidden = true; syncUIState(); return; }
   const mine = myHomeOpen(), hm = S.homeDoc;
   bar.hidden = false;
   bar.replaceChildren(h("b", { text: "🏠 " + houseName(hm.ownerNick || P.nick, hm) }),
-    mine ? h("button", { class: S.deco ? "on" : "", onclick: () => { S.deco = S.deco ? null : { sel: null, pick: null }; updateHomeBar(); renderDecoBar(); }, text: S.deco ? "꾸미기 끝" : "꾸미기" }) : null,
+    mine ? h("button", { class: S.deco ? "on" : "", onclick: () => { S.deco = S.deco ? null : { sel: null, pick: null }; if (S.deco) closeFloatingUI("deco"); updateHomeBar(); renderDecoBar(); }, text: S.deco ? "꾸미기 끝" : "꾸미기" }) : null,
     h("button", { onclick: () => openSheet("guestbook", S.homeHost), text: "방명록" }),
     h("button", { onclick: leaveHouse, text: "나가기" }));
   renderDecoBar();
@@ -9313,9 +9384,9 @@ function updateHomeBar() {
 /* ---------- 꾸미기 모드 ---------- */
 function renderDecoBar() {
   const bar = $("decoBar");
-  if (!S.deco || !myHomeOpen()) { bar.hidden = true; return; }
+  if (!S.deco || !myHomeOpen()) { bar.hidden = true; syncUIState(); return; }
   bar.hidden = false;
-  const hm = P.home, H = HOUSES[hm.tier], d = S.deco, placed = hm.items.length;
+  const hm = P.home, H = HOUSES[hm.tier], d = S.deco, placed = hm.items.length; syncUIState();
   const pickIt = d.pick && hm.items.find(x => x.id === d.pick);
   const kids = [h("div", { class: "dhead" }, h("b", { text: "꾸미기 · 가구 " + placed + "/" + H.furn }), h("span", { class: "muted", text: pickIt ? "고른 가구를 바닥에 누르면 옮겨요" : d.sel ? "놓을 자리를 바닥에서 눌러요" : "가구를 고르거나, 놓인 가구를 눌러요" }))];
   if (pickIt) kids.push(h("div", { class: "row" }, h("b", { text: FURN_BY[pickIt.f].ico + " " + FURN_BY[pickIt.f].name }),
@@ -9537,7 +9608,7 @@ function renderNoticeBar() {
   const parts = [];
   if (n && n.text && (!n.until || n.until > Date.now())) parts.push("📢 " + n.text);
   if (ev) { const e = EVENTS.find(x => x.id === ev.id); if (e) parts.push(e.ico + " " + e.name + " 이벤트 · " + fmtLeft(ev.until - Date.now()) + " 남음"); }
-  el.hidden = !parts.length || S.title; if (parts.length) el.textContent = parts.join("   ·   ");
+  el.hidden = !parts.length || S.title; if (parts.length) el.textContent = parts.join("   ·   "); syncUIState();
 }
 async function adminSet(path, data) {
   if (!S.isOwner) return false;
@@ -9641,7 +9712,7 @@ function menuTiles() {
     ["사람들", [
       { ico: "👫", t: "친구", s: fr + "명 · 접속 " + onF, go: () => openSheet("friends") },
       { ico: "🤝", t: "거래 · 주문", s: "받은 제안 " + S.offersIn.size, n: S.offersIn.size, go: () => openSheet("offers") },
-      { ico: "👋", t: "인사하기", s: "손 흔들기 · 박수 · 축하", go: () => { closeSheet(); $("emotePop").hidden = false; } },
+      { ico: "👋", t: "인사하기", s: "손 흔들기 · 박수 · 축하", go: () => { closeSheet(); closeFloatingUI("emote"); $("emotePop").hidden = false; syncUIState(); } },
       { ico: "🪪", t: "명함 내밀기", s: S.card ? "내밀고 있어요" : "받으면 친구가 돼요", go: () => { closeSheet(); S.card ? stopCard() : startCard(); } },
       { ico: "💌", t: "친구 초대", s: "추천인 코드 · 선물", go: () => openSheet("invite") },
     ]],
@@ -9738,7 +9809,7 @@ const QUICK_ITEMS = [
   { id: "rank", name: "랭킹", d: "명예의 전당 분야별 순위", open: "rank" },
   { id: "attend", name: "출석", d: "7일 출석 선물", open: "attend" },
   { id: "offers", name: "거래", d: "받은 거래 · 주문 제안", open: "offers" },
-  { id: "emote", name: "인사", d: "손 흔들기 · 박수 · 축하", run: () => { $("emotePop").hidden = false; } },
+  { id: "emote", name: "인사", d: "손 흔들기 · 박수 · 축하", run: () => { closeFloatingUI("emote"); $("emotePop").hidden = false; syncUIState(); } },
   { id: "card", name: "명함", d: "명함을 내밀어 친구 만들기", run: () => { S.card ? stopCard() : startCard(); } },
   { id: "profile", name: "내 정보", short: "내 정보", d: "레벨 · 기록 · 닉네임", open: "profile" },
   { id: "settings", name: "설정", d: "소리 · 입질 속도 · 그림자", open: "settings" },
@@ -10680,18 +10751,18 @@ $("adminBtn").addEventListener("click", () => openSheet("admin"));
 $("tutBtn").addEventListener("click", () => { P.tut = {}; markDirty(); closePop(); toast("안내를 처음부터 다시 보여 줄게요"); coach("welcome"); });
 { const ep = $("emotePop");
   ep.replaceChildren(...Object.entries(EMOTES).map(([k, v]) => h("button", { onclick: () => doEmote(k), text: v })));
-  $("emoteBtn").addEventListener("click", (e) => { e.stopPropagation(); ep.hidden = !ep.hidden; });
-  document.addEventListener("pointerdown", (e) => { if (!e.target.closest("#emotePop,#emoteBtn")) ep.hidden = true; }); }
+  $("emoteBtn").addEventListener("click", (e) => { e.stopPropagation(); const next = !ep.hidden; closeFloatingUI("emote"); ep.hidden = next; syncUIState(); });
+  document.addEventListener("pointerdown", (e) => { if (!e.target.closest("#emotePop,#emoteBtn") && !ep.hidden) { ep.hidden = true; syncUIState(); } }); }
 $("codeBtn").addEventListener("click", () => {
   const code = myCode();
   try { navigator.clipboard.writeText(code).then(() => toast("후원 코드 " + code + "를 복사했어요"), () => toast("내 후원 코드: " + code)); } catch { toast("내 후원 코드: " + code); }
 });
 $("setBtn").addEventListener("click", (e) => { e.stopPropagation(); if (S.sheet === "settings") closeSheet(); else openSheet("settings"); });
 document.addEventListener("pointerdown", (e) => { if (!e.target.closest("#settingsPop,#setBtn")) closePop(); });
-$("chatToggle").addEventListener("click", () => { const c = $("chatBox"); const min = c.classList.toggle("min"); c.classList.remove("big"); $("chatToggle").textContent = min ? "펼치기" : "접기"; $("chatToggle").setAttribute("aria-expanded", String(!min)); });
+$("chatToggle").addEventListener("click", () => { const c = $("chatBox"); const min = c.classList.toggle("min"); c.classList.remove("big"); $("chatToggle").textContent = min ? "펼치기" : "접기"; $("chatToggle").setAttribute("aria-expanded", String(!min)); syncUIState(); });
 $("chatDockBtn").addEventListener("click", () => {
   const c = $("chatBox");
-  if (MOBILE()) { const open = c.classList.toggle("min") === false; c.classList.toggle("big", open); S.chatUnread = 0; drawChatBadge(); if (open) { const l = $("chatList"); l.scrollTop = l.scrollHeight; } return; }
+  if (MOBILE()) { const open = c.classList.toggle("min") === false; if (open) closeFloatingUI("chat"); c.classList.toggle("big", open); S.chatUnread = 0; drawChatBadge(); syncUIState(); if (open) { const l = $("chatList"); l.scrollTop = l.scrollHeight; } return; }
   c.classList.remove("min"); const big = c.classList.toggle("big"); $("chatToggle").textContent = "접기"; if (big) { const l = $("chatList"); l.scrollTop = l.scrollHeight; } });
 const MOBILE = () => matchMedia("(max-width: 820px)").matches;
 function drawChatBadge() { const b = $("chatBadge"); if (!b) return; b.hidden = !S.chatUnread; b.textContent = S.chatUnread > 9 ? "9+" : S.chatUnread; }
