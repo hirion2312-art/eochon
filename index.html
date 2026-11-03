@@ -913,7 +913,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.22.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.23.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 10 },
   { name: "고급", base: 30 },
@@ -1014,6 +1014,55 @@ const BUILTIN = [
     ["b-arowana", "황금 아로와나", 4, 60, 110, "행운을 부르는 황금빛 용.", "20_Golden_Arowana", "#e8b83a"],
   ].map(([id, name, tier, min, max, desc, file, body, pattern, pc]) => ({ id, name, tier, min, max, desc, model: "fish/" + file + ".glb",
     art: { body, belly: "#f2efe6", fin: body, pattern: pattern || "none", pc: pc || body, len: 1, th: 1 } })),
+  // v1.23 새 3D 모델 물고기 (fish/models2.json, 나중에 불러옴 · 모델이 오기 전엔 그림으로 보여요)
+  ...[
+    ["b-oranda", "오란다", 0, 8, 18, "머리에 혹이 몽글몽글한 꼬리 긴 금붕어. 누가 바다에 놓아줬을까요?", "08_fancy_goldfish", "#f28a3a", "spots", "#ffffff"],
+    ["b-gajami", "참가자미", 0, 15, 35, "바닥에 납작 엎드려 두 눈만 굴리는 물고기.", "22_flounder", "#8a7a5a", "spots", "#5a4c34"],
+    ["b-sameseogi", "삼세기", 0, 15, 30, "울퉁불퉁 못생겼지만 매운탕 맛은 일품.", "GruntSculpin", "#7a6a52", "spots", "#4a3e2e"],
+    ["b-haepari", "해파리", 0, 10, 40, "둥실둥실 떠다니다 낚싯줄에 걸려 왔어요. 만지지 마세요!", "Jellyfish", "#e8b8e0"],
+    ["b-ssombaengi", "쏨뱅이", 0, 15, 30, "가시가 뾰족한 붉은 바위 물고기.", "rock_fish", "#b8543a", "spots", "#7a2e20"],
+    ["b-bass", "배스", 1, 25, 55, "입이 아주 큰 사냥꾼. 루어를 덥석 물어요.", "09_largemouth_bass", "#5f7a3a", "stripes", "#3a4a24"],
+    ["b-rtrout", "무지개송어", 1, 30, 60, "옆구리에 무지개빛 띠가 흘러요.", "10_rainbow_trout", "#8aa86a", "spots", "#d86a7a"],
+    ["b-piranha", "피라냐", 1, 15, 30, "이빨이 날카로운 은빛 물고기. 손가락 조심!", "17_piranha", "#9aa0a8", "spots", "#d8402a"],
+    ["b-mulchong", "물총고기", 1, 15, 30, "물방울을 쏴서 곤충을 떨어뜨리는 명사수.", "Archerfish", "#e8e2c8", "spots", "#2a2a30"],
+    ["b-gitdaedom", "깃대돔", 1, 12, 22, "등지느러미가 깃발처럼 길게 휘날려요.", "Moorishidol", "#f2e6a8", "stripes", "#1e1e24"],
+    ["b-nabi", "나비고기", 1, 10, 20, "나비처럼 팔랑이는 노란 산호초 물고기.", "Butterfly_Fish", "#f2d23a", "stripes", "#ffffff"],
+    ["b-kkomchi", "꼼치", 1, 30, 55, "물렁물렁한 겨울 생선. 시원한 국물의 주인공.", "black_fat_deep_sea_fish", "#3a3a44", "none", "", "night"],
+    ["b-ttukji", "뚝지", 1, 20, 40, "동글동글 배에 빨판이 달린 겨울 바다의 귀염둥이.", "brown_fat_deep_sea_fish", "#8a6a4a", "spots", "#5a4430"],
+    ["b-hongyeoneo", "홍연어", 2, 50, 80, "알을 낳으러 돌아갈 때 온몸이 붉게 물들어요.", "11_sockeye_salmon", "#d8402a", "none"],
+    ["b-haema", "해마", 2, 8, 20, "말 머리를 닮은 물고기. 아빠가 알을 품어요.", "20_seahorse", "#e8a23a", "spots", "#b86a1a"],
+    ["b-mandarin", "만다린피시", 2, 5, 8, "주황과 파랑 무늬가 물감처럼 번진 작은 보석.", "23_mandarinfish", "#2a78bb", "waves", "#f28a3a"],
+    ["b-jajubok", "자주복", 2, 30, 60, "복어 중의 으뜸. 손질은 꼭 전문가에게!", "Fugu", "#5a6a7a", "spots", "#2a3440"],
+    ["b-bineuldom", "비늘돔", 2, 30, 70, "부리 같은 이빨로 산호를 갉아 먹는 앵무 빛 물고기.", "Parrotfish", "#3fb8a8", "waves", "#f2a3c8"],
+    ["b-eoreumdom", "어름돔", 2, 30, 60, "두툼한 입술에 점박이 무늬를 두른 따뜻한 바다 물고기.", "Sweetlips", "#e8e2c8", "spots", "#2a2a30"],
+    ["b-badagaje", "바닷가재", 2, 25, 50, "커다란 집게 두 개를 휘두르며 올라와요.", "lobster", "#b8402a", "none", "", "night"],
+    ["b-deungbul", "초록 등불고기", 2, 20, 45, "깊은 바다에서 초록 불빛을 내며 먹이를 꾀어요.", "green_deep_sea_fish", "#3f8a5a", "spots", "#bff2a0", "sea"],
+    ["b-bulgeunsimhae", "붉은 심해어", 2, 25, 50, "빛이 닿지 않는 곳에선 붉은색이 보이지 않는대요.", "red_deep_sea_fish", "#a8302a", "none", "", "sea"],
+    ["b-borattukji", "보라 뚝지", 2, 20, 45, "깊은 바다에 사는 뚝지의 보랏빛 사촌.", "purple_fat_deep_sea_fish", "#7a4a9a", "spots", "#4a2a6a", "sea"],
+    ["b-silverarowana", "은빛 아로와나", 3, 60, 110, "물 위로 뛰어올라 먹이를 낚아채는 은빛 용.", "25_silver_arowana", "#c9d3da", "none"],
+    ["b-cheongsari", "청새리상어", 3, 150, 300, "푸른 등을 가진 날렵한 먼바다 상어.", "Shark", "#3a6a9a", "none", "", "sea"],
+    ["b-chilheuk", "칠흑 심해어", 3, 40, 90, "이빨이 바늘처럼 늘어선 깊은 바다의 그림자.", "black_deep_sea_fish", "#1e1e24", "none", "", "sea"],
+    ["b-borasimhae", "보라 심해어", 3, 40, 90, "어둠 속에서 보랏빛으로 은은하게 빛나요.", "purple_deep_sea_fish", "#6a3a8a", "spots", "#c9a8f2", "sea"],
+    ["b-cheolgap", "철갑상어", 4, 100, 300, "공룡 시대부터 살아온 갑옷 입은 물고기.", "Sturgeon", "#6a7480", "spots", "#3a4048"],
+    ["b-topgaori", "톱가오리", 4, 200, 500, "톱날 같은 주둥이로 모래 속 먹이를 찾아요.", "Sawfish", "#8a8a7a", "none", "", "sea"],
+    ["b-daewangojing", "대왕오징어", 4, 300, 900, "심해의 거인. 눈이 축구공만 하대요.", "squid", "#c9785a", "spots", "#8a3a2a", "sea"],
+    ["b-ilgak", "일각고래", 5, 400, 600, "긴 뿔 하나를 가진 북쪽 바다의 전설. 어쩌다 여기까지 왔을까요?", "Narwhal", "#9aa8b0", "spots", "#5a6870", "sea"],
+  ].map(([id, name, tier, min, max, desc, file, body, pattern, pc, where]) => ({ id, name, tier, min, max, desc, ...(where ? { where } : {}), model: "fish/" + file + ".glb", pack: 2,
+    art: { body, belly: "#f2efe6", fin: body, pattern: pattern || "none", pc: pc || body, len: 1, th: 1 } })),
+  // v1.23 새 그림 물고기 (우리 바다 물고기)
+  { id: "b-jeoneo", name: "전어", tier: 0, min: 15, max: 25, where: "dawn", desc: "가을 전어 굽는 냄새에 집 나간 며느리도 돌아온대요.", art: { body: "#6f8fa0", belly: "#eef2f2", fin: "#5a7686", pattern: "spots", pc: "#3a4a56", len: 1, th: .85 } },
+  { id: "b-myeolchi", name: "멸치", tier: 0, min: 5, max: 12, desc: "작아도 바다의 기본. 떼로 몰려다녀요.", art: { body: "#9ab8c8", belly: "#f4f8f8", fin: "#8aa6b6", pattern: "stripes", pc: "#c9d8e0", len: 1.1, th: .55 } },
+  { id: "b-kkongchi", name: "꽁치", tier: 0, min: 25, max: 35, desc: "길쭉한 몸에 뾰족한 주둥이. 구우면 기름이 자글자글.", art: { body: "#3a5a7a", belly: "#eef2f4", fin: "#2a4660", pattern: "finlets", pc: "#e8c93a", len: 1.25, th: .5, bill: true } },
+  { id: "b-jeongeori", name: "정어리", tier: 0, min: 15, max: 25, desc: "옆구리에 검은 점이 일곱 개쯤 줄지어 있어요.", art: { body: "#4a7a9a", belly: "#f2f6f6", fin: "#3a6680", pattern: "spots", pc: "#1e2a34", len: 1.05, th: .7 } },
+  { id: "b-nolraegi", name: "놀래기", tier: 0, min: 15, max: 30, desc: "알록달록한 갯바위 단골. 이름처럼 잘 놀라요.", art: { body: "#5aa86a", belly: "#e8f2d8", fin: "#d86a5a", pattern: "waves", pc: "#2a78bb", len: 1, th: .85 } },
+  { id: "b-yeolgi", name: "열기", tier: 1, min: 15, max: 30, where: "night", desc: "불볼락이라고도 해요. 밤에 떼로 몰려와요.", art: { body: "#d8784a", belly: "#f2d0b0", fin: "#c25a3a", pattern: "spots", pc: "#a8402a", len: .95, th: 1, eye: 1.35 } },
+  { id: "b-chamjogi", name: "참조기", tier: 1, min: 20, max: 35, desc: "노란 배가 반짝이는 굴비의 주인공.", art: { body: "#c9b26a", belly: "#f2d84a", fin: "#a8904a", pattern: "none", len: 1.05, th: .85 } },
+  { id: "b-imyeonsu", name: "임연수어", tier: 1, min: 30, max: 50, desc: "굵은 줄무늬가 다섯 개. 껍질 쌈이 별미예요.", art: { body: "#8a9a6a", belly: "#eef0e0", fin: "#6a7a4a", pattern: "stripes", pc: "#3a4428", len: 1.1, th: .8 } },
+  { id: "b-hwangeo", name: "황어", tier: 1, min: 30, max: 45, where: "dawn", desc: "봄이면 붉은 띠를 두르고 강을 거슬러 올라요.", art: { body: "#6a7a86", belly: "#f2e6d8", fin: "#d8584a", pattern: "stripes", pc: "#e8784a", len: 1.1, th: .8 } },
+  { id: "b-mineo", name: "민어", tier: 2, min: 50, max: 100, desc: "여름 보양식의 왕. 부레까지 버릴 게 없어요.", art: { body: "#a89a7a", belly: "#f0e8d8", fin: "#8a7a5a", pattern: "none", len: 1.15, th: .9 } },
+  { id: "b-daegu", name: "대구", tier: 2, min: 50, max: 90, where: "sea", desc: "입이 커서 대구. 한겨울 먼바다에서 올라와요.", art: { body: "#8a8a6a", belly: "#efece0", fin: "#6a6a4a", pattern: "spots", pc: "#5a5a3a", len: 1.1, th: .95 } },
+  { id: "b-hongeo", name: "홍어", tier: 2, min: 60, max: 120, where: "dawn", desc: "마름모꼴 가오리. 삭히면 코가 뻥 뚫려요.", art: { shape: "ray", body: "#8a6a5a", belly: "#f2e2d8", fin: "#8a6a5a", pattern: "spots", pc: "#5a3e30" } },
+  { id: "b-daebangeo", name: "대방어", tier: 3, min: 90, max: 150, where: "sea", desc: "겨울 바다를 주름잡는 10kg 넘는 방어. 기름이 꽉 찼어요.", art: { body: "#2a4a6a", belly: "#eef2f6", fin: "#c9b22a", pattern: "finlets", pc: "#f2d84a", len: 1.2, th: .95 } },
 ];
 const NICK_A = ["졸린", "멍한", "느긋한", "배고픈", "수줍은", "심심한", "행복한", "반짝이는", "꾸벅꾸벅", "조용한", "엉뚱한", "따끈한", "노곤한", "말랑한"];
 const NICK_B = ["붕어", "고등어", "멸치", "갈매기", "해달", "문어", "복어", "가자미", "꽁치", "물개", "소라", "해파리", "오징어", "도다리"];
@@ -1249,7 +1298,17 @@ const RODS = [
   { id: "carbon", name: "카본 낚싯대", price: 4200, lv: 7, tens: 1.18, slots: 1, color: 0x23356e, desc: "가볍고 질겨요 · 채비 1칸" },
   { id: "iridium", name: "이리듐 낚싯대", price: 9000, lv: 12, tens: 1.27, slots: 2, color: 0x8448cc, desc: "대물을 위한 낚싯대 · 채비 2칸" },
   { id: "legend", name: "전설의 낚싯대", price: 30000, lv: 25, tens: 1.38, slots: 3, color: 0xf2c230, desc: "바다의 왕을 노리는 낚싯대 · 채비 3칸" },
-];
+  // v1.23 새 낚싯대 (레벨 구간 사이 · 최상위)
+  { id: "lure", name: "초보 루어대", price: 600, lv: 2, tens: 1.04, slots: 0, color: 0xe2522c, desc: "가볍게 휘두르는 연습용 · 대나무보다 조금 더 버텨요" },
+  { id: "rock", name: "갯바위 낚싯대", price: 3000, lv: 5, tens: 1.14, slots: 1, color: 0x6a5a4a, desc: "거친 바위틈 대물을 버티는 낚싯대 · 채비 1칸" },
+  { id: "surf", name: "원투 낚싯대", price: 6000, lv: 9, tens: 1.21, slots: 1, color: 0x178a8a, desc: "멀리 던지는 긴 낚싯대 · 채비 1칸" },
+  { id: "boat", name: "선상 낚싯대", price: 7500, lv: 11, tens: 1.24, slots: 2, color: 0x2a78bb, desc: "배 위에서 쓰는 짧고 굵은 낚싯대 · 채비 2칸" },
+  { id: "titan", name: "티타늄 지깅대", price: 14000, lv: 15, tens: 1.3, slots: 2, color: 0xa7adb3, desc: "깊은 바다 지깅용 · 채비 2칸" },
+  { id: "obsidian", name: "흑요석 낚싯대", price: 20000, lv: 19, tens: 1.34, slots: 2, color: 0x1b1b1f, desc: "검게 빛나는 단단한 낚싯대 · 채비 2칸" },
+  { id: "abyss", name: "심해의 낚싯대", price: 50000, lv: 32, tens: 1.42, slots: 3, color: 0x23356e, desc: "심해의 거물과 겨루는 낚싯대 · 채비 3칸" },
+  { id: "palace", name: "용궁 낚싯대", price: 90000, lv: 40, tens: 1.46, slots: 3, color: 0x3fd6cc, desc: "용궁에서 내려왔다는 옥빛 낚싯대 · 채비 3칸" },
+  { id: "myth", name: "신화의 낚싯대", price: 150000, lv: 48, tens: 1.5, slots: 3, color: 0xe57aa8, desc: "신화 속 물고기도 버티는 마지막 낚싯대 · 채비 3칸" },
+].sort((a, b) => a.lv - b.lv);
 const REELS = [
   { id: "basic", name: "기본 릴", price: 0, lv: 1, heat: 1, cool: .12, speed: 2.2, color: 0x8a8f96, desc: "처음 받은 릴" },
   { id: "spin", name: "스피닝 릴", price: 1500, lv: 3, heat: .86, cool: .15, speed: 2.45, color: 0x2a78bb, desc: "덜 뜨거워지고 조금 빨리 감겨요" },
@@ -1362,7 +1421,12 @@ const JOB = Object.fromEntries(JOBS.map(j => [j.id, j]));
 const JOB_XP = [0, 6, 16, 32, 55, 85, 125, 175, 240, 320];   // Lv.1~10
 const JOB_CHANGE_COST = 1000, JOB_COOLDOWN = 864e5, MENU_CAP = 20;
 const jobLv = (id) => { const x = (P.job && P.job.xp && P.job.xp[id]) || 0; let lv = 1; while (lv < 10 && x >= JOB_XP[lv]) lv++; return lv; };
-const isJob = (id) => !!(P.job && P.job.id === id);
+/* 출시 때 잠가 두는 곳: 동사무소(직업) · 마이 홈(부동산 · 집). 운영자는 시험용으로 들어갈 수 있어요.
+   동사무소가 잠긴 동안에는 직업 제한도 풀어서 누구나 회를 뜨고 노점을 열어요(횟집 사장으로 쳐요) */
+const LOCKED = { office: true, home: true };
+const isLocked = (k) => LOCKED[k] && !S.isOwner;
+function lockedToast(what) { sfx("ui-error", .3); toast([h("b", { text: "🚧 " + what + "은 준비 중이에요" }), h("div", { class: "muted", style: "font-size:12px", text: "정식 오픈 뒤 업데이트에서 열려요" })], null, 3600); }
+const isJob = (id) => LOCKED.office ? id === "sashimi" : !!(P.job && P.job.id === id);
 const myTag = () => P.title || (P.job && JOB[P.job.id] ? JOB[P.job.id].name : "");
 function menuMax() { if (!isJob("sashimi")) return 12; const lv = jobLv("sashimi"); return lv >= 10 ? 20 : lv >= 7 ? 17 : lv >= 3 ? 14 : 12; }
 function dishQuality() { if (!isJob("sashimi")) return 0; const lv = jobLv("sashimi"); return lv >= 8 ? 2 : lv >= 5 ? 1 : 0; }
@@ -1558,7 +1622,7 @@ const ACH = [
   { id: "hero1", name: "영웅을 낚다", desc: "영웅 등급 물고기 낚기", stat: "t3", goal: 1, gold: 1000 },
   { id: "myth1", name: "신화를 낚다", desc: "신화 등급 물고기 낚기", stat: "t5", goal: 1, gold: 10000, title: "신화의 어부" },
   { id: "boot10", name: "바다 청소부", desc: "낡은 장화 10개 건지기", stat: "junk_boot", goal: 10, gold: 300, title: "바다 청소부" },
-  { id: "chest3", name: "보물 사냥꾼", desc: "보물 상자 3개 건지기", stat: "junk_chest", goal: 3, gold: 1000 },
+  { id: "chest3", name: "보물 사냥꾼", desc: "보물 상자 3개 건지기", stat: "junk_chest", goal: 3, gold: 400 },
   { id: "legend1", name: "전설과의 대면", desc: "전설 등급 물고기 낚기", stat: "t4", goal: 1, gold: 3000, title: "전설의 낚시꾼" },
   { id: "monster1", name: "괴물급!", desc: "×2.2 이상 괴물급 개체 낚기", stat: "monster", goal: 1, gold: 800 },
   { id: "night10", name: "달빛 낚시", desc: "밤에 물고기 10마리 낚기", stat: "nightCatch", goal: 10, gold: 400, title: "달빛 낚시꾼" },
@@ -1568,6 +1632,9 @@ const ACH = [
   { id: "dex10", cat: "도감", name: "꼬마 수집가", desc: "도감 10종 채우기", val: dexCount, goal: 10, gold: 500 },
   { id: "dex25", name: "바다 박사", desc: "도감 25종 채우기", val: dexCount, goal: 25, gold: 2000, title: "바다 박사" },
   { id: "dex45", name: "어촌 박물학자", desc: "도감 45종 채우기", val: dexCount, goal: 45, gold: 6000, title: "박물학자" },
+  { id: "dex70", name: "바다 백과사전", desc: "도감 70종 채우기", val: dexCount, goal: 70, gold: 9000, title: "바다 백과사전" },
+  { id: "dex100", name: "바다의 주인", desc: "도감 100종 채우기", val: dexCount, goal: 100, gold: 15000, title: "바다의 주인" },
+  { id: "rods8", name: "낚싯대 수집가", desc: "낚싯대 8종 모으기", val: () => (P.rods || []).length, goal: 8, gold: 3000 },
   { id: "night_fish", name: "밤바다의 친구", desc: "밤에만 나오는 물고기 5종 낚기", val: () => BUILTIN.filter(f => f.where === "night" && P.dex[f.id]).length, goal: 5, gold: 1500 },
   { id: "coop5", cat: "함께", name: "둘이서 한 마리", desc: "함께 낚시로 5마리 낚기", stat: "coop", goal: 5, gold: 700 },
   { id: "friends5", name: "부두 인싸", desc: "친구 5명 만들기", val: () => Object.keys(P.friends).length, goal: 5, gold: 500, title: "부두 인싸" },
@@ -1586,11 +1653,11 @@ const ACH = [
   { id: "profit10k", name: "주식 고수", desc: "주식을 팔아 100만원 수익 내기", stat: "stockProfit", goal: 10000, gold: 2000, money: true, title: "주식 고수" },
   { id: "jackpot", name: "잭팟!", desc: "슬롯머신에서 50배 이상 당첨", stat: "jackpots", goal: 1, gold: 1000, title: "행운아" },
   { id: "scratch20", name: "긁는 손", desc: "즉석 복권 20장 긁기", stat: "scratches", goal: 20, gold: 300 },
-  { id: "attend7", cat: "초대 · 출석", name: "새내기 졸업", desc: "출석 이벤트 7일 모두 받기", stat: "attend", goal: 7, gold: 500, title: "새내기 어부" },
+  { id: "attend7", cat: "초대 · 출석", name: "새내기 졸업", desc: "출석 이벤트 7일 모두 받기", stat: "attend", goal: 7, gold: 300, title: "새내기 어부" },
   { id: "rookieSet", name: "새내기 어부 완성", desc: "새내기 어부 세트 5벌을 한 번에 입기", val: () => ROOKIE_SET.filter(id => Object.values(P.wear).includes(id)).length, goal: 5, gold: 300 },
-  { id: "invite1", name: "첫 초대", desc: "추천인 코드로 친구 1명 초대 (친구가 Lv.3 달성)", stat: "invites", goal: 1, gold: 300 },
-  { id: "invite3", name: "마을 홍보대사", desc: "친구 3명 초대", stat: "invites", goal: 3, gold: 1500, title: "홍보대사" },
-  { id: "invite10", name: "어촌 이장님", desc: "친구 10명 초대", stat: "invites", goal: 10, gold: 5000, title: "어촌 이장님" },
+  { id: "invite1", name: "첫 초대", desc: "추천인 코드로 친구 1명 초대 (친구가 Lv.5 달성)", stat: "invites", goal: 1, gold: 300 },
+  { id: "invite3", name: "마을 홍보대사", desc: "친구 3명 초대", stat: "invites", goal: 3, gold: 600, title: "홍보대사" },
+  { id: "invite10", name: "어촌 이장님", desc: "친구 10명 초대", stat: "invites", goal: 10, gold: 1500, title: "어촌 이장님" },
   { id: "home1", cat: "집", name: "내 집 마련", desc: "부동산에서 첫 집 사기", val: () => (P.home && P.home.tier >= 0 ? 1 : 0), goal: 1, gold: 500 },
   { id: "furn20", name: "인테리어 장인", desc: "집에 가구 20개 놓기", val: () => (P.home ? P.home.items.length : 0), goal: 20, gold: 1000, title: "인테리어 장인" },
   { id: "villa", name: "바닷가 별장 주인", desc: "바닷가 2층 별장 장만하기", val: () => (P.home && P.home.tier >= 3 ? 1 : 0), goal: 1, gold: 5000, title: "별장 주인" },
@@ -1600,6 +1667,8 @@ const ACH = [
   { id: "sashimi10", name: "전설의 칼잡이", desc: "횟집 사장 숙련도 Lv.10", val: () => jobLv("sashimi"), goal: 10, gold: 5000, title: "전설의 칼잡이" },
 ];
 { let c = ""; for (const a of ACH) { if (a.cat) c = a.cat; else a.cat = c; } }
+// 잠긴 기능(마이 홈 · 직업 등록)의 도전과제는 열릴 때까지 숨겨요
+for (let i = ACH.length - 1; i >= 0; i--) if ((LOCKED.home && ACH[i].cat === "집") || (LOCKED.office && ACH[i].id === "job1")) ACH.splice(i, 1);
 const ACH_TITLES = ACH.filter(a => a.title).map(a => a.title);
 const achVal = (a) => Math.min(a.goal, a.val ? a.val() : (P.stats[a.stat] || 0));
 const achClaimable = () => ACH.filter(a => P.ach[a.id] && !P.ach[a.id].c).length;
@@ -1673,9 +1742,12 @@ function priceAt(i, t) {
 const priceNow = (i) => priceAt(i, mktTick());
 const stockIdx = (id) => STOCKS.findIndex(x => x.id === id);
 function recentNews(n) { const out = [], t0 = mktTick(); for (let t = t0 - (t0 % NEWS_EVERY); out.length < n && t > t0 - 400; t -= NEWS_EVERY) { const nw = newsAt(t); if (nw) out.push(nw); } return out; }
-function bankBal() {   // 예금: 게임 하루(30분)마다 0.5% 이자, 10만 G까지만 이자
-  const b = P.bank || { amt: 0, ts: Date.now() }, days = Math.max(0, (Date.now() - b.ts) / DAY_MS);
-  return Math.floor(b.amt + Math.min(b.amt, 100000) * (Math.pow(1.005, days) - 1));
+/* 예금: 30분마다 0.2% 이자, 300만원(3만)까지만 이자가 붙고, 쌓이는 건 마지막으로 넣고 뺀 뒤 하루(48번)까지.
+   (v1.23 전: 0.5% · 1,000만원까지 · 무제한 → 넣어만 둬도 하루 240만원이 생겨서 낮춤) */
+const BANK_RATE = .002, BANK_CAP = 30000, BANK_MAXDAYS = 48;
+function bankBal() {
+  const b = P.bank || { amt: 0, ts: Date.now() }, days = clamp((Date.now() - b.ts) / DAY_MS, 0, BANK_MAXDAYS);
+  return Math.floor(b.amt + Math.min(b.amt, BANK_CAP) * (Math.pow(1 + BANK_RATE, days) - 1));
 }
 function bankSet(amt) { P.bank = { amt: Math.max(0, Math.floor(amt)), ts: Date.now() }; markDirty(); }
 function holdings() { return P.stocks || {}; }
@@ -1860,7 +1932,7 @@ const TUTS = {
   sheet_shop: { icon: "🛒", title: "낚시 상점", steps: ["왼쪽 진열대에서 고른 물건을 자세히 보고, 오른쪽 목록에서 골라요. 검은 선은 지금 쓰는 장비예요.", "좋은 미끼는 귀한 물고기를, 좋은 낚싯대·릴·줄은 파이팅을 쉽게 해 줘요. 자물쇠는 레벨이 오르면 열려요."] },
   sheet_sashimi: { icon: "🔪", title: "회 센터", steps: ["회를 먹으면 입질 속도 · 좋은 물고기 확률 · 크기 · 판매가 중 하나가 잠깐 올라요.", "회를 직접 뜨는 건 횟집 사장님만 해요. 손님은 손님 창구에서 사 먹거나 시장 노점에서 사요."] },
   sheet_lotto: { icon: "🎰", title: "행운 복권방", steps: ["슬롯머신은 베팅을 고르고 돌려요. 같은 그림 3개면 큰 당첨!", "즉석 복권은 은박을 긁어 같은 금액 3개를 찾아요. 재미로만 즐겨요!"] },
-  sheet_bank: { icon: "🏦", title: "낭만 은행", steps: ["주식 시세는 1분마다 바뀌고, 모든 사람이 같은 값을 봐요. 6분마다 나오는 뉴스가 종목을 움직여요.", "쌀 때 사서 비쌀 때 팔아요! 예금은 30분마다 이자가 붙어요."] },
+  sheet_bank: { icon: "🏦", title: "낭만 은행", steps: ["주식 시세는 1분마다 바뀌고, 모든 사람이 같은 값을 봐요. 6분마다 나오는 뉴스가 종목을 움직여요.", "쌀 때 사서 비쌀 때 팔아요! 예금은 30분마다 이자가 붙고, 하루에 한 번은 은행에 들러야 계속 쌓여요."] },
   sheet_office: { icon: "🪪", title: "동사무소", steps: ["주민등록증을 받고 직업을 등록하는 곳이에요. 낚시와 갯벌은 누구나 해요. 직업은 부수입을 버는 방법이에요.", "지금은 「횟집 사장」이 열려 있어요. 회를 떠서 시장에서 파는 건 횟집 사장만 할 수 있어요. 첫 등록은 무료예요."] },
   home: { icon: "🏠", title: "우리 집", steps: ["여기는 나만의 공간이에요. 같은 집에 온 사람끼리만 서로 보여요.", "위의 「꾸미기」를 누르고 가구를 골라 바닥을 누르면 놓여요. 놓인 가구를 누르면 돌리거나 넣어 둘 수 있어요.", "침대에서는 하루 한 번 잘 수 있고, 창고 상자에는 물고기를 넣어 둬요. 「나가기」나 대문으로 마을에 돌아가요."] },
   sheet_realty: { icon: "🏠", title: "어촌 부동산", steps: ["돈으로 집을 사요. 계약서에 서명하면 끝! 첫 집은 침대와 창고 상자를 선물로 드려요.", "인테리어 코너에서 가구를 사고, 집에서 「꾸미기」로 놓아요. 친구는 「집 놀러 가기」로 와요."] },
@@ -2164,15 +2236,16 @@ function hook() {
 /* 잡동사니 · 보물: 가끔 물고기 대신 걸려 올라와요 (싸움 없이 바로) */
 const JUNK = [
   { id: "boot", w: 55, name: "낡은 장화", ico: "🥾", line: "앗, 누가 버린 장화예요. 쓰레기는 치웠어요!", gold: 0, xp: 2 },
-  { id: "bottle", w: 32, name: "병 편지", ico: "🍾", gold: [10, 50], xp: 4, notes: ["「이 편지를 읽는 어부에게 행운이 깃들기를!」", "「참돔은 새벽에 잘 문대요. — 옛날 어부」", "「배 위에서는 큰 물고기가 잘 잡혀요.」", "「갈치는 밤에만 나와요. 불빛을 좋아하거든요.」", "「몸부림칠 때는 꼭 손을 떼세요!」"] },
-  { id: "chest", w: 13, name: "작은 보물 상자", ico: "🧰", gold: [300, 2000], xp: 20, bait: true },
+  { id: "bottle", w: 35, name: "병 편지", ico: "🍾", gold: [5, 30], xp: 4, notes: ["「이 편지를 읽는 어부에게 행운이 깃들기를!」", "「참돔은 새벽에 잘 문대요. — 옛날 어부」", "「배 위에서는 큰 물고기가 잘 잡혀요.」", "「갈치는 밤에만 나와요. 불빛을 좋아하거든요.」", "「몸부림칠 때는 꼭 손을 떼세요!」"] },
+  { id: "chest", w: 10, name: "작은 보물 상자", ico: "🧰", gold: [100, 600], xp: 20, bait: true },
 ];
+/* v1.23 경제 조정: 공짜로 들어오는 돈이 낚시 벌이를 앞지르지 않게 (기준: 초반 지렁이 낚시 한 마리 ≈ 1,900원, 한 시간 ≈ 27만원) */
 function junkCatch() {
   const j = JUNK[weighted(JUNK.map(x => x.w))];
   let g = 0; if (Array.isArray(j.gold)) g = Math.round(j.gold[0] + Math.random() * (j.gold[1] - j.gold[0]));
   if (g) P.gold += g;
   let extra = "";
-  if (j.bait) { const b = ["krill", "paste", "squid"][Math.floor(Math.random() * 3)], n = 3 + Math.floor(Math.random() * 5); P.baits[b] = (P.baits[b] || 0) + n; extra = " · " + (BAITS.find(x => x.id === b) || {}).name + " " + n + "개"; }
+  if (j.bait) { const b = ["krill", "paste", "squid"][Math.floor(Math.random() * 3)], n = 2 + Math.floor(Math.random() * 3); P.baits[b] = (P.baits[b] || 0) + n; extra = " · " + (BAITS.find(x => x.id === b) || {}).name + " " + n + "개"; }
   stat("junk_" + j.id); gainXp(j.xp); markDirty();
   setPhase("catch", 1600); sfx(j.id === "chest" ? "jingle-rare" : "splash", .35);
   toast([h("b", { text: j.ico + " " + j.name + "를 건졌어요" }), h("div", { class: "muted", style: "font-size:12px", text: (j.notes ? j.notes[Math.floor(Math.random() * j.notes.length)] + " " : j.line ? j.line + " " : "") + (g ? "+" + won(g) : "") + extra })], j.id === "chest" ? "lvup" : null, 5000);
@@ -2618,9 +2691,15 @@ function nearestAction() {
     consider(st.x + 2.6, st.z, { key: "stall:" + st.i + ":" + label, label, run: () => { if (!alive) openSheet("stallopen", st.i); else if (cur.owner === S.uid) { if (S.myStall === st.i) openSheet("mystall"); else returnToStall(st.i); } else openSheet("stall", st.i); } }, 2.4);
   }
   if (inUptown(ME.x, ME.z)) {
-    consider(OFFICE.door.x, OFFICE.door.z, { key: "office", label: "동사무소 들어가기", run: () => { ME.ry = Math.PI / 2; presMove(true); openSheet("office"); } }, 2.6);
-    consider(REALTY.door.x, REALTY.door.z, { key: "realty", label: "부동산 들어가기", run: () => { ME.ry = Math.PI / 2; presMove(true); openSheet("realty"); } }, 2.4);
-    consider(HOUSE_GATE.x, HOUSE_GATE.z, { key: "housegate:" + P.home.tier, label: P.home.tier >= 0 ? "우리 집 들어가기" : "주택가 · 아직 집이 없어요", run: () => P.home.tier >= 0 ? enterHouse(S.uid) : (toast("부동산에서 집을 사면 여기로 들어가요"), openSheet("realty")) }, 2.2);
+    if (isLocked("office")) consider(OFFICE.door.x, OFFICE.door.z, { key: "office:soon", label: "🚧 동사무소 · 준비 중", run: () => lockedToast("동사무소") }, 2.6);
+    else consider(OFFICE.door.x, OFFICE.door.z, { key: "office", label: "동사무소 들어가기", run: () => { ME.ry = Math.PI / 2; presMove(true); openSheet("office"); } }, 2.6);
+    if (isLocked("home")) {
+      consider(REALTY.door.x, REALTY.door.z, { key: "realty:soon", label: "🚧 부동산 · 준비 중", run: () => lockedToast("마이 홈 · 부동산") }, 2.4);
+      consider(HOUSE_GATE.x, HOUSE_GATE.z, { key: "housegate:soon", label: "🚧 주택가 · 준비 중", run: () => lockedToast("마이 홈") }, 2.2);
+    } else {
+      consider(REALTY.door.x, REALTY.door.z, { key: "realty", label: "부동산 들어가기", run: () => { ME.ry = Math.PI / 2; presMove(true); openSheet("realty"); } }, 2.4);
+      consider(HOUSE_GATE.x, HOUSE_GATE.z, { key: "housegate:" + P.home.tier, label: P.home.tier >= 0 ? "우리 집 들어가기" : "주택가 · 아직 집이 없어요", run: () => P.home.tier >= 0 ? enterHouse(S.uid) : (toast("부동산에서 집을 사면 여기로 들어가요"), openSheet("realty")) }, 2.2);
+    }
   }
   if (inHall(ME.x, ME.z)) {
     for (const sp of STATUE_SPOTS) { const c = RANK_CATS[sp.i]; consider(sp.x, sp.z + sp.face * 1.5, { key: "hall:" + c.id, label: c.ico + " " + c.name + " 랭킹 보기", run: () => openSheet("rank", c.id) }, 1.4); }
@@ -3083,7 +3162,7 @@ const ME_ACTIONS = [
   { svg: ICO.friends, label: () => "친구 " + Object.keys(P.friends).length, run: () => openSheet("friends") },
   { svg: ICO.profile, label: () => "내 정보", run: () => openSheet("profile") },
   { svg: ICO.bag, label: () => "가방", run: () => openSheet("bag") },
-  { svg: '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>', label: () => atHome() ? "마을로" : P.home.tier >= 0 ? "우리 집" : "집 구하기", run: () => atHome() ? leaveHouse() : P.home.tier >= 0 ? enterHouse(S.uid) : (toast("윗마을 부동산에서 집을 살 수 있어요"), goRealty()) },
+  { svg: '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>', label: () => atHome() ? "마을로" : isLocked("home") ? "우리 집 🚧" : P.home.tier >= 0 ? "우리 집" : "집 구하기", run: () => atHome() ? leaveHouse() : P.home.tier >= 0 ? enterHouse(S.uid) : (toast("윗마을 부동산에서 집을 살 수 있어요"), goRealty()) },
   { svg: ICO.emote, label: () => "인사", run: () => { $("emotePop").hidden = false; } },
   { svg: ICO.face, label: () => "꾸미기", run: () => openSheet("face") },
   { svg: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M8 20h8"/>', hot: () => achClaimable() > 0, label: () => "도전과제" + (achClaimable() ? " " + achClaimable() : ""), run: () => openSheet("ach") },
@@ -4804,30 +4883,30 @@ function swimMat(map) {
 function loadFishModels() {
   if (!T3 || !T3.GLTFLoader) return;
   const loader = new T3.GLTFLoader();
-  const list = BUILTIN.filter(f => f.model);
-  let left = list.length;
-  const done = () => { if (--left === 0) onModelsReady(); };
-  fetch("fish/models.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((pack) => {
-  for (const f of list) {
+  // 1묶음(models.json)을 먼저, v1.23 새 물고기 2묶음(models2.json, 약 4MB)은 그다음에 불러와요. 오기 전엔 그림 물고기로 보여요
+  const loadPack = (file, list) => fetch(file).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((pack) => Promise.all(list.map((f) => new Promise((done) => {
     const b64 = pack[f.model.split("/").pop()];
-    if (!b64) { done(); continue; }
+    if (!b64) { done(); return; }
     const bin = atob(b64), buf = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
     loader.parse(buf.buffer, "", (g) => {
-    let mesh = null; g.scene.traverse(o => { if (!mesh && o.isMesh) mesh = o; });
-    if (mesh) {
-      const geo = mesh.geometry.clone(); geo.computeBoundingBox();
-      const bb = geo.boundingBox, c = new T3.Vector3(); bb.getCenter(c); geo.translate(-c.x, -c.y, -c.z);
-      const len = Math.max(bb.max.z - bb.min.z, bb.max.x - bb.min.x, .01); geo.scale(1 / len, 1 / len, 1 / len);
-      geo.computeBoundingBox();
-      const map = mesh.material && mesh.material.map || null;
-      if (map) { map.encoding = T3.LinearEncoding; map.needsUpdate = true; }
-      FISH3D.set(f.id, { geo, mat: swimMat(map) });
-    }
-    done();
-  }, (e) => { console.warn("model", f.model, e); done(); });
-  }
-  }).catch((e) => console.warn("models.json", e));
+      let mesh = null; g.scene.traverse(o => { if (!mesh && o.isMesh) mesh = o; });
+      if (mesh) {
+        const geo = mesh.geometry.clone(); geo.computeBoundingBox();
+        const bb = geo.boundingBox, c = new T3.Vector3(); bb.getCenter(c); geo.translate(-c.x, -c.y, -c.z);
+        const len = Math.max(bb.max.z - bb.min.z, bb.max.x - bb.min.x, .01); geo.scale(1 / len, 1 / len, 1 / len);
+        geo.computeBoundingBox();
+        const map = mesh.material && mesh.material.map || null;
+        if (map) { map.encoding = T3.LinearEncoding; map.needsUpdate = true; }
+        const mat = swimMat(map); if (geo.attributes.color) mat.vertexColors = true;   // 부품 색을 정점 색으로 구운 모델
+        FISH3D.set(f.id, { geo, mat });
+      }
+      done();
+    }, (e) => { console.warn("model", f.model, e); done(); });
+  })))).catch((e) => console.warn(file, e));
+  const withModel = BUILTIN.filter(f => f.model);
+  loadPack("fish/models.json", withModel.filter(f => f.pack !== 2)).then(onModelsReady)
+    .then(() => loadPack("fish/models2.json", withModel.filter(f => f.pack === 2))).then(onModelsReady);
 }
 function onModelsReady() { makeThumbs(); }
 function makeThumbs() {
@@ -4840,14 +4919,15 @@ function makeThumbs() {
     const dl = new T3.DirectionalLight(0xffffff, .6); dl.position.set(3, 4, 2); sc.add(dl);
     const cam = new T3.OrthographicCamera(-.62, .62, .31, -.31, .1, 10); cam.position.set(3, .02, 0); cam.lookAt(0, 0, 0);
     for (const [id, m] of FISH3D) {
-      const mesh = new T3.Mesh(m.geo, new T3.MeshToonMaterial({ map: m.mat.map, gradientMap: toonGrad(), side: T3.DoubleSide }));
+      if (artCache.has(id) && artCache.get(id).model) continue;   // 앞 묶음에서 이미 만든 사진
+      const mesh = new T3.Mesh(m.geo, new T3.MeshToonMaterial({ map: m.mat.map, gradientMap: toonGrad(), side: T3.DoubleSide, vertexColors: !!m.geo.attributes.color }));
       const bb = m.geo.boundingBox;
       if (id === "b-manta") mesh.rotation.z = -Math.PI / 2.4;
       const hgt = id === "b-manta" ? 0.7 : bb.max.y - bb.min.y;
       mesh.scale.setScalar(Math.min(1, .56 / hgt) * .94);
       sc.add(mesh); tr.render(sc, cam); sc.remove(mesh); mesh.material.dispose();
       const c = document.createElement("canvas"); c.width = W; c.height = H; c.getContext("2d").drawImage(tr.domElement, 0, 0);
-      artCache.set(id, { src: c.toDataURL(), el: c }); fishTex.delete(id);
+      artCache.set(id, { src: c.toDataURL(), el: c, model: true }); fishTex.delete(id);
     }
     tr.dispose(); if (tr.forceContextLoss) tr.forceContextLoss();
     updateHud(); refreshSheet(); renderChat();
@@ -5813,7 +5893,7 @@ function tapAt(x0, y0) {
     if (best.kind === "hall") { goHall(best.cat); return; }
     if (best.kind === "office") { goOffice(); return; }
     if (best.kind === "realty") { goRealty(); return; }
-    if (best.kind === "housegate") { walkTo(HOUSE_GATE.x, HOUSE_GATE.z, () => P.home.tier >= 0 ? enterHouse(S.uid) : openSheet("realty")); return; }
+    if (best.kind === "housegate") { if (isLocked("home")) { lockedToast("마이 홈"); return; } walkTo(HOUSE_GATE.x, HOUSE_GATE.z, () => P.home.tier >= 0 ? enterHouse(S.uid) : openSheet("realty")); return; }
     if (best.kind === "homegate") { const G = homeGeom(S.homeDoc); walkTo(HOME.x, G.yardZ1 - .4, leaveHouse); return; }
   }
   if (ground) {
@@ -5894,7 +5974,7 @@ function updateHud() {
   drawAvatar();
   { const mb = $("menuBadge"), n = menuBadgeCount(); mb.hidden = !n; mb.textContent = n > 9 ? "9+" : n;
     const on = S.peers ? otherPeers(true).filter(p => p.uid && isFriend(p.uid)).length : 0, fb = $("friendBadge"); fb.hidden = !on; fb.textContent = on;
-    $("homeDockTx").textContent = atHome() ? "나가기" : P.home && P.home.tier >= 0 ? "우리 집" : "집 구하기"; }
+    $("homeDockTx").textContent = atHome() ? "나가기" : isLocked("home") ? "준비 중" : P.home && P.home.tier >= 0 ? "우리 집" : "집 구하기"; }
   $("dexCount").textContent = Object.keys(P.dex).filter(id => findFish(id)).length + "/" + allFish().length;
   renderBuffs();
 }
@@ -5929,6 +6009,8 @@ function updateHint() {
 const SHEETS = {};
 S.sheetStack = [];
 function openSheet(name, arg, opt) {
+  if (name === "office" && isLocked("office")) { lockedToast("동사무소"); return; }
+  if (["realty", "storage", "tank", "guestbook"].includes(name) && isLocked("home")) { lockedToast("마이 홈 · 부동산"); return; }
   closeMeMenu();
   if (!(opt && opt.back)) { if (S.sheet && S.sheet !== name && SHEETS[name]) S.sheetStack.push([S.sheet, S.sheetArg]); else if (!S.sheet) S.sheetStack = []; }
   if (name === "dish") { S.bagTab = "dish"; name = "bag"; }
@@ -6542,6 +6624,7 @@ const pct = (a, b) => b ? (a - b) / b * 100 : 0;
 const chg = (v) => h("span", { class: "num " + (v > 0 ? "up" : v < 0 ? "down" : ""), text: (v > 0 ? "▲" : v < 0 ? "▼" : "") + Math.abs(v).toFixed(2) + "%" });
 SHEETS.bank = (body) => {
   setHead("낭만 은행", "모두가 같은 시세를 봐요 · 시세는 1분마다 · 뉴스는 6분마다 나와요");
+  if (P.bank && P.bank.amt && Date.now() - P.bank.ts > DAY_MS) bankSet(bankBal());   // 들르면 쌓인 이자를 확정하고 다시 쌓기 시작
   const t = mktTick(), sv = stockValue(), bal = bankBal();
   let cost = 0; for (const hld of Object.values(holdings())) cost += hld.cost;
   const gi = (l, v, cls) => h("div", { class: "gi" }, h("span", { text: l }), h("b", { class: cls || "", text: v }));
@@ -6590,7 +6673,7 @@ SHEETS.bank = (body) => {
   } else {
     const inp = h("input", { type: "number", min: "100", step: "10000", value: "100000", "aria-label": "금액 (원)", style: "width:120px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 8px" });
     body.append(h("div", { class: "tshop" }, h("div", { class: "ishelf" }, h("div", { class: "ibig" }, h("img", { src: (() => { const c = document.createElement("canvas"); c.width = c.height = 160; const g = c.getContext("2d"); g.fillStyle = "#e2f0f8"; g.fillRect(0, 0, 160, 160); SICON.bank(g, 80, 80, 120); return c.toDataURL(); })(), alt: "" })),
-        h("h3", { text: "낭만 예금" }), h("div", { class: "muted", style: "font-size:12.5px;line-height:1.5", text: "30분마다 0.5%씩 이자가 붙어요. 1,000만원까지 이자가 붙고, 언제든 넣고 뺄 수 있어요." }),
+        h("h3", { text: "낭만 예금" }), h("div", { class: "muted", style: "font-size:12.5px;line-height:1.5", text: "30분마다 0.2%씩 이자가 붙어요. 300만원까지 이자가 붙고, 은행에 들르지 않으면 하루치까지만 쌓여요. 언제든 넣고 뺄 수 있어요." }),
         h("div", { class: "stockhead" }, h("b", { text: won(bal) + "" }), h("span", { class: "muted", text: "지금 예금" }))),
       h("div", { style: "display:flex;flex-direction:column;gap:10px" }, h("div", { class: "qp" }, inp, ...[1000, 5000, 10000].map(v => h("button", { class: "btn sm", onclick: () => { inp.value = String(v * WON); }, text: won(v) }))),
         h("div", { class: "acts" },
@@ -6623,13 +6706,13 @@ SHEETS.ach = (body) => {
 /* ---------- 출석 이벤트 (7일) · 새내기 어부 세트 ----------
    하루(한국 시간 기준)에 한 번 도장. 연속이 아니어도 돼요. 7번 채우면 세트 완성 + 칭호 */
 const ATTEND = [
-  { gold: 500, baits: { shrimp: 20 }, ico: "🦐" },
+  { gold: 200, baits: { shrimp: 10 }, ico: "🦐" },
   { cloth: "h-rookie" },
-  { gold: 500, baits: { krill: 15 }, ico: "🦞" },
+  { gold: 200, baits: { krill: 8 }, ico: "🦞" },
   { cloth: "t-rookie" },
-  { cloth: "b-rookie", baits: { paste: 10 } },
-  { cloth: "s-rookie", gold: 1000 },
-  { cloth: "k-rookie", gold: 2000, ttl: "새내기 어부" },
+  { cloth: "b-rookie", baits: { paste: 5 } },
+  { cloth: "s-rookie", gold: 400 },
+  { cloth: "k-rookie", gold: 800, ttl: "새내기 어부" },
 ];
 const kstDay = (t) => new Date((t || Date.now()) + 9 * 3600e3).toISOString().slice(0, 10);
 const attendCan = () => !!P.attend && P.attend.n < 7 && P.attend.last !== kstDay();
@@ -6695,8 +6778,9 @@ function maybeAttendPopup() {
 }
 
 /* ---------- 추천인 코드 ----------
-   내 코드(후원 코드와 같음)를 친구가 입력하면: 친구는 바로 선물, 나는 친구가 Lv.3이 되면 보상(최대 20명) */
-const REF_MAXLV = 10, REF_CAP = 20, REF_GIFT = { gold: 1000, shrimp: 20, krill: 10 }, REF_BONUS = 2000;
+   내 코드(후원 코드와 같음)를 친구가 입력하면: 친구는 바로 선물, 나는 친구가 Lv.5가 되면 보상(최대 10명) */
+// 부계정으로 보상을 모으지 못하게: 초대한 사람은 친구가 Lv.5가 돼야 받고, 최대 10명
+const REF_MAXLV = 10, REF_CAP = 10, REF_PAYLV = 5, REF_GIFT = { gold: 300, shrimp: 10, krill: 5 }, REF_BONUS = 600;
 async function claimRef(code, auto) {
   code = String(code || "").trim().toUpperCase();
   if (!/^[0-9A-Z]{6}$/.test(code)) return "코드 6자리를 확인해 주세요";
@@ -6720,10 +6804,10 @@ async function claimRef(code, auto) {
   return "";
 }
 function refCheck() {
-  if (!P.ref || P.ref.paid || S.refSending || !S.online || !S.uid || myLv() < 3) return;
+  if (!P.ref || P.ref.paid || S.refSending || !S.online || !S.uid || myLv() < REF_PAYLV) return;
   S.refSending = true;
   sendInbox(P.ref.uid, { type: "referral", stage: "lv3", nick: P.nick }, "ref_" + S.uid)
-    .then(() => { P.ref.paid = true; markDirty(); toast("Lv.3 달성! 초대해 준 " + P.ref.nick + "님께도 보상이 전달됐어요"); })
+    .then(() => { P.ref.paid = true; markDirty(); toast("Lv." + REF_PAYLV + " 달성! 초대해 준 " + P.ref.nick + "님께도 보상이 전달됐어요"); })
     .catch(() => {}).finally(() => { setTimeout(() => { S.refSending = false; }, 30000); });
 }
 function onReferral(v) {
@@ -6732,12 +6816,12 @@ function onReferral(v) {
   if (v.stage === "join" && st < 1) {
     P.invited[from] = 1; stat("invJoin");
     if (!P.friends[from]) P.friends[from] = { nick, ts: Date.now() };
-    toast([h("b", { text: "🤝 " + nick + "님이 내 추천인 코드로 들어왔어요!" }), h("div", { class: "muted", style: "font-size:12px", text: "친구가 됐어요 · " + nick + "님이 Lv.3이 되면 " + won(REF_BONUS) + "을 받아요" })], "lvup", 5500);
+    toast([h("b", { text: "🤝 " + nick + "님이 내 추천인 코드로 들어왔어요!" }), h("div", { class: "muted", style: "font-size:12px", text: "친구가 됐어요 · " + nick + "님이 Lv." + REF_PAYLV + "가 되면 " + won(REF_BONUS) + "을 받아요" })], "lvup", 5500);
   } else if (v.stage === "lv3" && st < 2) {
     P.invited[from] = 2;
     const n = Object.values(P.invited).filter(x => x === 2).length;
-    if (n <= REF_CAP) { P.gold += REF_BONUS; stat("invites"); sfx("jingle-rare", .4); toast([h("b", { text: "🎉 초대 보상 +" + won(REF_BONUS) + "" }), h("div", { class: "muted", style: "font-size:12px", text: nick + "님이 Lv.3이 됐어요 · 지금까지 " + n + "명 초대" })], "lvup", 5000); }
-    else toast(nick + "님이 Lv.3이 됐어요 · 초대 보상은 " + REF_CAP + "명까지라 보상금은 없어요");
+    if (n <= REF_CAP) { P.gold += REF_BONUS; stat("invites"); sfx("jingle-rare", .4); toast([h("b", { text: "🎉 초대 보상 +" + won(REF_BONUS) + "" }), h("div", { class: "muted", style: "font-size:12px", text: nick + "님이 Lv." + REF_PAYLV + "가 됐어요 · 지금까지 " + n + "명 초대" })], "lvup", 5000); }
+    else toast(nick + "님이 Lv." + REF_PAYLV + "가 됐어요 · 초대 보상은 " + REF_CAP + "명까지라 보상금은 없어요");
   } else return;
   markDirty(); refreshSheet();
 }
@@ -6753,13 +6837,13 @@ SHEETS.invite = (body) => {
     h("div", { class: "row", style: "justify-content:center" },
       h("button", { class: "btn pri", disabled: !S.online, onclick: () => copyText(code, "코드 " + code + "를 복사했어요"), text: "코드 복사" }),
       web ? h("button", { class: "btn", disabled: !S.online, onclick: () => copyText("어촌생활에서 같이 낚시해요! 이 링크로 들어오면 선물을 받아요 🎣 " + refLink(), "초대 링크를 복사했어요"), text: "초대 링크 복사" }) : null),
-    h("span", { class: "muted", style: "font-size:12.5px", text: "초대한 친구 " + done + "명" + (wait ? " · Lv.3 기다리는 중 " + wait + "명" : "") })));
+    h("span", { class: "muted", style: "font-size:12.5px", text: "초대한 친구 " + done + "명" + (wait ? " · Lv." + REF_PAYLV + " 기다리는 중 " + wait + "명" : "") })));
   body.append(h("div", { class: "sec", text: "선물" }), h("div", { class: "ilist" },
     h("div", { class: "listrow" }, h("span", { class: "emo", text: "🎁" }), h("div", { class: "grow" }, h("b", { text: "초대받은 친구" }), h("div", { class: "muted", style: "font-size:12.5px", text: "코드를 넣는 즉시 " + won(REF_GIFT.gold) + " · 새우 " + REF_GIFT.shrimp + "개 · 크릴 " + REF_GIFT.krill + "개, 그리고 서로 친구가 돼요" }))),
-    h("div", { class: "listrow" }, h("span", { class: "emo", text: "💰" }), h("div", { class: "grow" }, h("b", { text: "초대한 나" }), h("div", { class: "muted", style: "font-size:12.5px", text: "친구가 낚시 Lv.3이 되면 " + won(REF_BONUS) + " (최대 " + REF_CAP + "명) · 3명, 10명 초대하면 칭호 「홍보대사」 「어촌 이장님」" })))));
+    h("div", { class: "listrow" }, h("span", { class: "emo", text: "💰" }), h("div", { class: "grow" }, h("b", { text: "초대한 나" }), h("div", { class: "muted", style: "font-size:12.5px", text: "친구가 낚시 Lv." + REF_PAYLV + "가 되면 " + won(REF_BONUS) + " (최대 " + REF_CAP + "명) · 3명, 10명 초대하면 칭호 「홍보대사」 「어촌 이장님」" })))));
   body.append(h("div", { class: "sec", text: "추천인 코드 입력" }));
   if (P.ref) body.append(h("div", { class: "listrow" }, h("span", { class: "emo", text: "✅" }), h("div", { class: "grow" }, h("b", { text: P.ref.nick + "님의 초대로 왔어요" }),
-    h("div", { class: "muted", style: "font-size:12.5px", text: P.ref.paid ? "Lv.3 보상도 " + P.ref.nick + "님께 전달됐어요" : "낚시 Lv.3이 되면 " + P.ref.nick + "님도 보상을 받아요" }))));
+    h("div", { class: "muted", style: "font-size:12.5px", text: P.ref.paid ? "Lv." + REF_PAYLV + " 보상도 " + P.ref.nick + "님께 전달됐어요" : "낚시 Lv." + REF_PAYLV + "가 되면 " + P.ref.nick + "님도 보상을 받아요" }))));
   else if (myLv() >= REF_MAXLV) body.append(h("div", { class: "muted", style: "font-size:13px", text: "추천인 코드는 Lv." + REF_MAXLV + " 전의 새내기만 입력할 수 있어요." }));
   else {
     const inp = h("input", { maxlength: "6", placeholder: "친구 코드 6자리", "aria-label": "추천인 코드", autocapitalize: "characters", style: "text-transform:uppercase;letter-spacing:.2em" }), err = h("div", { class: "nerr" });
@@ -7300,7 +7384,7 @@ function buildUptown() {
   buildRealty();
 }
 const UPTOWN_FLAG = { m: null };
-function goOffice() { if (ME.seat || S.myStall >= 0) { lockedHint(); return; } walkTo(OFFICE.door.x, OFFICE.door.z, () => { ME.ry = Math.PI / 2; presMove(true); openSheet("office"); }); }
+function goOffice() { if (isLocked("office")) { lockedToast("동사무소"); return; } if (ME.seat || S.myStall >= 0) { lockedHint(); return; } walkTo(OFFICE.door.x, OFFICE.door.z, () => { ME.ry = Math.PI / 2; presMove(true); openSheet("office"); }); }
 /* ===================== 마이 홈 · 부동산 =====================
    집은 마을과 떨어진 곳(HOME 좌표)에 그때그때 지어 보여 주는 「나만의 공간」.
    같은 집에 있는 사람끼리만 서로 보여요(presence.home). 집 모양은 houses/<uid>(주인만 씀), 창고는 내 진행에만 저장 */
@@ -7484,6 +7568,7 @@ function canLeaveTown() {
   return true;
 }
 async function enterHouse(hostUid) {
+  if (isLocked("home")) { lockedToast("마이 홈"); return; }
   if (!canLeaveTown()) return;
   let doc = null;
   if (hostUid === S.uid || !S.online) {
@@ -7719,7 +7804,7 @@ SHEETS.realty = (body) => {
   }
 };
 const REALTY = { x: 17.25, z: 66, door: { x: 12.1, z: 66 } };
-function goRealty() { if (atHome()) return; if (ME.seat || S.myStall >= 0) { lockedHint(); return; } walkTo(REALTY.door.x, REALTY.door.z, () => { ME.ry = Math.PI / 2; presMove(true); openSheet("realty"); }); }
+function goRealty() { if (atHome()) return; if (isLocked("home")) { lockedToast("마이 홈 · 부동산"); return; } if (ME.seat || S.myStall >= 0) { lockedHint(); return; } walkTo(REALTY.door.x, REALTY.door.z, () => { ME.ry = Math.PI / 2; presMove(true); openSheet("realty"); }); }
 function buildRealty() {
   const L = REALTY_LOT, g = new T3.Group(); g.position.set(REALTY.x, 0, REALTY.z); scene.add(g);
   const W = L.x1 - L.x0 - 1, D = L.z1 - L.z0 - 1;
@@ -7863,8 +7948,8 @@ function menuTiles() {
     ]],
     ["마을", [
       { ico: "🗺️", t: "지도 · 이동", s: "장소를 눌러 바로 가기", go: () => openSheet("travel") },
-      { ico: "🏠", t: atHome() ? "마을로 나가기" : P.home.tier >= 0 ? "우리 집 가기" : "집 구하기", s: P.home.tier >= 0 ? HOUSES[P.home.tier].name : "윗마을 부동산", go: () => { closeSheet(); atHome() ? leaveHouse() : P.home.tier >= 0 ? enterHouse(S.uid) : goRealty(); } },
-      { ico: "🪪", t: "동사무소", s: P.job.id ? JOB[P.job.id].name : "직업 등록", go: () => { closeSheet(); goOffice(); } },
+      { ico: "🏠", t: atHome() ? "마을로 나가기" : P.home.tier >= 0 ? "우리 집 가기" : "집 구하기", s: isLocked("home") ? "🚧 준비 중" : P.home.tier >= 0 ? HOUSES[P.home.tier].name : "윗마을 부동산", go: () => { closeSheet(); atHome() ? leaveHouse() : P.home.tier >= 0 ? enterHouse(S.uid) : goRealty(); } },
+      { ico: "🪪", t: "동사무소", s: isLocked("office") ? "🚧 준비 중" : P.job.id ? JOB[P.job.id].name : "직업 등록", go: () => { closeSheet(); goOffice(); } },
     ]],
     ["도움", [
       { ico: "⚙️", t: "설정", s: "소리 · 입질 속도 · 그림자 · 계정", go: () => openSheet("settings") },
