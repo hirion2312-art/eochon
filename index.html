@@ -1570,7 +1570,7 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.48.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.49.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -3336,13 +3336,20 @@ function setDrag(n) { S.autoDrag = false; lsSet("mn.autodrag", false); S.drag = 
 
 /* ===================== 월드 배치 ===================== */
 const SEA_Y = -0.8;
+/* 낭만 부두 = 낚시 데크 (v1.49): 항구 방파제 안에서 빼서, 포차거리 북쪽 바다로 길게 뻗은 데크로 옮겼어요.
+   옛 좌표(x -52 ~ -10, z 0) 그대로 만들고 (dx, dz)만큼 옮겨요. 항구 안에는 멍낚호 선착장(짧은 잔교)만 남아요 */
+const PIER = { dx: -17.2, dz: 72 };
+const JETTY = { x0: -17.4, x1: -9.2, z0: -3.6, z1: 3.6 };
+const onPier = (x, z) => { const ox = x - PIER.dx, oz = z - PIER.dz; return (ox >= -52.4 && ox <= -6.8 && oz >= -3.6 && oz <= 3.6) || (ox >= -52.4 && ox <= -46 && oz >= -11.6 && oz <= 11.6); };
+const onJetty = (x, z) => x >= JETTY.x0 && x <= JETTY.x1 && z >= JETTY.z0 && z <= JETTY.z1;
+const onDeck = (x, z) => onPier(x, z) || onJetty(x, z);
 const SEAT = {};
 (() => {
   const XS = [-19, -24, -29, -34, -39, -43.5];
   let k = 0;
-  for (const x of XS) SEAT["p" + k] = { id: "p" + k++, kind: "pier", x, z: -3.55, ry: Math.PI };
-  for (const x of XS) SEAT["p" + k] = { id: "p" + k++, kind: "pier", x, z: 3.55, ry: 0 };
-  for (const z of [-9, -3, 3, 9]) SEAT["p" + k] = { id: "p" + k++, kind: "pier", x: -52.05, z, ry: -Math.PI / 2 };
+  for (const x of XS) SEAT["p" + k] = { id: "p" + k++, kind: "pier", x: x + PIER.dx, z: -3.55 + PIER.dz, ry: Math.PI };
+  for (const x of XS) SEAT["p" + k] = { id: "p" + k++, kind: "pier", x: x + PIER.dx, z: 3.55 + PIER.dz, ry: 0 };
+  for (const z of [-9, -3, 3, 9]) SEAT["p" + k] = { id: "p" + k++, kind: "pier", x: -52.05 + PIER.dx, z: z + PIER.dz, ry: -Math.PI / 2 };
   let c = 0;
   for (const [tx, tz] of TABLES()) for (const [ox, oz] of [[0, -1.15], [1.15, 0], [0, 1.15], [-1.15, 0]]) {
     SEAT["c" + c] = { id: "c" + c++, kind: "table", x: tx + ox, z: tz + oz, ry: Math.atan2(-ox, -oz), tx, tz };
@@ -3351,22 +3358,23 @@ const SEAT = {};
 function TABLES() { return Array.from({ length: 8 }, (_, i) => [-19.4, 21 + i * 5.6]); }   // 포차 천막 아래 바깥 테이블
 const STALLS = Array.from({ length: 8 }, (_, i) => ({ i, x: -24.4, z: 21 + i * 5.6 }));   // 낭만포차 1~8호 카운터 (v1.35)
 const BUILDINGS = [
-  { id: "bait", name: "낚시 상점", z: 24, color: 0x6fa3c7, sheet: "shop" },
+  { id: "bait", name: "낚시 상점", z: 0, color: 0x6fa3c7, sheet: "shop" },
   { id: "release", name: "방류소", z: 12, color: 0xe2a35c, sheet: "studio" },
-  { id: "face", name: "얼굴 공방", z: 0, color: 0xd88aa8, sheet: "face" },
+  { id: "face", name: "얼굴 공방", z: 24, color: 0xd88aa8, sheet: "face" },
   { id: "sashimi", name: "회 센터", short: "회센터", z: -12, color: 0x7fb59a, sheet: "sashimi" },
   { id: "clothes", name: "옷가게", z: -24, color: 0xe9a3b8, sheet: "clothes" },
   { id: "lotto", name: "행운 복권방", z: -36, color: 0xd8473a, sheet: "lotto" },
   { id: "bank", name: "낭만 은행", z: -48, color: 0x8aa3b8, sheet: "bank" },
 ];
 const PLACES = [
-  { name: "부두 입구", x: -12, z: 0, d: "낚시 자리가 양옆으로 늘어선 큰 부두" },
-  { name: "선착장 (멍낚호)", x: -13.2, z: -3.2, d: "배 타고 5분 동안 깊은 바다로" },
-  { name: "부두 끝", x: -48.5, z: 0, d: "바다가 가장 넓게 보이는 T자 끝" },
+  { name: "낭만 부두 (낚시 데크)", x: -25.5, z: 72, d: "포차거리 북쪽 바다로 뻗은 낚시 데크 · 양옆으로 낚시 자리" },
+  { name: "항구 선착장 (멍낚호)", x: -13.2, z: -3.2, d: "방파제 안 항구 · 배 타고 5분 동안 깊은 바다로" },
+  { name: "부두 끝 정자", x: -63.5, z: 72, d: "바다가 가장 넓게 보이는 T자 끝 · 정자 쉼터" },
   { name: "낭만포차거리", x: -15, z: 30, d: "바닷가 포차 8동 · 내 가게를 열고 손님을 받는 곳" },
   { name: "어촌 수산시장", x: -12.5, z: -33, d: "아담한 아치 지붕 시장 · 도매상 왕눈이 사장에게 물고기를 넘겨요" },
   { name: "상점가", x: 5, z: 6, d: "미끼 가게 · 방류소 · 얼굴 공방 · 회 센터" },
   { name: "거리 입구", x: 0, z: 34, d: "처음 도착한 곳" },
+  { name: "어촌역", x: 26, z: 53, d: "접속하면 여기서 나와요 · 기차가 서는 작은 시골 역" },
   { name: "윗마을 공원", x: 11.2, z: 52, d: "분수 광장과 꽃밭 · 벤치에서 쉬어 가요" },
   { name: "명예의 전당", x: 8.2, z: -60.5, d: "분야별 1위의 금빛 동상이 서 있는 광장" },
   { name: "갯벌 해변", x: -4, z: -78, d: "거리 남쪽 끝 모래사장 · 썰물 때 갯벌이 드러나요" },
@@ -3376,7 +3384,9 @@ function placeAt(x, z) {
   if (inSand(x, z)) return "모래사장";
   if (z > 15 && x < -3.5 && x > -31 && z < 66) return "낭만포차거리";
   if (inFishMarket(x, z) || (x < -9.7 && x > -15.5 && z < -22 && z > -44)) return "수산시장";
-  if (x < -9.7) return "부두";
+  if (onPier(x, z)) return "낭만 부두";
+  if (x > 24.5 && x < 56 && z > 30 && z < 80) return "어촌역";
+  if (x < -9.7) return "항구";
   if (atHome()) return S.homeDoc ? houseName(S.homeDoc.ownerNick || P.nick, S.homeDoc) : "우리 집";
   if (inHall(x, z)) return "명예의 전당";
   if (z > 39) return "윗마을";
@@ -3390,8 +3400,7 @@ function walkable(x, z) {
   if (inUptown(x, z)) return !uptownBlocked(x, z);
   if (inSand(x, z)) return true;
   if (inMudArea(x, z)) return tideLow() && !!(P.tools && P.tools.boots);
-  if (x >= -52.4 && x <= -9 && z >= -3.6 && z <= 3.6) return true;
-  if (x >= -52.4 && x <= -46 && z >= -11.6 && z <= 11.6) return true;
+  if (onDeck(x, z)) return true;
   if (inIsland(x, z)) return openWalk(x, z);
   return false;
 }
@@ -3410,7 +3419,7 @@ const mudX = (z) => -3 - 48 * beachW(z) * (1 + .05 * Math.sin(z * .17 + 1));
 const inSand = (x, z) => z >= -126 && z <= -68 && x <= -1.5 && x >= shoreX(z);
 const inMudArea = (x, z) => z >= -124 && z <= -70 && x < shoreX(z) && x >= mudX(z) + 1;
 const sandY = (x, z) => -0.26 * clamp((-1 - x) / Math.max(.5, -1 - shoreX(z)), 0, 1);
-const groundY = (x, z) => inMudArea(x, z) ? -0.3 : inSand(x, z) ? sandY(x, z) : (x < -9 && Math.abs(z) < 12) ? 0 : (TER.h && inIsland(x, z)) ? terH(x, z) : 0;
+const groundY = (x, z) => inMudArea(x, z) ? -0.3 : inSand(x, z) ? sandY(x, z) : onDeck(x, z) ? 0 : !TER.h ? 0 : (() => { const rn = roadNear(x, z); if (rn.d < 4.2) return onMainSt(x, z) ? 0 : Math.max(rn.h, terH(x, z)) + .07; return inTownFlat(x, z) ? 0 : terH(x, z); })();   // v1.49: 마을은 0, 도로는 도로 높이, 그 밖은 지형
 /* 물때: 20분 주기, 앞 10분 썰물 */
 const TIDE_MS = 1200000;
 function tideInfo(now) {
@@ -4940,12 +4949,12 @@ function npcShopTick(t, dt) {
 const TOWN_NODES = {
   r30: [5.3, 30], r18: [5.3, 18], r6: [5.3, 6], rm6: [5.3, -6], rm18: [5.3, -18], rm30: [5.3, -30], rm42: [5.3, -42], rm54: [5.3, -54], rm64: [5.3, -64],
   l32: [-2.6, 32], c0: [-3, 0], pocha1: [-15, 21], pocha2: [-15, 46], mk1: [-11.5, -30], mk2: [-21, -36.5], mk3: [-11.5, -36], lm60: [-2.6, -62],
-  pier1: [-14, 0], pier2: [-28, .4], pier3: [-44, -.4], pierT: [-49, 6],
+  pier1: [-14, 0], pierN: [-19, 63], pier2: [-30, 72.4], pier3: [-48, 71.6], pierT: [-66, 78],
   up1: [3, 44], up2: [8.6, 47], up3: [9.4, 58], up4: [9, 68], plaza: [14.2, 44.6], hall1: [7.4, -60.5], hall2: [12.8, -60.5], beach1: [-3, -73], beach2: [-7, -78],
 };
 const TOWN_EDGES = [["r30", "r18"], ["r18", "r6"], ["r6", "rm6"], ["rm6", "rm18"], ["rm18", "rm30"], ["rm30", "rm42"], ["rm42", "rm54"], ["rm54", "rm64"],
   ["r30", "l32"], ["r30", "up1"], ["l32", "up1"], ["up1", "up2"], ["up2", "up3"], ["up3", "up4"], ["up2", "plaza"], ["l32", "pocha2"], ["pocha2", "pocha1"], ["pocha1", "c0"], ["r6", "c0"], ["rm6", "c0"],
-  ["c0", "pier1"], ["pier1", "pier2"], ["pier2", "pier3"], ["pier3", "pierT"], ["c0", "mk1"], ["rm18", "mk1"], ["mk1", "mk2"], ["mk2", "mk3"], ["mk3", "lm60"], ["rm54", "lm60"],
+  ["c0", "pier1"], ["pocha2", "pierN"], ["pierN", "pier2"], ["pier2", "pier3"], ["pier3", "pierT"], ["c0", "mk1"], ["rm18", "mk1"], ["mk1", "mk2"], ["mk2", "mk3"], ["mk3", "lm60"], ["rm54", "lm60"],
   ["rm54", "hall1"], ["rm64", "hall1"], ["hall1", "hall2"], ["lm60", "beach1"], ["rm64", "beach1"], ["beach1", "beach2"]];
 const TOWN_ADJ = {}; for (const [a, b] of TOWN_EDGES) { (TOWN_ADJ[a] = TOWN_ADJ[a] || []).push(b); (TOWN_ADJ[b] = TOWN_ADJ[b] || []).push(a); }
 const STOP_NODES = new Set(["pier3", "pierT", "mk1", "mk2", "mk3", "pocha1", "pocha2", "up3", "up4", "plaza", "hall2", "beach2", "r18", "rm30"]);
@@ -5889,6 +5898,7 @@ function init3D() {
   buildShops();
   buildBeach();
   buildHall();
+  buildStation();
   buildUptown();
   buildFar();
   buildCoast();
@@ -5977,7 +5987,7 @@ function resize3D() {
    땅은 높이 격자(TER) 한 장: 화면의 지형 메시와 캐릭터가 딛는 높이(groundY)가 같은 값을 써요. 마을 쪽(서쪽)은 높이 0으로 평평해요 */
 const ISLAND = [
   [-31, 66], [-31, 40], [-30, 18], [-20, 15.5], [-10.4, 14], [-10.4, -14], [-20, -15.5], [-41, -17], [-43, -34], [-41, -52], [-28, -60], [-12, -64.5], [-10.6, -70.8],
-  [-1.6, -71.2], [-1.4, -96], [-1.6, -124], [2, -130], [14, -137], [38, -152], [66, -184], [104, -222], [150, -250], [196, -268], [236, -262], [262, -276], [300, -258], [342, -270],
+  ...Array.from({ length: 14 }, (_, k) => { const z = -72 - k * 4; return [Math.min(-2, mudX(z) - 1.5), z]; }), [-1.6, -128], [2, -130], [14, -137], [38, -152], [66, -184], [104, -222], [150, -250], [196, -268], [236, -262], [262, -276], [300, -258], [342, -270],
   [388, -246], [432, -206], [470, -160], [500, -104], [516, -44], [508, 14], [526, 72], [504, 140], [464, 196], [418, 238], [362, 272], [306, 288], [258, 278], [214, 300], [168, 288],
   [124, 258], [86, 214], [52, 168], [24, 132], [2, 114], [-12, 100], [-22, 82],
 ];
@@ -5985,7 +5995,7 @@ function openSea(x, z, m) {
   m = m || 3;
   if (inIsland(x, z) || coastInfo(x, z).d > -m) return false;
   if (z < -62 && z > -134 && x > mudX(z) - m - 3) return false;              // 갯벌 해변 · 모래사장
-  if (x > -54 && x < -8 && Math.abs(z) < 13.5) return false;                 // 부두 · 선착장
+  if ((x > -18.5 && x < -8 && Math.abs(z) < 13.5) || onPier(x, z) || onPier(x + m + 2, z) || onPier(x - m - 2, z) || onPier(x, z + m + 2) || onPier(x, z - m - 2)) return false;   // 선착장 · 낭만 부두
   for (const bw of BREAKWATERS) for (let i = 0; i < bw.pts.length - 1; i++) { const [x0, z0] = bw.pts[i], [x1, z1] = bw.pts[i + 1], dx = x1 - x0, dz = z1 - z0, t = clamp(((x - x0) * dx + (z - z0) * dz) / (dx * dx + dz * dz), 0, 1); if (Math.hypot(x - x0 - dx * t, z - z0 - dz * t) < m + 2.5) return false; }
   return true;
 }
@@ -6011,25 +6021,80 @@ function vnoise(x, z) {
   const u = xf * xf * (3 - 2 * xf), v = zf * zf * (3 - 2 * zf), a = H(xi, zi), b = H(xi + 1, zi), c = H(xi, zi + 1), d = H(xi + 1, zi + 1);
   return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
 }
-const PEAKS = [[300, -30, 86, 118], [392, 168, 56, 92], [228, -186, 44, 78], [446, -120, 40, 70], [168, 186, 32, 72], [458, 48, 30, 64]];   // x, z, 높이, 반지름
+const PEAKS = [[300, -30, 86, 118], [392, 168, 56, 92], [228, -186, 44, 78], [430, -100, 40, 70], [168, 186, 32, 72], [440, 48, 30, 64]];   // x, z, 높이, 반지름
 // 마을 쪽은 평평하게(1), 동쪽으로 갈수록 자연 지형(0)
 const townMask = (x, z) => 1 - smooth01(52, 96, x + Math.max(0, -z - 128) * .6 + Math.max(0, z - 100) * .6);
-function terRaw(x, z) {
+/* ---------- 남쪽 긴 해변 (v1.49) ----------
+   섬 남쪽 해안 전체가 한 줄로 이어진 모래 해변이에요. 서쪽 만 안쪽(갯벌 해변)은 모래사장 → 갯벌 순서로 펼쳐지고, 지형과 한 장으로 이어져요 */
+const southBeach = (z, d) => smooth01(-60, -74, z) * (1 - smooth01(16, 26, d));
+function coveH(x, z) {   // 갯벌 해변 만 안쪽 높이 (만 밖이면 null)
+  if (z < -126 || z > -68 || x > -1.2) return null;
+  const xs = shoreX(z), xm = mudX(z);
+  if (x >= xs) return sandY(x, z);
+  if (x >= xm) return -0.3 + Math.sin(x * 1.3) * Math.cos(z * 1.1) * .02;
+  return null;
+}
+/* ---------- 섬 일주도로 (v1.49) ----------
+   마을 큰길(x = 0)에서 북쪽 · 남쪽으로 부드럽게 휘어 나가 섬 해안을 따라 한 바퀴 돌아요. 해안선에서 안쪽으로 26m 들어온 선을 매끈한 곡선으로 이어요 */
+const RING = (() => {
+  const off = (i) => {
+    const a = ISLAND[(i - 1 + ISLAND.length) % ISLAND.length], b = ISLAND[(i + 1) % ISLAND.length], v = ISLAND[i];
+    let tx = b[0] - a[0], tz = b[1] - a[1]; const L = Math.hypot(tx, tz); tx /= L; tz /= L;
+    let nx = -tz, nz = tx; if (!inIsland(v[0] + nx * 10, v[1] + nz * 10)) { nx = -nx; nz = -nz; }
+    for (let r = 26; r < 60; r += 2) { const p = [v[0] + nx * r, v[1] + nz * r]; if (coastInfo(p[0], p[1]).d >= 20) return p; }
+    return [v[0] + nx * 26, v[1] + nz * 26];
+  };
+  const ia = ISLAND.findIndex(p => p[0] === 38 && p[1] === -152), ib = ISLAND.findIndex(p => p[0] === 24 && p[1] === 132);
+  const ctrl = [[0, 40], [0, 8], [0, -24], [0, -56], [1.2, -66], [4.5, -78], [8, -92], [11, -106], [17, -118]];
+  for (let i = ia; i <= ib; i++) ctrl.push(off(i));
+  ctrl.push([22, 106], [10, 94], [2, 84], [0, 76], [0, 72]);
+  // 닫힌 캐트멀-롬 곡선을 1.5m 간격으로
+  const n = ctrl.length, dense = [];
+  for (let i = 0; i < n; i++) { const p0 = ctrl[(i - 1 + n) % n], p1 = ctrl[i], p2 = ctrl[(i + 1) % n], p3 = ctrl[(i + 2) % n];
+    for (let k = 0; k < 24; k++) { const t = k / 24, t2 = t * t, t3 = t2 * t, f = (a, b, c, d) => .5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
+      dense.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])]); } }
+  const out = [dense[0]]; let acc = 0;
+  for (let i = 1; i <= dense.length; i++) { const a = dense[i - 1], b = dense[i % dense.length], d = Math.hypot(b[0] - a[0], b[1] - a[1]); acc += d; if (acc >= 1.5) { out.push(b); acc = 0; } }
+  out.pop();
+  return { pts: out, h: null, w: (p) => (Math.abs(p[0]) < .6 && p[1] > -58 && p[1] < 74) ? 8 : 7 };
+})();
+const RING_BK = new Map(), RING_BS = 12;
+RING.pts.forEach((p, i) => { const k = Math.floor(p[0] / RING_BS) + "," + Math.floor(p[1] / RING_BS); if (!RING_BK.has(k)) RING_BK.set(k, []); RING_BK.get(k).push(i); });
+function roadNear(x, z) {   // 가장 가까운 도로 점까지 거리 · 그 점의 높이
+  let best = 1e9, bi = -1; const bx = Math.floor(x / RING_BS), bz = Math.floor(z / RING_BS);
+  for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) { const l = RING_BK.get((bx + dx) + "," + (bz + dz)); if (!l) continue; for (const i of l) { const p = RING.pts[i], d = (p[0] - x) ** 2 + (p[1] - z) ** 2; if (d < best) { best = d; bi = i; } } }
+  return bi < 0 ? { d: 1e9, h: 0, i: -1 } : { d: Math.sqrt(best), h: RING.h ? RING.h[bi] : 0, i: bi };
+}
+const onMainSt = (x, z) => Math.abs(x) < 4.5 && z > -60 && z < 76;   // 마을 큰길 구간
+const inTownFlat = (x, z, d) => townMask(x, z) * (1 - southBeach(z, d == null ? coastInfo(x, z).d : d)) > .999;
+function terNat(x, z) {
+  const cv = coveH(x, z); if (cv !== null) return cv;
   const c = coastInfo(x, z);
   if (c.d <= 0) return -1.3 - Math.min(7, -c.d * .9);
-  const tm = townMask(x, z);
+  const tm = townMask(x, z) * (1 - southBeach(z, c.d));
   let hills = 0;
   for (const [px, pz, hh, r] of PEAKS) { const q = ((x - px) ** 2 + (z - pz) ** 2) / (r * r); if (q < 4) hills += hh * Math.exp(-q * 1.6) * (.85 + .3 * vnoise(x / 23, z / 23)); }
   hills += (vnoise(x / 70, z / 70) * 13 + vnoise(x / 28 + 9, z / 28) * 4.5 - 6) * smooth01(0, 60, c.d);
   const beach = -.55 + 1.15 * smooth01(0, 14, c.d);   // 바닷가는 완만한 모래 비탈
-  const nat = beach + Math.max(0, hills) * smooth01(4, 40, c.d);
+  const roll = (vnoise(x / 18 + 5, z / 18) - .5) * 1.6 * smooth01(8, 30, c.d);   // 해안 들판의 잔잔한 굴곡
+  const nat = beach + Math.max(0, roll) + Math.max(0, hills) * smooth01(24, 80, c.d);   // 해안 쪽 띠는 낮은 들판, 안쪽으로 갈수록 산
   return nat * (1 - tm);
 }
-const TER = { x0: -48, z0: -292, st: 4, nx: 0, nz: 0, h: null, d: null };
+function terRaw(x, z) {
+  const nat = terNat(x, z), rn = roadNear(x, z);
+  if (rn.d > 12 || nat < -.2) return nat;
+  const f = smooth01(5.5, 12, rn.d); return rn.h * (1 - f) + nat * f;   // 도로 둘레는 도로 높이로 고르게
+}
+const TER = { x0: -66, z0: -292, st: 3, nx: 0, nz: 0, h: null, d: null };
 function buildTerrainGrid() {
+  // 도로 높이: 자연 지형을 따라가되 앞뒤로 부드럽게 (마을 안은 0)
+  const raw = RING.pts.map(([x, z]) => Math.max(.08, terNat(x, z))), N = raw.length;
+  RING.pts.forEach(([x, z], i) => { if (onMainSt(x, z)) raw[i] = 0; });   // 마을 큰길은 0
+  const sm = (a) => a.map((_, i) => { let s = 0; for (let k = -10; k <= 10; k++) s += a[(i + k + N) % N]; return s / 21; });
+  RING.h = sm(sm(raw)); RING.pts.forEach(([x, z], i) => { if (onMainSt(x, z)) RING.h[i] = 0; });
   TER.nx = Math.ceil((540 - TER.x0) / TER.st) + 1; TER.nz = Math.ceil((312 - TER.z0) / TER.st) + 1;
   TER.h = new Float32Array(TER.nx * TER.nz); TER.d = new Float32Array(TER.nx * TER.nz);
-  for (let j = 0; j < TER.nz; j++) for (let i = 0; i < TER.nx; i++) { const x = TER.x0 + i * TER.st, z = TER.z0 + j * TER.st, k = j * TER.nx + i; TER.h[k] = terRaw(x, z); TER.d[k] = coastInfo(x, z).d; }
+  for (let j = 0; j < TER.nz; j++) for (let i = 0; i < TER.nx; i++) { const x = TER.x0 + i * TER.st, z = TER.z0 + j * TER.st, k = j * TER.nx + i, cv = coveH(x, z); TER.d[k] = cv !== null ? 4 : coastInfo(x, z).d; TER.h[k] = terRaw(x, z); }
 }
 function terH(x, z) {
   if (!TER.h) return 0;
@@ -6039,37 +6104,75 @@ function terH(x, z) {
   return u + v <= 1 ? a + (b - a) * u + (c - a) * v : d + (c - d) * (1 - u) + (b - d) * (1 - v);   // 메시 삼각형과 같은 나눔
 }
 function terSlope(x, z) { const e = .8; return Math.max(Math.abs(terH(x + e, z) - terH(x - e, z)), Math.abs(terH(x, z + e) - terH(x, z - e))) / (2 * e); }
+function groundDetailTex() {   // 지형 위에 곱해지는 잔무늬 (풀 · 모래 알갱이)
+  const t = canvasTex(256, 256, (g, w, hh) => { g.fillStyle = "#ffffff"; g.fillRect(0, 0, w, hh); let s = 9; const r = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
+    for (let i = 0; i < 2600; i++) { const v = 205 + Math.floor(r() * 50); g.fillStyle = "rgb(" + v + "," + v + "," + v + ")"; g.fillRect(r() * w, r() * hh, 1 + r() * 3, 1 + r() * 3); }
+    for (let i = 0; i < 260; i++) { g.strokeStyle = "rgba(60,90,40,.18)"; const x = r() * w, y = r() * hh; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - .5) * 4, y - 3 - r() * 4); g.stroke(); } }, 1, 1);
+  t.wrapS = t.wrapT = T3.RepeatWrapping; return t;
+}
 function buildIsland() {
   buildTerrainGrid();
-  const { nx, nz, st, x0, z0 } = TER, pos = new Float32Array(nx * nz * 3), col = new Float32Array(nx * nz * 3), idx = [];
-  const cGrass = new T3.Color(0x86b866), cGrass2 = new T3.Color(0x6f9e55), cForest = new T3.Color(0x5a8a48), cSand = new T3.Color(0xead7a6), cWet = new T3.Color(0xb8a57c), cRock = new T3.Color(0x8e877a), cTown = new T3.Color(0x8fbe6c), tmp = new T3.Color();
+  const { nx, nz, st, x0, z0 } = TER, pos = new Float32Array(nx * nz * 3), col = new Float32Array(nx * nz * 3), uv = new Float32Array(nx * nz * 2), idx = [];
+  const cGrass = new T3.Color(0x8cbc68), cGrass2 = new T3.Color(0x74a356), cForest = new T3.Color(0x5a8a48), cSand = new T3.Color(0xefdcae), cWet = new T3.Color(0xbfa97e),
+    cMud = new T3.Color(0x6a5a4a), cMud2 = new T3.Color(0x54473a), cRock = new T3.Color(0x8e877a), cTown = new T3.Color(0x93c070), tmp = new T3.Color();
   for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
     const k = j * nx + i; let x = x0 + i * st, z = z0 + j * st, y = TER.h[k];
-    const d = TER.d[k];
-    if (d < 0 && d > -st * 1.6) { const c = coastInfo(x, z); x = c.x; z = c.z; y = -1.25; }   // 바다 쪽 첫 줄은 해안선에 붙여서 해안선이 매끈하게
-    pos[k * 3] = x; pos[k * 3 + 1] = y; pos[k * 3 + 2] = z;
-    const tm = townMask(x, z), n = vnoise(x / 9, z / 9);
-    if (d < 0) tmp.copy(cWet);
-    else if (tm < .5 && d < 11 && y < 1.2) tmp.copy(cSand).lerp(cWet, smooth01(2.5, 0, d));
-    else { tmp.copy(cGrass).lerp(cGrass2, n * .7).lerp(cForest, smooth01(8, 40, y) * .8).lerp(cTown, tm * .6);
-      if (z < -66 && z > -132 && x < 14) tmp.lerp(cSand, smooth01(5 + 5 * vnoise(z / 6, 3), 0, x) * smooth01(-66, -72, z) * smooth01(-132, -126, z)); }   // 갯벌 해변 모래가 들판으로 물결치듯 이어짐
+    const d = TER.d[k], cove = coveH(x, z) !== null;
+    if (!cove && d < 0 && d > -st * 1.6) { const c = coastInfo(x, z); x = c.x; z = c.z; y = inTownFlat(x, z, .5) ? 0 : -1.25; }   // 바다 쪽 첫 줄은 해안선에 붙여서 해안선이 매끈하게 (마을 쪽은 물양장 벽처럼)
+    pos[k * 3] = x; pos[k * 3 + 1] = y; pos[k * 3 + 2] = z; uv[k * 2] = x / 7; uv[k * 2 + 1] = z / 7;
+    const tm = townMask(x, z), n = vnoise(x / 9, z / 9), sb = southBeach(z, d);
+    if (cove) { const xs = shoreX(z); if (x >= xs) tmp.copy(cSand).lerp(cWet, smooth01(xs + 3, xs, x)); else tmp.copy(cMud).lerp(cMud2, (Math.sin(x * .7) * Math.cos(z * .9) + 1) / 2 * .6).lerp(cWet, smooth01(xs - 2, xs, x)); }
+    else if (d < 0) tmp.copy(cWet);
+    else {
+      tmp.copy(cGrass).lerp(cGrass2, n * .7).lerp(cForest, smooth01(8, 40, y) * .8).lerp(cTown, tm * .5);
+      const sandK = Math.max(sb * smooth01(17 + 4 * vnoise(x / 11, z / 11), 9, d), (1 - tm) * smooth01(7 + 3 * vnoise(x / 9, 2), 2, d) * (y < 1.4 ? 1 : 0));   // 남쪽은 넓은 모래 해변, 다른 바닷가는 좁은 모래띠
+      if (sandK > 0) tmp.lerp(cSand, sandK).lerp(cWet, smooth01(2.2, 0, d) * .8);
+    }
     col[k * 3] = tmp.r; col[k * 3 + 1] = tmp.g; col[k * 3 + 2] = tmp.b;
     if (i && j) { const a = k - nx - 1, b = k - nx, c = k - 1, lim = -st * 1.6, keep = (q) => TER.d[q] > lim; if (keep(a) || keep(b) || keep(c) || keep(k)) idx.push(a, c, b, b, c, k); }   // 먼바다 쪽 삼각형은 버림
   }
-  const g = new T3.BufferGeometry(); g.setAttribute("position", new T3.BufferAttribute(pos, 3)); g.setAttribute("color", new T3.BufferAttribute(col, 3)); g.setIndex(idx); g.computeVertexNormals();
+  const g = new T3.BufferGeometry(); g.setAttribute("position", new T3.BufferAttribute(pos, 3)); g.setAttribute("color", new T3.BufferAttribute(col, 3)); g.setAttribute("uv", new T3.BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals();
   // 가파른 곳은 바위색
   const nrm = g.attributes.normal;
   for (let k = 0; k < nx * nz; k++) { const ny = nrm.getY(k); if (ny < .82 && pos[k * 3 + 1] > .5) { tmp.setRGB(col[k * 3], col[k * 3 + 1], col[k * 3 + 2]).lerp(cRock, smooth01(.82, .6, ny)); col[k * 3] = tmp.r; col[k * 3 + 1] = tmp.g; col[k * 3 + 2] = tmp.b; } }
-  const land = new T3.Mesh(g, phong(0xffffff, { vertexColors: true })); land.receiveShadow = true; scene.add(land); grounds.push(land);
+  const land = new T3.Mesh(g, phong(0xffffff, { vertexColors: true, map: groundDetailTex() })); land.receiveShadow = true; scene.add(land); grounds.push(land);
+  buildRingRoad();
   buildForest();
+}
+// 일주도로 리본: 아스팔트 + 가장자리 흰 선 + 가운데 노란 점선. 마을 큰길과 같은 폭으로 이어져요
+function buildRingRoad() {
+  const tex = canvasTex(128, 512, (g, w, hh) => { g.fillStyle = "#5d6168"; g.fillRect(0, 0, w, hh); let s = 3; const r = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
+    for (let i = 0; i < 1800; i++) { const v = 80 + Math.floor(r() * 40); g.fillStyle = "rgb(" + v + "," + (v + 3) + "," + (v + 8) + ")"; g.fillRect(r() * w, r() * hh, 1 + r() * 2, 1 + r() * 2); }
+    g.fillStyle = "#e9e6dc"; g.fillRect(5, 0, 4, hh); g.fillRect(w - 9, 0, 4, hh);
+    g.fillStyle = "#f2d36b"; for (let y = 0; y < hh; y += 128) g.fillRect(w / 2 - 2.5, y + 20, 5, 70); }, 1, 1);
+  tex.wrapS = tex.wrapT = T3.RepeatWrapping;
+  const P = RING.pts, N = P.length, pos = [], uv = [], idx = [];
+  let acc = 0;
+  for (let i = 0; i <= N; i++) {
+    const p = P[i % N], a = P[(i - 1 + N) % N], b = P[(i + 1) % N]; let tx = b[0] - a[0], tz = b[1] - a[1]; const L = Math.hypot(tx, tz) || 1; tx /= L; tz /= L;
+    const nx = -tz, nz = tx, w = RING.w(p) / 2; if (i) acc += Math.hypot(p[0] - P[i - 1][0], p[1] - P[i - 1][1]);
+    for (const [s, u] of [[-1, 0], [0, .5], [1, 1]]) { const x = p[0] + nx * w * s, z = p[1] + nz * w * s;
+      const y = onMainSt(x, z) ? .035 : Math.max(RING.h[i % N], terH(x, z)) + .07; pos.push(x, y, z); uv.push(u, acc / 16); }
+    if (i) { const q = (i - 1) * 3; for (const c of [0, 1]) idx.push(q + c, q + c + 1, q + c + 3, q + c + 1, q + c + 4, q + c + 3); }
+  }
+  const g = new T3.BufferGeometry(); g.setAttribute("position", new T3.Float32BufferAttribute(pos, 3)); g.setAttribute("uv", new T3.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals();
+  const road = new T3.Mesh(g, phong(0xffffff, { map: tex })); road.receiveShadow = true; scene.add(road); grounds.push(road);
+  // 마을 밖 길가: 낮은 나무 말뚝 울타리 · 가로등 · 이정표
+  const det = new T3.Group(); scene.add(det); DETAIL_GROUPS.push(det);
+  const postG = new T3.CylinderGeometry(.07, .08, .7, 6), postM = cmat(0x8a6a4a);
+  for (let i = 0; i < N; i += 4) { const p = P[i], a = P[(i - 1 + N) % N], b = P[(i + 1) % N]; if (inTownFlat(p[0], p[1]) || Math.hypot(p[0], p[1] + 70) < 40) continue;
+    let tx = b[0] - a[0], tz = b[1] - a[1]; const L = Math.hypot(tx, tz) || 1; tx /= L; tz /= L; const nx = -tz, nz = tx, side = coastInfo(p[0] + nx * 6, p[1] + nz * 6).d < coastInfo(p[0] - nx * 6, p[1] - nz * 6).d ? 1 : -1;   // 바다 쪽 길가에
+    const x = p[0] + nx * 4.6 * side, z = p[1] + nz * 4.6 * side; plain(postG, postM, x, terH(x, z) + .35, z, det);
+    if (i % 40 === 0) { const lx = p[0] + nx * 4.9 * side, lz = p[1] + nz * 4.9 * side, ly = terH(lx, lz); plain(new T3.CylinderGeometry(.06, .08, 3.6, 6), cmat(0x2a2d33), lx, ly + 1.8, lz, det);
+      const bl = new T3.Mesh(GEOD.rlamp || (GEOD.rlamp = new T3.SphereGeometry(.2, 10, 8)), bulbMat(0x8a8a80, 0xffe2a8)); bl.position.set(lx - nx * side * .45, ly + 3.55, lz - nz * side * .45); scene.add(bl); } }
 }
 // 숲: 소나무 · 활엽수 · 바위를 한 번에 그리는 묶음(InstancedMesh)
 function buildForest() {
   const items = { pine: [], round: [], rock: [] }; let s = 77; const r = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
-  for (let n = 0; n < 9000 && items.pine.length + items.round.length < 2200; n++) {
+  for (let n = 0; n < 11000 && items.pine.length + items.round.length < 2400; n++) {
     const x = -40 + r() * 580, z = -290 + r() * 600; if (townMask(x, z) > .15 || !inIsland(x, z)) continue;
     const h = terH(x, z), d = coastInfo(x, z).d, dens = vnoise(x / 60 + 3, z / 60) + smooth01(6, 40, h) * .5;
-    if (d < 14 || terSlope(x, z) > .7) continue;
+    if (d < 14 || terSlope(x, z) > .7 || roadNear(x, z).d < 9 || southBeach(z, d) > .3) continue;
     if (r() < .06) { items.rock.push([x, h, z, .6 + r() * 1.8]); continue; }
     if (dens < .55 + r() * .25) continue;
     (h > 18 || r() < .55 ? items.pine : items.round).push([x, h, z, .8 + r() * .9]);
@@ -6119,7 +6222,7 @@ function buildCoast() {
   }
   // 해안 바위 (마을 앞 물양장 · 시장 · 포차 바닷가 · 해변은 빼고)
   const rockG = [new T3.DodecahedronGeometry(1, 0), new T3.IcosahedronGeometry(1, 0)];
-  const town = (x, z) => (x > -45 && x < -8 && z > -56 && z < 70) || (x > -4 && x < 4 && z < -64) || (z < -58 && z > -134 && x > mudX(z) - 6 && x < 6);   // 마을 · 도로 끝 · 갯벌 해변은 바위 없이
+  const town = (x, z) => z < -64 || (x > -36 && x < -16 && z > 60 && z < 86) || (x > -45 && x < -8 && z > -56 && z < 70) || (x > -4 && x < 4 && z < -64) || (z < -58 && z > -134 && x > mudX(z) - 6 && x < 6);   // 마을 · 도로 끝 · 갯벌 해변은 바위 없이
   for (let i = 0; i < ISLAND.length; i++) {
     const [x0, z0] = ISLAND[i], [x1, z1] = ISLAND[(i + 1) % ISLAND.length], L = Math.hypot(x1 - x0, z1 - z0);
     for (let d = 0; d < L; d += 2.4) {
@@ -6135,14 +6238,11 @@ function buildCoast() {
 }
 function buildLand() {
   buildIsland();
-  // 길 끝: 차단봉 + 줄무늬
-  for (let x = -3.5; x <= 3.6; x += 1.4) { cyl(.12, .12, .8, 8, phong(0xf4f1ea), x, .4, -69.4); box(.26, .12, .26, phong(0xe2522c), x, .62, -69.4); }
   for (const x of [-5.5, -8]) { const t = new T3.Mesh(new T3.IcosahedronGeometry(1.1, 0), phong(0x6fa85e)); t.position.set(x + 9, 1.6, -73); scene.add(t); cyl(.12, .16, 1.2, 5, phong(0x7a5a3c), x + 9, .6, -73); }
   // 차도
-  const road = box(8, .04, 146, lam(0xffffff, { map: imgTex("a/asphalt.jpg", 2, 37) }), 0, .02, 3.5); grounds.push(road);
-  for (let z = 74; z > -68; z -= 6) box(.18, .02, 2.6, lam(0xf2d36b), 0, .05, z);
+  // 큰길은 섬 일주도로(buildRingRoad)의 한 구간이에요 (v1.49)
   // 인도
-  const sw = box(3, .16, 146, lam(0xffffff, { map: imgTex("a/pavers.jpg", 1, 49) }), 5.5, .08, 3.5); grounds.push(sw);
+  const sw = box(3, .16, 128, lam(0xffffff, { map: imgTex("a/pavers.jpg", 1, 43) }), 5.5, .08, 9); grounds.push(sw);
   // 가로등 (차도 쪽)
   for (let z = 36; z > -66; z -= 12) {
     cyl(.07, .09, 4.2, 6, phong(0x2a2d33), 4.3, 2.1, z);
@@ -6151,30 +6251,37 @@ function buildLand() {
   }
 }
 function buildPier() {
-  const wood = canvasTex(256, 256, (g, w, hh) => {
-    const cols = ["#8a6240", "#7f5a3a", "#93694a", "#7a5636"];
-    for (let i = 0; i < 8; i++) { g.fillStyle = cols[(i * 5) % 4]; g.fillRect(0, i * hh / 8, w, hh / 8 - 3); g.fillStyle = "#4b3322"; g.fillRect(0, i * hh / 8 + hh / 8 - 3, w, 3); }
-  }, 1, 1);
-  const deckTex = imgTex("a/planks.jpg", 10.75, 2);
-  const deck = box(43, .35, 8, lam(0xffffff, { map: deckTex }), -31, -.175, 0); grounds.push(deck);
-  const headTex = imgTex("a/planks.jpg", 1.75, 6);
-  const head = box(7, .35, 24, lam(0xffffff, { map: headTex }), -49, -.175, 0); grounds.push(head);
+  // ── 낭만 부두 (낚시 데크): 옛 모양 그대로 PIER 만큼 옮긴 그룹 ──
+  const G = new T3.Group(); G.position.set(PIER.dx, 0, PIER.dz); scene.add(G);
+  const deck = box(45.6, .35, 8, lam(0xffffff, { map: imgTex("a/planks.jpg", 11.4, 2) }), -29.6, -.175, 0, G); grounds.push(deck);
+  const head = box(7, .35, 24, lam(0xffffff, { map: imgTex("a/planks.jpg", 1.75, 6) }), -49, -.175, 0, G); grounds.push(head);
   const postMat = phong(0x4a3322);
-  for (let x = -12; x >= -46; x -= 5) for (const z of [-3.8, 3.8]) cyl(.2, .24, 4, 8, postMat, x, -2.2, z);
-  for (const z of [-11.6, -6, 6, 11.6]) for (const x of [-45.8, -52.2]) cyl(.2, .24, 4, 8, postMat, x, -2.2, z);
-  // 부두 가로등
+  for (let x = -12; x >= -46; x -= 5) for (const z of [-3.8, 3.8]) cyl(.2, .24, 4, 8, postMat, x, -2.2, z, G);
+  for (const z of [-11.6, -6, 6, 11.6]) for (const x of [-45.8, -52.2]) cyl(.2, .24, 4, 8, postMat, x, -2.2, z, G);
   for (const [x, z] of [[-17.5, -3.85], [-27.5, 3.85], [-37.5, -3.85], [-49, -11.5], [-49, 11.5]]) {
-    cyl(.08, .1, 3.4, 6, phong(0x2a2d33), x, 1.7, z);
-    const b = new T3.Mesh(new T3.SphereGeometry(.28, 12, 8), bulbMat(0x777777, 0xffe2a8)); b.position.set(x, 3.5, z); scene.add(b);
+    cyl(.08, .1, 3.4, 6, phong(0x2a2d33), x, 1.7, z, G);
+    const b = new T3.Mesh(new T3.SphereGeometry(.28, 12, 8), bulbMat(0x777777, 0xffe2a8)); b.position.set(x, 3.5, z); G.add(b);
   }
-  const pl = new T3.PointLight(0xffcf8a, 0, 22, 1.6); pl.position.set(-30, 4, 0); scene.add(pl); glow.push({ light: pl, val: 1.2 });
-  const pl2 = new T3.PointLight(0xffcf8a, 0, 18, 1.6); pl2.position.set(-49, 4, 0); scene.add(pl2); glow.push({ light: pl2, val: 1.2 });
-  // 부두 입구 아치
-  const arch = phong(0x2f6f86);
-  cyl(.15, .15, 4, 8, arch, -10.5, 2, -4.2); cyl(.15, .15, 4, 8, arch, -10.5, 2, 4.2);
-  const sign = makeSign(7, 1.75, SIGNS.pier);
-  sign.position.set(-10.5, 4.35, 0); sign.rotation.y = Math.PI / 2; scene.add(sign);
-  const sign2 = sign.clone(); sign2.rotation.y = -Math.PI / 2; sign2.position.x = -10.55; scene.add(sign2);
+  // 끝의 정자 (지붕 · 기둥 · 둘러앉는 벤치)
+  { const J = new T3.Group(); J.position.set(-49, 0, 0); G.add(J);
+    for (const [dx, dz] of [[-2.6, -2.6], [2.6, -2.6], [2.6, 2.6], [-2.6, 2.6]]) cyl(.13, .15, 2.8, 8, cmat(0x7a3a24), dx, 1.4, dz, J);
+    box(6, .2, 6, cmat(0x7a3a24), 0, 2.85, 0, J); const rf = new T3.Mesh(new T3.ConeGeometry(4.8, 1.8, 4), cmat(0x3a4a5a)); rf.rotation.y = Math.PI / 4; rf.position.y = 3.85; J.add(rf);
+    for (const s of [-1, 1]) box(.5, .42, 4.2, cmat(0x9b7653), s * 2.3, .21, 0, J); }
+  // 화분 줄 · 깃발
+  for (let x = -14; x >= -44; x -= 10) for (const z of [-3.6, 3.6]) { plain(new T3.BoxGeometry(.9, .4, .5), cmat(0x8a6a4a), x, .2, z, G); plain(new T3.IcosahedronGeometry(.3, 0), cmat([0xff7a8a, 0xffd84d, 0xb38af0][Math.abs(x) % 3]), x, .55, z, G); }
+  const pl = new T3.PointLight(0xffcf8a, 0, 22, 1.6); pl.position.set(-30 + PIER.dx, 4, PIER.dz); scene.add(pl); glow.push({ light: pl, val: 1.2 });
+  const pl2 = new T3.PointLight(0xffcf8a, 0, 18, 1.6); pl2.position.set(-49 + PIER.dx, 4, PIER.dz); scene.add(pl2); glow.push({ light: pl2, val: 1.2 });
+  // 부두 입구 아치 (뭍 쪽)
+  const arch = phong(0x2f6f86), ax = -8.2;
+  cyl(.15, .15, 4, 8, arch, ax, 2, -4.2, G); cyl(.15, .15, 4, 8, arch, ax, 2, 4.2, G);
+  const sign = makeSign(7, 1.75, SIGNS.pier); sign.position.set(ax, 4.35, 0); sign.rotation.y = Math.PI / 2; G.add(sign);
+  const sign2 = sign.clone(); sign2.rotation.y = -Math.PI / 2; sign2.position.x = ax - .05; G.add(sign2);
+  // 포차 마당 → 부두 입구 돌길
+  const path = box(4.2, .05, 12, lam(0xffffff, { map: imgTex("a/slabs.jpg", 1.2, 3.5) }), -22.6, .03, 66.2); path.rotation.y = .5; grounds.push(path);
+  // ── 항구 안 멍낚호 선착장 (짧은 잔교) ──
+  const jet = box(JETTY.x1 - JETTY.x0 + .6, .35, JETTY.z1 - JETTY.z0 + .4, lam(0xffffff, { map: imgTex("a/planks.jpg", 2, 2) }), (JETTY.x0 + JETTY.x1) / 2 - .3, -.175, 0); grounds.push(jet);
+  for (const x of [-11, -14.5, -17]) for (const z of [-3.8, 3.8]) cyl(.2, .24, 4, 8, postMat, x, -2.2, z);
+  for (const z of [-3.85, 3.85]) { cyl(.08, .1, 3.4, 6, phong(0x2a2d33), -16.6, 1.7, z); const b = new T3.Mesh(new T3.SphereGeometry(.28, 12, 8), bulbMat(0x777777, 0xffe2a8)); b.position.set(-16.6, 3.5, z); scene.add(b); }
 }
 function buildPromenade() {
   const tile = canvasTex(128, 128, (g, w, hh) => { g.fillStyle = "#c9b9a0"; g.fillRect(0, 0, w, hh); g.strokeStyle = "#a9987f"; g.lineWidth = 3; g.strokeRect(0, 0, w / 2, hh / 2); g.strokeRect(w / 2, hh / 2, w / 2, hh / 2); g.strokeRect(w / 2, 0, w / 2, hh / 2); g.strokeRect(0, hh / 2, w / 2, hh / 2); }, 3, 100);
@@ -6525,7 +6632,7 @@ function buildDetails() {
   const det = new T3.Group(); scene.add(det); DETAIL_GROUPS.push(det);
   const iron = cmat(0x2a2d33), wood = cmat(0xb07a48), stone = cmat(0xc8c3ba), white = cmat(0xf4f1ea);
   // 연석 · 횡단보도
-  plain(new T3.BoxGeometry(.24, .18, 146), stone, 4.05, .09, 3.5, det); plain(new T3.BoxGeometry(.24, .14, 146), stone, -4.05, .07, 3.5, det);
+  plain(new T3.BoxGeometry(.24, .18, 128), stone, 4.05, .09, 9, det); plain(new T3.BoxGeometry(.24, .14, 114), stone, -4.05, .07, 15, det);
   const cw = new T3.BoxGeometry(.45, .02, 3.2);
   for (const z0 of [0, 30, -30]) for (let x = -3.2; x <= 3.25; x += .8) plain(cw, white, x, .055, z0, det);
   // 벤치 (바다를 보게)
@@ -6562,29 +6669,30 @@ function buildDetails() {
     const can = new T3.CylinderGeometry(.05, .05, .16, 8);
     for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) plain(can, cmat([0xe2522c, 0x2a78bb, 0x2f8f5b, 0xf2c230][c]), -.41, .95 + r * .3, -.3 + c * .2, g);
     plain(new T3.BoxGeometry(.06, .14, .5), iron, -.39, .45, 0, g); }
+  const pd = new T3.Group(); pd.position.set(PIER.dx, 0, PIER.dz); det.add(pd);   // 낭만 부두 소품 (v1.49 옮김)
   // 부두: 계류 기둥 · 밧줄 · 아래쪽 테두리
-  const fas = new T3.BoxGeometry(43, .25, .08);
-  for (const z of [-4.04, 4.04]) plain(fas, cmat(0x5a3d26), -31, -.45, z, det);
+  const fas = new T3.BoxGeometry(45.6, .25, .08);
+  for (const z of [-4.04, 4.04]) plain(fas, cmat(0x5a3d26), -29.6, -.45, z, pd);
   const boll = new T3.CylinderGeometry(.12, .15, .38, 10), bcap = new T3.CylinderGeometry(.17, .17, .07, 10);
-  for (const x of [-16.5, -21.5, -26.5, -31.5, -36.5, -41.25]) for (const z of [-3.82, 3.82]) { plain(boll, iron, x, .19, z, det); plain(bcap, iron, x, .4, z, det); }
+  for (const x of [-16.5, -21.5, -26.5, -31.5, -36.5, -41.25]) for (const z of [-3.82, 3.82]) { plain(boll, iron, x, .19, z, pd); plain(bcap, iron, x, .4, z, pd); }
   const coil = new T3.TorusGeometry(.2, .055, 6, 16);
-  for (const [x, z] of [[-21.05, -3.3], [-31.05, 3.3], [-41, -3.3]]) plain(coil, cmat(0xcfa86a), x, .06, z, det).rotation.x = Math.PI / 2;
+  for (const [x, z] of [[-21.05, -3.3], [-31.05, 3.3], [-41, -3.3]]) plain(coil, cmat(0xcfa86a), x, .06, z, pd).rotation.x = Math.PI / 2;
   // 부두 끝: 나무 상자 · 통 · 그물 더미
   const crateTex = canvasTex(64, 64, (g, w, hh) => { g.fillStyle = "#b8874e"; g.fillRect(0, 0, w, hh); g.strokeStyle = "#7a5530"; g.lineWidth = 5; g.strokeRect(2, 2, w - 4, hh - 4); g.beginPath(); g.moveTo(4, 4); g.lineTo(w - 4, hh - 4); g.stroke(); g.lineWidth = 1; g.strokeStyle = "rgba(90,60,30,.4)"; for (let y = 12; y < hh; y += 12) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); } }, 1, 1);
   const crateM = phong(0xffffff, { map: crateTex });
   const barrel = new T3.CylinderGeometry(.34, .34, .86, 14), hoop = new T3.CylinderGeometry(.355, .355, .06, 14);
   for (const sz of [1, -1]) {
-    box(.9, .9, .9, crateM, -46.7, .45, sz * 10.7, det); box(.7, .7, .7, crateM, -46.75, 1.25, sz * 10.65, det).rotation.y = .4;
-    box(.8, .8, .8, crateM, -47.8, .4, sz * 11.1, det);
-    for (const [bx, bz] of [[-50.4, 11.0], [-51.25, 10.35]]) { plain(barrel, cmat(0x7a5530), bx, .43, sz * bz, det); for (const yy of [.18, .68]) plain(hoop, iron, bx, yy, sz * bz, det); }
-    plain(new T3.SphereGeometry(.7, 12, 8), cmat(0x5f7a52), -46.8, .12, sz * 8.6, det).scale.set(1.2, .32, 1);
-    plain(new T3.SphereGeometry(.13, 8, 6), cmat(0xff7a2e), -46.4, .3, sz * 8.3, det);
+    box(.9, .9, .9, crateM, -46.7, .45, sz * 10.7, pd); box(.7, .7, .7, crateM, -46.75, 1.25, sz * 10.65, pd).rotation.y = .4;
+    box(.8, .8, .8, crateM, -47.8, .4, sz * 11.1, pd);
+    for (const [bx, bz] of [[-50.4, 11.0], [-51.25, 10.35]]) { plain(barrel, cmat(0x7a5530), bx, .43, sz * bz, pd); for (const yy of [.18, .68]) plain(hoop, iron, bx, yy, sz * bz, pd); }
+    plain(new T3.SphereGeometry(.7, 12, 8), cmat(0x5f7a52), -46.8, .12, sz * 8.6, pd).scale.set(1.2, .32, 1);
+    plain(new T3.SphereGeometry(.13, 8, 6), cmat(0xff7a2e), -46.4, .3, sz * 8.3, pd);
   }
   // 구명환
   const lpost = new T3.CylinderGeometry(.05, .05, 1.5, 6);
   for (const [x, z] of [[-15.6, 3.86], [-44.6, -3.86]]) {
-    plain(lpost, iron, x, .75, z, det);
-    const rg = new T3.Group(); rg.position.set(x, 1.15, z + (z > 0 ? -.08 : .08)); det.add(rg);
+    plain(lpost, iron, x, .75, z, pd);
+    const rg = new T3.Group(); rg.position.set(x, 1.15, z + (z > 0 ? -.08 : .08)); pd.add(rg);
     for (let i = 0; i < 8; i++) plain(GEOD.lseg || (GEOD.lseg = new T3.TorusGeometry(.28, .075, 8, 6, Math.PI / 4)), cmat(i % 2 ? 0xffffff : 0xe2402a), 0, 0, 0, rg).rotation.z = i * Math.PI / 4;
   }
   // 길 안내 표지판 (처음 도착하는 거리 입구) · v1.27 — 갯벌 해변이 있는 줄 모르는 사람이 많아서. 처음 보는 방향(남쪽)이 「↑」
@@ -6597,7 +6705,7 @@ function buildDetails() {
   // 상점 뒤 언덕 마을 · 나무
   const pastel = [0xf2e6d0, 0xe9d3c0, 0xd8e4ea, 0xf0dcdc, 0xe4ead2], roofs = [0xd8473a, 0x2f6f86, 0x3f6e58, 0xc98a4a, 0x6b6bd6];
   const hwin = bulbMat(0x8aa3b0, 0xffd89a), winG = new T3.PlaneGeometry(.5, .5);
-  const keepOut = (x, z) => (x < 26.5 && z > 37 && z < 75) || (x < 23.5 && z > -70 && z < -52);   // 윗마을 · 명예의 전당 자리는 비워 둠
+  const keepOut = (x, z) => (x < 26.5 && z > 37 && z < 75) || (x < 23.5 && z > -70 && z < -52) || (x > 22 && x < 56 && z > 28 && z < 92);   // 윗마을 · 명예의 전당 · 어촌역 자리는 비워 둠   // 윗마을 · 명예의 전당 자리는 비워 둠
   for (let i = 0; i < 26; i++) {
     const x = 21 + srnd() * 22, z = -64 + i * 4.9 + (srnd() - .5) * 2, w = 2.4 + srnd() * 1.4, hh = 1.8 + srnd() * 1.6;
     if (keepOut(x, z)) continue;
@@ -7187,24 +7295,7 @@ function imgTex(src, rx, ry) {
   const t = new T3.TextureLoader().load(src);
   t.wrapS = t.wrapT = T3.RepeatWrapping; t.repeat.set(rx || 1, ry || 1); t.anisotropy = 4; return t;
 }
-function buildBeach() {
-  const X0 = -64, X1 = -1, Z0 = -130, Z1 = -70, NX = 70, NZ = 66;
-  const p = [], uv = [], col = [], idx = [];
-  const cSand = new T3.Color(0xf0dfb6), cWet = new T3.Color(0xb39d78), cMud = new T3.Color(0x6a5a4a), cMud2 = new T3.Color(0x54473a), tmp = new T3.Color();
-  for (let j = 0; j <= NZ; j++) for (let i = 0; i <= NX; i++) {
-    const x = X0 + (X1 - X0) * i / NX, z = Z0 + (Z1 - Z0) * j / NZ;
-    const xs = shoreX(z), xm = mudX(z);
-    let y;
-    if (x >= xs) { y = sandY(x, z); tmp.copy(cSand).lerp(cWet, smooth01(xs + 3, xs, x)); }
-    else if (x >= xm) { y = -0.3 + Math.sin(x * 1.3) * Math.cos(z * 1.1) * .02; tmp.copy(cMud).lerp(cMud2, (Math.sin(x * .7) * Math.cos(z * .9) + 1) / 2 * .6).lerp(cWet, smooth01(xs - 2, xs, x)); }
-    else { y = -0.3 - Math.min(2.4, (xm - x) * .35); tmp.copy(cMud2); }
-    if (x < -10) y = y + (-1.5 - y) * smooth01(-75, -70, z);
-    if (z < -124) y = y + (-1.5 - y) * smooth01(-124, -130, z);
-    p.push(x, y, z); uv.push(x / 5, z / 5); col.push(tmp.r, tmp.g, tmp.b);
-    if (i && j) { const a = (j - 1) * (NX + 1) + i - 1, b = a + 1, c = a + NX + 1, d = c + 1; idx.push(a, c, b, b, c, d); }
-  }
-  const g = new T3.BufferGeometry(); g.setAttribute("position", new T3.Float32BufferAttribute(p, 3)); g.setAttribute("uv", new T3.Float32BufferAttribute(uv, 2)); g.setAttribute("color", new T3.Float32BufferAttribute(col, 3)); g.setIndex(idx); g.computeVertexNormals();
-  const beach = new T3.Mesh(g, phong(0xffffff, { vertexColors: true, map: imgTex("a/sand.jpg", 1, 1) })); scene.add(beach); grounds.push(beach);
+function buildBeach() {   // 모래사장 · 갯벌 땅은 섬 지형(buildIsland)이 그려요 (v1.49)
   // 물때 수면 (가장자리는 투명하게 번짐)
   const c = document.createElement("canvas"); c.width = c.height = 128; const cg = c.getContext("2d");
   const gr = cg.createRadialGradient(64, 64, 20, 64, 64, 64); gr.addColorStop(0, "rgba(92,201,196,.85)"); gr.addColorStop(.75, "rgba(92,201,196,.7)"); gr.addColorStop(1, "rgba(92,201,196,0)");
@@ -7215,7 +7306,6 @@ function buildBeach() {
   const rock = phong(0x8b857a);
   [[-34, -88], [-40, -108], [-22, -116], [-46, -96], [-12, -122], [-28, -78]].forEach(([x, z], i) => { const r = new T3.Mesh(new T3.DodecahedronGeometry(.7 + (i % 3) * .5, 0), rock); r.position.set(x, -.35, z); r.rotation.set(i, i * 2, 0); r.scale.y = .6; scene.add(r); });
   const reed = phong(0x9fae5c);
-  for (let k = 0; k < 36; k++) { const z = -120 + k * 1.4, x = -2.2 - (k % 3) * .4; if (!inSand(x, z)) continue; cyl(.03, .05, .9 + (k % 4) * .2, 3, reed, x, .4, z); }
   [[-6, -86, 0xe2522c], [-8, -104, 0x3f8fc0]].forEach(([x, z, cc]) => {
     cyl(.04, .04, 2.4, 5, phong(0xdddddd), x, 1.1, z);
     const u = new T3.Mesh(new T3.ConeGeometry(1.4, .6, 8), phong(cc)); u.position.set(x, 2.3, z); scene.add(u);
@@ -8831,7 +8921,7 @@ SHEETS.quests = (body) => {
 /* ---------- 마을 지도 ----------
    실제 월드 좌표로 그린 그림 지도. 위 = 남쪽(갯벌 해변), 오른쪽 = 상점가 — 처음 카메라가 보는 방향과 같아요.
    ▲ 내 위치 · 친구(이름) · 다른 사람(점)이 1초마다 바뀌고, 장소를 누르면 그곳으로 걸어가요 */
-const MAP = { x0: -78, x1: 32, z0: -130, z1: 80 };
+const MAP = { x0: -74, x1: 54, z0: -130, z1: 88 };
 const MAP_ICO = { bait: "🎣", release: "🐟", face: "🙂", sashimi: "🍣", clothes: "👕", lotto: "🎰", bank: "🏦" };
 function mapSpots() {
   const out = PLACES.map(p => ({ name: p.name, x: p.x, z: p.z, go: () => walkTo(p.x, p.z) }));
@@ -8857,10 +8947,10 @@ function drawTownMap(cv) {
   const low = tideLow(), band = (fx, col) => { g.fillStyle = col; g.beginPath(); g.moveTo(X(-1.5), Y(-127)); for (let z = -127; z <= -67; z += 1) g.lineTo(X(fx(z)), Y(z)); g.lineTo(X(-1.5), Y(-67)); g.closePath(); g.fill(); };
   band((z) => mudX(z) + 1, low ? "#a89276" : "#9fd3e2"); band(shoreX, "#efdcab");
   // 산책로 · 차도 · 인도
-  R(-9.8, -64, -4, 15.5, "#d8c8aa"); R(-4, -69.5, 4, 76, "#62666d"); R(4, -69.5, 7, 76, "#d2c8b4");
+  R(-9.8, -64, -4, 15.5, "#d8c8aa"); g.strokeStyle = "#62666d"; g.lineWidth = 8 * k; g.lineJoin = "round"; g.beginPath(); RING.pts.forEach(([x, z], i) => i ? g.lineTo(X(x), Y(z)) : g.moveTo(X(x), Y(z))); g.closePath(); g.stroke(); R(STN.x0, STN.z0, STN.x1, STN.z1, "#c2402a"); R(STN.rail - .8, 1, STN.rail + .8, 97, "#7a7062"); R(4, -69.5, 7, 76, "#d2c8b4");
   g.fillStyle = "#f2d36b"; for (let z = 72; z > -68; z -= 6) g.fillRect(X(-.15), Y(z), .3 * k, 2.4 * k);
   // 부두 · 선착장
-  R(-52.4, -3.6, -9.6, 3.6, "#a8794e"); R(-52.4, -11.6, -46, 11.6, "#a8794e");
+  R(-52.4 + PIER.dx, -3.6 + PIER.dz, -6.8 + PIER.dx, 3.6 + PIER.dz, "#a8794e"); R(-52.4 + PIER.dx, -11.6 + PIER.dz, -46 + PIER.dx, 11.6 + PIER.dz, "#a8794e"); R(JETTY.x0, JETTY.z0, JETTY.x1, JETTY.z1, "#a8794e");
   for (const s of Object.values(SEAT)) if (s.kind === "pier") C(s.x, s.z, 1.3 * u, "#f6f1e7");
   E("⛵", BOAT.dock.x, BOAT.dock.z - 1.5, 13);
   // 포차 · 시장
@@ -8886,7 +8976,7 @@ function drawTownMap(cv) {
   for (const s of STATUE_SPOTS) R(s.x - .85, s.z - .85, s.x + .85, s.z + .85, "#d2a24a");
   E("🏆", HALL.x1 - 1.6, HALL.cz, 13);
   // 구역 이름
-  T("낭만 부두", -31, -7.5, 10, "#4a3420", true); T("낭만포차거리", -16, 67.5, 9, "#8a3a1a", true); T("어촌 수산시장", -23, -45.5, 9, "#1d5a7a", true);
+  T("낭만 부두", -48, 64, 10, "#4a3420", true); T("⚓ 항구", -30, -7.5, 9, "#1d3a5c", true); T("🚉 어촌역", 36, 68, 9, "#1d3a5c", true); T("낭만포차거리", -16, 67.5, 9, "#8a3a1a", true); T("어촌 수산시장", -23, -45.5, 9, "#1d5a7a", true);
   T("윗마을", 15.2, 74.5, 10, "#2f4a6a", true); T("명예의 전당", 13, -69.6, 9, "#7a5a10", true); T("갯벌 해변", -16, -104, 10, "#6a5030", true); T("🐚 조개 캐기 · 장화 + 호미", -16, -96.5, 8, "#6a5030");
   T(low ? "썰물 · 갯벌이 드러났어요" : "밀물 · 갯벌이 잠겼어요", -24, -92, 7.5, "#4a5a66"); T("낭만 거리", 0, 10, 8.5, "#ffffff");
   // 사람들: 다른 사람 = 점, 친구 = 이름
@@ -8957,6 +9047,7 @@ function drawIslandMap(cv) {
   g.drawImage(islandMapBase(W, H), 0, 0);
   g.strokeStyle = "rgba(255,255,255,.9)"; g.setLineDash([4 * u, 3 * u]); g.lineWidth = 1.5 * u; g.strokeRect(X(-45), Y(-130), 75 * k, 210 * k); g.setLineDash([]);
   g.font = "700 " + 9 * u + "px sans-serif"; g.textAlign = "center"; g.fillStyle = "#2a3a2a"; g.fillText("마을", X(-8), Y(-136));
+  g.strokeStyle = "rgba(70,74,80,.85)"; g.lineWidth = 2.2 * u; g.beginPath(); RING.pts.forEach(([x, z], i) => i ? g.lineTo(X(x), Y(z)) : g.moveTo(X(x), Y(z))); g.closePath(); g.stroke();
   for (const [px, pz, hh] of PEAKS.slice(0, 3)) { g.fillStyle = "#3a2a1a"; g.font = 8 * u + "px sans-serif"; g.fillText("▲ " + Math.round(hh) + "m", X(px), Y(pz)); }
   for (const p of otherPeers(false)) { const fr = p.uid && P.friends && P.friends[p.uid]; g.fillStyle = "#fff"; g.beginPath(); g.arc(X(p.x), Y(p.z), 2.6 * u, 0, 7); g.fill(); g.fillStyle = fr ? "#2fae7f" : p.color; g.beginPath(); g.arc(X(p.x), Y(p.z), 1.8 * u, 0, 7); g.fill(); }
   const mx = X(ME.x), my = Y(ME.z), a = Math.atan2(Math.cos(ME.ry), Math.sin(ME.ry)), r = 7 * u;
@@ -9805,6 +9896,61 @@ const inUptown = (x, z) => x > UPTOWN.x0 && x < UPTOWN.x1 && z > UPTOWN.z0 && z 
 function uptownBlocked(x, z) {
   return solidHit(UP_SOLID, x, z) || solidHit(UP_PARK_SOLID, x, z);
 }
+/* ===================== 어촌역 (v1.49) =====================
+   접속하면 여기서 나와요. 윗마을 동쪽의 작은 시골 역: 빨간 박공지붕 역사 · 「어촌역」 간판 · 시계 · 대합실 벤치,
+   동쪽 승강장에 파란 지붕과 2량 열차가 서 있고, 선로는 남북으로 뻗어 언덕 너머로 이어져요. 서쪽 문 → 윗마을 공원으로 돌길 */
+const STN = { x0: 28, x1: 40, z0: 46, z1: 60, door: { x: 27.2, z: 53 }, rail: 47.5 };
+function buildStation() {
+  const det = new T3.Group(); scene.add(det); DETAIL_GROUPS.push(det);
+  const { x0, x1, z0, z1, rail } = STN, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, W = x1 - x0, L = z1 - z0, H = 4.4;
+  // 역 광장 · 승강장 바닥
+  const plaza = box(W + 8, .08, L + 10, lam(0xffffff, { map: imgTex("a/pavers.jpg", 3, 4) }), cx - 1, .04, cz); grounds.push(plaza);
+  const plat = box(4.2, .7, 50, cmat(0xcfc8bc), rail - 3.4, .35, cz); grounds.push(plat);
+  box(.25, .02, 50, cmat(0xf2d36b), rail - 1.45, .72, cz, det);   // 노란 안전선
+  // 역사: 크림색 벽 · 아래 붉은 벽돌 띠 · 큰 창 · 빨간 박공지붕
+  box(W, H, L, cmat(0xf2ead8), cx, H / 2, cz, det);
+  box(W + .1, .9, L + .1, cmat(0xa8483a), cx, .45, cz, det);
+  const win = bulbMat(0x9fc3d6, 0xffd89a);
+  for (const z of [z0 + 2.4, z1 - 2.4]) for (const s of [-1, 1]) { const m = box(.08, 1.6, 2.2, win, s > 0 ? x1 + .02 : x0 - .02, 2.2, z); }
+  box(.12, 2.6, 2.6, phong(0x6a8aa8), x0 - .06, 1.3, cz);   // 서쪽 유리문
+  box(.12, 2.6, 2.6, phong(0x6a8aa8), x1 + .06, 1.3, cz);   // 승강장 쪽 문
+  const roof = new T3.Mesh(new T3.CylinderGeometry(.01, W * .62, 2.6, 4, 1), cmat(0xc2402a)); roof.rotation.y = Math.PI / 4; roof.scale.set(1, 1, L / W * 1.05); roof.position.set(cx, H + 1.3, cz); det.add(roof);
+  box(W + 1.4, .22, L + 1.4, cmat(0x8a2e22), cx, H + .05, cz, det);
+  // 간판 · 시계
+  const sg = makeSign(6.4, 1.3, { shape: "board", fill: { type: "grad", c: ["#1d3a5c", "#122840"] }, frame: { c: "#f2c230" }, t: { text: "어 촌 역", font: "hyeon", color: "#fff7e6", size: .58, y: .46 }, sub: { text: "EOCHON STATION", color: "#ffe08a", size: .18, y: .84 } }, { cw: 900 });
+  sg.position.set(x0 - .1, H - .4, cz); sg.rotation.y = -Math.PI / 2; scene.add(sg);
+  const clock = canvasTex(128, 128, (g) => { g.fillStyle = "#fffdf6"; g.beginPath(); g.arc(64, 64, 60, 0, 7); g.fill(); g.strokeStyle = "#1d3a5c"; g.lineWidth = 8; g.stroke(); g.lineWidth = 4; for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; g.beginPath(); g.moveTo(64 + Math.cos(a) * 46, 64 + Math.sin(a) * 46); g.lineTo(64 + Math.cos(a) * 54, 64 + Math.sin(a) * 54); g.stroke(); } g.lineWidth = 6; g.beginPath(); g.moveTo(64, 64); g.lineTo(64, 28); g.moveTo(64, 64); g.lineTo(92, 64); g.stroke(); }, 1, 1);
+  const ck = new T3.Mesh(new T3.CircleGeometry(.7, 24), new T3.MeshBasicMaterial({ map: clock })); ck.position.set(x0 - .1, H + 1.1, cz); ck.rotation.y = -Math.PI / 2; scene.add(ck);
+  // 문 위 차양 · 화분 · 벤치 · 우체통
+  const awn = box(2.2, .1, 4.2, cmat(0x2f6f86), x0 - 1, 2.9, cz, det); awn.rotation.z = -.25;
+  for (const z of [cz - 3, cz + 3]) { propPot(x0 - 1.2, z); }
+  propBench(x0 - 3.6, cz - 5.5, -Math.PI / 2); propBench(x0 - 3.6, cz + 5.5, -Math.PI / 2);
+  { plain(new T3.CylinderGeometry(.28, .28, 1.1, 12), cmat(0xd8382c), x0 - 1.2, .55, z0 - 1.2, det); plain(new T3.SphereGeometry(.28, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), cmat(0xd8382c), x0 - 1.2, 1.1, z0 - 1.2, det); }
+  // 승강장 지붕 (파란 차양) · 기둥 · 역 이름판
+  for (let z = z0 - 8; z <= z1 + 8; z += 6) cyl(.1, .1, 3.2, 8, cmat(0x2a2d33), rail - 4.6, 2.3, z, det);
+  const pr = box(3.6, .14, 30, cmat(0x2a78bb), rail - 3.6, 3.95, cz, det); pr.rotation.z = .12;
+  { const ns = makeSign(2.6, .7, { shape: "board", fill: { type: "grad", c: ["#ffffff", "#eef3f6"] }, frame: { c: "#1d3a5c" }, t: { text: "어촌", font: "hyeon", color: "#1d3a5c", size: .5, y: .5 } }, { cw: 500 });
+    ns.position.set(rail - 4.6, 2.5, cz + 9); ns.rotation.y = Math.PI / 2; scene.add(ns); const ns2 = ns.clone(); ns2.rotation.y = -Math.PI / 2; ns2.position.x = rail - 4.62; scene.add(ns2); }
+  // 선로: 침목 · 레일 (남북으로 길게, 끝은 언덕 쪽으로 사라짐)
+  const tieG = new T3.BoxGeometry(2.6, .12, .32), tieM = cmat(0x6a4a32), railM = cmat(0x9aa3aa);
+  for (let z = 2; z <= 96; z += .9) plain(tieG, tieM, rail, groundY(rail, z) + .06, z, det);
+  for (const s of [-.72, .72]) { box(.1, .14, 95, railM, rail + s, .2, 49, det); }
+  plain(new T3.BoxGeometry(5, .12, 96), cmat(0x9a9284), rail, .02, 49, det);   // 자갈 바닥
+  for (const z of [1.2, 96.8]) box(2.4, .9, .5, cmat(0xd8382c), rail, .55, z, det);   // 끝 막이
+  // 열차 2량 (승강장에 정차)
+  const train = new T3.Group(); train.position.set(rail, 0, cz); scene.add(train);
+  for (const [dz, c] of [[-6.6, 0x2a78bb], [6.6, 0x2f8f5b]]) {
+    const car = new T3.Group(); car.position.z = dz; train.add(car);
+    box(2.6, 2.6, 12.4, cmat(0xf4f1ea), 0, 1.75, 0, car); box(2.64, .6, 12.44, cmat(c), 0, .9, 0, car); box(2.64, .25, 12.44, cmat(c), 0, 2.6, 0, car);
+    const roofT = new T3.Mesh(new T3.CylinderGeometry(1.4, 1.4, 12.4, 16, 1, false, -Math.PI / 2, Math.PI), cmat(0xb8bec4)); roofT.rotation.x = Math.PI / 2; roofT.rotation.z = Math.PI / 2; roofT.scale.set(1, 1, .3); roofT.position.y = 3.05; car.add(roofT);
+    for (let k = -2; k <= 2; k++) for (const s of [-1, 1]) { const w = new T3.Mesh(new T3.PlaneGeometry(1.6, .9), bulbMat(0x8ab0c6, 0xffe0a0)); w.position.set(s * 1.32, 2.0, k * 2.3); w.rotation.y = s * Math.PI / 2; car.add(w); }
+    for (const z of [-4.6, 4.6]) for (const s of [-1, 1]) { const wh = new T3.Mesh(new T3.CylinderGeometry(.4, .4, .2, 14), cmat(0x2a2d33)); wh.rotation.z = Math.PI / 2; wh.position.set(s * 1.1, .42, z); car.add(wh); }
+  }
+  BLOCKS.push([x0 - .3, x1 + .3, z0 - .3, z1 + .3], [rail - 5.5, rail + 3, 0, 98]);
+  // 윗마을 공원 → 역 돌길
+  const path = box(6.4, .05, 3.4, lam(0xffffff, { map: imgTex("a/slabs.jpg", 2, 1) }), 24.4, .03, cz); grounds.push(path);
+  const pl = new T3.PointLight(0xffd8a0, 0, 24, 1.6); pl.position.set(x0 - 2, 4, cz); scene.add(pl); glow.push({ light: pl, val: 1.2 });
+}
 function buildUptown() {
   const U = UPTOWN, cx = (U.x0 + U.x1) / 2, cz = (U.z0 + U.z1) / 2;
   const floor = box(U.x1 - U.x0, .1, U.z1 - U.z0, lam(0xffffff, { map: imgTex("a/pavers.jpg", 4, 8) }), cx, .05, cz); grounds.push(floor);
@@ -9814,10 +9960,9 @@ function buildUptown() {
   cyl(3.3, 3.3, .03, 36, cmat(0xcdbfa6), UP.fountain[0], .115, UP.fountain[1]);
   propAdd(new T3.Mesh(new T3.TorusGeometry(3.3, .07, 4, 48), cmat(0xa89a82)), UP.fountain[0], .13, UP.fountain[1]).rotation.x = Math.PI / 2;
   // 길 끝 차단봉 + 둘레 화단 (남쪽은 길 입구만 열어 둠)
-  for (let x = -3.5; x <= 3.6; x += 1.4) { cyl(.12, .12, .8, 8, phong(0xf4f1ea), x, .4, 74.6); box(.26, .12, .26, phong(0xe2522c), x, .62, 74.6); }
   const rim = phong(0xd9cdb6), hedge = phong(0x5f9a52);
   box(U.x1 - U.x0, .5, .7, rim, cx, .25, U.z1 + .35); box(U.x1 - U.x0 - .2, .45, .5, hedge, cx, .62, U.z1 + .35);
-  box(.7, .5, U.z1 - U.z0, rim, U.x1 + .35, .25, cz); box(.5, .45, U.z1 - U.z0 - .2, hedge, U.x1 + .35, .62, cz);
+  for (const [za, zb] of [[U.z0, 51], [55, U.z1]]) { box(.7, .5, zb - za, rim, U.x1 + .35, .25, (za + zb) / 2); box(.5, .45, zb - za - .2, hedge, U.x1 + .35, .62, (za + zb) / 2); }   // 가운데는 어촌역 가는 문
   box(U.x1 - 11.6 + .7, .5, .7, rim, (11.6 + U.x1 + .7) / 2, .25, U.z0 - .35); box(U.x1 - 11.6 + .5, .45, .5, hedge, (11.6 + U.x1 + .7) / 2, .62, U.z0 - .35);
   // 소품
   propFountain(UP.fountain[0], UP.fountain[1]);
@@ -11463,7 +11608,7 @@ window.addEventListener("blur", () => { keys.clear(); });
    처음 온 사람: 메인 화면 → 캐릭터 만들기(왼쪽 큰 인형 · 오른쪽 이름/색/얼굴) → 비행기 도착 장면(창밖으로 섬) → 역에서 나와요.
    다시 온 사람: 메인 화면 → 역에서 나와요. 그동안 S.title 은 켜 둬서 다른 사람에게 보이지 않아요(presence 안 보냄) */
 // 역 문 앞 좌표 · 나오는 방향(ry). 맵 재구성 때 역을 지으면 여기만 정해 주세요. null 이면 지금처럼 거리 입구에서 시작해요
-const STATION = null;
+const STATION = { x: STN.door.x, z: STN.door.z, ry: -Math.PI / 2 };   // v1.49 어촌역 서쪽 문 앞 (윗마을 공원 쪽으로 걸어 나와요)
 /* ---------- 캐릭터 만들기 ---------- */
 S.creating = false; S.createStep = 1;
 let CREATOR_TEX = null;
