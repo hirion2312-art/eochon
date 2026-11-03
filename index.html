@@ -1382,6 +1382,38 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
 .dx-row{display:flex;flex-direction:column;gap:1px;padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.06)}.dx-row span{font-size:11.5px;color:var(--muted)}.dx-row b{font-size:14px}
 @media (max-width:560px){.dx-head{flex-direction:column;padding:8px}.dx-all{flex-direction:row;gap:10px;padding:2px 8px}.dx-tiers{grid-template-columns:repeat(3,1fr);gap:4px}.dx-tier{padding:6px 7px}.dx-tier b{font-size:12.5px}.dx-tier small{font-size:11px}.dx-grid{grid-template-columns:repeat(3,1fr);gap:7px}.dx-pic{height:62px}.dx-pic img{max-height:54px}.dx-nm{font-size:12.5px}
   .dx-detail{grid-template-columns:1fr}.dx-info{padding-right:0}.dx-rows{grid-template-columns:1fr 1fr}}
+/* v1.43 메인 메뉴 = 캐릭터 둘레의 큰 동그란 버튼 (간격 넓게) */
+.mebtn{width:92px;gap:6px}
+.mebtn .orb{position:relative;width:62px;height:62px;background:var(--lg-sheen),var(--oc,var(--lg-fill-strong))!important;border:1.5px solid rgba(255,255,255,.5)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 10px 24px rgba(0,0,0,.4)!important;-webkit-backdrop-filter:var(--lg-blur);backdrop-filter:var(--lg-blur)}
+.mebtn .orb .ico{width:28px;height:28px;stroke:#fff}
+.mebtn>span:not(.orb){font-size:12.5px;font-weight:800;color:#fff;padding:2px 10px;border-radius:999px;background:rgba(12,16,24,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);white-space:nowrap}
+.mebtn .mbadge{position:absolute;right:-4px;top:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#e2402a;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;box-shadow:0 0 0 2px rgba(12,16,24,.9)}
+.mebtn.hot .orb{box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 0 0 3px rgba(255,106,66,.55),0 10px 24px rgba(0,0,0,.4)!important}
+@media (max-width:820px){.mebtn{width:78px}.mebtn .orb{width:54px;height:54px}.mebtn .orb .ico{width:24px;height:24px}.mebtn>span:not(.orb){font-size:11.5px;padding:2px 8px}}
+#setBtn{display:none!important}
+/* 업적: 오늘 할 일 + 모아 가기 */
+.av-hero{display:flex;gap:12px;align-items:center;padding:14px;border-radius:18px;border:1.5px solid var(--line);background:var(--bg)}
+.av-hero.hot{border-color:#e2522c;background:linear-gradient(135deg,rgba(226,82,44,.2),rgba(226,82,44,.05))}
+.av-hero .av-ico{font-size:32px}.av-hero small{display:block;color:var(--muted);font-size:12.5px}
+.av-list{display:flex;flex-direction:column;gap:8px}
+.av-row{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:12px 14px;border-radius:16px;border:1.5px solid var(--line);background:var(--bg);color:inherit;font:inherit;cursor:pointer}
+.av-row:hover{border-color:var(--ac)}
+.av-row .av-i{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:color-mix(in srgb,var(--ac) 24%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--ac) 55%,transparent)}
+.av-row .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.av-row b{font-size:15px}.av-row small{font-size:12px;color:var(--muted)}
+.av-bar{display:block;height:7px;border-radius:4px;background:rgba(127,127,127,.22);overflow:hidden;margin-top:2px}.av-bar>i{display:block;height:100%;background:var(--ac)}
+.av-n{flex:none;min-width:24px;height:24px;padding:0 7px;border-radius:12px;background:#e2402a;color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+.av-ok{flex:none;color:#2fae7f;font-weight:800;font-size:16px}.av-row.done{opacity:.72}.av-row .chev{color:var(--muted);font-size:20px}
+/* 커뮤니티: 지금 채널 + 접속한 친구 얼굴 + 큰 칸 6개 */
+.cm-hero{display:flex;gap:12px;align-items:center;padding:14px;border-radius:18px;border:1.5px solid rgba(224,106,146,.45);background:linear-gradient(135deg,rgba(224,106,146,.18),rgba(42,120,187,.1))}
+.cm-hero small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}.cm-hero .grow{flex:1;min-width:0}
+.cm-faces{display:flex}.cm-faces .navatar{margin-left:-8px;box-shadow:0 0 0 2px #2fae7f}.cm-more{margin-left:4px;font-size:12px;font-weight:800;align-self:center}
+.cm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cm-tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:16px 8px 12px;border-radius:18px;border:1.5px solid var(--line);background:var(--bg);color:inherit;font:inherit;cursor:pointer;transition:transform .12s,border-color .12s}
+.cm-tile:hover{transform:translateY(-2px);border-color:var(--cc)}.cm-tile.on{border-color:var(--cc);background:color-mix(in srgb,var(--cc) 16%,transparent)}
+.cm-tile .cm-i{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:27px;background:color-mix(in srgb,var(--cc) 26%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--cc) 60%,transparent)}
+.cm-tile b{font-size:14.5px;margin-top:4px}.cm-tile small{font-size:11.5px;color:var(--muted);line-height:1.35}
+.cm-tile .mdot{position:absolute;top:8px;right:8px;min-width:20px;height:20px;border-radius:10px;background:#e2522c;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px}
+@media (max-width:560px){.cm-grid{grid-template-columns:repeat(2,1fr)}}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 </style>
 
@@ -1477,7 +1509,7 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
     <button data-open="friends"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5A5 5 0 0 1 21 19"/></svg><span>친구</span><span class="badge" id="friendBadge" hidden>0</span></button>
     <button id="homeDockBtn" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg><span id="homeDockTx">우리 집</span></button>
     <button class="chatonly" id="chatDockBtn"><span class="badge" id="chatBadge" hidden>0</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H9l-4 4z"/></svg><span>채팅</span></button>
-    <button data-open="menu" class="menubtn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span>메뉴</span><span class="badge" id="menuBadge" hidden>0</span></button>
+    <button id="menuBtn" class="menubtn" aria-label="메뉴"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span>메뉴</span><span class="badge" id="menuBadge" hidden>0</span></button>
     <span hidden><button id="emoteBtn"></button><button data-open="offers" id="offersBtn"><span class="badge" id="offerBadge" hidden>0</span></button></span>
   </nav>
 </div>
@@ -1521,7 +1553,7 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.42.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.43.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -2091,7 +2123,7 @@ function normItem(it) {
   if (!it || typeof it !== "object") return null;
   const tier = clamp(Math.floor(Number(it.tier) || 0), 0, 5);
   return { id: isUid(it.id) ? it.id : uid4(), fishId: str(it.fishId, 80), name: str(it.name, 14) || "물고기", tier,
-    size: clamp(Number(it.size) || 1, 0.1, 5000), k: clamp(Number(it.k) || 1, 0.1, 10), price: clamp(Math.round(Number(it.price) || 1), 1, 2000000), ts: Number(it.ts) || Date.now(), hooked: !!it.hooked };
+    size: clamp(Number(it.size) || 1, 0.1, 200000), k: clamp(Number(it.k) || 1, 0.1, 100), price: clamp(Math.round(Number(it.price) || 1), 1, 2000000), ts: Number(it.ts) || Date.now(), hooked: !!it.hooked };
 }
 function normDish(d) {
   if (!d || typeof d !== "object") return null;
@@ -2242,7 +2274,7 @@ function rawFishMul(id, d) {
 function fishMul(id, d) { d = d == null ? mktDay() : d; return id === todayFish(d) ? TODAY_FISH_MUL : rawFishMul(id, d); }
 function fishTrend(id) { const d = mktDay(), now = fishMul(id, d), prev = rawFishMul(id, d - 1); return now > prev + .01 ? 1 : now < prev - .01 ? -1 : 0; }
 // 예전에 잡아 둔 물고기도 지금 값(v1.31 인상)으로 쳐 줘요
-function curPrice(it) { const f = findFish(it.fishId), k = clamp(Number(it.k) || 1, .1, 10); return !f ? it.price : f.shell ? Math.max(it.price, Math.round(f.price * Math.pow(k, 1.2))) : Math.max(it.price, priceFor(f, k)); }
+function curPrice(it) { const f = findFish(it.fishId), k = clamp(Number(it.k) || 1, .1, 100); return !f ? it.price : f.shell ? Math.max(it.price, Math.round(f.price * Math.pow(Math.min(k, 3), 1.2))) : Math.max(it.price, priceFor(f, k)); }
 const fishSell = (it) => sellValue(Math.round(curPrice(it) * fishMul(it.fishId)));
 function mulTag(id) {   // 「×1.12 ▲」 · 오늘의 생선은 「오늘의 생선 ×1.5」
   if (id === todayFish()) return "⭐ 오늘의 생선 ×" + TODAY_FISH_MUL;
@@ -2956,14 +2988,19 @@ function luckProbs(p, extra) {
 /* 개체 고유 크기: 종마다 기준 크기가 있고, 개체마다 배율이 자유분방하게 달라짐 (등급과 무관). 클수록 값이 많이 오름 */
 const baseSize = (f) => Math.sqrt(f.min * f.max);
 function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+/* v1.43: 크기는 극단적으로 — 보통이 ×1(100%)일 때 아주 드물게 ×100(10,000%)까지. 클수록 훨씬 드물어요(꼬리가 긴 분포)
+   대략: ×2 이상 6% · ×5 이상 1% · ×10 이상 0.3% · ×30 이상 0.04% · ×100 근처 2만 마리에 1마리 */
+const SIZE_MAX = 100;
 function rollSizeK() {
-  let k = Math.exp(gauss() * 0.33);
-  if (Math.random() < 0.03) k *= rnd(1.5, 2.3);      // 가끔 괴물급
-  else if (Math.random() < 0.03) k *= rnd(0.5, 0.7); // 가끔 꼬마
-  return clamp(k, 0.3, 4.5);
+  let k = Math.exp(gauss() * 0.26);
+  if (Math.random() < 0.08) k = 1.6 * Math.pow(Math.random() || 1e-9, -1 / 1.8);   // 큰 개체: 파레토 꼬리
+  else if (Math.random() < 0.03) k *= rnd(0.45, 0.7);                           // 가끔 꼬마
+  return clamp(k, 0.3, SIZE_MAX);
 }
-function sizeLabel(k) { return k < .6 ? "꼬마" : k < .85 ? "작은" : k < 1.2 ? "보통" : k < 1.6 ? "큰" : k < 2.2 ? "왕" : "괴물급"; }
-function priceFor(f, k) { return Math.max(1, Math.round(TIERS[f.tier].base * Math.pow(k, 1.7))); }
+function sizeLabel(k) { return k < .6 ? "꼬마" : k < .85 ? "작은" : k < 1.2 ? "보통" : k < 1.6 ? "큰" : k < 2.2 ? "왕" : k < 5 ? "괴물급" : k < 15 ? "초거대" : k < 40 ? "말도 안 되는" : "전설 속 거대"; }
+// 값: ×1.5까지는 예전처럼(크기의 1.7제곱), 그 위로는 천천히만 올라요 — ×2 ≈2.5배 · ×10 ≈5.4배 · ×100 ≈9.5배
+const sizePriceMul = (k) => k <= 1.5 ? Math.pow(k, 1.7) : Math.pow(1.5, 1.7) * (1 + 0.9 * Math.log(k / 1.5));
+function priceFor(f, k) { return Math.max(1, Math.round(TIERS[f.tier].base * sizePriceMul(k))); }
 /* 사는 곳 · 시간: night 밤에만 · sea 배 위 깊은 바다에서만 · dawn 새벽·노을에 3배 (다른 때도 가끔) */
 const isDawnDusk = () => { const hh = gameHour(); return (hh >= 4.8 && hh < 7.2) || (hh >= 17.2 && hh < 19.8); };
 function habitatW(f) {
@@ -2989,7 +3026,7 @@ function rollFish(baitId, opts) {
   for (let i = 0; i < cands.length; i++) { if ((rr -= w[i]) < 0) { f = cands[i]; break; } }
   let k = rollSizeK() * (1 + buffVal("size") / 100) * (deep ? 1.15 : 1);
   if (opts.coop) k = 1.5 * Math.max(1, k);   // 함께 낚시: 기준 크기의 1.5배 이상부터
-  return { f, k: Math.min(k, 6), bait: baitId };
+  return { f, k: Math.min(k, SIZE_MAX), bait: baitId };
 }
 function landFish(r, perfect, auto) {
   const f = r.f;
@@ -3864,12 +3901,12 @@ function onCoopMsg(msg) {
     case "start": if (fromOther && c.role === "guest") {
       const f = findFish(str(d.fishId, 80));
       if (!f) { coopSend("result", { ok: false }); return; }
-      c.r = { f, k: clamp(Number(d.kk) || 1.5, 1.5, 6), bait: "worm", coop: true }; c.stage = "reel";
+      c.r = { f, k: clamp(Number(d.kk) || 1.5, 1.5, 100), bait: "worm", coop: true }; c.stage = "reel";
       $("hookBtn").hidden = true; startReel(c.r, { coop: true });
     } return;
     case "result": if (fromOther && c.role === "host" && c.res) { c.res.them = !!d.ok; coopResolve(); } return;
     case "give": if (fromOther && c.role === "guest") {
-      const f = findFish(str(d.fishId, 80)); if (f) landFish({ f, k: clamp(Number(d.kk) || 1.5, 1.5, 6), coop: true }, false);
+      const f = findFish(str(d.fishId, 80)); if (f) landFish({ f, k: clamp(Number(d.kk) || 1.5, 1.5, 100), coop: true }, false);
       S.phase = "idle";
     } return;
     case "outcome": if (fromOther && c.role === "guest") {
@@ -3942,24 +3979,24 @@ const ICO = {
   face: '<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/><path d="M9 9.5h.01M15 9.5h.01"/>',
 };
 const ME_ACTIONS = [
-  { svg: ICO.card, hot: () => !!S.card, label: () => S.card ? "명함 거두기" : "명함 내밀기", run: () => S.card ? stopCard() : startCard() },
-  { svg: ICO.friends, label: () => "친구 " + Object.keys(P.friends).length, run: () => openSheet("friends") },
-  { svg: ICO.profile, label: () => "내 정보", run: () => openSheet("profile") },
-  { svg: ICO.bag, label: () => "가방", run: () => openSheet("bag") },
-  { svg: ICO.emote, label: () => "인사", run: () => { closeFloatingUI("emote"); $("emotePop").hidden = false; syncUIState(); } },
-  { svg: ICO.face, label: () => "꾸미기", run: () => openSheet("face") },
-  { svg: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M8 20h8"/>', hot: () => achClaimable() > 0, label: () => "도전과제" + (achClaimable() ? " " + achClaimable() : ""), run: () => openSheet("ach") },
+  { svg: ICO.profile, col: "rgba(226,82,44,.78)", label: () => "내 정보", run: () => openSheet("profile") },
+  { svg: ICO.friends, col: "rgba(224,106,146,.78)", n: () => S.offersIn.size, label: () => "커뮤니티", run: () => openSheet("community") },
+  { svg: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M8 20h8"/>', col: "rgba(217,165,20,.8)", n: () => achieveBadge(), label: () => "업적", run: () => openSheet("achieve") },
+  { svg: ICO.bag, col: "rgba(201,120,58,.8)", n: () => 0, label: () => "가방", run: () => openSheet("bag") },
+  { svg: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>', col: "rgba(42,138,154,.8)", label: () => "도감", run: () => openSheet("dex") },
+  { svg: ICO.emote, col: "rgba(239,138,58,.78)", label: () => "인사", run: () => { closeFloatingUI("emote"); $("emotePop").hidden = false; syncUIState(); } },
 ];
-const ringR = () => matchMedia("(max-width: 820px)").matches ? 88 : 104;
+const ringR = () => matchMedia("(max-width: 820px)").matches ? 116 : 150;   // 버튼 사이를 넉넉하게 (v1.43)
 function openMeMenu() {
   if (S.mung || !R) return;
   S.meMenu = true; closeFloatingUI("me"); syncUIState();
   const ring = $("meRing"), rr = ringR();
   ring.replaceChildren(...ME_ACTIONS.map((a, i) => {
     const ang = -Math.PI / 2 + i * Math.PI * 2 / ME_ACTIONS.length;
-    const b = h("button", { class: "mebtn" + (a.hot && a.hot() ? " hot" : ""), style: "--dx:" + Math.round(Math.cos(ang) * rr) + "px;--dy:" + Math.round(Math.sin(ang) * rr) + "px;transition-delay:" + i * 28 + "ms",
+    const nb = a.n ? a.n() : 0;
+    const b = h("button", { class: "mebtn" + (nb ? " hot" : ""), style: "--dx:" + Math.round(Math.cos(ang) * rr) + "px;--dy:" + Math.round(Math.sin(ang) * rr) + "px;transition-delay:" + i * 28 + "ms;--oc:" + (a.col || ""),
       onclick: (e) => { e.stopPropagation(); sfx("ui-click", .3); closeMeMenu(); a.run(); } });
-    const orb = h("span", { class: "orb" }); orb.innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + a.svg + "</svg>";
+    const orb = h("span", { class: "orb" }); orb.innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + a.svg + "</svg>"; if (nb) orb.append(h("span", { class: "mbadge", text: nb > 9 ? "9+" : String(nb) }));
     b.append(orb, h("span", { text: a.label() }));
     return b;
   }));
@@ -3976,7 +4013,7 @@ function positionRing() {
   const F = folks.get("me"), ring = $("meRing"); if (!F || !camera) return;
   _v.set(F.px, 1.05, F.pz).project(camera);
   const r = cv.getBoundingClientRect(), rr = ringR();
-  const x = clamp((_v.x + 1) / 2 * r.width, rr + 40, r.width - rr - 40), y = clamp((1 - _v.y) / 2 * r.height, rr + 50, r.height - rr - 70);
+  const x = clamp((_v.x + 1) / 2 * r.width, rr + 48, r.width - rr - 48), y = clamp((1 - _v.y) / 2 * r.height, rr + 56, r.height - rr - 96);
   ring.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)";
 }
 const cardTexCache = new Map();
@@ -9855,55 +9892,50 @@ SHEETS.admintools = (body) => {
 /* ===================== 전체 메뉴 · 설정 =====================
    숨어 있던 기능을 한곳에 모아요. 받을 것이 있는 칸에는 빨간 점 */
 function questDone() { return P.quests && Array.isArray(P.quests.list) ? P.quests.list.filter(q => q.have >= q.need && !q.claimed).length : 0; }
-function menuTiles() {
-  const fr = Object.keys(P.friends).length, onF = otherPeers(true).filter(p => p.uid && isFriend(p.uid)).length;
-  return [
-    ["나", [
-      { ico: "🙂", t: "내 정보", s: "레벨 · 기록 · 닉네임", go: () => openSheet("profile") },
-      { ico: "🏆", t: "도전과제", s: ACH.filter(a => P.ach[a.id]).length + "/" + ACH.length + " 달성", n: achClaimable(), go: () => openSheet("ach") },
-      { ico: "🎨", t: "얼굴 꾸미기", s: "눈 · 입 · 표정 그리기", go: () => openSheet("face") },
-      { ico: "🎒", t: "가방", s: P.bag.length + "/" + BAG_MAX + " · 회 " + P.dishes.length, go: () => openSheet("bag") },
-    ]],
-    ["오늘 할 일", [
-      { ico: "📜", t: "오늘의 의뢰", s: P.quests && P.quests.list ? P.quests.list.filter(q => q.claimed).length + "/" + P.quests.list.length + " 완료" : "", n: questDone(), go: () => openSheet("quests") },
-      { ico: "🎁", t: "출석 이벤트", s: attendDone() ? "7일 완료" : P.attend.n + "/7일", n: attendCan() ? 1 : 0, go: () => openSheet("attend") },
-      { ico: "🏅", t: "명예의 전당", s: "분야별 랭킹", go: () => openSheet("rank") },
-      { ico: "📖", t: "도감", s: dexCount() + "종 발견", go: () => openSheet("dex") },
-    ]],
-    ["사람들", [
-      { ico: "👫", t: "친구", s: fr + "명 · 접속 " + onF, go: () => openSheet("friends") },
-      { ico: "🤝", t: "거래 · 주문", s: "받은 제안 " + S.offersIn.size, n: S.offersIn.size, go: () => openSheet("offers") },
-      { ico: "👋", t: "인사하기", s: "손 흔들기 · 박수 · 축하", go: () => { closeSheet(); closeFloatingUI("emote"); $("emotePop").hidden = false; syncUIState(); } },
-      { ico: "🪪", t: "명함 내밀기", s: S.card ? "내밀고 있어요" : "받으면 친구가 돼요", go: () => { closeSheet(); S.card ? stopCard() : startCard(); } },
-      { ico: "💌", t: "친구 초대", s: "추천인 코드 · 선물", go: () => openSheet("invite") },
-    ]],
-    ["마을", [
-      { ico: "🗺️", t: "지도 · 이동", s: "장소를 눌러 바로 가기", go: () => openSheet("travel") },
-      { ico: "🪪", t: "동사무소", s: isLocked("office") ? "🚧 준비 중" : P.job.id ? JOB[P.job.id].name : "직업 등록", go: () => { closeSheet(); goOffice(); } },
-    ]],
-    ["도움", [
-      { ico: "📘", t: "초보 어부 수첩", s: guideLeft() ? "할 일 " + (GUIDE_STEPS.length - guideLeft()) + "/" + GUIDE_STEPS.length + " · 궁금한 것 모음" : "다 끝냈어요 · 궁금한 것 모음", n: guideReady(), go: () => openSheet("guide") },
-      { ico: "🧩", t: "퀵바 꾸미기", s: "아래 막대에 넣을 메뉴 고르기", go: () => openSheet("quickbar") },
-      { ico: "⚙️", t: "설정", s: "소리 · 그림자 · 계정", go: () => openSheet("settings") },
-      { ico: "🐞", t: "오류 제보 · 건의", s: "운영자에게 보내기", go: () => openSheet("feedback") },
-      { ico: "🧭", t: "안내 다시 보기", s: "처음 하는 것 설명", go: () => { closeSheet(); $("tutBtn").click(); } },
-      S.isOwner ? { ico: "🛠️", t: "운영자 도구", s: "공지 · 이벤트 · 플레이어", go: () => openSheet("admintools") } : null,
-    ].filter(Boolean)],
-  ];
-}
-function menuBadgeCount() { return achClaimable() + questDone() + (attendCan() ? 1 : 0) + S.offersIn.size + guideReady(); }
-SHEETS.menu = (body) => {
-  setHead("메뉴", "필요한 곳을 눌러요 · 아래 막대에 자주 쓰는 것을 넣을 수 있어요(퀵바 꾸미기)");
-  // 맨 위: 나 (얼굴 · 이름 · 레벨 · 돈) — 메뉴를 열 때마다 내 상태가 바로 보이게
-  const av = document.createElement("canvas"); av.width = av.height = 88; av.getContext("2d").drawImage($("avatar"), 0, 0, 88, 88);
-  body.append(h("div", { class: "mhead" }, av, h("div", null, h("b", { text: P.nick }), h("small", { text: "Lv." + myLv() + " · " + won(P.gold) + " · 낚은 물고기 " + fmt(P.caught || 0) + "마리" }))));
-  const SEC_COL = { "나": "#e2522c", "오늘 할 일": "#d9a514", "사람들": "#e06a92", "마을": "#4f9a52", "도움": "#2a78bb" };
-  for (const [sec, tiles] of menuTiles()) {
-    const mc = SEC_COL[sec] || "#8a8f96";
-    body.append(h("div", { class: "msec", style: "--mc:" + mc }, h("i"), h("span", { text: sec })), h("div", { class: "mgrid", style: "--mc:" + mc }, tiles.map(t => h("button", { class: "mtile", onclick: t.go },
-      h("span", { class: "mi", "aria-hidden": "true", text: t.ico }), h("span", { class: "mt" }, h("b", { text: t.t }), t.s ? h("small", { text: t.s }) : null),
-      t.n ? h("span", { class: "mdot", text: String(t.n) }) : null))));
-  }
+/* ===================== 메뉴 (v1.43) =====================
+   아래 막대 「메뉴」나 내 캐릭터를 누르면 캐릭터 둘레로 큰 동그란 버튼 6개가 펼쳐져요 — 이게 메인 메뉴예요.
+   나 → 내 정보 · 사람들 → 커뮤니티 · 오늘 할 일 → 업적 · 설정 · 오류 제보 · 안내는 설정 창에 */
+const achieveBadge = () => questDone() + achClaimable() + (attendCan() ? 1 : 0) + guideReady();
+function menuBadgeCount() { return achieveBadge() + S.offersIn.size; }
+SHEETS.achieve = (body) => {
+  const qs = P.quests && P.quests.list ? P.quests.list : [], qDone = qs.filter(q => q.claimed).length;
+  const achDone = ACH.filter(a => P.ach[a.id]).length, gDone = GUIDE_STEPS.filter(s => guideState()[s.id]).length;
+  const n = achieveBadge();
+  setHead("🏆 업적", "오늘 할 일과 모아 가는 기록 · 빨간 숫자는 받을 보상이에요");
+  body.append(h("div", { class: "av-hero" + (n ? " hot" : "") }, h("span", { class: "av-ico", text: n ? "🎁" : "✨" }),
+    h("div", { class: "grow" }, h("b", { text: n ? "받을 보상이 " + n + "개 있어요" : "지금 받을 보상은 없어요" }),
+      h("small", { text: n ? "아래에서 빨간 숫자가 붙은 칸을 눌러 받아요" : "의뢰를 하고 물고기를 모으면 보상이 쌓여요" }))));
+  const row = (ico, col, t, sub, pct, badge, go, done) => h("button", { class: "av-row" + (done ? " done" : ""), style: "--ac:" + col, onclick: go },
+    h("span", { class: "av-i", text: ico }),
+    h("span", { class: "grow" }, h("b", { text: t }), h("small", { text: sub }), pct != null ? h("i", { class: "av-bar" }, h("i", { style: "width:" + Math.round(clamp(pct, 0, 1) * 100) + "%" })) : null),
+    badge ? h("span", { class: "av-n", text: String(badge) }) : done ? h("span", { class: "av-ok", text: "✓" }) : null,
+    h("span", { class: "chev", text: "›" }));
+  body.append(h("div", { class: "sec", text: "오늘" }), h("div", { class: "av-list" },
+    row("📜", "#c98a4a", "오늘의 의뢰", qs.length ? qDone + " / " + qs.length + " 완료 · 자정에 새로 와요" : "오늘의 부탁 3개", qs.length ? qDone / qs.length : 0, questDone(), () => openSheet("quests"), qs.length && qDone >= qs.length),
+    row("🎁", "#e2522c", "출석 도장", attendDone() ? "7일 모두 찍었어요" : P.attend.n + " / 7일 · " + (attendCan() ? "오늘 도장을 찍을 수 있어요" : "오늘은 찍었어요"), P.attend.n / 7, attendCan() ? 1 : 0, () => openSheet("attend"), attendDone())));
+  body.append(h("div", { class: "sec", text: "모아 가기" }), h("div", { class: "av-list" },
+    row("🏆", "#d9a514", "도전과제", achDone + " / " + ACH.length + " 달성 · 칭호는 이름표에", achDone / ACH.length, achClaimable(), () => openSheet("ach")),
+    row("🏅", "#7a5ad6", "명예의 전당", "분야별 랭킹 · 1위는 광장에 동상", null, 0, () => openSheet("rank")),
+    gDone < GUIDE_STEPS.length ? row("📘", "#3f8f6a", "초보 어부 수첩", gDone + " / " + GUIDE_STEPS.length + " 단계 · 궁금한 것 모음", gDone / GUIDE_STEPS.length, guideReady(), () => openSheet("guide"))
+      : row("📘", "#3f8f6a", "초보 어부 수첩", "다 끝냈어요 · 궁금한 것 모음", 1, 0, () => openSheet("guide"), true)));
+};
+SHEETS.community = (body) => {
+  const peers = otherPeers(true), onF = peers.filter(p => p.uid && isFriend(p.uid)), fr = Object.keys(P.friends).length;
+  setHead("👫 커뮤니티", "친구 · 거래 · 명함 · 인사 · 초대 · 채널");
+  const faces = h("div", { class: "cm-faces" }, onF.slice(0, 6).map(p => nickAvatar(p.nick, p.uid, 38)), onF.length > 6 ? h("span", { class: "cm-more", text: "+" + (onF.length - 6) }) : null);
+  body.append(h("div", { class: "cm-hero" },
+    h("div", { class: "grow" }, h("b", { text: "🌊 " + S.ch + "채널 · 지금 " + (peers.length + 1) + "명" }),
+      h("small", { text: onF.length ? "접속한 친구 " + onF.length + "명 · 눌러서 찾아가요" : fr ? "친구 " + fr + "명 · 지금은 다른 곳에 있어요" : "아직 친구가 없어요 · 명함을 내밀어 보세요" })),
+    onF.length ? faces : null));
+  const tile = (ico, col, t, sub, go, n, on) => h("button", { class: "cm-tile" + (on ? " on" : ""), style: "--cc:" + col, onclick: go },
+    h("span", { class: "cm-i", text: ico }), h("b", { text: t }), h("small", { text: sub }), n ? h("span", { class: "mdot", text: String(n) }) : null);
+  body.append(h("div", { class: "cm-grid" },
+    tile("👫", "#e06a92", "친구", fr + "명 · 접속 " + onF.length, () => openSheet("friends")),
+    tile("🤝", "#1f9a8a", "거래 · 주문", "받은 제안 " + S.offersIn.size, () => openSheet("offers"), S.offersIn.size),
+    tile("🪪", "#5a6ad6", S.card ? "명함 거두기" : "명함 내밀기", S.card ? "내밀고 있어요" + (S.card.taken ? " · 새 친구 " + S.card.taken : "") : "받아 간 사람은 친구가 돼요", () => { closeSheet(); S.card ? stopCard() : startCard(); }, 0, !!S.card),
+    tile("👋", "#ef8a3a", "인사하기", "손 흔들기 · 박수 · 축하", () => { closeSheet(); closeFloatingUI("emote"); $("emotePop").hidden = false; syncUIState(); }),
+    tile("💌", "#c0506a", "친구 초대", "추천인 코드 · 둘 다 선물", () => openSheet("invite")),
+    tile("🌊", "#2a78bb", "채널", S.ch + "채널 · 옮기기", () => openSheet("channels"))));
 };
 function toggleRow(label, desc, on, fn) {
   return h("button", { class: "setrow", role: "switch", "aria-checked": String(!!on), onclick: () => { fn(); refreshSheet(true); } },
@@ -9932,9 +9964,11 @@ SHEETS.settings = (body) => {
 /* ===================== 퀵바 꾸미기 (v1.32) =====================
    화면 아래 막대에 자주 쓰는 메뉴를 최대 6개까지 골라 넣고 순서를 바꿔요. 「메뉴」 칸은 항상 맨 끝에 있어요.
    P.quick에 저장해서 다른 기기에서도 같아요 */
-const QUICK_MAX = 6, QUICK_DEF = ["bag", "dex", "travel", "friends", "quests"];
+const QUICK_MAX = 6, QUICK_DEF = ["bag", "dex", "travel", "community", "achieve", "settings"];   // v1.43: 고정 (퀵바 꾸미기 없앰)
 const QSVG = {
   quests: '<path d="M7 3h10v18l-5-3-5 3z"/><path d="M10 8h4M10 12h4"/>',
+  community: '<circle cx="9" cy="9" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="10" r="2.5"/><path d="M15.5 14.6A4.5 4.5 0 0 1 21 19"/>',
+  achieve: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M8 20h8"/>',
   ach: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M9 20h6"/>',
   rank: '<path d="M4 20V13h5v7M9 20V8h6v12M15 20v-9h5v9"/>',
   attend: '<rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M4 13h16M12 9v11"/><path d="M12 9c-2-4-6-3-5 0M12 9c2-4 6-3 5 0"/>',
@@ -9953,6 +9987,8 @@ const QUICK_ITEMS = [
   { id: "dex", name: "도감", d: "지금까지 만난 물고기 목록" },
   { id: "travel", name: "지도", d: "장소를 눌러 바로 걸어가요" },
   { id: "friends", name: "친구", d: "친구 목록 · 명함" },
+  { id: "community", name: "커뮤니티", d: "친구 · 거래 · 명함 · 인사 · 초대 · 채널", open: "community" },
+  { id: "achieve", name: "업적", d: "의뢰 · 출석 · 도전과제 · 랭킹 · 초보 수첩", open: "achieve" },
   { id: "quests", name: "의뢰", d: "매일 바뀌는 작은 목표 3개", open: "quests" },
   { id: "guide", name: "초보 수첩", short: "수첩", d: "처음 할 일을 순서대로 알려 줘요", open: "guide" },
   { id: "shop", name: "낚시 상점", short: "상점", d: "미끼 · 낚싯대 · 릴 사러 걸어가요", run: () => goBuilding("bait") },
@@ -9967,7 +10003,8 @@ const QUICK_ITEMS = [
   { id: "settings", name: "설정", d: "소리 · 그림자 · 계정", open: "settings" },
 ];
 const QUICK = Object.fromEntries(QUICK_ITEMS.map(q => [q.id, q]));
-function normQuick(a) { const out = []; for (const id of Array.isArray(a) ? a : QUICK_DEF) if (QUICK[id] && !out.includes(id)) out.push(id); return out.slice(0, QUICK_MAX); }
+function normQuick() { return QUICK_DEF.slice(); }
+function normQuickOld(a) { const out = []; for (const id of Array.isArray(a) ? a : QUICK_DEF) if (QUICK[id] && !out.includes(id)) out.push(id); return out.slice(0, QUICK_MAX); }
 function goBuilding(id) {
   const b = BUILDINGS.find(x => x.id === id); if (!b) return;
   if (atHome()) { toast("마을로 나간 다음에 가 볼 수 있어요"); return; }
@@ -10000,52 +10037,16 @@ function applyQuick() {
 }
 function updateQuickBadges() {
   const set = (id, n) => { const b = document.querySelector('.dock [data-q="' + id + '"] .qbadge'); if (b) { b.hidden = !n; b.textContent = n; } };
-  set("quests", questDone()); set("ach", achClaimable()); set("attend", attendCan() ? 1 : 0); set("offers", S.offersIn.size); set("guide", guideReady());
+  set("quests", questDone()); set("ach", achClaimable()); set("attend", attendCan() ? 1 : 0); set("offers", S.offersIn.size); set("guide", guideReady()); set("community", S.offersIn.size); set("achieve", achieveBadge());
 }
 function setQuick(list) { P.quick = normQuick(list); markDirty(); applyQuick(); refreshSheet(); }
 // 칸마다 아이콘 색 (아래 막대와 꾸미기 화면이 같은 색을 써요)
 const QCOL = { bag: "#c9783a", dex: "#2a8a9a", travel: "#4f9a52", friends: "#e06a92", home: "#e2952c", quests: "#8a5a34", guide: "#3f8f6a", shop: "#2a78bb", sashimi: "#d8402a",
-  ach: "#d9a514", rank: "#7a5ad6", attend: "#e2522c", offers: "#1f9a8a", emote: "#ef8a3a", card: "#5a6ad6", profile: "#3a8fd0", settings: "#6b7780" };
-/* ---------- 퀵바 꾸미기: 작업대 — 진짜 막대 모양 미리보기에서 칸을 골라 옮기고, 아래 상자에서 넣고 빼요 ---------- */
-SHEETS.quickbar = (body) => {
-  setHead("퀵바 꾸미기", "화면 아래 막대에 자주 쓰는 메뉴를 최대 " + QUICK_MAX + "개 넣어요 · 막대를 꾹 눌러도 열려요");
-  const cur = normQuick(P.quick);
-  if (!cur.includes(S.qbSel)) S.qbSel = null;
-  const sel = S.qbSel, k = cur.indexOf(sel);
-  const ico = (id, svg) => h("span", { class: "qb2-ico", style: "--qc:" + (QCOL[id] || "#2a3440"), html: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + (svg || qIcon(id)) + '</svg>' });
-  const move = (d) => { const a = cur.slice(); [a[k + d], a[k]] = [a[k], a[k + d]]; setQuick(a); };
-  // 미리보기: 게임 화면 아래 막대와 똑같은 모양
-  const bar = h("div", { class: "qb2-bar", role: "list", "aria-label": "지금 퀵바" });
-  cur.forEach((id) => bar.append(h("button", { class: "qb2-slot" + (id === sel ? " sel" : ""), role: "listitem", "aria-pressed": String(id === sel), onclick: () => { S.qbSel = id === sel ? null : id; refreshSheet(); } }, ico(id), h("span", { text: QUICK[id].short || QUICK[id].name }))));
-  for (let i = cur.length; i < QUICK_MAX; i++) bar.append(h("div", { class: "qb2-slot empty", "aria-label": "빈 칸" }, h("span", { class: "qb2-ico" }, "＋"), h("span", { text: "빈 칸" })));
-  bar.append(h("div", { class: "qb2-slot fixed", title: "메뉴는 항상 맨 오른쪽" }, ico("menu", '<rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/>'), h("span", { text: "메뉴" })));
-  body.append(h("div", { class: "qb2-stage" }, h("div", { class: "qb2-sea" }), bar,
-    sel ? h("div", { class: "qb2-tools" }, h("b", { text: QUICK[sel].name + " · " + (k + 1) + "번째" }),
-      h("button", { class: "btn sm", disabled: k === 0, onclick: () => move(-1), text: "◀ 앞으로" }),
-      h("button", { class: "btn sm", disabled: k === cur.length - 1, onclick: () => move(1), text: "뒤로 ▶" }),
-      h("button", { class: "btn sm danger", onclick: () => { S.qbSel = null; setQuick(cur.filter(x => x !== sel)); }, text: "✕ 빼기" }))
-      : h("div", { class: "qb2-tools hint", text: "막대의 칸을 누르면 자리를 옮기거나 뺄 수 있어요 · 「메뉴」는 늘 맨 오른쪽" })));
-  // 넣을 수 있는 메뉴 상자
-  const full = cur.length >= QUICK_MAX;
-  body.append(h("div", { class: "sec", text: "넣을 수 있는 메뉴 · " + cur.length + " / " + QUICK_MAX + (full ? " (꽉 찼어요 — 하나를 빼야 넣을 수 있어요)" : "") }),
-    h("div", { class: "qb2-grid" }, QUICK_ITEMS.map(q => {
-      const on = cur.includes(q.id);
-      return h("button", { class: "qb2-item" + (on ? " on" : ""), style: "--qc:" + (QCOL[q.id] || "#6b7780"), disabled: !on && full, onclick: () => { if (on && S.qbSel === q.id) S.qbSel = null; setQuick(on ? cur.filter(x => x !== q.id) : cur.concat(q.id)); },
-        title: on ? "눌러서 빼기" : full ? "칸이 다 찼어요 · 하나를 먼저 빼 주세요" : "눌러서 넣기" },
-        ico(q.id), h("span", { class: "grow" }, h("b", { text: q.name }), h("small", { text: q.d })),
-        h("span", { class: "qb2-tag", text: on ? (cur.indexOf(q.id) + 1) + "번째 ✓" : "＋" }));
-    })));
-  body.append(h("div", { class: "row", style: "justify-content:center;margin-top:12px" }, h("button", { class: "btn sm ghost", onclick: () => { S.qbSel = null; setQuick(QUICK_DEF); toast("퀵바를 처음 모양으로 되돌렸어요"); }, text: "처음 모양으로 되돌리기" })));
-};
+  ach: "#d9a514", achieve: "#d9a514", community: "#e06a92", rank: "#7a5ad6", attend: "#e2522c", offers: "#1f9a8a", emote: "#ef8a3a", card: "#5a6ad6", profile: "#3a8fd0", settings: "#6b7780" };
 function qIcon(id) {
   if (QSVG[id]) return QSVG[id];
   const el = document.querySelector('.dock [data-q="' + id + '"] svg'); return el ? el.innerHTML : "";
 }
-// 퀵바를 꾹 누르면(0.6초) 꾸미기 화면
-(() => { let tmr = null; document.addEventListener("pointerdown", (e) => { if (!e.target.closest(".dock")) return; clearTimeout(tmr); tmr = setTimeout(() => { tmr = "fired"; openSheet("quickbar"); }, 600); }, true);
-  const stop = () => { if (tmr !== "fired") clearTimeout(tmr); else setTimeout(() => { tmr = null; }, 0); };
-  document.addEventListener("pointerup", stop, true); document.addEventListener("pointercancel", stop, true);
-  document.addEventListener("click", (e) => { if (tmr === "fired" && e.target.closest(".dock")) { e.stopPropagation(); e.preventDefault(); } }, true); })();
 
 /* ===================== 초보 어부 수첩 (v1.32) =====================
    처음 하는 사람이 순서대로 따라 하면 게임 전체를 배울 수 있는 10단계. 하나 끝낼 때마다 작은 용돈 */
@@ -10057,7 +10058,7 @@ const GUIDE_STEPS = [
   { id: "eat", ico: "🍣", t: "회 먹고 힘내기", how: "「회 센터」에서 물고기를 회로 떠서 먹으면 잠깐 입질이 빨라지거나 좋은 물고기가 잘 와요.", done: () => (P.stats.eat || 0) > 0, go: () => goBuilding("sashimi"), reward: 80 },
   { id: "dig", ico: "🐚", t: "갯벌에서 조개 캐기", how: "썰물 때 거리 남쪽 끝 갯벌로 가요. 「낚시 상점 › 도구」에서 호미와 장화를 사야 해요.", done: () => (P.stats.digs || 0) > 0, go: () => goPlace("갯벌 해변"), reward: 100 },
   { id: "look", ico: "👕", t: "내 모습 꾸미기", how: "「옷가게」에서 옷을 사 입거나 「얼굴 공방」에서 얼굴을 그려요. 다른 사람에게도 보여요.", done: () => P.closet.length > 0 || !!(faceFor && faceFor("me")), go: () => goBuilding("clothes"), reward: 100 },
-  { id: "friend", ico: "🤝", t: "친구 만들기", how: "메뉴 › 「명함 내밀기」를 하거나, 명함을 내민 사람에게 다가가 받아요.", done: () => Object.keys(P.friends).length > 0, go: () => openSheet("friends"), reward: 100 },
+  { id: "friend", ico: "🤝", t: "친구 만들기", how: "메뉴 › 커뮤니티 › 「명함 내밀기」를 하거나, 명함을 내민 사람에게 다가가 받아요.", done: () => Object.keys(P.friends).length > 0, go: () => openSheet("friends"), reward: 100 },
   { id: "boat", ico: "⛵", t: "멍낚호 타 보기", how: "부두 입구 선착장에서 배를 타요. 5분 동안 깊은 바다에서 귀한 물고기가 훨씬 잘 나와요.", done: () => (P.stats.boats || 0) > 0, go: () => goPlace("선착장 (멍낚호)"), reward: 150 },
   { id: "lv5", ico: "⭐", t: "낚시 Lv.5 되기", how: "낚을 때마다 경험치가 쌓여요. 직접 챔질하고 퍼펙트로 잡으면 더 많이 받아요.", done: () => myLv() >= 5, go: () => openSheet("profile"), reward: 300 },
 ];
@@ -10126,8 +10127,9 @@ Object.assign(TUTS, {
   sheet_rank: { icon: "🏅", title: "명예의 전당", steps: ["분야별로 마을에서 가장 잘하는 사람 순위예요. 1위는 명예의 전당 광장에 금빛 동상이 서요!"] },
   sheet_attend: { icon: "🎁", title: "출석 이벤트", steps: ["하루에 한 번 접속해서 「받기」를 누르면 선물을 줘요. 7일을 다 모으면 새내기 어부 세트를 받아요."] },
   sheet_invite: { icon: "💌", title: "친구 초대", steps: ["내 추천인 코드를 친구에게 알려 주세요. 친구가 코드를 넣으면 둘 다 선물을 받고, 친구가 Lv.5가 되면 더 받아요."] },
+  sheet_achieve: { icon: "🏆", title: "업적", steps: ["오늘의 의뢰 · 출석 도장 · 도전과제 · 명예의 전당 · 초보 수첩이 모여 있어요. 빨간 숫자가 붙은 칸에 받을 보상이 있어요."] },
+  sheet_community: { icon: "👫", title: "커뮤니티", steps: ["친구 · 거래 · 명함 · 인사 · 친구 초대 · 채널 옮기기가 모여 있어요. 위에는 지금 접속한 친구 얼굴이 보여요."] },
   sheet_menu: { icon: "🧭", title: "전체 메뉴", steps: ["게임의 모든 기능이 여기 있어요. 빨간 숫자는 받을 보상이 있다는 뜻이에요.", "자주 쓰는 건 「퀵바 꾸미기」로 화면 아래 막대에 넣어 두세요."] },
-  sheet_quickbar: { icon: "🧩", title: "퀵바 꾸미기", steps: ["화면 아래 막대(퀵바)에 넣을 메뉴를 최대 6개 골라요. ＋로 넣고, ◀ ▶로 자리를 바꾸고, ✕로 빼요.", "막대를 꾹 누르고 있어도 이 화면이 열려요."] },
   sheet_guide: { icon: "📘", title: "초보 어부 수첩", steps: ["처음이라면 위에서부터 하나씩 따라 해 보세요. 「가 보기」를 누르면 그곳으로 데려다줘요.", "끝내면 버튼이 「용돈 받기」로 바뀌어요. 아래 「궁금한 것 모음」에 자주 묻는 질문이 있어요."] },
   sheet_profile: { icon: "🙂", title: "내 정보", steps: ["내 레벨 · 낚은 수 · 기록이 모여 있어요. 닉네임과 이름표 칭호도 여기서 바꿔요."] },
   sheet_offers: { icon: "🤝", title: "거래 · 주문", steps: ["다른 사람이 보낸 거래 제안이 여기 와요. 내용을 보고 「받기」나 「거절」을 눌러요."] },
@@ -10190,7 +10192,8 @@ SHEETS.profile = (body) => {
     h("div", { class: "pring", style: "--p:" + pct.toFixed(3) }, av, h("span", { class: "plv", text: "Lv." + lv })),
     h("div", { class: "pinfo" }, h("b", { class: "pnm", text: P.nick }), tag ? h("span", { class: "ttl-tag", text: tag }) : null,
       h("small", { text: lv < LV_MAX ? "다음 레벨까지 경험치 " + fmt(Math.max(0, b - (P.xp || 0))) + " (" + Math.round(pct * 100) + "%)" : "최고 레벨이에요!" }),
-      h("div", { class: "row" }, h("button", { class: "btn sm", onclick: () => openSheet("face"), text: "🎨 얼굴" }), h("button", { class: "btn sm", onclick: () => openSheet("ach"), text: "🏆 도전과제 " + ACH.filter(x => P.ach[x.id]).length + "/" + ACH.length })))));
+      h("div", { class: "row" }, h("button", { class: "btn sm", onclick: () => openSheet("face"), text: "🎨 얼굴 꾸미기" }), h("button", { class: "btn sm", onclick: () => openSheet("bag"), text: "🎒 가방 " + P.bag.length + "/" + BAG_MAX }),
+        h("button", { class: "btn sm", onclick: () => { closeSheet(); goBuilding("clothes"); }, text: "👕 옷 갈아입기" }), h("button", { class: "btn sm", onclick: () => openSheet("ach"), text: "🏆 도전과제 " + ACH.filter(x => P.ach[x.id]).length + "/" + ACH.length })))));
   let best = null;
   for (const [id, d] of Object.entries(P.dex)) { const f = findFish(id); if (f && d.bestK && (!best || d.bestK > best.k)) best = { f, k: d.bestK, size: d.best }; }
   const known = Object.keys(P.dex).filter(id => findFish(id)).length;
@@ -10884,6 +10887,7 @@ $("hookBtn").addEventListener("pointerdown", (e) => { e.preventDefault(); hook()
 $("hookBtn").addEventListener("keydown", (e) => { if (e.key === "Enter") hook(); });
 window.addEventListener("pointerup", () => reelHold(false));
 $("chanBtn").addEventListener("click", () => openSheet("channels"));
+$("menuBtn").addEventListener("click", (e) => { e.stopPropagation(); if (S.meMenu) closeMeMenu(); else { closeSheet(); openMeMenu(); } });
 $("standBtn").addEventListener("click", () => { if (S.card) stopCard(); else if (onBoat() && S.boat.status === "sailing") openSheet("boat"); else leaveSpot(); });
 $("actBtn").addEventListener("click", doAction);
 $("testGold").addEventListener("click", () => { P.gold += 5000; markDirty(); refreshSheet(); toast("테스트용 50만원을 받았어요"); });
@@ -11239,7 +11243,7 @@ async function boot() {
   S.watchCh();
   S.records = new Map();
   db.collection("records").limit(500).onSnapshot((snap) => {
-    S.records = new Map(snap.docs.map(d => { const v = d.data() || {}; return [d.id, { k: clamp(Number(v.k) || 0, 0, 10), nick: str(v.nick, 16) || "누군가" }]; }));
+    S.records = new Map(snap.docs.map(d => { const v = d.data() || {}; return [d.id, { k: clamp(Number(v.k) || 0, 0, 100), nick: str(v.nick, 16) || "누군가" }]; }));
     if (S.sheet === "dex") refreshSheet();
   }, (e) => console.warn("records", e));
   ensureQuests(); updateQuestCount();
