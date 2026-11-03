@@ -162,7 +162,7 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.sm{padding:3px 9px;font-size:12px}
 .tier{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;color:#fff;letter-spacing:.02em}
-.tbadge{display:inline-block;height:auto;vertical-align:-8px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.tbadge{display:inline-block;height:auto;vertical-align:middle;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
 .tier.t0{background:var(--t0)}.tier.t1{background:var(--t1)}.tier.t2{background:var(--t2)}.tier.t3{background:var(--t3)}.tier.t4{background:var(--t4)}.tier.t5{background:var(--t5)}.tier.t6{background:var(--t6)}.tier.t7{background:var(--t7)}.tier.t8{background:var(--t8)}.tier.t9{background:linear-gradient(90deg,#0f9f9a,#7b5cd6,#e0479a);box-shadow:0 0 6px rgba(123,92,214,.6)}
 .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .muted{color:var(--muted)}
@@ -1623,7 +1623,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.70.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.71.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -1809,7 +1809,7 @@ function h(tag, attrs, ...kids) {
   for (const c of kids.flat()) if (c != null && c !== false) el.append(c instanceof Node ? c : String(c));
   return el;
 }
-function tierChip(t) { return h("span", { class: "tier t" + t, text: TIERS[t].name }); }
+function tierChip(t) { const src = (window.TIER_BADGE_SRC || [])[t]; return src ? h("img", { src, class: "tbadge", style: "width:54px", alt: TIERS[t].name }) : h("span", { class: "tier t" + t, text: TIERS[t].name }); }   // v1.71: 모든 등급 표시는 그림 배지가 기본
 function tierBadge(t, w) { const src = (window.TIER_BADGE_SRC || [])[t]; return src ? h("img", { src, class: "tbadge", style: "width:" + (w || 72) + "px", alt: TIERS[t].name }) : tierChip(t); }   // 등급 배지 그림 (tier-badges.js) · 없으면 텍스트 칩
 function lsGet(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } }
 function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
@@ -9906,7 +9906,7 @@ function dexTile(f, isKnown) {
     today ? h("span", { class: "dx-star", title: "오늘의 생선", text: "⭐" }) : null,
     d ? h("span", { class: "dx-n num", text: d.n }) : null,
     h("b", { class: "dx-nm", text: show ? f.name : "???" }),
-    h("span", { class: "dx-tg", text: TIERS[f.tier].name }));
+    tierBadge(f.tier, 52));
 }
 function dexDetail(f, isKnown) {
   const d = P.dex[f.id], mineFish = f.user && f.owner && f.owner === S.uid, show = isKnown || mineFish, rec = S.records && S.records.get(f.id);
