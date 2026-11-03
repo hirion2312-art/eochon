@@ -1623,7 +1623,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.71.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.72.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -1703,55 +1703,55 @@ const BUILTIN = [
     ["b-clown", "흰동가리", 0, 6, 11, "말미잘 사이에 숨어 사는 주황 줄무늬 꼬마.", "01_Clownfish", "#f07a2a", "stripes", "#ffffff"],
     ["b-goldfish", "금붕어", 0, 8, 20, "누가 바다에 풀어 줬을까? 반짝이는 금빛.", "03_Goldfish", "#f2a33a"],
     ["b-betta", "베타", 0, 5, 8, "지느러미가 드레스처럼 하늘거려요.", "13_Betta_Splendens", "#2bb0c9"],
-    ["b-bluetang", "블루탱", 1, 15, 30, "새파란 몸에 노란 꼬리.", "02_BlueTang", "#2a5fc2"],
-    ["b-angelfish", "엔젤피시", 1, 10, 22, "세로로 길쭉한 우아한 줄무늬.", "04_Angelfish", "#e8e2c8", "stripes", "#333333"],
+    ["b-bluetang", "블루탱", 2, 15, 30, "새파란 몸에 노란 꼬리.", "02_BlueTang", "#2a5fc2"],
+    ["b-angelfish", "엔젤피시", 2, 10, 22, "세로로 길쭉한 우아한 줄무늬.", "04_Angelfish", "#e8e2c8", "stripes", "#333333"],
     ["b-puffer", "복어", 1, 15, 40, "놀라면 동그랗게 부풀어요. 손질은 전문가에게!", "07_Pufferfish", "#e0c04a", "spots", "#6b5a2a"],
-    ["b-moray", "곰치", 1, 60, 150, "바위틈에서 고개만 내밀고 있어요.", "15_Moray_Eel", "#5a7a3a"],
-    ["b-lionfish", "쏠배감펭", 1, 20, 35, "화려한 지느러미에 독가시가 숨어 있어요.", "16_Red_Lionfish", "#c8402a", "stripes", "#ffffff"],
-    ["b-salmon", "연어", 2, 50, 100, "강으로 돌아가는 길에 잠깐 들렀나 봐요.", "06_Atlantic_Salmon", "#d86a5a"],
+    ["b-moray", "곰치", 2, 60, 150, "바위틈에서 고개만 내밀고 있어요.", "15_Moray_Eel", "#5a7a3a"],
+    ["b-lionfish", "쏠배감펭", 2, 20, 35, "화려한 지느러미에 독가시가 숨어 있어요.", "16_Red_Lionfish", "#c8402a", "stripes", "#ffffff"],
+    ["b-salmon", "연어", 3, 50, 100, "강으로 돌아가는 길에 잠깐 들렀나 봐요.", "06_Atlantic_Salmon", "#d86a5a"],
     ["b-koi", "비단잉어", 2, 40, 90, "붉고 흰 무늬가 비단 같아요.", "12_Koi_Carp", "#f2f0ea", "spots", "#d8402a"],
-    ["b-catfish", "큰메기", 2, 80, 200, "긴 수염을 늘어뜨린 바다의 할아버지.", "14_Giant_Catfish", "#5a5048"],
+    ["b-catfish", "큰메기", 3, 80, 200, "긴 수염을 늘어뜨린 바다의 할아버지.", "14_Giant_Catfish", "#5a5048"],
     ["b-barracuda", "꼬치고기", 2, 60, 170, "번개처럼 빠른 은빛 사냥꾼.", "18_Great_Barracuda", "#8a9aa2"],
-    ["b-manta", "쥐가오리", 3, 200, 500, "바닷속을 나는 커다란 날개.", "09_MantaRay", "#2e3a4a"],
-    ["b-angler", "아귀", 3, 40, 100, "깊은 바다에서 등불을 켜고 기다려요.", "10_DeepSea_Anglerfish", "#4a3a5a"],
-    ["b-swordfish", "황새치", 3, 150, 400, "칼날 같은 주둥이로 물살을 가르는 검객.", "11_Swordfish", "#2a4f8a"],
-    ["b-whiteshark", "백상아리", 4, 300, 600, "바다의 제왕. 부두 근처에 나타나다니!", "08_GreatWhite_Shark", "#6a7480"],
-    ["b-mola", "개복치", 4, 150, 330, "느긋하게 떠다니는 거대한 원반.", "17_Ocean_Sunfish_Mola", "#9aa4ac"],
+    ["b-manta", "쥐가오리", 5, 200, 500, "바닷속을 나는 커다란 날개.", "09_MantaRay", "#2e3a4a"],
+    ["b-angler", "아귀", 1, 40, 100, "깊은 바다에서 등불을 켜고 기다려요.", "10_DeepSea_Anglerfish", "#4a3a5a"],
+    ["b-swordfish", "황새치", 4, 150, 400, "칼날 같은 주둥이로 물살을 가르는 검객.", "11_Swordfish", "#2a4f8a"],
+    ["b-whiteshark", "백상아리", 5, 300, 600, "바다의 제왕. 부두 근처에 나타나다니!", "08_GreatWhite_Shark", "#6a7480"],
+    ["b-mola", "개복치", 5, 150, 330, "느긋하게 떠다니는 거대한 원반.", "17_Ocean_Sunfish_Mola", "#9aa4ac"],
     ["b-hammerhead", "귀상어", 4, 250, 500, "망치 같은 머리로 바다를 훑어요.", "19_Hammerhead_Shark", "#6a7480"],
-    ["b-arowana", "황금 아로와나", 4, 60, 110, "행운을 부르는 황금빛 용.", "20_Golden_Arowana", "#e8b83a"],
+    ["b-arowana", "황금 아로와나", 7, 60, 110, "행운을 부르는 황금빛 용.", "20_Golden_Arowana", "#e8b83a"],
   ].map(([id, name, tier, min, max, desc, file, body, pattern, pc]) => ({ id, name, tier, min, max, desc, model: "fish/" + file + ".glb",
     art: { body, belly: "#f2efe6", fin: body, pattern: pattern || "none", pc: pc || body, len: 1, th: 1 } })),
   // v1.23 새 3D 모델 물고기 (fish/models2.json, 나중에 불러옴 · 모델이 오기 전엔 그림으로 보여요)
   ...[
     ["b-oranda", "오란다", 0, 8, 18, "머리에 혹이 몽글몽글한 꼬리 긴 금붕어. 누가 바다에 놓아줬을까요?", "08_fancy_goldfish", "#f28a3a", "spots", "#ffffff"],
-    ["b-gajami", "참가자미", 0, 15, 35, "바닥에 납작 엎드려 두 눈만 굴리는 물고기.", "22_flounder", "#8a7a5a", "spots", "#5a4c34"],
+    ["b-gajami", "참가자미", 1, 15, 35, "바닥에 납작 엎드려 두 눈만 굴리는 물고기.", "22_flounder", "#8a7a5a", "spots", "#5a4c34"],
     ["b-sameseogi", "삼세기", 0, 15, 30, "울퉁불퉁 못생겼지만 매운탕 맛은 일품.", "GruntSculpin", "#7a6a52", "spots", "#4a3e2e"],
     ["b-haepari", "해파리", 0, 10, 40, "둥실둥실 떠다니다 낚싯줄에 걸려 왔어요. 만지지 마세요!", "Jellyfish", "#e8b8e0"],
-    ["b-ssombaengi", "쏨뱅이", 0, 15, 30, "가시가 뾰족한 붉은 바위 물고기.", "rock_fish", "#b8543a", "spots", "#7a2e20"],
+    ["b-ssombaengi", "쏨뱅이", 1, 15, 30, "가시가 뾰족한 붉은 바위 물고기.", "rock_fish", "#b8543a", "spots", "#7a2e20"],
     ["b-bass", "배스", 1, 25, 55, "입이 아주 큰 사냥꾼. 루어를 덥석 물어요.", "09_largemouth_bass", "#5f7a3a", "stripes", "#3a4a24"],
-    ["b-rtrout", "무지개송어", 1, 30, 60, "옆구리에 무지개빛 띠가 흘러요.", "10_rainbow_trout", "#8aa86a", "spots", "#d86a7a"],
-    ["b-piranha", "피라냐", 1, 15, 30, "이빨이 날카로운 은빛 물고기. 손가락 조심!", "17_piranha", "#9aa0a8", "spots", "#d8402a"],
-    ["b-mulchong", "물총고기", 1, 15, 30, "물방울을 쏴서 곤충을 떨어뜨리는 명사수.", "Archerfish", "#e8e2c8", "spots", "#2a2a30"],
-    ["b-gitdaedom", "깃대돔", 1, 12, 22, "등지느러미가 깃발처럼 길게 휘날려요.", "Moorishidol", "#f2e6a8", "stripes", "#1e1e24"],
-    ["b-nabi", "나비고기", 1, 10, 20, "나비처럼 팔랑이는 노란 산호초 물고기.", "Butterfly_Fish", "#f2d23a", "stripes", "#ffffff"],
+    ["b-rtrout", "무지개송어", 3, 30, 60, "옆구리에 무지개빛 띠가 흘러요.", "10_rainbow_trout", "#8aa86a", "spots", "#d86a7a"],
+    ["b-piranha", "피라냐", 2, 15, 30, "이빨이 날카로운 은빛 물고기. 손가락 조심!", "17_piranha", "#9aa0a8", "spots", "#d8402a"],
+    ["b-mulchong", "물총고기", 2, 15, 30, "물방울을 쏴서 곤충을 떨어뜨리는 명사수.", "Archerfish", "#e8e2c8", "spots", "#2a2a30"],
+    ["b-gitdaedom", "깃대돔", 2, 12, 22, "등지느러미가 깃발처럼 길게 휘날려요.", "Moorishidol", "#f2e6a8", "stripes", "#1e1e24"],
+    ["b-nabi", "나비고기", 2, 10, 20, "나비처럼 팔랑이는 노란 산호초 물고기.", "Butterfly_Fish", "#f2d23a", "stripes", "#ffffff"],
     ["b-kkomchi", "꼼치", 1, 30, 55, "물렁물렁한 겨울 생선. 시원한 국물의 주인공.", "black_fat_deep_sea_fish", "#3a3a44", "none", "", "night"],
     ["b-ttukji", "뚝지", 1, 20, 40, "동글동글 배에 빨판이 달린 겨울 바다의 귀염둥이.", "brown_fat_deep_sea_fish", "#8a6a4a", "spots", "#5a4430"],
-    ["b-hongyeoneo", "홍연어", 2, 50, 80, "알을 낳으러 돌아갈 때 온몸이 붉게 물들어요.", "11_sockeye_salmon", "#d8402a", "none"],
+    ["b-hongyeoneo", "홍연어", 3, 50, 80, "알을 낳으러 돌아갈 때 온몸이 붉게 물들어요.", "11_sockeye_salmon", "#d8402a", "none"],
     ["b-haema", "해마", 2, 8, 20, "말 머리를 닮은 물고기. 아빠가 알을 품어요.", "20_seahorse", "#e8a23a", "spots", "#b86a1a"],
     ["b-mandarin", "만다린피시", 2, 5, 8, "주황과 파랑 무늬가 물감처럼 번진 작은 보석.", "23_mandarinfish", "#2a78bb", "waves", "#f28a3a"],
     ["b-jajubok", "자주복", 2, 30, 60, "복어 중의 으뜸. 손질은 꼭 전문가에게!", "Fugu", "#5a6a7a", "spots", "#2a3440"],
     ["b-bineuldom", "비늘돔", 2, 30, 70, "부리 같은 이빨로 산호를 갉아 먹는 앵무 빛 물고기.", "Parrotfish", "#3fb8a8", "waves", "#f2a3c8"],
     ["b-eoreumdom", "어름돔", 2, 30, 60, "두툼한 입술에 점박이 무늬를 두른 따뜻한 바다 물고기.", "Sweetlips", "#e8e2c8", "spots", "#2a2a30"],
-    ["b-badagaje", "바닷가재", 2, 25, 50, "커다란 집게 두 개를 휘두르며 올라와요.", "lobster", "#b8402a", "none", "", "night"],
-    ["b-deungbul", "초록 등불고기", 2, 20, 45, "깊은 바다에서 초록 불빛을 내며 먹이를 꾀어요.", "green_deep_sea_fish", "#3f8a5a", "spots", "#bff2a0", "sea"],
-    ["b-bulgeunsimhae", "붉은 심해어", 2, 25, 50, "빛이 닿지 않는 곳에선 붉은색이 보이지 않는대요.", "red_deep_sea_fish", "#a8302a", "none", "", "sea"],
+    ["b-badagaje", "바닷가재", 5, 25, 50, "커다란 집게 두 개를 휘두르며 올라와요.", "lobster", "#b8402a", "none", "", "night"],
+    ["b-deungbul", "초록 등불고기", 6, 20, 45, "깊은 바다에서 초록 불빛을 내며 먹이를 꾀어요.", "green_deep_sea_fish", "#3f8a5a", "spots", "#bff2a0", "sea"],
+    ["b-bulgeunsimhae", "붉은 심해어", 6, 25, 50, "빛이 닿지 않는 곳에선 붉은색이 보이지 않는대요.", "red_deep_sea_fish", "#a8302a", "none", "", "sea"],
     ["b-borattukji", "보라 뚝지", 2, 20, 45, "깊은 바다에 사는 뚝지의 보랏빛 사촌.", "purple_fat_deep_sea_fish", "#7a4a9a", "spots", "#4a2a6a", "sea"],
-    ["b-silverarowana", "은빛 아로와나", 3, 60, 110, "물 위로 뛰어올라 먹이를 낚아채는 은빛 용.", "25_silver_arowana", "#c9d3da", "none"],
-    ["b-cheongsari", "청새리상어", 3, 150, 300, "푸른 등을 가진 날렵한 먼바다 상어.", "Shark", "#3a6a9a", "none", "", "sea"],
-    ["b-chilheuk", "칠흑 심해어", 3, 40, 90, "이빨이 바늘처럼 늘어선 깊은 바다의 그림자.", "black_deep_sea_fish", "#1e1e24", "none", "", "sea"],
-    ["b-borasimhae", "보라 심해어", 3, 40, 90, "어둠 속에서 보랏빛으로 은은하게 빛나요.", "purple_deep_sea_fish", "#6a3a8a", "spots", "#c9a8f2", "sea"],
-    ["b-cheolgap", "철갑상어", 4, 100, 300, "공룡 시대부터 살아온 갑옷 입은 물고기.", "Sturgeon", "#6a7480", "spots", "#3a4048"],
-    ["b-topgaori", "톱가오리", 4, 200, 500, "톱날 같은 주둥이로 모래 속 먹이를 찾아요.", "Sawfish", "#8a8a7a", "none", "", "sea"],
+    ["b-silverarowana", "은빛 아로와나", 7, 60, 110, "물 위로 뛰어올라 먹이를 낚아채는 은빛 용.", "25_silver_arowana", "#c9d3da", "none"],
+    ["b-cheongsari", "청새리상어", 4, 150, 300, "푸른 등을 가진 날렵한 먼바다 상어.", "Shark", "#3a6a9a", "none", "", "sea"],
+    ["b-chilheuk", "칠흑 심해어", 6, 40, 90, "이빨이 바늘처럼 늘어선 깊은 바다의 그림자.", "black_deep_sea_fish", "#1e1e24", "none", "", "sea"],
+    ["b-borasimhae", "보라 심해어", 6, 40, 90, "어둠 속에서 보랏빛으로 은은하게 빛나요.", "purple_deep_sea_fish", "#6a3a8a", "spots", "#c9a8f2", "sea"],
+    ["b-cheolgap", "철갑상어", 5, 100, 300, "공룡 시대부터 살아온 갑옷 입은 물고기.", "Sturgeon", "#6a7480", "spots", "#3a4048"],
+    ["b-topgaori", "톱가오리", 5, 200, 500, "톱날 같은 주둥이로 모래 속 먹이를 찾아요.", "Sawfish", "#8a8a7a", "none", "", "sea"],
     ["b-daewangojing", "대왕오징어", 4, 300, 900, "심해의 거인. 눈이 축구공만 하대요.", "squid", "#c9785a", "spots", "#8a3a2a", "sea"],
     ["b-ilgak", "일각고래", 5, 400, 600, "긴 뿔 하나를 가진 북쪽 바다의 전설. 어쩌다 여기까지 왔을까요?", "Narwhal", "#9aa8b0", "spots", "#5a6870", "sea"],
   ].map(([id, name, tier, min, max, desc, file, body, pattern, pc, where]) => ({ id, name, tier, min, max, desc, ...(where ? { where } : {}), model: "fish/" + file + ".glb", pack: 2,
@@ -1771,6 +1771,109 @@ const BUILTIN = [
   { id: "b-hongeo", name: "홍어", tier: 2, min: 60, max: 120, where: "dawn", desc: "마름모꼴 가오리. 삭히면 코가 뻥 뚫려요.", art: { shape: "ray", body: "#8a6a5a", belly: "#f2e2d8", fin: "#8a6a5a", pattern: "spots", pc: "#5a3e30" } },
   { id: "b-daebangeo", name: "대방어", tier: 4, min: 90, max: 150, where: "sea", desc: "겨울 바다를 주름잡는 10kg 넘는 방어. 기름이 꽉 찼어요.", art: { body: "#2a4a6a", belly: "#eef2f6", fin: "#c9b22a", pattern: "finlets", pc: "#f2d84a", len: 1.2, th: .95 } },
 ];
+// v1.72 신규 어종 96종 — 물고기 200종 로스터 (오프라인 제작 3D 모델 포함)
+BUILTIN.push(
+  { id: "b-doroomook", name: "도루묵", tier: 0, min: 15, max: 25, desc: "겨울 동해의 선물. 알이 톡톡 터져요.", model: "fish/b-doroomook.glb", pack: 4, art: { body: "#9aa8a0", belly: "#e8ece8", fin: "#7c8a84", len: 1, th: 1.0 } },
+  { id: "b-yangmiri", name: "양미리", tier: 0, min: 12, max: 20, desc: "가늘고 긴 몸. 구워 먹으면 고소해요.", model: "fish/b-yangmiri.glb", pack: 4, art: { body: "#b8c4b0", belly: "#eef2e6", fin: "#9aa88f", len: 1, th: 1.0 } },
+  { id: "b-borimyeol", name: "보리멸", tier: 0, min: 10, max: 18, desc: "모래 속에 숨는 작은 물고기.", model: "fish/b-borimyeol.glb", pack: 4, art: { body: "#c2b090", belly: "#efe6d0", fin: "#a08c64", pattern: "spots", pc: "#8a764f", len: 1, th: 1.0 } },
+  { id: "b-bingeo", name: "빙어", tier: 0, min: 8, max: 15, desc: "겨울 얼음낚시의 주인공. 투명한 몸이 예뻐요.", model: "fish/b-bingeo.glb", pack: 4, art: { body: "#cfdde2", belly: "#f6fbfc", fin: "#b9ccd2", len: 1, th: 1.0 } },
+  { id: "b-mikkuraji", name: "미꾸라지", tier: 0, min: 10, max: 20, desc: "논과 개울의 미끈이. 잡기가 쉽지 않아요.", model: "fish/b-mikkuraji.glb", pack: 4, art: { shape: "eel", body: "#7a6a4f", belly: "#c9b896", fin: "#66583f", len: 1, th: 1.0 } },
+  { id: "b-moraemuji", name: "모래무지", tier: 0, min: 8, max: 15, desc: "모래 바닥에 배를 깔고 쉬는 민물고기.", model: "fish/b-moraemuji.glb", pack: 4, art: { body: "#b3a284", belly: "#ece2cc", fin: "#94835f", pattern: "spots", pc: "#7d6c4e", len: 1, th: 1.0 } },
+  { id: "b-swiri", name: "쉬리", tier: 0, min: 6, max: 12, desc: "맑은 물에만 사는 작은 보석 같은 물고기.", model: "fish/b-swiri.glb", pack: 4, art: { body: "#8fae6d", belly: "#e6efd8", fin: "#74955a", pattern: "spots", pc: "#5c7f45", len: 1, th: 1.0 } },
+  { id: "b-dongsari", name: "동사리", tier: 0, min: 8, max: 15, where: "night", desc: "밤에 돌아다니는 작은 민물 맹수.", model: "fish/b-dongsari.glb", pack: 4, art: { body: "#6d7a56", belly: "#d8dcc4", fin: "#55613f", pattern: "spots", pc: "#47543a", len: 1, th: 1.0 } },
+  { id: "b-baengeo", name: "뱅어", tier: 0, min: 5, max: 10, desc: "뼈째 먹는 투명한 실 같은 물고기.", model: "fish/b-baengeo.glb", pack: 4, art: { body: "#dfe9ea", belly: "#ffffff", fin: "#c9d8da", len: 1, th: 1.0 } },
+  { id: "b-silchi", name: "실치", tier: 0, min: 4, max: 8, desc: "봄 바다의 실 같은 치어 무리.", model: "fish/b-silchi.glb", pack: 4, art: { body: "#e6eeee", belly: "#ffffff", fin: "#ccdcdc", len: 1, th: 1.0 } },
+  { id: "b-cheongeo", name: "청어", tier: 0, min: 20, max: 35, desc: "은빛 비늘이 반짝이는 떼 물고기.", model: "fish/b-cheongeo.glb", pack: 4, art: { body: "#5d7f96", belly: "#e8eef0", fin: "#47687e", pattern: "waves", pc: "#33505f", len: 1, th: 1.0 } },
+  { id: "b-baendaengi", name: "밴댕이", tier: 0, min: 10, max: 18, desc: "젓갈로 유명한 작은 생선.", model: "fish/b-baendaengi.glb", pack: 4, art: { body: "#a8b6a4", belly: "#eef0e2", fin: "#87977f", len: 1, th: 1.0 } },
+  { id: "b-ungeo", name: "웅어", tier: 0, min: 20, max: 40, where: "dawn", desc: "봄에 강을 거슬러 오르는 은빛 물고기.", model: "fish/b-ungeo.glb", pack: 4, art: { body: "#b9c2c9", belly: "#f2f4f2", fin: "#98a4ab", len: 1, th: 1.0 } },
+  { id: "b-bedorachi", name: "베도라치", tier: 0, min: 10, max: 20, desc: "바위틈에 숨는 길쭉한 물고기.", model: "fish/b-bedorachi.glb", pack: 4, art: { shape: "eel", body: "#a8895e", belly: "#e8dcc2", fin: "#8a6c42", pattern: "spots", pc: "#7d6240", len: 1, th: 1.0 } },
+  { id: "b-byeongeo", name: "병어", tier: 1, min: 20, max: 35, desc: "납작하고 은빛 도는 고급 생선.", model: "fish/b-byeongeo.glb", pack: 4, art: { body: "#c8ccd2", belly: "#f0f2f4", fin: "#a8adb6", len: 1, th: 0.55 } },
+  { id: "b-gapojingeo", name: "갑오징어", tier: 1, min: 20, max: 40, desc: "갑옷 같은 뼈를 가진 오징어. 먹물이 진해요.", model: "fish/b-gapojingeo.glb", pack: 4, art: { shape: "squid", body: "#8a6a4e", belly: "#e6d8c2", fin: "#75573d", pattern: "spots", pc: "#5f4630", len: 1, th: 1.0 } },
+  { id: "b-hanchi", name: "한치", tier: 1, min: 15, max: 30, where: "night", desc: "여름밤의 별미. 짧고 통통한 오징어.", model: "fish/b-hanchi.glb", pack: 4, art: { shape: "squid", body: "#d8cfc4", belly: "#f6f1e8", fin: "#c2b4a4", len: 1, th: 1.0 } },
+  { id: "b-seongdae", name: "성대", tier: 1, min: 20, max: 40, desc: "날개 같은 지느러미로 바다를 나는 물고기.", model: "fish/b-seongdae.glb", pack: 4, art: { body: "#c26a5a", belly: "#f0d8cc", fin: "#a04a3e", pattern: "stripes", pc: "#7d3a2e", len: 1, th: 1.0 } },
+  { id: "b-mulmegi", name: "물메기", tier: 1, min: 25, max: 50, desc: "물컹한 몸, 시원한 탕의 주인공.", model: "fish/b-mulmegi.glb", pack: 4, art: { body: "#9a8f7a", belly: "#e2dccc", fin: "#7d7260", pattern: "spots", pc: "#6b6050", len: 1, th: 1.0 } },
+  { id: "b-seodae", name: "서대", tier: 1, min: 20, max: 35, desc: "혀처럼 납작한 가자미 친척.", model: "fish/b-seodae.glb", pack: 4, art: { shape: "flat", body: "#b09a72", belly: "#eadfc6", fin: "#937c56", pattern: "spots", pc: "#77603e", len: 1, th: 1.0 } },
+  { id: "b-bakdae", name: "박대", tier: 1, min: 20, max: 35, desc: "껍질째 구우면 일품인 납작 생선.", model: "fish/b-bakdae.glb", pack: 4, art: { shape: "flat", body: "#a89468", belly: "#e6dabb", fin: "#87714c", len: 1, th: 1.0 } },
+  { id: "b-munchi", name: "문치가자미", tier: 1, min: 25, max: 45, desc: "점박이 무늬의 고급 가자미.", model: "fish/b-munchi.glb", pack: 4, art: { shape: "flat", body: "#8f7c58", belly: "#ddd0ae", fin: "#76643f", pattern: "spots", pc: "#5f4e30", len: 1, th: 1.0 } },
+  { id: "b-yonggajami", name: "용가자미", tier: 1, min: 25, max: 45, desc: "줄무늬가 선명한 가자미.", model: "fish/b-yonggajami.glb", pack: 4, art: { shape: "flat", body: "#97835e", belly: "#e2d4b0", fin: "#7d6a45", pattern: "stripes", pc: "#66552f", len: 1, th: 1.0 } },
+  { id: "b-daeha", name: "대하", tier: 1, min: 15, max: 25, desc: "가을 전어와 겨루는 큰 새우.", model: "fish/b-daeha.glb", pack: 4, art: { body: "#d88a6a", belly: "#f6e0d2", fin: "#c06a4c", len: 1, th: 1.0 } },
+  { id: "b-kkotsaeu", name: "꽃새우", tier: 1, min: 8, max: 15, desc: "꽃처럼 붉은 작은 새우.", model: "fish/b-kkotsaeu.glb", pack: 4, art: { body: "#d86a7a", belly: "#f8dde0", fin: "#bc4c5c", len: 1, th: 1.0 } },
+  { id: "b-gul", name: "굴", tier: 1, min: 5, max: 12, desc: "바다의 우유. 바위에 붙어 살아요.", model: "fish/b-gul.glb", pack: 4, art: { shape: "clam", body: "#8d8578", belly: "#efe9dc", fin: "#6f675c", len: 1, th: 1.0 } },
+  { id: "b-meongge", name: "멍게", tier: 1, min: 8, max: 15, desc: "바다 향이 입안 가득 퍼지는 해산물.", model: "fish/b-meongge.glb", pack: 4, art: { shape: "clam", body: "#d8734a", belly: "#f2b183", fin: "#b8552f", len: 1, th: 1.0 } },
+  { id: "b-sora", name: "소라", tier: 1, min: 8, max: 15, desc: "쫄깃한 뿔소라. 뿔이 멋져요.", model: "fish/b-sora.glb", pack: 4, art: { shape: "clam", body: "#7d7466", belly: "#e8e0cf", fin: "#5f574b", len: 1, th: 1.0 } },
+  { id: "b-geumtae", name: "금태", tier: 2, min: 25, max: 45, desc: "눈볼대. 금빛 눈이 부의 상징이에요.", model: "fish/b-geumtae.glb", pack: 4, art: { body: "#c05a44", belly: "#f0d4c4", fin: "#a04a38", len: 1, th: 1.0 } },
+  { id: "b-okdom", name: "옥돔", tier: 2, min: 25, max: 40, desc: "분홍빛 비늘의 귀한 생선.", model: "fish/b-okdom.glb", pack: 4, art: { body: "#d88a94", belly: "#f8e2e0", fin: "#bc6a76", len: 1, th: 1.0 } },
+  { id: "b-ginkkoribenge", name: "긴꼬리벵에돔", tier: 2, min: 30, max: 50, desc: "꼬리가 긴 벵에돔의 친척.", model: "fish/b-ginkkoribenge.glb", pack: 4, art: { body: "#7d8a94", belly: "#e2e8ea", fin: "#626e78", pattern: "stripes", pc: "#4c565e", len: 1, th: 1.0 } },
+  { id: "b-maljwichi", name: "말쥐치", tier: 2, min: 25, max: 40, desc: "쫄깃한 껍질이 별미인 쥐치.", model: "fish/b-maljwichi.glb", pack: 4, art: { body: "#9aa48e", belly: "#e6ead9", fin: "#7d8770", len: 1, th: 1.0 } },
+  { id: "b-gaekjuri", name: "객주리", tier: 2, min: 30, max: 50, desc: "옆으로 납작한 은빛 물고기.", model: "fish/b-gaekjuri.glb", pack: 4, art: { body: "#b9c2c4", belly: "#f0f2ee", fin: "#9aa4a6", len: 1, th: 1.0 } },
+  { id: "b-silgogi", name: "실고기", tier: 2, min: 15, max: 25, desc: "바늘처럼 가늘고 긴 물고기.", model: "fish/b-silgogi.glb", pack: 4, art: { shape: "eel", body: "#c2b490", belly: "#eee6ce", fin: "#a08e64", len: 1, th: 1.0 } },
+  { id: "b-yongchi", name: "용치놀래기", tier: 2, min: 20, max: 35, desc: "용의 이빨을 닮은 놀래기.", model: "fish/b-yongchi.glb", pack: 4, art: { body: "#7a9a6d", belly: "#e0ecd2", fin: "#5f7f54", pattern: "spots", pc: "#49663f", len: 1, th: 1.0 } },
+  { id: "b-hobakdom", name: "호박돔", tier: 2, min: 25, max: 40, desc: "호박색으로 물드는 돔.", model: "fish/b-hobakdom.glb", pack: 4, art: { body: "#d88f4a", belly: "#f8e3c2", fin: "#bc7434", len: 1, th: 1.0 } },
+  { id: "b-junchi", name: "준치", tier: 3, min: 30, max: 55, desc: "썩어도 준치라는 그 생선.", model: "fish/b-junchi.glb", pack: 4, art: { body: "#aebf9e", belly: "#eef2e2", fin: "#8fa37e", len: 1, th: 1.0 } },
+  { id: "b-bulkbari", name: "붉바리", tier: 3, min: 30, max: 60, desc: "붉은 바리. 횟감의 귀족.", model: "fish/b-bulkbari.glb", pack: 4, art: { body: "#b84a3c", belly: "#f0c8bc", fin: "#9c382c", pattern: "spots", pc: "#7d2a20", len: 1, th: 1.0 } },
+  { id: "b-jabari", name: "자바리", tier: 3, min: 40, max: 80, desc: "제주에서 다금바리와 겨루는 바리.", model: "fish/b-jabari.glb", pack: 4, art: { body: "#6e6258", belly: "#d8d0c2", fin: "#574c42", pattern: "spots", pc: "#453b32", len: 1, th: 1.0 } },
+  { id: "b-jaetbangeo", name: "잿방어", tier: 3, min: 50, max: 100, desc: "방어와 부시리 사이의 잿빛 사냥꾼.", model: "fish/b-jaetbangeo.glb", pack: 4, art: { body: "#7d8894", belly: "#e4e8ea", fin: "#626c76", len: 1, th: 1.0 } },
+  { id: "b-hwangdarangeo", name: "황다랑어", tier: 3, min: 100, max: 200, where: "sea", desc: "노란 지느러미의 다랑어.", model: "fish/b-hwangdarangeo.glb", pack: 4, art: { body: "#4a6d9c", belly: "#eef0e8", fin: "#d8a83a", len: 1, th: 1.0 } },
+  { id: "b-nundarangeo", name: "눈다랑어", tier: 3, min: 100, max: 220, where: "sea", desc: "큰 눈의 다랑어. 심해에서 헤엄쳐요.", model: "fish/b-nundarangeo.glb", pack: 4, art: { body: "#42557a", belly: "#e8e8e2", fin: "#33455f", len: 1, th: 1.0 } },
+  { id: "b-gadarangeo", name: "가다랑어", tier: 3, min: 40, max: 80, where: "sea", desc: "가쓰오부시의 그 생선. 떼로 다녀요.", model: "fish/b-gadarangeo.glb", pack: 4, art: { body: "#4a6d8c", belly: "#eef0ea", fin: "#385a76", pattern: "stripes", pc: "#2c4a63", len: 1, th: 1.0 } },
+  { id: "b-mansaegi", name: "만새기", tier: 3, min: 100, max: 180, where: "sea", desc: "창처럼 긴 부리의 바다 사냥꾼.", model: "fish/b-mansaegi.glb", pack: 4, art: { body: "#3f7d6a", belly: "#dceee4", fin: "#2f6656", len: 1, th: 1.0 } },
+  { id: "b-dotsoechi", name: "돛새치", tier: 3, min: 150, max: 250, where: "sea", desc: "돛 같은 등지느러미의 고속 사냥꾼.", model: "fish/b-dotsoechi.glb", pack: 4, art: { body: "#3a5a8c", belly: "#dfe8f2", fin: "#2c4468", len: 1, th: 1.0 } },
+  { id: "b-eundaegu", name: "은대구", tier: 3, min: 50, max: 100, where: "sea", desc: "메로로 불리는 심해의 고급어.", model: "fish/b-eundaegu.glb", pack: 4, art: { body: "#5c6658", belly: "#e6e8da", fin: "#49523f", len: 1, th: 1.0 } },
+  { id: "b-hwando", name: "환도상어", tier: 3, min: 200, max: 400, where: "sea", desc: "꼬리가 몸만큼 긴 상어.", model: "fish/b-hwando.glb", pack: 4, art: { body: "#6d7f96", belly: "#e8ecef", fin: "#55677c", len: 1, th: 1.0 } },
+  { id: "b-chammuneo", name: "참문어", tier: 3, min: 50, max: 120, desc: "가장 흔하고 가장 영리한 큰 문어.", model: "fish/b-chammuneo.glb", pack: 5, art: { shape: "octo", body: "#9c5a44", belly: "#eccfc0", fin: "#84503c", pattern: "spots", pc: "#6e3c2a", len: 1, th: 1.0 } },
+  { id: "b-bakhaji", name: "박하지", tier: 3, min: 10, max: 20, desc: "돌 틈의 작은 게. 국물이 시원해요.", model: "fish/b-bakhaji.glb", pack: 5, art: { shape: "crab", body: "#a85a3c", belly: "#f0d8c4", fin: "#8c462c", len: 1, th: 1.0 } },
+  { id: "b-cheongge", name: "청게", tier: 3, min: 15, max: 25, desc: "푸른 집게의 게.", model: "fish/b-cheongge.glb", pack: 5, art: { shape: "crab", body: "#4a7d8c", belly: "#dcebe8", fin: "#38626e", len: 1, th: 1.0 } },
+  { id: "b-jeonbok", name: "전복", tier: 3, min: 10, max: 20, desc: "바다의 황제. 비싼 데는 이유가 있어요.", model: "fish/b-jeonbok.glb", pack: 5, art: { shape: "clam", body: "#6d6250", belly: "#e8dfc8", fin: "#554c3c", len: 1, th: 1.0 } },
+  { id: "b-haesam", name: "해삼", tier: 3, min: 15, max: 30, desc: "바다의 인삼.", model: "fish/b-haesam.glb", pack: 5, art: { body: "#4e4a42", belly: "#77705f", fin: "#423e36", pattern: "spots", pc: "#8a8272", len: 1, th: 1.0 } },
+  { id: "b-kijogae", name: "키조개", tier: 3, min: 20, max: 35, desc: "부채처럼 큰 조개. 관자가 일품.", model: "fish/b-kijogae.glb", pack: 5, art: { shape: "clam", body: "#8a7a5c", belly: "#efe6ce", fin: "#6e5f45", len: 1, th: 1.0 } },
+  { id: "b-heuksoechi", name: "흑새치", tier: 4, min: 250, max: 450, where: "sea", desc: "검푸른 거구의 새치.", model: "fish/b-heuksoechi.glb", pack: 5, art: { body: "#2e3a55", belly: "#c8d2de", fin: "#232c42", len: 1, th: 1.0 } },
+  { id: "b-daewangbari", name: "대왕바리", tier: 4, min: 100, max: 250, desc: "바리 중의 왕. 어른만 해요.", model: "fish/b-daewangbari.glb", pack: 5, art: { body: "#7d7264", belly: "#ddd5c4", fin: "#665c4e", pattern: "spots", pc: "#574e40", len: 1, th: 1.0 } },
+  { id: "b-cheongsangari", name: "청상아리", tier: 4, min: 200, max: 400, where: "sea", desc: "가장 빠른 상어.", model: "fish/b-cheongsangari.glb", pack: 5, art: { body: "#4a7d9c", belly: "#eef2f4", fin: "#38657f", len: 1, th: 1.0 } },
+  { id: "b-beomsangeo", name: "범상어", tier: 4, min: 300, max: 550, where: "sea", desc: "호랑이 무늬의 바다 맹수.", model: "fish/b-beomsangeo.glb", pack: 5, art: { body: "#8c7a5c", belly: "#efe8d8", fin: "#71603f", pattern: "stripes", pc: "#5c4c2c", len: 1, th: 1.0 } },
+  { id: "b-taimen", name: "타이멘", tier: 4, min: 100, max: 200, desc: "민물고기의 왕. 연어의 거인 친척.", model: "fish/b-taimen.glb", pack: 5, art: { body: "#8c6a52", belly: "#efe2d2", fin: "#d8734a", pattern: "spots", pc: "#6e4c34", len: 1, th: 1.0 } },
+  { id: "b-jajeongaengi", name: "자전갱이", tier: 4, min: 60, max: 170, where: "sea", desc: "자이언트 트레발리. 방파제를 공포에 떨게 해요.", model: "fish/b-jajeongaengi.glb", pack: 5, art: { body: "#7d94a8", belly: "#e8eef2", fin: "#5c748c", len: 1, th: 1.0 } },
+  { id: "b-gaetjangeo", name: "갯장어", tier: 4, min: 100, max: 200, desc: "여름 보양식의 제왕. 이빨이 날카로워요.", model: "fish/b-gaetjangeo.glb", pack: 5, art: { shape: "eel", body: "#8a7a62", belly: "#e6dcc6", fin: "#71634c", len: 1, th: 1.0 } },
+  { id: "b-gamulchi", name: "가물치", tier: 4, min: 60, max: 120, desc: "민물의 무법자. 생명력이 질겨요.", model: "fish/b-gamulchi.glb", pack: 5, art: { body: "#5c6650", belly: "#d8dcc8", fin: "#47523c", pattern: "spots", pc: "#39422c", len: 1, th: 1.0 } },
+  { id: "b-ssogari", name: "쏘가리", tier: 4, min: 30, max: 60, desc: "민물 횟감의 황제.", model: "fish/b-ssogari.glb", pack: 5, art: { body: "#b8924a", belly: "#f2e6c4", fin: "#9c7834", pattern: "spots", pc: "#7d5c24", len: 1, th: 1.0 } },
+  { id: "b-kingyeoneo", name: "킹연어", tier: 4, min: 80, max: 150, where: "dawn", desc: "연어 중의 왕. 강을 거슬러 올라요.", model: "fish/b-kingyeoneo.glb", pack: 5, art: { body: "#9aa8a4", belly: "#f2e8e2", fin: "#78847f", pattern: "spots", pc: "#5c6a64", len: 1, th: 1.0 } },
+  { id: "b-gireumchi", name: "기름치", tier: 4, min: 80, max: 180, where: "sea", desc: "버터처럼 기름진 심해어. 많이 먹으면 안 돼요.", model: "fish/b-gireumchi.glb", pack: 5, art: { body: "#7a6f5e", belly: "#e8e2d2", fin: "#655c4c", len: 1, th: 1.0 } },
+  { id: "b-manta", name: "만타가오리", tier: 5, min: 300, max: 600, where: "sea", desc: "날개로 날듯 헤엄치는 거대한 가오리.", model: "fish/b-manta.glb", pack: 5, art: { shape: "ray", body: "#4a4a52", belly: "#e8e8e8", fin: "#3a3a42", pattern: "spots", pc: "#d8d8d8", len: 1, th: 1.0 } },
+  { id: "b-greenland", name: "그린란드상어", tier: 5, min: 250, max: 500, where: "sea", desc: "수백 년을 산다는 얼음 바다의 상어.", model: "fish/b-greenland.glb", pack: 5, art: { body: "#5e6d5a", belly: "#d8dccf", fin: "#4a5744", len: 1, th: 1.0 } },
+  { id: "b-piraruku", name: "피라루쿠", tier: 5, min: 200, max: 300, desc: "아마존의 붉은 거인. 민물 최대급.", model: "fish/b-piraruku.glb", pack: 5, art: { body: "#8c5a44", belly: "#e8d0bc", fin: "#c23c2c", pattern: "spots", pc: "#6e4230", len: 1, th: 1.2 } },
+  { id: "b-alligatorgar", name: "앨리게이터가아", tier: 5, min: 150, max: 250, desc: "악어 주둥이의 고대 물고기.", model: "fish/b-alligatorgar.glb", pack: 5, art: { body: "#6d7a56", belly: "#e2e6d2", fin: "#55613f", pattern: "spots", pc: "#454f30", len: 1, th: 1.0 } },
+  { id: "b-mekong", name: "메콩메기", tier: 5, min: 200, max: 300, desc: "강의 거인. 어른 셋 무게예요.", model: "fish/b-mekong.glb", pack: 5, art: { body: "#8d9296", belly: "#e8eae6", fin: "#71767a", len: 1, th: 1.15 } },
+  { id: "b-colossal", name: "콜로설오징어", tier: 5, min: 400, max: 900, where: "sea", desc: "대왕오징어보다 무거운 남극의 거물.", model: "fish/b-colossal.glb", pack: 5, art: { shape: "squid", body: "#a83c46", belly: "#e8c8c4", fin: "#8c2f38", len: 1, th: 1.0 } },
+  { id: "b-kingcrab", name: "킹크랩", tier: 5, min: 100, max: 180, where: "sea", desc: "다리를 펴면 어른 키. 게 중의 왕.", model: "fish/b-kingcrab.glb", pack: 5, art: { shape: "crab", body: "#b84a34", belly: "#f0d0c0", fin: "#9c3a28", len: 1, th: 1.0 } },
+  { id: "b-opah", name: "오파", tier: 5, min: 100, max: 200, where: "sea", desc: "온몸이 화려한 심해의 보석.", model: "fish/b-opah.glb", pack: 5, art: { body: "#c25a6e", belly: "#f2d8ce", fin: "#e8e2da", pattern: "spots", pc: "#f2f2f2", len: 1, th: 0.55 } },
+  { id: "b-goblin", name: "고블린상어", tier: 6, min: 250, max: 400, where: "night", desc: "이마의 검이 튀어나오는 분홍 상어.", model: "fish/b-goblin.glb", pack: 5, art: { body: "#c98a94", belly: "#f2dde0", fin: "#a86a74", len: 1, th: 1.0 } },
+  { id: "b-jureum", name: "주름상어", tier: 6, min: 150, max: 200, where: "night", desc: "뱀처럼 긴 고대 상어.", model: "fish/b-jureum.glb", pack: 5, art: { shape: "eel", body: "#5e5248", belly: "#8a7c6c", fin: "#4a4038", len: 1, th: 1.0 } },
+  { id: "b-chorongagwi", name: "초롱아귀", tier: 6, min: 20, max: 120, where: "night", desc: "빛나는 미끼로 사냥하는 심해 아귀.", model: "fish/b-chorongagwi.glb", pack: 5, art: { body: "#4a4258", belly: "#6e6480", fin: "#38324a", len: 1, th: 1.0 } },
+  { id: "b-yuryeongsangeo", name: "유령상어", tier: 6, min: 100, max: 150, where: "night", desc: "투명한 눈의 키메라.", model: "fish/b-yuryeongsangeo.glb", pack: 5, art: { body: "#9aa8b8", belly: "#e2e8ee", fin: "#7d8a99", len: 1, th: 1.0 } },
+  { id: "b-megamouth", name: "메가마우스상어", tier: 6, min: 400, max: 550, where: "night", desc: "거대한 입의 수수께끼 상어. 목격담이 드물어요.", model: "fish/b-megamouth.glb", pack: 5, art: { body: "#6e6258", belly: "#d8d0c2", fin: "#574c40", len: 1, th: 1.0 } },
+  { id: "b-puliphaeryong", name: "풀잎해룡", tier: 6, min: 25, max: 40, where: "night", desc: "해초로 위장한 바다의 용.", model: "fish/b-puliphaeryong.glb", pack: 5, art: { shape: "dragon", body: "#7da86d", belly: "#dcecc9", fin: "#5f8a54", len: 1, th: 1.0 } },
+  { id: "b-tuguge", name: "투구게", tier: 6, min: 40, max: 70, where: "night", desc: "4억 년을 살아남은 살아있는 화석.", model: "fish/b-tuguge.glb", pack: 5, art: { shape: "crab", body: "#7d6a4e", belly: "#d8ccb0", fin: "#655538", len: 1, th: 1.0 } },
+  { id: "b-daewangdeunggak", name: "대왕등각류", tier: 6, min: 30, max: 50, where: "night", desc: "심해의 거대한 쥐며느리.", model: "fish/b-daewangdeunggak.glb", pack: 5, art: { shape: "crab", body: "#9a938a", belly: "#d8d4cc", fin: "#7d766e", len: 1, th: 1.0 } },
+  { id: "b-goldbungeo", name: "황금 붕어", tier: 7, min: 15, max: 35, desc: "온몸이 황금으로 빛나는 붕어. 행운의 상징.", model: "fish/b-goldbungeo.glb", pack: 5, art: { body: "#e8b83a", belly: "#fbeec2", fin: "#d8a82a", len: 1, th: 1.0 } },
+  { id: "b-dalbit", name: "달빛 해파리", tier: 7, min: 30, max: 80, where: "night", desc: "달빛을 머금고 빛나는 해파리.", model: "fish/b-dalbit.glb", pack: 5, art: { body: "#cfd8f2", belly: "#f2f4ff", fin: "#aebadd", len: 1, th: 1.0 } },
+  { id: "b-hongryong", name: "홍룡 아로와나", tier: 7, min: 60, max: 90, desc: "붉은 용의 비늘을 가진 관상의 왕.", model: "fish/b-hongryong.glb", pack: 5, art: { body: "#c23c2e", belly: "#f2c8b8", fin: "#a82f24", len: 1, th: 0.9 } },
+  { id: "b-baekgeum", name: "백금 잉어", tier: 7, min: 40, max: 80, where: "dawn", desc: "백금으로 빚은 듯한 잉어.", model: "fish/b-baekgeum.glb", pack: 5, art: { body: "#e8e6df", belly: "#fbfaf6", fin: "#d8d4c8", len: 1, th: 1.0 } },
+  { id: "b-unicorn", name: "유니콘 상어", tier: 7, min: 200, max: 350, where: "night", desc: "이마에 뿔이 돋은 전설의 상어.", model: "fish/b-unicorn.glb", pack: 5, art: { body: "#8f7fb8", belly: "#e6e0f2", fin: "#726096", len: 1, th: 1.0 } },
+  { id: "b-nalgaehaema", name: "날개 해마", tier: 7, min: 10, max: 25, where: "night", desc: "하늘을 나는 날개가 달린 해마.", model: "fish/b-nalgaehaema.glb", pack: 5, art: { shape: "dragon", body: "#d8a83a", belly: "#fbeec2", fin: "#e8c13a", len: 1, th: 1.0 } },
+  { id: "b-kraken", name: "심연의 크라켄", tier: 8, min: 800, max: 2000, where: "night", desc: "심연에서 배를 끌어당기는 전설의 괴수.", model: "fish/b-kraken.glb", pack: 5, art: { shape: "octo", body: "#5e2f4a", belly: "#8a5570", fin: "#472238", len: 1, th: 1.0 } },
+  { id: "b-yongingeo", name: "용이 된 잉어", tier: 8, min: 300, max: 700, where: "dawn", desc: "천 년을 수행해 용이 된 잉어.", model: "fish/b-yongingeo.glb", pack: 5, art: { shape: "dragon", body: "#d8b13a", belly: "#f8ecc2", fin: "#c23c2e", len: 1, th: 1.0 } },
+  { id: "b-siganjangeo", name: "시간을 삼킨 장어", tier: 8, min: 200, max: 500, where: "night", desc: "나이를 먹지 않는 장어. 눈이 시계처럼 돌아요.", model: "fish/b-siganjangeo.glb", pack: 5, art: { shape: "eel", body: "#4a4460", belly: "#7a7294", fin: "#38334a", len: 1, th: 1.0 } },
+  { id: "b-jormungandr", name: "요르문간드", tier: 8, min: 1000, max: 3000, where: "sea", desc: "세계를 한 바퀴 감는다는 바다뱀.", model: "fish/b-jormungandr.glb", pack: 5, art: { shape: "eel", body: "#3f6d5a", belly: "#a8ccb4", fin: "#2f5747", len: 1, th: 1.3 } },
+  { id: "b-leviathan", name: "공허 리바이어던", tier: 8, min: 900, max: 2500, where: "night", desc: "빛조차 닿지 않는 곳의 군주.", model: "fish/b-leviathan.glb", pack: 5, art: { body: "#2e2a3e", belly: "#55506e", fin: "#232030", len: 1, th: 1.2 } },
+  { id: "b-chawon", name: "차원의 상어", tier: 8, min: 300, max: 600, where: "sea", desc: "물결이 갈라질 때만 보이는 상어.", model: "fish/b-chawon.glb", pack: 5, art: { body: "#6d5a9c", belly: "#d8cff0", fin: "#54467c", len: 1, th: 1.0 } },
+  { id: "b-jungnyeok", name: "중력을 거스르는 고래", tier: 8, min: 800, max: 1800, where: "sea", desc: "하늘과 바다의 경계에서 헤엄치는 고래.", model: "fish/b-jungnyeok.glb", pack: 5, art: { body: "#5a7d9c", belly: "#dcebf4", fin: "#47687e", len: 1, th: 1.5 } },
+  { id: "b-coelacanth", name: "태초의 실러캔스", tier: 9, min: 150, max: 200, where: "night", desc: "4억 년 전 바다에서 그대로 온 물고기.", model: "fish/b-coelacanth.glb", pack: 5, art: { body: "#4a5a78", belly: "#9aa8bc", fin: "#3a4a63", pattern: "spots", pc: "#c8d2de", len: 1, th: 1.0 } },
+  { id: "b-ammonite", name: "태초의 암모나이트", tier: 9, min: 60, max: 150, where: "sea", desc: "소용돌이 껍데기의 고대 두족류.", model: "fish/b-ammonite.glb", pack: 5, art: { shape: "clam", body: "#b08d57", belly: "#e8dcc0", fin: "#8f713f", len: 1, th: 1.0 } },
+  { id: "b-megalodon", name: "태초의 메갈로돈", tier: 9, min: 1200, max: 1800, where: "sea", desc: "고대 바다의 절대 포식자.", model: "fish/b-megalodon.glb", pack: 5, art: { body: "#7d8894", belly: "#eef0f2", fin: "#626c76", len: 1, th: 1.0 } }
+);
+
+// v1.72 오프라인 제작 3D 모델 묶음 지정 (기존 어종 53종)
+for (const [fid, pk] of Object.entries({"b-pirami": 3, "b-bungeo": 3, "b-mangdung": 3, "b-ureok": 3, "b-godeungeo": 3, "b-bollak": 3, "b-chamdom": 3, "b-nongeo": 3, "b-cheongsaechi": 3, "b-goraesangeo": 3, "b-sangalchi": 3, "b-jeongaeng": 3, "b-hakkkong": 3, "b-bokseom": 3, "b-noraemi": 3, "b-sungeo": 3, "b-jwichi": 3, "b-galchi": 3, "b-jukkumi": 3, "b-gwangeo": 3, "b-dodari": 3, "b-gamseongdom": 3, "b-doldom": 3, "b-bengedom": 3, "b-bangeo": 3, "b-munui": 3, "b-samchi": 3, "b-butjangeo": 3, "b-busiri": 3, "b-hokdom": 3, "b-daewangmuneo": 3, "b-neungseong": 3, "b-dotdom": 3, "b-dageumbari": 3, "b-geumdom": 3, "b-byeolgaori": 3, "b-haeryong": 3, "b-jeoneo": 3, "b-myeolchi": 3, "b-kkongchi": 3, "b-jeongeori": 3, "b-nolraegi": 3, "b-yeolgi": 3, "b-chamjogi": 3, "b-imyeonsu": 3, "b-hwangeo": 3, "b-mineo": 3, "b-daegu": 3, "b-hongeo": 3, "b-daebangeo": 3, "s-bajirak": 4, "s-matjogae": 4, "s-kkotge": 4})) { const f = BUILTIN.find(x => x.id === fid); if (f && !f.model) { f.model = "fish/" + fid + ".glb"; f.pack = pk; } }
+
 const NICK_A = ["졸린", "멍한", "느긋한", "배고픈", "수줍은", "심심한", "행복한", "반짝이는", "꾸벅꾸벅", "조용한", "엉뚱한", "따끈한", "노곤한", "말랑한"];
 const NICK_B = ["붕어", "고등어", "멸치", "갈매기", "해달", "문어", "복어", "가자미", "꽁치", "물개", "소라", "해파리", "오징어", "도다리"];
 const COLORS = ["#e2522c", "#2a78bb", "#2f8f5b", "#8448cc", "#d4701a", "#c23b6b", "#178a8a", "#6b6bd6"];
@@ -8118,8 +8221,11 @@ function loadFishModels() {
     }, (e) => { console.warn("model", f.model, e); done(); });
   })))).catch((e) => console.warn(file, e));
   const withModel = BUILTIN.filter(f => f.model);
-  loadPack("fish/models.json", withModel.filter(f => f.pack !== 2)).then(onModelsReady)
-    .then(() => loadPack("fish/models2.json", withModel.filter(f => f.pack === 2))).then(onModelsReady);
+  loadPack("fish/models.json", withModel.filter(f => !f.pack || f.pack === 1)).then(onModelsReady)
+    .then(() => loadPack("fish/models2.json", withModel.filter(f => f.pack === 2))).then(onModelsReady)
+    .then(() => loadPack("fish/models3.json", withModel.filter(f => f.pack === 3))).then(onModelsReady)
+    .then(() => loadPack("fish/models4.json", withModel.filter(f => f.pack === 4))).then(onModelsReady)
+    .then(() => loadPack("fish/models5.json", withModel.filter(f => f.pack === 5))).then(onModelsReady);
 }
 function onModelsReady() { makeThumbs(); }
 function makeThumbs() {
@@ -8146,7 +8252,46 @@ function makeThumbs() {
     updateHud(); refreshSheet(); renderChat();
   } catch (e) { console.warn("thumbs", e); }
 }
-function fishMesh(id) { const m = FISH3D.get(id); return m ? new T3.Mesh(m.geo, m.mat) : null; }
+function fishMesh(id) { const m = FISH3D.get(id); if (!m) return null; const mesh = new T3.Mesh(m.geo, m.mat); const f = findFish(id); if (f && f.tier >= 5) { const au = makeFishAura(f.tier); if (au) mesh.add(au); } return mesh; }
+/* v1.72 등급 오라 — 전설(5)부터 상시 파티클, 등급이 오를수록 반짝이·링이 늘어요 */
+const AURA_SPEC = {
+  5: { n: 26, col: "#ffd76a", size: 3.2, r: .68, rings: [] },
+  6: { n: 40, col: "#54f0dc", size: 3.6, r: .74, rings: [["#54f0dc", .84, .5]] },
+  7: { n: 55, col: "#ff8ae0", size: 4.0, r: .8, rainbow: 1, rings: [["#ff8ae0", .92, -.65]] },
+  8: { n: 78, col: "#b07aff", size: 4.4, r: .86, rings: [["#b07aff", .97, .8], ["#7a4ae0", 1.08, -.55]] },
+  9: { n: 105, col: "#fff2b0", size: 4.8, r: .92, rings: [["#ffd76a", 1.04, .9], ["#ffffff", 1.16, -.7]] } };
+function makeFishAura(tier) {
+  const S = AURA_SPEC[tier]; if (!S || !T3) return null;
+  const g = new T3.Group();
+  const pos = new Float32Array(S.n * 3), ph = new Float32Array(S.n), ps = new Float32Array(S.n);
+  for (let i = 0; i < S.n; i++) {
+    const a = Math.random() * Math.PI * 2, b = Math.acos(2 * Math.random() - 1), rr = S.r * (0.72 + Math.random() * 0.38);
+    pos[i * 3] = rr * Math.sin(b) * Math.cos(a); pos[i * 3 + 1] = rr * Math.cos(b) * 0.8; pos[i * 3 + 2] = rr * Math.sin(b) * Math.sin(a);
+    ph[i] = Math.random(); ps[i] = 0.6 + Math.random() * 0.8;
+  }
+  const geo = new T3.BufferGeometry();
+  geo.setAttribute("position", new T3.BufferAttribute(pos, 3));
+  geo.setAttribute("phase", new T3.BufferAttribute(ph, 1));
+  geo.setAttribute("ps", new T3.BufferAttribute(ps, 1));
+  const mat = new T3.ShaderMaterial({
+    uniforms: { uT: SWIM_T, uCol: { value: new T3.Color(S.col) }, uSize: { value: S.size }, uRain: { value: S.rainbow ? 1 : 0 } },
+    vertexShader: "attribute float phase; attribute float ps; uniform float uT; uniform float uSize; uniform float uRain; uniform vec3 uCol; varying float vA; varying vec3 vC;" +
+      "vec3 hsv2(vec3 c){ vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0,0.0,1.0); return c.z*mix(vec3(1.0),rgb,c.y); }" +
+      "void main(){ vec3 p = position; p.x += sin(uT*0.9+phase*6.283)*0.045; p.y += sin(uT*1.25+phase*12.0)*0.055; p.z += cos(uT*0.7+phase*9.0)*0.045;" +
+      " vec4 mv = modelViewMatrix*vec4(p,1.0); vA = 0.5+0.5*sin(uT*2.3+phase*40.0); vC = uRain>0.5 ? hsv2(vec3(fract(phase+uT*0.045),0.5,1.0)) : uCol;" +
+      " gl_PointSize = uSize*ps*(14.0/max(0.1,-mv.z)); gl_Position = projectionMatrix*mv; }",
+    fragmentShader: "varying float vA; varying vec3 vC; void main(){ float d = length(gl_PointCoord-0.5); float a = smoothstep(0.5,0.04,d)*(0.3+0.7*vA); gl_FragColor = vec4(vC, a*0.85); }",
+    transparent: true, depthWrite: false, blending: T3.AdditiveBlending });
+  const pts = new T3.Points(geo, mat); pts.frustumCulled = false; g.add(pts);
+  for (const [rc, rr, spd] of S.rings) {
+    const rgeo = new T3.RingGeometry(rr, rr + 0.016, 64); rgeo.rotateX(-Math.PI / 2);
+    const rmat = new T3.MeshBasicMaterial({ color: new T3.Color(rc), transparent: true, opacity: .45, side: T3.DoubleSide, depthWrite: false, blending: T3.AdditiveBlending });
+    rmat.onBeforeCompile = (sh) => { sh.uniforms.swimT = SWIM_T; sh.uniforms.uSpd = { value: spd };
+      sh.vertexShader = "uniform float swimT;\nuniform float uSpd;\n" + sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n float ra_ = swimT * uSpd; float rc_ = cos(ra_), rs_ = sin(ra_); transformed.xz = mat2(rc_, -rs_, rs_, rc_) * transformed.xz;"); };
+    const ring = new T3.Mesh(rgeo, rmat); ring.frustumCulled = false; g.add(ring);
+  }
+  return g;
+}
 function decorateStalls() {
   const ids = [...FISH3D.keys()].filter(id => !isShell(id)); if (!ids.length) return;
   for (const s of STALLS) {
