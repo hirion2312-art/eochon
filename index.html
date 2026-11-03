@@ -1460,6 +1460,11 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .rb-row.open{border-color:rgba(47,174,127,.5)}.rb-row .rb-i{font-size:26px}.rb-row .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.rb-row small{color:var(--muted);font-size:12px}
 .rb-tag{font-size:12px;font-weight:800;color:#2fae7f}
 @media (max-width:560px){.rb-ledger{grid-template-columns:repeat(2,1fr)}}
+.rm-open{display:flex;gap:12px;align-items:center;padding:14px;border-radius:16px;border:1.5px solid var(--line);background:var(--bg)}.rm-open.on{border-color:#2fae7f;background:rgba(47,174,127,.12)}.rm-open small{display:block;font-size:12px;color:var(--muted)}.rm-open .grow{flex:1;min-width:0}
+.rm-menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.rm-dish{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 8px;border-radius:14px;border:1.5px dashed var(--line);background:transparent;color:inherit;font:inherit;cursor:pointer;opacity:.6}
+.rm-dish.on{border-style:solid;border-color:#e2952c;background:rgba(226,149,44,.12);opacity:1}.rm-dish .rm-di{font-size:26px}.rm-dish b{font-size:13.5px}.rm-dish small{font-size:12px;color:var(--muted)}
+.rm-dish .rm-tg{font-size:11px;font-weight:800;padding:1px 8px;border-radius:999px;background:rgba(127,127,127,.2)}.rm-dish.on .rm-tg{background:#e2952c;color:#fff}
 .restbar .rb-open{background:#2f8f5b;color:#fff}.restbar .rb-open.on{background:#e2522c}
 .rm-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.rm-step{padding:8px 4px;border-radius:12px;text-align:center;border:1.5px solid var(--line);background:var(--bg);font-size:11.5px;display:flex;flex-direction:column;gap:2px}
 .rm-step b{font-size:12px}.rm-step.done{opacity:.6}.rm-step.cur{border-color:#e2952c;background:rgba(226,149,44,.16)}
@@ -1609,7 +1614,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.55.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.56.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -2253,6 +2258,7 @@ function normRest(r) {
   const pl = k.plate && typeof k.plate === "object" ? k.plate : {};
   return {
     lv: clamp(Math.floor(Number(r.lv) || 0), 0, REST_LV.length - 1), mig: r.mig ? 1 : 0,
+    off: (Array.isArray(r.off) ? r.off : []).filter(id => RECIPE[id]),   // 해금했지만 주문은 안 받는 메뉴 (가게 관리)
     staff: (Array.isArray(r.staff) ? r.staff : []).filter(x => x && REST_STAFF_KEYS.includes(x.g)).slice(0, 4).map(x => ({ id: str(x.id, 16) || uid4(), g: x.g, post: ["prep", "run", "cook"].includes(x.post) ? x.post : "prep", name: str(x.name, 8) || "알바", since: str(x.since, 10) })),
     last: r.last && typeof r.last === "object" && typeof r.last.d === "string" ? { d: r.last.d, sales: Number(r.last.sales) || 0, tips: Number(r.last.tips) || 0, plates: Number(r.last.plates) || 0, wages: Number(r.last.wages) || 0, opex: Number(r.last.opex) || 0, net: Number(r.last.net) || 0, short: Number(r.last.short) || 0, closed: !!r.last.closed } : null,
     unlocked: (Array.isArray(r.unlocked) ? r.unlocked : []).filter(id => RECIPE[id]),
@@ -2263,6 +2269,7 @@ function normRest(r) {
   };
 }
 const restUnlocked = (r) => r.cost === 0 || P.rest.unlocked.includes(r.id);
+const restOnMenu = (r) => restUnlocked(r) && !(P.rest.off || []).includes(r.id);
 function restDay() { const d = kstDay(); if (!P.rest.day || P.rest.day.d !== d) { if (P.rest.day) restSettle({ ...P.rest.day, open: P.rest.day.tickets > 0 }); P.rest.day = { d, sales: 0, plates: 0, tips: 0, tickets: 0, perfect: 0 }; } return P.rest.day; }
 
 function normProfile(p) {
@@ -4837,6 +4844,7 @@ const REST_ST = [   // 스테이션 자리(lx, lz) · 사람이 서는 곳(sx, s
   { id: "fry", name: "튀김기", ico: "🍤", lx: -2.3, lz: 1.55, sx: -1.35, sz: 1.55, ry: -Math.PI / 2 },
   { id: "plate", name: "접시", ico: "🍽", lx: 2.62, lz: 1.05, sx: 1.7, sz: 1.05, ry: Math.PI / 2 },
   { id: "pass", name: "서빙대", ico: "🛎", lx: 2.62, lz: -.75, sx: 1.7, sz: -.75, ry: Math.PI / 2 },
+  { id: "trash", name: "쓰레기통", ico: "🗑", lx: 1.25, lz: -2.0, sx: 1.25, sz: -1.2, ry: Math.PI },
 ];
 const restZ = () => POCHA_Z(S.restSlot >= 0 ? S.restSlot : 0);
 const restW = (lx, lz) => ({ x: POCHA.x + lx, z: restZ() + lz });   // 포차 좌표 → 마을 좌표
@@ -4852,6 +4860,7 @@ function restInnerWalk(x, z) {   // 내 포차 안에서 걸을 수 있는 곳 (
   if (lx > 2.05 && Math.abs(lz) < 1.78) return false;                     // 앞 카운터 (양끝 틈으로 드나들어요)
   if (lx > -1.45 && lx < .25 && lz > 1.55) return false;                  // 수조
   if (Math.abs(lx + .45) < .55 && lz < -1.45) return false;               // 냉장고
+  if (Math.abs(lx - 1.25) < .4 && lz < -1.6) return false;                 // 쓰레기통
   return true;
 }
 /* 내 포차 안에 있을 때: 포차 건물들의 높이 2.3 위(지붕 · 벽 위 · 간판)를 잘라서 위에서 내려다봐도 안이 보이게 (v1.52 · 단면 보기) */
@@ -4901,6 +4910,11 @@ function buildRestScene(force) {
     box(.62, .22, .74, cmat(0xb7bec4), 0, .11, 0, fr);
     const oil = new T3.Mesh(new T3.PlaneGeometry(.5, .6), new T3.MeshBasicMaterial({ color: 0xe0a23a })); oil.rotation.x = -Math.PI / 2; oil.position.y = .23; fr.add(oil); RESTG.oil = oil;
     for (const dz of [-.15, .15]) box(.22, .1, .2, cmat(0x9aa2a8), .02, .28, dz, fr); }
+  // 쓰레기통 (남쪽 벽)
+  { const tb = new T3.Group(); tb.position.set(1.25, 0, -2.0); root.add(tb);
+    plain(GEOD.restBin || (GEOD.restBin = new T3.CylinderGeometry(.26, .22, .62, 16)), cmat(0x5f7a62), 0, .31, 0, tb).castShadow = true;
+    plain(GEOD.restBinLid || (GEOD.restBinLid = new T3.CylinderGeometry(.29, .29, .06, 16)), cmat(0x3f5a44), 0, .65, 0, tb);
+    plain(GEOD.restBinH || (GEOD.restBinH = new T3.BoxGeometry(.16, .04, .05)), cmat(0x2a3a2c), 0, .7, 0, tb); }
   // 앞 카운터: 접시 선반 · 서빙 종
   put("dishrack_plates", .3, 2.62, 1.04, 1.55);
   { const bell = plain(GEOD.restBell || (GEOD.restBell = new T3.SphereGeometry(.1, 14, 8, 0, 6.3, 0, 1.6)), cmat(0xe8c060), 2.62, 1.06, -1.3, root); bell.castShadow = true; }
@@ -4908,7 +4922,7 @@ function buildRestScene(force) {
   for (const s of REST_ST) {
     const hit = new T3.Mesh(new T3.BoxGeometry(.9, 1.6, .9), MAT.hit || new T3.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }));
     hit.position.set(s.lx, .9, s.lz); hit.userData.pick = { kind: "rest", id: s.id }; root.add(hit); RESTG.hits.push(hit); pickables.push(hit);
-    const yy = s.id === "pass" || s.id === "plate" ? 1.06 : s.id === "fridge" ? 1.55 : s.id === "boil" ? top + .2 : s.id === "fry" ? top + .25 : top + .06;
+    const yy = s.id === "pass" || s.id === "plate" ? 1.06 : s.id === "fridge" ? 1.55 : s.id === "trash" ? .75 : s.id === "boil" ? top + .2 : s.id === "fry" ? top + .25 : top + .06;
     const g = new T3.Group(); g.position.set(s.lx + (s.lx < 0 && s.id !== "fridge" ? .12 : 0), yy, s.lz); root.add(g);
     const gauge = makeText(); gauge.visible = false; gauge.position.set(s.lx + (s.lx < 0 ? .6 : -.2), 1.85, s.lz); root.add(gauge);
     RESTG.st[s.id] = { g, gauge, key: "" };
@@ -5060,6 +5074,11 @@ function restUse(id) {
     if (done) { const q = done.cook && pl.items.every(x => x.q === "perfect") ? "perfect" : "normal"; pl.dish = { id: done.id, q, items: pl.items }; pl.items = []; restSnd("complete_1", .55); { const pw = stationW("plate"); fxPop(pw.x, 2.1, pw.z, done.ico + " " + done.name + " 완성!", "#ffffff"); } }
     return restChanged();
   }
+  if (id === "trash") {
+    if (!hand) { toast(restK().plate.items.length ? "접시에 잘못 담은 재료는 접시에서 들어 와서 버려요" : "버릴 것을 들고 와요"); return; }
+    const what = hand.dish ? RECIPE[hand.dish].name : itemName(hand);
+    k.hand = null; restSnd("plate_2", .4); toast("🗑 " + what + "을(를) 버렸어요"); return restChanged();
+  }
   if (id === "pass") {
     if (!hand || !hand.dish) { toast(hand ? "재료는 접시에 담아 요리로 만들어요" : "완성된 요리를 들고 와요"); return; }
     serveDish(hand);
@@ -5139,7 +5158,7 @@ function restRenderStations(force) {
 /* ---------- 손님 · 주문 티켓 ---------- */
 S.restGuests = []; S.restTickets = []; S.restSlot = -1;
 function pickTicketRecipe() {
-  const un = RECIPES.filter(restUnlocked); if (!un.length) return null;
+  const un = RECIPES.filter(restOnMenu); if (!un.length) return null;
   const have = (id, n) => P.bag.filter(it => it.fishId === id).length + kitchenCount(id) >= n;
   const ok = un.filter(r => r.ing.every(([id, n]) => have(id, n)));
   const pool = ok.length && Math.random() < .8 ? ok : un;   // 대부분은 지금 만들 수 있는 메뉴로 와요
@@ -5197,6 +5216,16 @@ function restTick(t, dt) {
   }
   if (!S.restRenderAt || now - S.restRenderAt > 120) { S.restRenderAt = now; restRenderStations(); renderRestHud(true); }
   restStaffTick(t, dt);
+  { // 지금 행동 버튼이 가리키는 스테이션에 흰 테두리 (재료를 어디에 올릴지 보여요)
+    const m = atRest() && curAction && /^rest:([a-z]+):/.exec(curAction.key || ""), sid = m ? m[1] : null;
+    if (!RESTG.hl) { const g = new T3.Group(), mat = new T3.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .95, depthTest: false });
+      for (const k of [1, 1.06]) { const l = new T3.LineSegments(new T3.EdgesGeometry(new T3.BoxGeometry(.9 * k, 1 * k, .9 * k)), mat); l.renderOrder = 9; g.add(l); }
+      const glow = new T3.Mesh(new T3.BoxGeometry(.92, 1.02, .92), new T3.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .12, depthWrite: false })); g.add(glow); g.userData.glow = glow;
+      g.visible = false; RESTG.root.add(g); RESTG.hl = g; }
+    const s2 = sid && REST_ST.find(x => x.id === sid);
+    RESTG.hl.visible = !!s2;
+    if (s2) { const hh2 = s2.id === "fridge" ? 1.5 : s2.id === "trash" ? .75 : s2.id === "pass" || s2.id === "plate" ? 1.15 : 1.15; RESTG.hl.position.set(s2.lx, hh2 / 2 + (s2.id === "fridge" || s2.id === "trash" ? 0 : .02), s2.lz); RESTG.hl.scale.set(1, hh2, 1); RESTG.hl.userData.glow.material.opacity = .1 + Math.sin(t * 5) * .05; }
+  }
   if (RESTG.oil) RESTG.oil.material.color.setHSL(.1, .75, .52 + (restK().fry.length ? Math.sin(t * 20) * .05 : 0));
   if (Math.random() < .25) for (const id of ["boil", "fry", "grill"]) if (restK()[id].length) { const p = stationW(id); fxBurst(p.x + .1, 1.25, p.z + (Math.random() - .5) * .3, { n: 1, spd: .15, up: .7, size: .14, dur: 1.1, spread: .1, col: id === "fry" ? 0xffe0a0 : 0xffffff }); }
 }
@@ -5307,6 +5336,7 @@ function restActions(consider) {
     if (s.id === "board" && k.board[0] && !k.board[0].it.chopped) label = "🔪 썰기! " + k.board[0].it.hits + "/" + chopHitsFor(k.board[0].it.fish);
     else if (s.id === "fridge") label = hand && !hand.dish ? "🧊 냉장고에 넣기" : "🧊 재료 꺼내기";
     else if (s.id === "pass") label = hand && hand.dish ? "🛎 서빙하기" : "🛎 서빙대";
+    else if (s.id === "trash") label = hand ? "🗑 버리기 · " + (hand.dish ? RECIPE[hand.dish].name : itemName(hand)) : "🗑 쓰레기통";
     else if (stationItems(s.id) && stationItems(s.id).length && !hand) label = s.ico + " 꺼내기";
     else if (hand && !hand.dish && s.id !== "pass") label = s.ico + " " + s.name + "에 올리기";
     consider(p.x, p.z, { key: "rest:" + s.id + ":" + label, label, run: () => { ME.ry = s.ry; presMove(true); restUse(s.id); } }, .95);
@@ -5446,6 +5476,19 @@ function restStaffTick(t, dt) {
 function restManageSheet(body) {
   const lv = P.rest.lv, L = REST_LV[lv], nx = REST_LV[lv + 1], d = restDay();
   setHead("🧑‍🍳 가게 관리", L.name + " · 알바 " + P.rest.staff.length + "/" + L.hire + "명 · 동시 주문 " + L.tickets + "장");
+  // 장사 시작 · 종료
+  body.append(h("div", { class: "rm-open" + (S.restOpen ? " on" : "") }, h("span", { class: "rm-i", text: S.restOpen ? "🏮" : "💤" }),
+    h("div", { class: "grow" }, h("b", { text: S.restOpen ? "영업 중이에요" : "준비 중이에요" }), h("small", { text: S.restOpen ? "손님이 들어와요 · 알바는 내가 포차 근처에 있을 때 일해요" : "장사를 시작해야 손님이 와요" })),
+    h("button", { class: "btn " + (S.restOpen ? "" : "pri"), onclick: () => { setRestOpen(!S.restOpen); setTimeout(() => refreshSheet(true), 0); }, text: S.restOpen ? "🌙 장사 종료" : "🏮 장사 시작" })));
+  // 메뉴: 해금한 레시피 중 주문 받을 것 고르기
+  const opened = RECIPES.filter(restUnlocked), onN = opened.filter(restOnMenu).length;
+  body.append(h("div", { class: "sec", text: "🍽 오늘의 메뉴 · 주문 받는 요리 " + onN + " / " + opened.length }));
+  body.append(h("div", { class: "rm-menu" }, opened.map(r => { const on = restOnMenu(r);
+    return h("button", { class: "rm-dish" + (on ? " on" : ""), "aria-pressed": String(on), onclick: () => { const off = P.rest.off || (P.rest.off = []);
+        if (on) { if (onN <= 1) { toast("메뉴는 하나 이상 켜 둬야 해요"); return; } off.push(r.id); } else P.rest.off = off.filter(x => x !== r.id);
+        markDirty(); refreshSheet(true); } },
+      h("span", { class: "rm-di", text: r.ico }), h("b", { text: r.name }), h("small", { class: "num", text: won(Math.round(recipePrice(r) * (1 + L.price))) }), h("span", { class: "rm-tg", text: on ? "주문 받음" : "쉬는 메뉴" })); })));
+  { const locked = RECIPES.filter(r => !restUnlocked(r)); if (locked.length) body.append(h("button", { class: "btn sm", style: "margin-top:6px", onclick: () => openSheet("restbook"), text: "📖 새 레시피 열기 (" + locked.length + "개 남음)" })); }
   // 가게 단계
   const steps = h("div", { class: "rm-steps" }, REST_LV.map((x, i) => h("div", { class: "rm-step" + (i === lv ? " cur" : i < lv ? " done" : "") }, h("b", { text: "Lv." + (i + 1) }), h("span", { text: x.name }))));
   body.append(h("div", { class: "sec", text: "🏮 가게 단계" }), steps);
@@ -8598,9 +8641,6 @@ function updateChar(F, f, t, dt, now) {
   const vx = F.px + (F.sx || 0), vz = F.pz + (F.sz || 0);
   F.g.position.set(vx, seat && seat.kind === "boat" ? seat.y : seat && seat.kind === "table" ? .3 : stool ? .5 : groundY(vx, vz), vz);
   let shownRy = F.ry;
-  if (f.me && !moving && !sitting && f.st === "idle" && now - (ME.stopAt || 0) > 1500) {
-    F.faceCam = lerpAngle(F.faceCam ?? F.ry, Math.atan2(camera.position.x - F.px, camera.position.z - F.pz), Math.min(1, dt * 3)); shownRy = F.faceCam;
-  } else F.faceCam = F.ry;
   F.g.rotation.y = shownRy;
   applyOutfit(F, f.wear, f.color);
   if (F.skinC !== f.skin) { F.skinM.color.set(f.skin || "#f6d2b4"); F.skinC = f.skin; }
