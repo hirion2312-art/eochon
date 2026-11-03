@@ -1601,7 +1601,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.51.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.52.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -4838,6 +4838,20 @@ function restInnerWalk(x, z) {   // 내 포차 안에서 걸을 수 있는 곳 (
   if (Math.abs(lx + .45) < .55 && lz < -1.45) return false;               // 냉장고
   return true;
 }
+/* 내 포차 안에 있을 때: 포차 건물들의 높이 2.3 위(지붕 · 벽 위 · 간판)를 잘라서 위에서 내려다봐도 안이 보이게 (v1.52 · 단면 보기) */
+const REST_CLIP = { plane: null, mats: null };
+function restClip(on) {
+  if (!T3 || !R) return;
+  if (!REST_CLIP.plane) {
+    REST_CLIP.plane = new T3.Plane(new T3.Vector3(0, -1, 0), 1e6); R.localClippingEnabled = true; REST_CLIP.mats = [];
+    for (const g of scene.children) if (g.userData && g.userData.pocha) g.traverse(o => {
+      if (!o.material || o.userData.noClip) return;
+      const one = (m) => { const c = m.clone(); c.clippingPlanes = [REST_CLIP.plane]; REST_CLIP.mats.push(c); return c; };
+      o.material = Array.isArray(o.material) ? o.material.map(one) : one(o.material);
+    });
+  }
+  REST_CLIP.plane.constant = on ? 2.3 : 1e6;
+}
 const restNear = () => S.restSlot >= 0 && ME.x > POCHA.x - 3.5 && ME.x < POCHA.x + 13 && Math.abs(ME.z - restZ()) < 4.4 && !atHome();
 
 /* ---------- 3D: KayKit Restaurant Bits(CC0)를 내 포차 안에 놓아요 (내 화면에만) ---------- */
@@ -5119,7 +5133,7 @@ function restTick(t, dt) {
   if (!RESTG && T3 && R) { loadRestModels(); buildRestScene(true); }
   if (!RESTG) return;
   const inside = !atHome() && inPochaBox(S.restSlot, ME.x, ME.z);
-  if (inside !== !!S.restIn) { S.restIn = inside; updateRestBar(); updateHint(); }
+  if (inside !== !!S.restIn) { S.restIn = inside; restClip(inside); if (inside) cam.yawGoal = 0; updateRestBar(); updateHint(); }
   { const sg = stallSigns.find(x => x.userData.i === S.restSlot); if (sg) sg.visible = !inside; }   // 안에 있을 땐 앞 카운터 간판이 시야를 가려서 숨겨요
   const near = restNear(), now = Date.now(), d = restDay();
   if (near !== !!S.restNearOn) { S.restNearOn = near; updateRestBar(); }
@@ -6897,7 +6911,7 @@ const POCHA_COL = [["#e2402a", "#7a1410"], ["#f28a1a", "#7a3a06"], ["#2a78bb", "
 const pochaSign = (i, name) => ({ shape: "board", fill: { type: "neon", base: POCHA_COL[i][1] }, frame: { c: "#1a1a1e", inner: "rgba(255,255,255,.25)" }, bulbs: "#ffd890",
   t: { text: name || "낭만포차 " + (i + 1) + "호", font: "hyeon", color: "#fffaf0", glow: POCHA_COL[i][0], size: .44, y: .42 }, sub: { text: "★ " + POCHA_MENU[i] + " ★", color: "#ffe9a8", glow: "#ff9a3c", y: .8, size: .2 } });
 function buildPocha() {
-  const det = new T3.Group(); scene.add(det); DETAIL_GROUPS.push(det);
+  const det = new T3.Group(); scene.add(det); DETAIL_GROUPS.push(det); det.userData.pocha = true;   // 식당 안에서 위쪽을 잘라 보여 줄 묶음 (restClip)
   const wallW = cmat(0xf2ede4), tileM = phong(0xffffff, { map: canvasTex(128, 128, (g, w, hh) => { g.fillStyle = "#e9e4da"; g.fillRect(0, 0, w, hh); g.strokeStyle = "#cfc8bb"; g.lineWidth = 2; for (let y = 0; y <= hh; y += 16) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); } for (let y = 0; y < hh; y += 16) for (let x = (y / 16) % 2 ? 0 : 16; x < w; x += 32) { g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 16); g.stroke(); } }, 2, 1) });
   const roofM = cmat(0x4a4e56), steel = cmat(0xb8bec4), dark = cmat(0x2a2d33), wood = cmat(0x9b7653), tarp = phong(0xf26b2a, { side: T3.DoubleSide }), tarp2 = phong(0xf7e9d0, { side: T3.DoubleSide });
   const floorM = cmat(0x8a8e86);
@@ -8665,12 +8679,11 @@ function loop3D(ms) {
   _v.set(ME.x, 1.1 + groundY(ME.x, ME.z), ME.z);
   if (BREACH) { const B = BREACH, m = B.boom ? .55 : .45; _v.set(ME.x + (B.x - ME.x) * m, B.boom && B.last ? Math.max(1.1, B.last.y * .7) : 1.1, ME.z + (B.z - ME.z) * m); }   // 대물 연출: 물고기 쪽을 크게 보여 줌
   cam.t.lerp(_v, 1 - Math.pow(BREACH ? .05 : .002, dt));
-  const pitch0 = S.mung ? Math.max(.15, cam.pitch * .6) : atRest() ? .11 : atHome() ? Math.max(.72, cam.pitch) : cam.pitch, pitch = pitch0 + ((.16) - pitch0) * (cam.bz || 0);   // 대물 연출: 낮은 각도로 올려다봄
+  const pitch0 = S.mung ? Math.max(.15, cam.pitch * .6) : atRest() ? Math.max(.98, cam.pitch) : atHome() ? Math.max(.72, cam.pitch) : cam.pitch, pitch = pitch0 + ((.16) - pitch0) * (cam.bz || 0);   // 대물 연출: 낮은 각도로 올려다봄
   if (S.meMenu && ME.moving) closeMeMenu();
   cam.zk = (cam.zk || 0) + ((S.meMenu ? 1 : 0) - (cam.zk || 0)) * Math.min(1, dt * 6);
   cam.bz = (cam.bz || 0) + ((BREACH ? 1 : 0) - (cam.bz || 0)) * Math.min(1, dt * 2);
-  const cd = (atRest() ? (MOBILE() ? 8.2 : 6.8) : atHome() ? Math.min(cam.dist, 12) : cam.dist) * (1 - .3 * cam.zk) + cam.bz * Math.max(3, 15 - cam.dist);
-  if (atRest()) { cam.yawGoal = Math.PI / 2; cam.t.x = Math.max(cam.t.x, POCHA.x - .4); }   // 내 포차 안: 열린 앞쪽에서 들여다봐요 (지붕 · 옆벽에 안 가리게)
+  const cd = (atRest() ? clamp(cam.dist, MOBILE() ? 10.5 : 8.5, 13) : atHome() ? Math.min(cam.dist, 12) : cam.dist) * (1 - .3 * cam.zk) + cam.bz * Math.max(3, 15 - cam.dist);
   camera.position.set(cam.t.x + Math.sin(cam.yaw) * Math.cos(pitch) * cd, cam.t.y + Math.sin(pitch) * cd, cam.t.z + Math.cos(cam.yaw) * Math.cos(pitch) * cd);
   if (camera.position.y < .6) camera.position.y = .6;
   { const gh = groundY(camera.position.x, camera.position.z) + 1.4; if (camera.position.y < gh) camera.position.y = gh; }   // 언덕에 카메라가 파묻히지 않게
