@@ -518,6 +518,17 @@ body.titling .hud,body.titling .hint,body.titling .actbtn,body.titling .place,bo
 .tstart:disabled{opacity:.55;cursor:wait}
 .tstart:not(:disabled):hover{filter:brightness(1.08)}
 .tfoot{font-size:11.5px;color:var(--hud-muted);text-align:center}
+.counter{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:14px;background:linear-gradient(180deg,#2f4a6a,#22374f);color:#fff}
+.counter .ticket{align-self:flex-start;font-size:12px;padding:2px 10px;border-radius:6px;background:#fff6dc;color:#2f4a6a;font-weight:700}
+.counter .tabs button{border-color:rgba(255,255,255,.35);color:#fff}
+.counter .tabs button[aria-selected="true"]{background:#fff6dc;color:#2f4a6a;border-color:#fff6dc}
+.jobcard{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--bg);flex-wrap:wrap}
+.jobcard.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.jobcard.soon{opacity:.62}
+.jobcard .jico{font-size:30px;width:44px;text-align:center;flex:none}
+.jobcard .grow{flex:1;min-width:180px;display:flex;flex-direction:column;gap:4px}
+.jobcard .perks{display:flex;gap:4px;flex-wrap:wrap}
+.idcard{width:100%;max-width:520px;border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,.18);display:block;margin:0 auto}
 .rankrow{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--bg)}
 .rankrow .rk{width:30px;text-align:center;font-family:var(--f-display);font-size:18px;flex:none}
 .rankrow .grow{flex:1;min-width:0}.rankrow .grow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
@@ -726,7 +737,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
     <label class="tsound"><input type="checkbox" id="tSound" checked> 물소리·효과음 켜고 시작</label>
     <button class="tstart" id="tStart" type="button" disabled>불러오는 중…</button>
     <div class="tlinks"><button type="button" id="tBug">🐞 오류 제보</button><button type="button" id="tIdea">💡 건의하기</button><button type="button" id="tInvite">🤝 초대 코드</button></div>
-    <div class="tfoot"><span id="tVer">v1.15.0</span> · Enter 키로도 들어갈 수 있어요</div>
+    <div class="tfoot"><span id="tVer">v1.16.0</span> · Enter 키로도 들어갈 수 있어요</div>
   </div>
 </div>
 
@@ -745,7 +756,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.15.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.16.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 10 },
   { name: "고급", base: 30 },
@@ -1050,6 +1061,24 @@ const CLOTHES = [
 ];
 const CLOTH = Object.fromEntries(CLOTHES.map(c => [c.id, c]));
 const ROOKIE_SET = CLOTHES.filter(c => c.ev).map(c => c.id);
+/* 직업 기본 정의 (동사무소 코드는 아래 「동사무소 · 직업」) */
+const JOBS = [
+  { id: "sashimi", name: "횟집 사장", ico: "🍣", ready: true, income: "물고기를 회로 떠서 시장 노점에서 팔아요. 회 뜨기와 회 팔기는 횟집 사장만 할 수 있어요.",
+    perks: ["Lv.3 노점 메뉴 14칸", "Lv.5 회 효과 시간 +25%", "Lv.7 노점 메뉴 17칸", "Lv.8 회 효과 시간 +50%", "Lv.10 노점 메뉴 20칸"] },
+  { id: "diver", name: "해녀", ico: "🤿", ready: false, income: "물질로 전복·소라·성게·해삼을 캐서 팔아요." },
+  { id: "farmer", name: "농부", ico: "🌾", ready: false, income: "텃밭을 두 배로 쓰고, 귀한 작물을 키워 팔아요." },
+  { id: "pocha", name: "포차 사장", ico: "🍲", ready: false, income: "포차 거리에서 매운탕·해물파전·조개구이를 만들어 팔아요." },
+  { id: "carpenter", name: "목수", ico: "🪚", ready: false, income: "가구를 만들어 집주인들에게 팔아요." },
+];
+const JOB = Object.fromEntries(JOBS.map(j => [j.id, j]));
+const JOB_XP = [0, 6, 16, 32, 55, 85, 125, 175, 240, 320];   // Lv.1~10
+const JOB_CHANGE_COST = 1000, JOB_COOLDOWN = 864e5, MENU_CAP = 20;
+const jobLv = (id) => { const x = (P.job && P.job.xp && P.job.xp[id]) || 0; let lv = 1; while (lv < 10 && x >= JOB_XP[lv]) lv++; return lv; };
+const isJob = (id) => !!(P.job && P.job.id === id);
+const myTag = () => P.title || (P.job && JOB[P.job.id] ? JOB[P.job.id].name : "");
+function menuMax() { if (!isJob("sashimi")) return 12; const lv = jobLv("sashimi"); return lv >= 10 ? 20 : lv >= 7 ? 17 : lv >= 3 ? 14 : 12; }
+function dishQuality() { if (!isJob("sashimi")) return 0; const lv = jobLv("sashimi"); return lv >= 8 ? 2 : lv >= 5 ? 1 : 0; }
+
 const NOWEAR = {};
 function normWear(w) {
   const o = {};
@@ -1066,7 +1095,7 @@ function parseWear(s) {
 function newProfile() {
   return { nick: pick(NICK_A) + " " + pick(NICK_B), color: pick(COLORS), skin: "#f6d2b4", gold: 300,
     baits: { shrimp: 5, paste: 0, lure: 0, legend: 0 }, bait: "worm", bag: [], dex: {}, autoSell: 0, caught: 0,
-    dishes: [], buffs: [], listing: {}, pendingTrades: {}, pendingOrders: {}, rod: "bamboo", rods: ["bamboo"], gear: [], equip: [], quests: null, closet: [], wear: {}, friends: {}, reels: ["basic"], reel: "basic", lines: ["nylon"], line: "nylon", tools: {}, xp: 0, stats: {}, ach: {}, title: "", stocks: {}, bank: { amt: 0, ts: 0 }, tut: {}, attend: { n: 0, last: "" }, ref: null, invited: {}, v: 7 };
+    dishes: [], buffs: [], listing: {}, pendingTrades: {}, pendingOrders: {}, rod: "bamboo", rods: ["bamboo"], gear: [], equip: [], quests: null, closet: [], wear: {}, friends: {}, reels: ["basic"], reel: "basic", lines: ["nylon"], line: "nylon", tools: {}, xp: 0, stats: {}, ach: {}, title: "", stocks: {}, bank: { amt: 0, ts: 0 }, tut: {}, attend: { n: 0, last: "" }, ref: null, invited: {}, job: { id: "", xp: {}, changedAt: 0 }, resident: 0, v: 7 };
 }
 function normItem(it) {
   if (!it || typeof it !== "object") return null;
@@ -1079,8 +1108,9 @@ function normDish(d) {
   const tier = clamp(Math.floor(Number(d.tier) || 0), 0, 4);
   const b = d.buff || {};
   const type = BUFF_KEYS.includes(b.type) ? b.type : "bite";
-  return { id: isUid(d.id) ? d.id : uid4(), fishId: str(d.fishId, 80), name: str(d.name, 16) || "회", tier, size: clamp(Number(d.size) || 1, 0.1, 2000),
-    buff: { type, val: BUFFS[type].vals[tier], min: BUFF_MIN[tier] }, ts: Number(d.ts) || Date.now() };
+  const q = clamp(Math.floor(Number(d.q) || 0), 0, 2);
+  return { id: isUid(d.id) ? d.id : uid4(), fishId: str(d.fishId, 80), name: str(d.name, 16) || "회", tier, size: clamp(Number(d.size) || 1, 0.1, 2000), q,
+    buff: { type, val: BUFFS[type].vals[tier], min: Math.round(BUFF_MIN[tier] * (1 + .25 * q)) }, ts: Number(d.ts) || Date.now() };
 }
 function normFriends(f) {
   const o = {};
@@ -1121,6 +1151,12 @@ function normProfile(p) {
   o.closet = [...new Set((Array.isArray(p.closet) ? p.closet : []).filter(id => CLOTH[id]))];
   o.wear = normWear(p.wear); for (const k of Object.keys(o.wear)) if (!o.closet.includes(o.wear[k])) delete o.wear[k];
   o.invited = {}; if (p.invited && typeof p.invited === "object") for (const [k, v] of Object.entries(p.invited).slice(0, 300)) if (isUid(k)) o.invited[k] = v === 2 ? 2 : 1;
+  o.job = { id: "", xp: {}, changedAt: 0 };
+  if (p.job && typeof p.job === "object") {
+    for (const [k, v] of Object.entries(p.job.xp || {})) if (/^[a-z]{2,12}$/.test(k)) o.job.xp[k] = clamp(Math.floor(Number(v) || 0), 0, 1e7);
+    o.job.id = /^[a-z]{2,12}$/.test(p.job.id || "") ? p.job.id : ""; o.job.changedAt = Number(p.job.changedAt) || 0;
+  }
+  o.resident = Number(p.resident) || 0;
   o.attend = { n: clamp(Math.floor(Number(p.attend && p.attend.n) || 0), 0, 7), last: str(p.attend && p.attend.last, 10) };
   o.ref = p.ref && typeof p.ref === "object" && isUid(p.ref.uid) ? { uid: p.ref.uid, nick: str(p.ref.nick, 16), code: str(p.ref.code, 6), at: Number(p.ref.at) || 0, paid: !!p.ref.paid } : null;
   return o;
@@ -1185,9 +1221,9 @@ function applyBuff(buff) {
   P.buffs = P.buffs.filter(b => b.until > now);
   markDirty();
 }
-function makeDish(item) {
+function makeDish(item, q) {
   const type = BUFF_KEYS[hashStr(item.fishId) % BUFF_KEYS.length];
-  return normDish({ id: uid4(), fishId: item.fishId, name: item.name + " 회", tier: item.tier, size: item.size, buff: { type } });
+  return normDish({ id: uid4(), fishId: item.fishId, name: item.name + " 회", tier: item.tier, size: item.size, buff: { type }, q: q == null ? dishQuality() : q });
 }
 function dishBuffLine(d) { return buffText(d.buff) + " · " + d.buff.min + "분"; }
 function sellValue(price) { return Math.round(price * (1 + buffVal("gold") / 100)); }
@@ -1220,7 +1256,7 @@ function wearGear() {
    P.stats에 쌓인 기록으로 판정. 달성하면 알림 → 도전과제 화면에서 보상(골드)을 받음. 일부는 이름표에 다는 칭호도 줌 */
 const stat = (k, n) => { P.stats[k] = (P.stats[k] || 0) + (n == null ? 1 : n); };
 const dexCount = () => Object.keys(P.dex).filter(id => findFish(id) && !isShell(id)).length;
-const ACH_ICON = { "캐스팅": "🎣", "낚시": "🐟", "파이팅": "💪", "도감": "📖", "함께": "🤝", "갯벌": "🐚", "회 · 시장": "🍣", "성장": "⭐", "은행 · 복권": "💰", "초대 · 출석": "🎁" };
+const ACH_ICON = { "캐스팅": "🎣", "낚시": "🐟", "파이팅": "💪", "도감": "📖", "함께": "🤝", "갯벌": "🐚", "회 · 시장": "🍣", "성장": "⭐", "은행 · 복권": "💰", "초대 · 출석": "🎁", "직업": "🪪" };
 const ACH = [
   { id: "cast1", cat: "캐스팅", name: "첫 캐스팅", desc: "낚싯대를 처음 던지기", stat: "casts", goal: 1, gold: 50 },
   { id: "cast100", name: "던지기 장인", desc: "100번 던지기", stat: "casts", goal: 100, gold: 500 },
@@ -1260,6 +1296,9 @@ const ACH = [
   { id: "invite1", name: "첫 초대", desc: "추천인 코드로 친구 1명 초대 (친구가 Lv.3 달성)", stat: "invites", goal: 1, gold: 300 },
   { id: "invite3", name: "마을 홍보대사", desc: "친구 3명 초대", stat: "invites", goal: 3, gold: 1500, title: "홍보대사" },
   { id: "invite10", name: "어촌 이장님", desc: "친구 10명 초대", stat: "invites", goal: 10, gold: 5000, title: "어촌 이장님" },
+  { id: "job1", cat: "직업", name: "어엿한 주민", desc: "동사무소에서 직업 등록하기", val: () => (P.job && P.job.id ? 1 : 0), goal: 1, gold: 300 },
+  { id: "sashimi5", name: "횟집 장인", desc: "횟집 사장 숙련도 Lv.5", val: () => jobLv("sashimi"), goal: 5, gold: 1500, title: "횟집 장인" },
+  { id: "sashimi10", name: "전설의 칼잡이", desc: "횟집 사장 숙련도 Lv.10", val: () => jobLv("sashimi"), goal: 10, gold: 5000, title: "전설의 칼잡이" },
 ];
 { let c = ""; for (const a of ACH) { if (a.cat) c = a.cat; else a.cat = c; } }
 const ACH_TITLES = ACH.filter(a => a.title).map(a => a.title);
@@ -1280,7 +1319,7 @@ function claimAch(a) {
   st.c = true; P.gold += a.gold; markDirty(); sfx("ui-confirmation", .4);
   toast("「" + a.name + "」 보상 +" + fmt(a.gold) + " G" + (a.title ? " · 칭호 「" + a.title + "」를 달 수 있어요" : "")); refreshSheet(true);
 }
-function setTitle(t) { P.title = ACH_TITLES.includes(t) ? t : ""; markDirty(); pushPresence({ ttl: P.title }); refreshSheet(true); toast(P.title ? "이름표에 「" + P.title + "」를 달았어요" : "칭호를 뗐어요"); }
+function setTitle(t) { P.title = ACH_TITLES.includes(t) ? t : ""; markDirty(); pushPresence({ ttl: myTag() }); refreshSheet(true); toast(P.title ? "이름표에 「" + P.title + "」를 달았어요" : "칭호를 뗐어요"); }
 
 /* ===================== 낭만 은행: 실시간 주식 · 뉴스 · 예금 =====================
    시세는 서버 없이 「시간」만으로 계산(여러 주기의 물결 + 그 분의 흔들림 + 최근 뉴스 효과) → 모두가 같은 순간 같은 가격.
@@ -1520,9 +1559,11 @@ const TUTS = {
   beach: { icon: "🐚", title: "갯벌 해변", steps: ["썰물 때 장화를 신으면 갯벌에 들어갈 수 있어요. 뽀글뽀글 숨구멍을 호미로 캐면 바지락 · 맛조개 · 꽃게가 나와요.", "장화와 호미는 낚시 상점 > 도구에서 팔아요. 캔 조개는 모래사장의 하얀 원에서 팔아요."] },
   market: { icon: "🏮", title: "수산시장", steps: ["빈 노점을 열면 홍보 종이를 꾸며 붙이고, 높은 의자에 앉아 회를 팔 수 있어요.", "500 G로 알바를 쓰면 내가 자리를 비워도 10분 동안 대신 팔아 줘요."] },
   sheet_shop: { icon: "🛒", title: "낚시 상점", steps: ["왼쪽 진열대에서 고른 물건을 자세히 보고, 오른쪽 목록에서 골라요. 검은 선은 지금 쓰는 장비예요.", "좋은 미끼는 귀한 물고기를, 좋은 낚싯대·릴·줄은 파이팅을 쉽게 해 줘요. 자물쇠는 레벨이 오르면 열려요."] },
-  sheet_sashimi: { icon: "🔪", title: "회 센터", steps: ["물고기를 도마에 올려 회를 떠요. 먹으면 입질 속도 · 좋은 물고기 확률 · 크기 · 판매가 중 하나가 잠깐 올라요."] },
+  sheet_sashimi: { icon: "🔪", title: "회 센터", steps: ["회를 먹으면 입질 속도 · 좋은 물고기 확률 · 크기 · 판매가 중 하나가 잠깐 올라요.", "회를 직접 뜨는 건 횟집 사장님만 해요. 손님은 손님 창구에서 사 먹거나 시장 노점에서 사요."] },
   sheet_lotto: { icon: "🎰", title: "행운 복권방", steps: ["슬롯머신은 베팅을 고르고 돌려요. 같은 그림 3개면 큰 당첨!", "즉석 복권은 은박을 긁어 같은 금액 3개를 찾아요. 재미로만 즐겨요!"] },
   sheet_bank: { icon: "🏦", title: "낭만 은행", steps: ["주식 시세는 1분마다 바뀌고, 모든 사람이 같은 값을 봐요. 6분마다 나오는 뉴스가 종목을 움직여요.", "쌀 때 사서 비쌀 때 팔아요! 예금은 부두 하루(30분)마다 이자가 붙어요."] },
+  sheet_office: { icon: "🪪", title: "동사무소", steps: ["주민등록증을 받고 직업을 등록하는 곳이에요. 낚시와 갯벌은 누구나 해요. 직업은 부수입을 버는 방법이에요.", "지금은 「횟집 사장」이 열려 있어요. 회를 떠서 시장에서 파는 건 횟집 사장만 할 수 있어요. 첫 등록은 무료예요."] },
+  jobnotice: { icon: "🪪", title: "직업이 생겼어요", steps: ["이제 회를 뜨고 시장에서 파는 건 「횟집 사장」만 할 수 있어요. 가진 회는 그대로 먹을 수 있어요.", "거리 북쪽 끝 윗마을의 동사무소에서 무료로 등록할 수 있어요. 「이동」 메뉴에서 바로 갈 수 있어요."] },
   sheet_clothes: { icon: "👕", title: "옷가게", steps: ["카드를 눌러 입어 보고, 마음에 들면 아래 계산대에서 한 번에 사요. 입은 옷은 다른 사람에게도 보여요."] },
   sheet_face: { icon: "🎨", title: "얼굴 공방", steps: ["눈썹 · 눈 · 입을 직접 그리거나 도장을 찍어요. 표정 5가지를 그려 두면 상황에 맞게 얼굴이 바뀌어요."] },
   sheet_studio: { icon: "🖌️", title: "방류소", steps: ["물고기를 그리고 이름을 지어 바다에 풀면 모든 사람이 낚을 수 있어요. 누가 낚을 때마다 로열티가 들어와요."] },
@@ -1534,7 +1575,7 @@ const TUTS = {
 };
 const coachQ = [];
 function coach(id) {
-  if (!TUTS[id] || !P.tut || P.tut[id] || S.title || coachQ.includes(id) || (S.coach && S.coach.id === id)) return;
+  if (!TUTS[id] || !P.tut || P.tut[id] || (P.tut._off && id !== "jobnotice") || S.title || coachQ.includes(id) || (S.coach && S.coach.id === id)) return;
   coachQ.push(id); if (!S.coach) nextCoach();
 }
 function nextCoach() {
@@ -2078,6 +2119,7 @@ const PLACES = [
   { name: "시장", x: -4.4, z: -30, d: "노점을 잡고 회를 팔고 사는 곳" },
   { name: "상점가", x: 5, z: 6, d: "미끼 가게 · 방류소 · 얼굴 공방 · 회 센터" },
   { name: "거리 입구", x: 0, z: 34, d: "처음 도착한 곳" },
+  { name: "동사무소 (윗마을)", x: 10.4, z: 52, d: "주민등록증 · 직업 등록 · 민원 창구" },
   { name: "명예의 전당", x: 8.2, z: -60.5, d: "분야별 1위의 금빛 동상이 서 있는 광장" },
   { name: "갯벌 해변", x: -4, z: -78, d: "거리 남쪽 끝 모래사장 · 썰물 때 갯벌이 드러나요" },
 ];
@@ -2088,12 +2130,14 @@ function placeAt(x, z) {
   if (z > 8 && x < -3.5) return "포차 거리";
   if (z < -12 && z > -52 && x < -3.5) return "시장";
   if (inHall(x, z)) return "명예의 전당";
+  if (z > 39) return "윗마을";
   if (x > 3.5) return "상점가";
   return "낭만 거리";
 }
 function walkable(x, z) {
   if (inHall(x, z)) return !hallBlocked(x, z);
-  if (x >= -9.6 && x <= 6.4 && z >= -70 && z <= 38) return true;
+  if (x >= -9.6 && x <= 6.4 && z >= -70 && z <= 74) return true;
+  if (inUptown(x, z)) return !uptownBlocked(x, z);
   if (inSand(x, z)) return true;
   if (inMudArea(x, z)) return tideLow() && !!(P.tools && P.tools.boots);
   if (x >= -52.4 && x <= -9 && z >= -3.6 && z <= 3.6) return true;
@@ -2221,6 +2265,10 @@ function nearestAction() {
     const cur = S.stalls[st.i], alive = stallAlive(cur);
     const label = !alive ? "노점 열기" : cur.owner === S.uid ? (S.myStall === st.i ? "내 노점 보기" : "내 노점으로 돌아가기") : cur.nick + "네 횟집 구경하기";
     consider(st.x + 2.6, st.z, { key: "stall:" + st.i + ":" + label, label, run: () => { if (!alive) openSheet("stallopen", st.i); else if (cur.owner === S.uid) { if (S.myStall === st.i) openSheet("mystall"); else returnToStall(st.i); } else openSheet("stall", st.i); } }, 2.4);
+  }
+  if (inUptown(ME.x, ME.z)) {
+    consider(OFFICE.door.x, OFFICE.door.z, { key: "office", label: "동사무소 들어가기", run: () => { ME.ry = Math.PI / 2; presMove(true); openSheet("office"); } }, 2.6);
+    consider(REALTY_LOT.x0 - .9, (REALTY_LOT.z0 + REALTY_LOT.z1) / 2, { key: "realty-soon", label: "부동산 (공사 중)", run: () => toast("부동산은 다음 업데이트에 문을 열어요. 집을 사고, 친구와 함께 살 수 있어요!") }, 2);
   }
   if (inHall(ME.x, ME.z)) {
     for (const sp of STATUE_SPOTS) { const c = RANK_CATS[sp.i]; consider(sp.x, sp.z + sp.face * 1.5, { key: "hall:" + c.id, label: c.ico + " " + c.name + " 랭킹 보기", run: () => openSheet("rank", c.id) }, 1.4); }
@@ -2744,7 +2792,7 @@ function doEmote(e) {
 function pushPresence(patch) { if (S.room && !S.title) S.room.presence(patch).catch(() => {}); }
 function fullPresence() {
   return { nick: P.nick, color: P.color, skin: P.skin, uid: S.uid || null, x: ME.x, z: ME.z, ry: ME.ry, st: ME.st, seat: ME.seat,
-    stall: S.myStall, phase: S.phase, fv: S.myFace ? S.myFace.ts || 0 : 0, wear: wearStr(P.wear), card: S.card ? S.card.id : null, lv: myLv(), rod: P.rod, reel: P.reel, cp: S.castPow || .6, ttl: P.title || "" };
+    stall: S.myStall, phase: S.phase, fv: S.myFace ? S.myFace.ts || 0 : 0, wear: wearStr(P.wear), card: S.card ? S.card.id : null, lv: myLv(), rod: P.rod, reel: P.reel, cp: S.castPow || .6, ttl: myTag() };
 }
 const ST_OK = ["idle", "walk", "run", "sit", "fish", "stall", "coop", "dig"];
 function otherPeers() {
@@ -2920,12 +2968,12 @@ async function handleInbox(id, v) {
     toast([h("b", { text: "📮 운영자의 답장" }), h("div", { style: "font-size:13px;white-space:pre-wrap", text: t })], "lvup", 12000);
   } else if (v.type === "sale") {
     const amt = clamp(Math.floor(Number(v.price) || 0), 0, 1000000); if (!amt) return;
-    P.gold += amt; stat("stallSales"); stat("soldGold", amt); markDirty(); S.saleLog.push({ name: str(v.name, 16), price: amt, ts: Date.now() });
+    P.gold += amt; stat("stallSales"); stat("soldGold", amt); gainJobXp("sashimi", 3); markDirty(); S.saleLog.push({ name: str(v.name, 16), price: amt, ts: Date.now() });
     sfx("jingle-catch", .3);
     toast(str(v.buyer, 16) + "님이 「" + str(v.name, 16) + "」를 샀어요 · +" + fmt(amt) + " G" + (v.npc ? " (알바생이 팔았어요)" : ""));
     questProgress("sell", amt); refreshSheet();
   } else if (v.type === "stall_return") {
-    const n = takeBackDishes(Array.isArray(v.dishes) ? v.dishes.slice(0, MENU_MAX) : []);
+    const n = takeBackDishes(Array.isArray(v.dishes) ? v.dishes.slice(0, MENU_CAP) : []);
     if (n) toast("닫힌 노점에 남아 있던 회 " + n + "접시를 돌려받았어요"); refreshSheet();
   } else if (v.type === "friend_take") {
     if (!isUid(v.from) || v.from === S.uid || !S.cardIds.has(str(v.card, 40))) return;
@@ -3023,7 +3071,7 @@ function normStall(d) {
   if (!d) return null;
   return { owner: str(d.owner, 200), nick: str(d.nick, 16) || "사장님", color: /^#[0-9a-f]{6}$/i.test(d.color || "") ? d.color : "#888888", hb: Number(d.hb) || 0,
     npcUntil: Number(d.npcUntil) || 0, promo: normPromo(d.promo),
-    menu: (Array.isArray(d.menu) ? d.menu : []).slice(0, MENU_MAX).map(m => { const dd = normDish(m); if (!dd) return null; dd.price = clamp(Math.round(Number(m.price) || 1), 1, 1000000); return dd; }).filter(Boolean) };
+    menu: (Array.isArray(d.menu) ? d.menu : []).slice(0, MENU_CAP).map(m => { const dd = normDish(m); if (!dd) return null; dd.price = clamp(Math.round(Number(m.price) || 1), 1, 1000000); return dd; }).filter(Boolean) };
 }
 const menuDoc = (menu) => menu.map(m => ({ id: m.id, fishId: m.fishId, name: m.name, tier: m.tier, size: m.size, buff: m.buff, ts: m.ts, price: m.price }));
 async function stallEdit(i, fn) {
@@ -3045,6 +3093,7 @@ function takeBackDishes(list) {
 }
 function claimStall(i) { openSheet("stallopen", i); }
 async function openStall(i, promo) {
+  if (!needJob("sashimi", "노점에서 회 팔기")) return;
   if (S.card) stopCard(true);
   const own = myOwnStall(); if (own >= 0 && own !== i) { toast("이미 " + (own + 1) + "번 노점을 운영 중이에요"); return; }
   let fresh = true;
@@ -3094,12 +3143,13 @@ async function closeStall(silent, idx) {
 function syncMenu() { const i = S.myStall; if (i >= 0 && S.online) S.db.doc("stalls/s" + i).update({ nick: P.nick, color: P.color, hb: Date.now() }).catch(() => {}); }
 async function listDish(dishId, price) {
   const i = S.myStall; if (i < 0) return;
+  if (!needJob("sashimi", "회 팔기")) return;
   const di = P.dishes.findIndex(d => d.id === dishId); if (di < 0) return;
   const d = P.dishes[di]; price = clamp(Math.round(Number(price) || 0), 1, 1000000);
   P.dishes.splice(di, 1); markDirty();
   const ok = await stallEdit(i, async (cur, ref) => {
     if (!cur || cur.owner !== S.uid) return false;
-    if (cur.menu.length >= MENU_MAX) { toast("메뉴는 " + MENU_MAX + "접시까지 올릴 수 있어요"); return false; }
+    if (cur.menu.length >= menuMax()) { toast("메뉴는 " + menuMax() + "접시까지 올릴 수 있어요 · 횟집 숙련도가 오르면 늘어나요"); return false; }
     await ref.update({ menu: menuDoc(cur.menu).concat(menuDoc([{ ...d, price }])), hb: Date.now() }); return true;
   });
   if (!ok) { P.dishes.unshift(d); markDirty(); refreshSheet(); return; }
@@ -3652,6 +3702,11 @@ const SICON = {
     g.beginPath(); g.moveTo(x, y + s * .05); g.quadraticCurveTo(x + s * .05, y + s * .3, x + s * .16, y + s * .42); g.lineWidth = s * .05; g.strokeStyle = "#2f8f5b"; g.lineCap = "round"; g.stroke();
     for (let k = 0; k < 4; k++) { g.save(); g.translate(x, y); g.rotate(k * Math.PI / 2 + Math.PI / 4); g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(-s * .22, -s * .08, -s * .2, -s * .36, 0, -s * .24); g.bezierCurveTo(s * .2, -s * .36, s * .22, -s * .08, 0, 0); g.fillStyle = "#4cc46a"; g.fill(); olStroke(g, s); g.restore(); }
   },
+  stamp(g, x, y, s) {
+    rrPath(g, x - s * .3, y - s * .3, s * .6, s * .6, s * .12); g.fillStyle = "#d8382c"; g.fill(); olStroke(g, s);
+    g.fillStyle = "#fff6dc"; g.font = "700 " + Math.round(s * .22) + "px 'Black Han Sans','Jua',sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillText("어촌", x, y - s * .1); g.fillText("동장", x, y + s * .14);
+  },
   trophy(g, x, y, s) {
     g.beginPath(); g.moveTo(x - s * .26, y - s * .32); g.lineTo(x + s * .26, y - s * .32); g.quadraticCurveTo(x + s * .24, y + s * .06, x, y + s * .1); g.quadraticCurveTo(x - s * .24, y + s * .06, x - s * .26, y - s * .32); g.closePath();
     g.fillStyle = "#f2c230"; g.fill(); olStroke(g, s);
@@ -3782,6 +3837,12 @@ const SIGNS = {
     sub: { text: st.menu.length ? "오늘의 회 " + st.menu.length + "접시" : "메뉴 준비 중", font: "round", color: "#6b4a32", y: .74, size: .17 } }),
   hall: { shape: "board", fill: { type: "grad", c: ["#23356e", "#121c3e"] }, frame: { c: "#f2c230", inner: "rgba(242,194,48,.55)" }, icons: ["trophy", "trophy"],
     t: { text: "명예의 전당", font: "bold", color: "#ffd84d", depth: .03, depthColor: "#0a1230" }, sub: { text: "HALL OF FAME · 분야별 1위의 동상", color: "#fff6dc" } },
+  office: { shape: "board", fill: { type: "grad", c: ["#f4f1ea", "#e2dccf"] }, frame: { c: "#2f4a6a", w: 16, inner: "#c9a24a" }, icons: ["stamp", "stamp"],
+    t: { text: "어촌 동사무소", font: "bold", color: "#2f4a6a", depth: .02, depthColor: "#c9bfa8", size: .42, y: .4 }, sub: { text: "주민등록 · 직업 등록 · 민원", color: "#8a6a2a", y: .74 } },
+  notice: { shape: "round", fill: { type: "chalk" }, frame: { c: "#7a5634", w: 22 }, nails: true,
+    t: { text: "마을 게시판", font: "hand", color: "#fdfbf2", size: .26, y: .3 }, sub: { text: "직업 등록 시작! 첫 등록 무료", font: "hand", color: "#ffe08a", size: .17, y: .66 } },
+  realtySoon: { shape: "round", fill: { type: "chalk", base: "#3b4a4e" }, frame: { c: "#f2c230", w: 18 },
+    t: { text: "부동산 공사 중", font: "hand", color: "#f2f0e6", y: .4, size: .38 }, sub: { text: "다음 업데이트에 문을 열어요", font: "hand", color: "#ffe08a", size: .2, y: .74 } },
   stallEmpty: (i) => ({ shape: "round", fill: { type: "chalk", base: "#3b4a4e" }, frame: { c: "#8a8f86" },
     t: { text: (i + 1) + "번 노점", font: "hand", color: "#f2f0e6", y: .4, size: .4 }, sub: { text: "비어 있음 · 누구나 열 수 있어요", font: "hand", color: "#cfe8d8", size: .2, y: .74 } }),
 };
@@ -3942,6 +4003,7 @@ function init3D() {
   buildShops();
   buildBeach();
   buildHall();
+  buildUptown();
   buildFar();
   buildDetails();
 
@@ -5247,7 +5309,7 @@ function loop3D(ms) {
   updateActionUI();
   // 사람들
   const desired = new Map();
-  if (!S.title) desired.set("me", { me: true, x: ME.x, z: ME.z, ry: ME.ry, st: ME.st, seat: ME.seat, nick: P.nick, color: P.color, skin: P.skin, phase: S.phase, faceUid: "me", wear: P.wear, ttl: P.title || "", lv: myLv(), rod: P.rod, reel: P.reel, emo: S.myEmo ? { e: S.myEmo.e, ts: S.myEmo.at } : null });
+  if (!S.title) desired.set("me", { me: true, x: ME.x, z: ME.z, ry: ME.ry, st: ME.st, seat: ME.seat, nick: P.nick, color: P.color, skin: P.skin, phase: S.phase, faceUid: "me", wear: P.wear, ttl: myTag(), lv: myLv(), rod: P.rod, reel: P.reel, emo: S.myEmo ? { e: S.myEmo.e, ts: S.myEmo.at } : null });
   for (const p of otherPeers()) {
     const bs = p.seat && SEAT[p.seat] && SEAT[p.seat].boat ? SEAT[p.seat] : null;
     desired.set(p.peer, bs ? { ...p, x: bs.x, z: bs.z, ry: bs.ry, me: false, faceUid: p.uid || "_" } : { ...p, me: false, faceUid: p.uid || "_" });
@@ -5339,7 +5401,7 @@ function tapAt(x0, y0) {
   raycaster.setFromCamera(new T3.Vector2(((x0 - r.left) / r.width) * 2 - 1, -((y0 - r.top) / r.height) * 2 + 1), camera);
   const hits = raycaster.intersectObjects(pickables, false);
   const ground = raycaster.intersectObjects(grounds, false)[0];
-  const order = { peer: 0, me: 1, seat: 2, boat: 3, stall: 3, building: 4, hall: 4 };
+  const order = { peer: 0, me: 1, seat: 2, boat: 3, stall: 3, building: 4, hall: 4, office: 4 };
   let best = null;
   for (const hh of hits) {
     const pk = hh.object.userData.pick; if (!pk) continue;
@@ -5357,6 +5419,7 @@ function tapAt(x0, y0) {
     if (best.kind === "stall") { goStall(best.i); return; }
     if (best.kind === "building") { goBuilding(best.id); return; }
     if (best.kind === "hall") { goHall(best.cat); return; }
+    if (best.kind === "office") { goOffice(); return; }
   }
   if (ground) {
     if (ME.seat || S.myStall >= 0 || (S.coop && S.coop.role === "guest" && S.coop.stage !== "inviting")) { lockedHint(); return; }
@@ -5776,9 +5839,10 @@ function sellItems(pred) {
   toast(n + "마리를 팔아 " + fmt(sum) + " G를 받았어요");
 }
 function cutSashimi(item) {
+  if (!needJob("sashimi", "회 뜨기")) return;
   if (P.dishes.length >= DISH_MAX) { toast("회 보관함이 가득 찼어요 (" + DISH_MAX + "접시)"); return; }
   P.bag = P.bag.filter(x => x.id !== item.id);
-  const d = makeDish(item); P.dishes.unshift(d); stat("cut"); markDirty(); refreshSheet();
+  const d = makeDish(item); P.dishes.unshift(d); stat("cut"); gainJobXp("sashimi", 2); markDirty(); refreshSheet();
   toast("「" + d.name + "」를 떴어요 · 먹으면 " + dishBuffLine(d));
 }
 function eatDish(d) {
@@ -5844,6 +5908,21 @@ SHEETS.sashimi = (body) => {
   if (act.length) body.append(h("div", { class: "buffbar" }, act.map(b => h("div", { class: "bufrow" },
     h("b", { text: "지금 효과 · " + buffText(b) }), h("span", { class: "num muted", text: fmtLeft(b.until - now) + " 남음" }),
     h("div", { class: "meter" }, h("i", { style: "width:" + Math.min(100, (b.until - now) / 3600000 * 100) + "%" }))))));
+  const boss = isJob("sashimi");
+  if (!boss && S.sashTab === "cut") S.sashTab = "shop";
+  if (boss && S.sashTab === "shop") S.sashTab = "cut";
+  if (S.sashTab === "shop") {
+    body.append(h("div", { class: "listrow", style: "flex-direction:column;align-items:stretch;gap:4px" }, h("b", { text: "손님 창구" }),
+      h("span", { class: "muted", style: "font-size:12.5px", text: "회를 직접 뜨는 건 횟집 사장님만 해요. 여기서는 기본 회를 사 먹을 수 있고, 시장 노점의 사장님 회가 보통 더 싸고 좋아요." })));
+    body.append(h("div", { class: "tabs", role: "tablist" },
+      h("button", { role: "tab", "aria-selected": "true", text: "손님 창구" }),
+      h("button", { role: "tab", "aria-selected": "false", onclick: () => { S.sashTab = "eat"; S.sashSel = null; refreshSheet(true); }, text: "내 회 " + P.dishes.length + "/" + DISH_MAX })));
+    for (const m of SET_MENUS) { const d = makeDish({ fishId: "set" + m.tier, name: m.name, tier: m.tier, size: 1 }, 0);
+      body.append(h("div", { class: "listrow" }, tierChip(m.tier), h("div", { class: "grow" }, h("b", { text: m.name }), h("div", { class: "muted", style: "font-size:12.5px", text: "먹으면 효과 하나 · " + d.buff.min + "분 (종류는 그날 들어온 생선 따라 달라요)" })),
+        h("button", { class: "btn sm pri", disabled: P.gold < m.price || P.dishes.length >= DISH_MAX, onclick: () => buySetMenu(m), text: fmt(m.price) + " G" }))); }
+    body.append(h("div", { class: "row" }, h("button", { class: "btn sm", onclick: () => { closeSheet(); goOffice(); }, text: "🍣 횟집 사장 되기 (동사무소)" })));
+    return;
+  }
   const cut = S.sashTab === "cut", fish = P.bag.filter(it => !isShell(it.fishId)), list = cut ? fish : P.dishes;
   if (!S.sashSel || !list.some(x => x.id === S.sashSel)) S.sashSel = list[0] ? list[0].id : null;
   const sel = list.find(x => x.id === S.sashSel);
@@ -5871,7 +5950,7 @@ SHEETS.sashimi = (body) => {
   }));
   body.append(h("div", { class: "tshop" }, board, h("div", { class: "racks" },
     h("div", { class: "tabs", role: "tablist" },
-      h("button", { role: "tab", "aria-selected": String(cut), onclick: () => { S.sashTab = "cut"; S.sashSel = null; refreshSheet(true); }, text: "회 뜨기 · 물고기 " + fish.length }),
+      h("button", { role: "tab", "aria-selected": String(cut), onclick: () => { S.sashTab = boss ? "cut" : "shop"; S.sashSel = null; refreshSheet(true); }, text: boss ? "회 뜨기 · 물고기 " + fish.length : "손님 창구" }),
       h("button", { role: "tab", "aria-selected": String(!cut), onclick: () => { S.sashTab = "eat"; S.sashSel = null; refreshSheet(true); }, text: "내 회 " + P.dishes.length + "/" + DISH_MAX })),
     list.length ? rows : h("div", { class: "empty-note", text: cut ? "가방에 물고기가 없어요." : "아직 뜬 회가 없어요." }))));
   body.append(h("details", { class: "guidebox" }, h("summary", { text: "등급별 효과 보기" }),
@@ -6526,6 +6605,158 @@ SHEETS.rank = (body) => {
   body.append(h("div", { class: "row" }, h("button", { class: "btn sm", disabled: !S.online, onclick: () => { pushRank(true); setTimeout(() => loadRanks(true), 800); toast("내 기록을 올렸어요"); }, text: "내 기록 지금 올리기" }),
     !inHall(ME.x, ME.z) ? h("button", { class: "btn sm pri", onclick: () => { closeSheet(); goHall(c.id); }, text: "동상 보러 가기" }) : null));
 };
+/* ===================== 동사무소 · 직업 =====================
+   낚시·갯벌은 누구나. 직업은 「부수입을 버는 방법」을 정해요(한 사람에 하나).
+   지금은 횟집 사장만 열려 있고, 나머지는 다음 업데이트에서 열려요. */
+function gainJobXp(id, n) {
+  if (!isJob(id)) return;
+  const before = jobLv(id);
+  P.job.xp[id] = (P.job.xp[id] || 0) + n;
+  const after = jobLv(id);
+  if (after > before) { sfx("jingle-rare", .4); toast([h("b", { text: JOB[id].ico + " " + JOB[id].name + " 숙련도 Lv." + after + "!" }), h("div", { class: "muted", style: "font-size:12px", text: (JOB[id].perks || []).find(p => p.startsWith("Lv." + after + " ")) || "손에 익어 가요" })], "lvup", 5000); }
+}
+function needJob(id, what) {
+  if (isJob(id)) return true;
+  sfx("ui-error", .3);
+  toast([h("b", { text: what + "는 「" + JOB[id].name + "」만 할 수 있어요" }), h("div", { class: "muted", style: "font-size:12px", text: "거리 북쪽 동사무소에서 직업을 등록해요 · 첫 등록은 무료" })], null, 5000);
+  return false;
+}
+function canChangeJob() {
+  if (!P.job.id) return { ok: true, cost: 0 };
+  const wait = P.job.changedAt + JOB_COOLDOWN - Date.now();
+  return wait > 0 ? { ok: false, wait } : { ok: true, cost: JOB_CHANGE_COST };
+}
+function setJob(id) {
+  const j = JOB[id]; if (!j || !j.ready || isJob(id)) return;
+  const c = canChangeJob();
+  if (!c.ok) { toast("직업은 하루에 한 번만 바꿀 수 있어요 · " + fmtLeft(c.wait) + " 남음"); return; }
+  if (c.cost && P.gold < c.cost) { sfx("ui-error", .4); toast("직업을 바꾸려면 " + fmt(c.cost) + " G가 필요해요"); return; }
+  const first = !P.job.id;
+  P.gold -= c.cost || 0;
+  P.job.id = id; P.job.changedAt = Date.now(); P.job.xp[id] = P.job.xp[id] || 0;
+  if (!P.resident) P.resident = Date.now();
+  markDirty(); flushSave(); pushPresence({ ttl: myTag() });
+  sfx("jingle-catch", .4);
+  toast([h("b", { text: j.ico + " 오늘부터 " + j.name + "!" }), h("div", { class: "muted", style: "font-size:12px", text: first ? "첫 등록이라 무료예요 · 이름표에 직업이 보여요" : "-" + fmt(c.cost) + " G · 전에 쌓은 숙련도는 그대로 남아요" })], "lvup", 5000);
+  if (first) postSys(P.nick + "님이 " + j.name + "(으)로 등록했어요");
+  refreshSheet(true);
+}
+/* 손님 창구: 직업이 없어도 회 센터에서 기본 모둠회를 사 먹을 수 있어요 */
+const SET_MENUS = [
+  { tier: 0, name: "모둠회 (보통)", price: 150 },
+  { tier: 1, name: "모둠회 (특)", price: 450 },
+  { tier: 2, name: "제철 특선회", price: 1500 },
+];
+function buySetMenu(m) {
+  if (P.gold < m.price) { sfx("ui-error", .4); toast("골드가 부족해요"); return; }
+  if (P.dishes.length >= DISH_MAX) { toast("회 보관함이 가득 찼어요 (" + DISH_MAX + "접시)"); return; }
+  const pool = BUILTIN.filter(f => f.tier === m.tier), f = pool[Math.floor(Math.random() * pool.length)] || BUILTIN[0];
+  const d = makeDish({ fishId: f.id, name: m.name, tier: m.tier, size: Math.sqrt(f.min * f.max) }, 0); d.name = m.name;
+  P.gold -= m.price; P.dishes.unshift(d); markDirty(); sfx("ui-confirmation", .4);
+  toast("「" + m.name + "」을 샀어요 · 먹으면 " + dishBuffLine(d)); refreshSheet(true);
+}
+/* 주민등록증 그림 */
+function idCardCanvas() {
+  const c = document.createElement("canvas"); c.width = 640; c.height = 400; const g = c.getContext("2d");
+  rrPath(g, 6, 6, 628, 388, 28); const gr = g.createLinearGradient(0, 0, 640, 400); gr.addColorStop(0, "#eef6f8"); gr.addColorStop(1, "#d9ecef"); g.fillStyle = gr; g.fill();
+  g.save(); rrPath(g, 6, 6, 628, 388, 28); g.clip(); g.fillStyle = "rgba(47,74,106,.07)"; for (let k = 0; k < 9; k++) { g.beginPath(); g.arc(560, 360, 40 + k * 34, 0, 7); g.lineWidth = 6; g.strokeStyle = "rgba(47,74,106,.06)"; g.stroke(); } g.restore();
+  rrPath(g, 6, 6, 628, 388, 28); g.lineWidth = 6; g.strokeStyle = "#2f4a6a"; g.stroke();
+  g.fillStyle = "#2f4a6a"; g.font = sfont("bold", 34); g.textBaseline = "middle"; g.fillText("어촌생활 주민등록증", 36, 52);
+  g.fillStyle = "#56717a"; g.font = sfont("round", 18); g.fillText("EOCHON RESIDENT CARD", 36, 84);
+  g.save(); rrPath(g, 36, 112, 170, 210, 16); g.clip(); g.fillStyle = "#bfe3ee"; g.fillRect(36, 112, 170, 210); g.drawImage($("avatar"), 36, 132, 170, 170); g.restore();
+  rrPath(g, 36, 112, 170, 210, 16); g.lineWidth = 3; g.strokeStyle = "#2f4a6a"; g.stroke();
+  const j = JOB[P.job.id], since = P.resident ? new Date(P.resident) : new Date();
+  const rows = [["이름", P.nick], ["직업", j ? j.name + " · 숙련도 Lv." + jobLv(j.id) : "아직 없음"], ["주소", "집 없음 · 부동산 공사 중"], ["주민이 된 날", since.getFullYear() + "." + (since.getMonth() + 1) + "." + since.getDate()], ["낚시 레벨", "Lv." + myLv()]];
+  rows.forEach(([k, v], i) => { const y = 136 + i * 42; g.fillStyle = "#56717a"; g.font = sfont("round", 18); g.fillText(k, 236, y); g.fillStyle = "#132f38"; g.font = sfont("bold", 24); let t = v; while (g.measureText(t).width > 260 && t.length > 2) t = t.slice(0, -2) + "…"; g.fillText(t, 360, y); });
+  g.fillStyle = "#56717a"; g.font = "18px 'IBM Plex Mono',monospace"; g.fillText("No. " + (S.uid ? myCode() : "------") + "-" + String(hashStr(P.nick) % 9000 + 1000), 236, 352);
+  g.beginPath(); g.arc(560, 330, 38, 0, 7); g.fillStyle = "rgba(216,56,44,.85)"; g.fill(); g.fillStyle = "#fff"; g.font = sfont("bold", 22); g.textAlign = "center"; g.fillText("어촌", 560, 318); g.fillText("동장", 560, 344); g.textAlign = "left";
+  return c;
+}
+S.officeTab = "job";
+SHEETS.office = (body) => {
+  if (S.sheetArg) { S.officeTab = S.sheetArg; S.sheetArg = null; }
+  setHead("어촌 동사무소", "번호표 뽑고 창구로 오세요 · 주민등록증 · 직업 등록 · 민원");
+  const tabs = [["job", "직업 창구"], ["card", "주민등록증"], ["move", "전입 · 전출"], ["civil", "민원 창구"]];
+  body.append(h("div", { class: "counter" }, h("span", { class: "ticket num", text: "번호표 " + String(100 + (hashStr(P.nick + todayKey()) % 800)) }),
+    h("div", { class: "tabs", role: "tablist" }, tabs.map(([id, l]) => h("button", { role: "tab", "aria-selected": String(S.officeTab === id), onclick: () => { S.officeTab = id; refreshSheet(true); }, text: l })))));
+  const t = S.officeTab;
+  if (t === "job") {
+    const cur = JOB[P.job.id], c = canChangeJob();
+    body.append(h("div", { class: "listrow", style: "flex-direction:column;align-items:stretch;gap:6px" },
+      h("b", { text: cur ? "지금 직업: " + cur.ico + " " + cur.name + " · 숙련도 Lv." + jobLv(cur.id) : "아직 직업이 없어요" }),
+      cur ? (() => { const lv = jobLv(cur.id), x = P.job.xp[cur.id] || 0, a = JOB_XP[lv - 1], b2 = JOB_XP[lv]; return h("div", { class: "meter" }, h("i", { style: "width:" + (lv >= 10 ? 100 : clamp((x - a) / Math.max(1, b2 - a), 0, 1) * 100) + "%;background:var(--ok)" })); })() : null,
+      h("span", { class: "muted", style: "font-size:12.5px", text: "낚시·갯벌은 누구나 해요. 직업은 부수입을 버는 방법이에요. 첫 등록은 무료, 바꿀 때는 " + fmt(JOB_CHANGE_COST) + " G이고 하루에 한 번만 바꿀 수 있어요." })));
+    for (const j of JOBS) {
+      const mine = isJob(j.id);
+      body.append(h("div", { class: "jobcard" + (mine ? " on" : "") + (j.ready ? "" : " soon") },
+        h("span", { class: "jico", text: j.ico }),
+        h("div", { class: "grow" }, h("b", { text: j.name + (j.ready ? "" : " · 준비 중") }), h("div", { class: "muted", style: "font-size:12.5px", text: j.income }),
+          j.perks ? h("div", { class: "perks" }, j.perks.map(p => h("span", { class: "tag" + (mine && jobLv(j.id) >= Number(p.slice(3, p.indexOf(" "))) ? " on" : ""), text: p }))) : null,
+          (P.job.xp[j.id] && !mine) ? h("div", { class: "muted", style: "font-size:11.5px", text: "전에 쌓은 숙련도 Lv." + jobLv(j.id) + " 그대로 있어요" }) : null),
+        mine ? h("span", { class: "tag on", text: "지금 직업" })
+          : !j.ready ? h("span", { class: "tag", text: "곧 열려요" })
+          : h("button", { class: "btn pri", disabled: !c.ok || (c.cost && P.gold < c.cost), onclick: () => setJob(j.id),
+              text: !c.ok ? fmtLeft(c.wait) + " 뒤에 변경" : c.cost ? "바꾸기 · " + fmt(c.cost) + " G" : "무료로 등록" })));
+    }
+  } else if (t === "card") {
+    const cv = idCardCanvas(); cv.className = "idcard"; cv.setAttribute("aria-label", "내 주민등록증");
+    body.append(cv, h("div", { class: "muted", style: "font-size:12.5px", text: "얼굴은 얼굴 공방에서, 이름은 내 정보에서 바꿀 수 있어요. 집이 생기면 주소가 적혀요." }),
+      h("div", { class: "row" }, h("button", { class: "btn sm", onclick: () => openSheet("face"), text: "얼굴 바꾸러 가기" }), h("button", { class: "btn sm", onclick: () => openSheet("profile"), text: "내 정보" })));
+  } else if (t === "move") {
+    body.append(h("div", { class: "empty-note", text: "부동산이 공사 중이에요. 집을 살 수 있게 되면 여기서 친구와 함께 살 수 있게 전입신고를 해요. (다음 업데이트)" }));
+  } else {
+    body.append(h("div", { class: "listrow" }, h("span", { class: "emo", text: "🐞" }), h("div", { class: "grow" }, h("b", { text: "오류 제보" }), h("div", { class: "muted", style: "font-size:12.5px", text: "이상하게 움직이거나 안 되는 게 있으면 알려 주세요" })), h("button", { class: "btn sm pri", onclick: () => openSheet("feedback", "bug"), text: "쓰기" })),
+      h("div", { class: "listrow" }, h("span", { class: "emo", text: "💡" }), h("div", { class: "grow" }, h("b", { text: "건의사항" }), h("div", { class: "muted", style: "font-size:12.5px", text: "있었으면 하는 기능이나 바뀌었으면 하는 점" })), h("button", { class: "btn sm pri", onclick: () => openSheet("feedback", "idea"), text: "쓰기" })));
+  }
+};
+/* 윗마을: 거리 북쪽 끝 너머 새 구역 (동사무소 · 부동산 공사장) */
+const UPTOWN = { x0: 6.4, x1: 24, z0: 40, z1: 72 };
+const OFFICE = { x: 17, z: 52, w: 9, d: 10.4, door: { x: 11.2, z: 52 } };
+const REALTY_LOT = { x0: 13, x1: 21.5, z0: 61.5, z1: 70.5 };
+const inUptown = (x, z) => x > UPTOWN.x0 && x < UPTOWN.x1 && z > UPTOWN.z0 && z < UPTOWN.z1;
+function uptownBlocked(x, z) {
+  if (Math.abs(x - OFFICE.x) < OFFICE.w / 2 + .5 && Math.abs(z - OFFICE.z) < OFFICE.d / 2 + .5) return true;
+  return x > REALTY_LOT.x0 && x < REALTY_LOT.x1 && z > REALTY_LOT.z0 && z < REALTY_LOT.z1;
+}
+function buildUptown() {
+  const U = UPTOWN, cx = (U.x0 + U.x1) / 2, cz = (U.z0 + U.z1) / 2;
+  const floor = box(U.x1 - U.x0, .1, U.z1 - U.z0, lam(0xffffff, { map: imgTex("a/pavers.jpg", 4, 8) }), cx, .05, cz); grounds.push(floor);
+  // 길 끝 차단봉 + 둘레 화단
+  for (let x = -3.5; x <= 3.6; x += 1.4) { cyl(.12, .12, .8, 8, phong(0xf4f1ea), x, .4, 74.6); box(.26, .12, .26, phong(0xe2522c), x, .62, 74.6); }
+  const rim = phong(0xd9cdb6), hedge = phong(0x5f9a52);
+  box(U.x1 - U.x0, .5, .7, rim, cx, .25, U.z1 + .35); box(U.x1 - U.x0 - .2, .45, .5, hedge, cx, .62, U.z1 + .35);
+  box(.7, .5, U.z1 - U.z0, rim, U.x1 + .35, .25, cz); box(.5, .45, U.z1 - U.z0 - .2, hedge, U.x1 + .35, .62, cz);
+  // 동사무소 건물
+  const O = OFFICE, g = new T3.Group(); g.position.set(O.x, 0, O.z); scene.add(g);
+  box(O.w, 6.6, O.d, phong(0xf1e6cf), 0, 3.3, 0, g);
+  box(O.w + .6, .4, O.d + .6, phong(0x2f4a6a), 0, 6.8, 0, g);
+  box(O.w + .2, .25, O.d + .2, phong(0xc9b896), 0, 3.3, 0, g);
+  const win = bulbMat(0x9fc3d6, 0xffd89a);
+  for (const dz of [-3.3, 3.3]) { box(.08, 1.3, 1.9, win, -O.w / 2 - .03, 1.9, dz, g); box(.08, 1.3, 1.9, win, -O.w / 2 - .03, 4.8, dz, g); }
+  box(.08, 1.3, 1.9, win, -O.w / 2 - .03, 4.8, 0, g);
+  box(.12, 2.5, 2.2, phong(0x6a8aa8), -O.w / 2 - .04, 1.25, 0, g);   // 유리문
+  box(.1, .1, 2.4, phong(0x2f4a6a), -O.w / 2 - .08, 2.55, 0, g);
+  for (let k = 0; k < 3; k++) box(.5, .12, 3.4 - k * .3, phong(0xd9d2c4), -O.w / 2 - .25 - (2 - k) * .45, .06 + k * .12, 0, g);   // 계단
+  const sign = makeSign(5.2, 1.25, SIGNS.office); sign.position.set(O.x - O.w / 2 - .06, 3.35 + .02, O.z); sign.rotation.y = -Math.PI / 2; scene.add(sign);
+  // 마을 깃발 (물고기 깃발) + 게시판
+  cyl(.06, .07, 6, 8, phong(0xd9d9d9), 10.2, 3, 57.6);
+  const flag = new T3.Mesh(new T3.PlaneGeometry(1.6, 1), new T3.MeshBasicMaterial({ side: T3.DoubleSide, map: canvasTex(128, 80, (c) => { c.fillStyle = "#2f6f86"; c.fillRect(0, 0, 128, 80); c.fillStyle = "#fff6dc"; c.beginPath(); c.ellipse(60, 40, 30, 16, 0, 0, 7); c.fill(); c.beginPath(); c.moveTo(86, 40); c.lineTo(108, 24); c.lineTo(108, 56); c.fill(); c.fillStyle = "#132f38"; c.beginPath(); c.arc(44, 36, 4, 0, 7); c.fill(); }, 1, 1) }));
+  flag.position.set(10.2, 5.4, 58.42); flag.rotation.y = Math.PI / 2; scene.add(flag); UPTOWN_FLAG.m = flag;
+  const board = makeSign(1.8, 1.2, SIGNS.notice, { cw: 512 }); board.position.set(10.6, 1.5, 46.2); board.rotation.y = -Math.PI / 2; scene.add(board);
+  cyl(.05, .05, 1.8, 6, phong(0x5a3f2a), 10.62, .9, 45.4); cyl(.05, .05, 1.8, 6, phong(0x5a3f2a), 10.62, .9, 47);
+  for (const z of [44, 60]) { box(1.6, .1, .5, phong(0x9a6a40), 9.4, .5, z); for (const dx of [-.65, .65]) box(.1, .5, .45, phong(0x3a2a20), 9.4 + dx, .25, z); }
+  const hit = new T3.Mesh(new T3.BoxGeometry(O.w, 6.6, O.d), MAT.hit); hit.position.set(O.x, 3.3, O.z); hit.userData.pick = { kind: "office" }; scene.add(hit); pickables.push(hit);
+  // 부동산 공사장 (다음 업데이트)
+  const L = REALTY_LOT, lx = (L.x0 + L.x1) / 2, lz = (L.z0 + L.z1) / 2, fence = phong(0xf2c230), stripe = phong(0x2a2d33);
+  for (let z = L.z0; z <= L.z1 + .01; z += 1.5) { box(.12, 1.2, .12, stripe, L.x0, .6, z); }
+  box(.06, .5, L.z1 - L.z0, fence, L.x0, .9, lz); box(.06, .2, L.z1 - L.z0, stripe, L.x0, .5, lz);
+  box(L.x1 - L.x0, .5, .06, fence, lx, .9, L.z0); box(L.x1 - L.x0, .5, .06, fence, lx, .9, L.z1);
+  box(3, 2.4, 3, phong(0xb9b1a3), lx + 1.5, 1.2, lz + 1.2); box(2.2, .3, 2.2, phong(0x8a7a66), lx - 2, .15, lz - 2.2);
+  const crane = phong(0xe2a33a); box(.3, 6, .3, crane, lx + 3, 3, lz - 3); box(5, .25, .25, crane, lx + 1, 6, lz - 3);
+  const lot = makeSign(3.6, 1, SIGNS.realtySoon, { cw: 768 }); lot.position.set(L.x0 - .1, 2, lz); lot.rotation.y = -Math.PI / 2; scene.add(lot);
+}
+const UPTOWN_FLAG = { m: null };
+function goOffice() { if (ME.seat || S.myStall >= 0) { lockedHint(); return; } walkTo(OFFICE.door.x, OFFICE.door.z, () => { ME.ry = Math.PI / 2; presMove(true); openSheet("office"); }); }
 /* ---------- 친구 ---------- */
 SHEETS.friends = (body) => {
   const peers = otherPeers();
@@ -6645,6 +6876,14 @@ SHEETS.offers = (body) => {
 const promoEd = { text: "", paper: 0, sticker: 0, font: 0, for: null };
 SHEETS.stallopen = (body, i) => {
   const editing = typeof i !== "number";
+  if (!editing && !isJob("sashimi")) {
+    setHead((i + 1) + "번 노점", "노점에서 회를 파는 건 횟집 사장님만 할 수 있어요");
+    body.append(h("div", { class: "listrow", style: "flex-direction:column;align-items:stretch;gap:8px" },
+      h("b", { text: "🍣 횟집 사장으로 등록하면 노점을 열 수 있어요" }),
+      h("span", { class: "muted", style: "font-size:13px", text: "거리 북쪽 동사무소의 직업 창구에서 등록해요. 첫 등록은 무료예요. 낚시는 지금처럼 누구나 할 수 있어요." }),
+      h("div", { class: "row" }, h("button", { class: "btn pri", onclick: () => { closeSheet(); goOffice(); }, text: "동사무소로 가기" }))));
+    return;
+  }
   const own = myOwnStall(), st = editing ? S.stalls[own] : S.stalls[i];
   if (!editing && stallAlive(st) && st.owner !== S.uid) { setHead((i + 1) + "번 노점", "이미 사장님이 있어요"); body.append(h("div", { class: "empty-note", text: "다른 분이 운영 중인 노점이에요." })); return; }
   const key = editing ? "edit" : i;
@@ -6717,7 +6956,7 @@ SHEETS.mystall = (body) => {
   const right = h("div", { style: "display:flex;flex-direction:column;gap:10px;min-width:0" });
   const sum = S.saleLog.reduce((a, x) => a + x.price, 0);
   right.append(h("div", { class: "gearbar" },
-    h("div", { class: "gi" }, h("span", { text: "상 위 메뉴" }), h("b", { text: st.menu.length + " / " + MENU_MAX + "접시" })),
+    h("div", { class: "gi" }, h("span", { text: "상 위 메뉴" }), h("b", { text: st.menu.length + " / " + menuMax() + "접시" })),
     h("div", { class: "gi" }, h("span", { text: "이번 접속 판매" }), h("b", { text: S.saleLog.length + "접시 · " + fmt(sum) + " G" }))));
   right.append(h("div", { class: "sec", text: "상 위에 올린 회" }));
   if (!st.menu.length) right.append(h("div", { class: "muted", style: "font-size:13px", text: "상이 비어 있어요. 아래에서 회를 올려 보세요." }));
@@ -6733,7 +6972,7 @@ SHEETS.mystall = (body) => {
       h("img", { class: "iic wide", src: f ? fishArt(f).src : "", alt: "" }),
       h("div", { style: "display:flex;flex-direction:column;gap:6px;min-width:0" }, h("span", { class: "inm" }, h("b", { text: d.name }), h("small", { text: dishBuffLine(d) })),
         h("div", { class: "qp" }, price, ...[1, 1.5, 2].map(k => { const v = Math.max(10, Math.round(base * k / 10) * 10); return h("button", { class: "btn sm", onclick: () => { price.value = String(v); }, text: fmt(v) }); }),
-          h("button", { class: "btn sm pri", disabled: !seated || st.menu.length >= MENU_MAX, title: seated ? "" : "노점에 앉아 있어야 올릴 수 있어요", onclick: () => listDish(d.id, price.value), text: "상에 올리기" }))));
+          h("button", { class: "btn sm pri", disabled: !seated || st.menu.length >= menuMax(), title: seated ? "" : "노점에 앉아 있어야 올릴 수 있어요", onclick: () => listDish(d.id, price.value), text: "상에 올리기" }))));
   })));
   right.append(h("div", { class: "row" }, h("button", { class: "btn", onclick: () => { closeSheet(); closeStall(); }, text: "노점 닫기 (남은 회는 돌려받아요)" })));
   body.append(h("div", { class: "tshop" }, left_, right));
@@ -7348,6 +7587,7 @@ function enterGame() {
   if (back) toast("다시 오셨네요, " + P.nick + "님!", null, 4000);
   setTimeout(() => coach("welcome"), 700);
   updateHint();
+  if (!P.job.id && ((P.stats.cut || 0) > 0 || (P.stats.stallSales || 0) > 0)) setTimeout(() => coach("jobnotice"), 900);
   maybeAttendPopup();
   setTimeout(applyPendingRef, 2500);
   setTimeout(() => { pushRank(true); setTimeout(() => loadRanks(true), 1200); }, 3000);
