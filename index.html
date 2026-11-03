@@ -790,6 +790,13 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 @keyframes rainbow{0%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}33%{box-shadow:0 0 0 2px #7b8cff,0 0 16px rgba(123,140,255,.6)}66%{box-shadow:0 0 0 2px #3fd6cc,0 0 16px rgba(63,214,204,.6)}100%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}}
 .tier.t3,.tier.t4,.tier.t5{background-image:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.65) 50%,transparent 65%),var(--tb,none);background-size:250% 100%,100% 100%;background-repeat:no-repeat;animation:tshine 2.6s ease-in-out infinite}
 .tier.t3{--tb:linear-gradient(var(--t3),var(--t3))}.tier.t4{--tb:linear-gradient(var(--t4),var(--t4))}.tier.t5{--tb:linear-gradient(90deg,#0f9f9a,#7b5cd6,#e0479a)}
+.shopbar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:8px 12px;border-radius:12px;background:linear-gradient(135deg,rgba(242,194,48,.18),rgba(226,82,44,.12));border:1px solid rgba(242,194,48,.4);margin-bottom:8px;font-size:13px}
+.shopbar .stars{color:#f2b630;font-size:18px;letter-spacing:1px}
+.guests{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin-bottom:10px}
+.guest{display:grid;grid-template-columns:40px 1fr auto;gap:8px;align-items:center;padding:8px 10px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg)}
+.guest .gemo{font-size:28px;text-align:center}.guest .gtx{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:12.5px}.guest .gtx b{font-size:13.5px}
+.guest .gbar{display:block;height:6px;border-radius:3px;background:rgba(0,0,0,.12);overflow:hidden}.guest .gbar i{display:block;height:100%;transition:width .4s linear}
+.guest.gourmet{--gc:#f2b630;--gs:rgba(242,182,48,.5);animation:gpulse 2s ease-in-out infinite}.guest.angry{border-color:#e2402a}.guest.empty{opacity:.45;grid-template-columns:40px 1fr}
 .ratebox{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:12px;background:rgba(127,214,224,.12);border:1px solid rgba(127,214,224,.35)}
 .ratetbl{display:grid;grid-template-columns:auto auto 1fr;gap:4px 10px;align-items:center;font-size:13px}
 .ratetbl .up{color:#2fae7f;font-weight:700}.ratetbl .down{color:#d8402a;font-weight:700}
@@ -939,7 +946,7 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.27.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.28.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 10 },
   { name: "고급", base: 30 },
@@ -1464,7 +1471,26 @@ const isLocked = (k) => LOCKED[k] && !S.isOwner;
 function lockedToast(what) { sfx("ui-error", .3); toast([h("b", { text: "🚧 " + what + "은 준비 중이에요" }), h("div", { class: "muted", style: "font-size:12px", text: "정식 오픈 뒤 업데이트에서 열려요" })], null, 3600); }
 const isJob = (id) => id === "sashimi" || (!LOCKED.office && !!(P.job && P.job.id === id));
 const myTag = () => P.title || (P.job && JOB[P.job.id] ? JOB[P.job.id].name : "");
-function menuMax() { if (!isJob("sashimi")) return 12; const lv = jobLv("sashimi"); return lv >= 10 ? 20 : lv >= 7 ? 17 : lv >= 3 ? 14 : 12; }
+function menuMax() { const up = SHOP_UPG.fridge.eff[shopLv("fridge")]; if (!isJob("sashimi")) return 12 + up; const lv = jobLv("sashimi"); return (lv >= 10 ? 20 : lv >= 7 ? 17 : lv >= 3 ? 14 : 12) + up; }
+/* ---------- 내 횟집 (v1.28): 평판 · 가게 꾸미기 ----------
+   평판(rep)은 손님을 만족시키면 오르고 화나서 떠나면 내려가요. 별(★0~5)이 오를수록 손님이 자주 오고 팁이 커져요.
+   꾸미기는 내 것이라 어느 노점을 열어도 따라와요. eff = 단계별 효과 */
+const SHOP_UPG = {
+  table: { ico: "🪑", name: "손님 테이블", cost: [0, 3000, 9000, 25000], eff: [2, 3, 4, 5], fx: (v) => "손님 " + v + "명까지 같이 기다려요" },
+  sign: { ico: "🏮", name: "간판 · 등불", cost: [0, 2000, 7000, 20000], eff: [30, 25, 21, 17], fx: (v) => "손님이 약 " + v + "초마다 와요" },
+  fridge: { ico: "🧊", name: "진열 냉장고", cost: [0, 2500, 8000, 22000], eff: [0, 3, 6, 10], fx: (v) => "상 위 메뉴 +" + v + "칸" },
+  decor: { ico: "🎐", name: "인테리어", cost: [0, 3000, 10000, 30000], eff: [0, 5, 10, 15], fx: (v) => "팁 +" + v + "% · 손님이 " + Math.round(v / 3) + "초 더 기다려요" },
+};
+const REP_STARS = [0, 30, 80, 160, 300, 500];
+function newShop() { return { rep: 0, served: 0, tips: 0, upg: { table: 0, sign: 0, fridge: 0, decor: 0 } }; }
+function normShop(s) {
+  const o = newShop(); if (!s || typeof s !== "object") return o;
+  o.rep = clamp(Math.floor(Number(s.rep) || 0), 0, 99999); o.served = clamp(Math.floor(Number(s.served) || 0), 0, 1e7); o.tips = clamp(Math.floor(Number(s.tips) || 0), 0, 1e10);
+  for (const k of Object.keys(o.upg)) o.upg[k] = clamp(Math.floor(Number(s.upg && s.upg[k]) || 0), 0, SHOP_UPG[k].cost.length - 1);
+  return o;
+}
+const shopLv = (k) => (P && P.shop && P.shop.upg ? P.shop.upg[k] || 0 : 0);
+const shopStars = () => { const r = (P.shop && P.shop.rep) || 0; let s = 0; for (let k = 1; k < REP_STARS.length; k++) if (r >= REP_STARS[k]) s = k; return s; };
 function dishQuality() { if (!isJob("sashimi")) return 0; const lv = jobLv("sashimi"); return lv >= 8 ? 2 : lv >= 5 ? 1 : 0; }
 
 const NOWEAR = {};
@@ -1483,7 +1509,7 @@ function parseWear(s) {
 function newProfile() {
   return { nick: pick(NICK_A) + " " + pick(NICK_B), color: pick(COLORS), skin: "#f6d2b4", gold: 300,
     baits: { shrimp: 5, paste: 0, lure: 0, legend: 0 }, bait: "worm", bag: [], dex: {}, autoSell: 0, caught: 0,
-    dishes: [], buffs: [], listing: {}, pendingTrades: {}, pendingOrders: {}, rod: "bamboo", rods: ["bamboo"], gear: [], equip: [], quests: null, closet: [], wear: {}, friends: {}, reels: ["basic"], reel: "basic", lines: ["nylon"], line: "nylon", tools: {}, xp: 0, stats: {}, ach: {}, title: "", stocks: {}, bank: { amt: 0, ts: 0 }, tut: {}, attend: { n: 0, last: "" }, ref: null, invited: {}, job: { id: "", xp: {}, changedAt: 0 }, resident: 0, home: newHome(), npcSales: { day: "", n: 0 }, v: 7 };
+    dishes: [], buffs: [], listing: {}, pendingTrades: {}, pendingOrders: {}, rod: "bamboo", rods: ["bamboo"], gear: [], equip: [], quests: null, closet: [], wear: {}, friends: {}, reels: ["basic"], reel: "basic", lines: ["nylon"], line: "nylon", tools: {}, xp: 0, stats: {}, ach: {}, title: "", stocks: {}, bank: { amt: 0, ts: 0 }, tut: {}, attend: { n: 0, last: "" }, ref: null, invited: {}, job: { id: "", xp: {}, changedAt: 0 }, resident: 0, home: newHome(), npcSales: { day: "", n: 0 }, shop: newShop(), v: 7 };
 }
 function normItem(it) {
   if (!it || typeof it !== "object") return null;
@@ -1521,6 +1547,7 @@ function normProfile(p) {
   o.rods = (Array.isArray(p.rods) ? p.rods : ["bamboo"]).filter(id => RODS.some(r => r.id === id)); if (!o.rods.includes("bamboo")) o.rods.unshift("bamboo");
   o.rod = o.rods.includes(p.rod) ? p.rod : "bamboo";
   o.npcSales = p.npcSales && typeof p.npcSales === "object" ? { day: str(p.npcSales.day, 10), n: clamp(Math.floor(Number(p.npcSales.n) || 0), 0, 999) } : { day: "", n: 0 };
+  o.shop = normShop(p.shop);
   o.reels = (Array.isArray(p.reels) ? p.reels : []).filter(id => REELS.some(r => r.id === id)); if (!o.reels.includes("basic")) o.reels.unshift("basic");
   o.reel = o.reels.includes(p.reel) ? p.reel : "basic";
   o.lines = (Array.isArray(p.lines) ? p.lines : []).filter(id => LINES.some(r => r.id === id)); if (!o.lines.includes("nylon")) o.lines.unshift("nylon");
@@ -3555,7 +3582,7 @@ async function handleInbox(id, v) {
     toast(str(v.buyer, 16) + "님이 「" + str(v.name, 16) + "」를 샀어요 · +" + won(amt) + "" + (v.npc ? " (알바생이 팔았어요)" : ""));
     questProgress("sell", amt); refreshSheet();
   } else if (v.type === "stall_return") {
-    const n = takeBackDishes(Array.isArray(v.dishes) ? v.dishes.slice(0, MENU_CAP) : []);
+    const n = takeBackDishes(Array.isArray(v.dishes) ? v.dishes.slice(0, MENU_LIMIT) : []);
     if (n) toast("닫힌 노점에 남아 있던 회 " + n + "접시를 돌려받았어요"); refreshSheet();
   } else if (v.type === "friend_take") {
     if (!isUid(v.from) || v.from === S.uid || !S.cardIds.has(str(v.card, 40))) return;
@@ -3635,7 +3662,7 @@ async function cancelTrade(tid) {
    회를 메뉴에 올리면 가방에서 빠져 노점 문서(stalls/sN)에 맡겨짐. 손님은 노점 문서를 잠그고 바로 꺼내 가고,
    값은 사장님 우편함(sale)으로 감 → 사장님이 자리를 비워도(알바) 팔림.
    알바(npcUntil): 500 G에 10분. 시간이 끝나면 사장님 쪽에서 노점을 닫고 남은 회를 돌려받음 */
-const STALL_HB = 180000, NPC_MS = 600000, NPC_PRICE = 500, MENU_MAX = 12;
+const STALL_HB = 180000, NPC_MS = 600000, NPC_PRICE = 500, MENU_MAX = 12, MENU_LIMIT = 30;
 let hbTimer = null;
 const stallAlive = (st) => !!st && isUid(st.owner) && (Date.now() - (Number(st.hb) || 0) < STALL_HB || (Number(st.npcUntil) || 0) > Date.now());
 const npcActive = (st) => !!st && (Number(st.npcUntil) || 0) > Date.now();
@@ -3653,8 +3680,11 @@ function normStall(d) {
   if (!d) return null;
   return { owner: str(d.owner, 200), nick: str(d.nick, 16) || "사장님", color: /^#[0-9a-f]{6}$/i.test(d.color || "") ? d.color : "#888888", hb: Number(d.hb) || 0,
     npcUntil: Number(d.npcUntil) || 0, promo: normPromo(d.promo),
-    menu: (Array.isArray(d.menu) ? d.menu : []).slice(0, MENU_CAP).map(m => { const dd = normDish(m); if (!dd) return null; dd.price = clamp(Math.round(Number(m.price) || 1), 1, 1000000); return dd; }).filter(Boolean) };
+    menu: (Array.isArray(d.menu) ? d.menu : []).slice(0, MENU_LIMIT).map(m => { const dd = normDish(m); if (!dd) return null; dd.price = dishPrice(dd); return dd; }).filter(Boolean) };
 }
+/* 회 값은 고정 (v1.28): 그 물고기 기본 판매가(크기 반영, 시세 · 버프 없이)의 1.5배. 예전에 직접 정한 가격도 불러올 때 이 값으로 맞춰요 */
+const DISH_MUL = 1.5;
+function dishPrice(d) { return clamp(Math.round(dishFishValue(d) * DISH_MUL), 1, 1000000); }
 const menuDoc = (menu) => menu.map(m => ({ id: m.id, fishId: m.fishId, name: m.name, tier: m.tier, size: m.size, buff: m.buff, ts: m.ts, price: m.price }));
 async function stallEdit(i, fn, quiet) {   // quiet: NPC 손님처럼 알아서 하는 일은 실패해도 안내를 띄우지 않음
   if (!S.online) { if (!quiet) toast("시장은 온라인에서만 쓸 수 있어요"); return null; }
@@ -3723,19 +3753,22 @@ async function closeStall(silent, idx) {
   refreshSheet();
 }
 function syncMenu() { const i = S.myStall; if (i >= 0 && S.online) S.db.doc("stalls/s" + i).update({ nick: P.nick, color: P.color, hb: Date.now() }).catch(() => {}); }
-async function listDish(dishId, price) {
+// 회를 상에 올려요(여러 접시 한 번에). 값은 고정(dishPrice)이라 고를 게 없어요
+async function listDish(dishId) { return listDishes([dishId]); }
+async function listDishes(ids) {
   const i = S.myStall; if (i < 0) return;
-  if (!needJob("sashimi", "회 팔기")) return;
-  const di = P.dishes.findIndex(d => d.id === dishId); if (di < 0) return;
-  const d = P.dishes[di]; price = clamp(Math.round(Number(price) || 0), 1, 1000000);
-  P.dishes.splice(di, 1); markDirty();
+  const picks = ids.map(id => P.dishes.find(d => d.id === id)).filter(Boolean); if (!picks.length) return;
+  let added = [];
   const ok = await stallEdit(i, async (cur, ref) => {
     if (!cur || cur.owner !== S.uid) return false;
-    if (cur.menu.length >= menuMax()) { toast("메뉴는 " + menuMax() + "접시까지 올릴 수 있어요 · 횟집 숙련도가 오르면 늘어나요"); return false; }
-    await ref.update({ menu: menuDoc(cur.menu).concat(menuDoc([{ ...d, price }])), hb: Date.now() }); return true;
+    const room = menuMax() - cur.menu.length;
+    if (room <= 0) { toast("상 위 메뉴는 " + menuMax() + "접시까지예요 · 가게 꾸미기의 「진열 냉장고」나 횟집 숙련도로 늘어나요"); return false; }
+    added = picks.slice(0, room);
+    await ref.update({ menu: menuDoc(cur.menu).concat(menuDoc(added.map(d => ({ ...d, price: dishPrice(d) })))), hb: Date.now() }); return true;
   });
-  if (!ok) { P.dishes.unshift(d); markDirty(); refreshSheet(); return; }
-  flushSave(); sfx("ui-click", .3); refreshSheet();
+  if (!ok || !added.length) { refreshSheet(); return; }
+  const gone = new Set(added.map(d => d.id)); P.dishes = P.dishes.filter(d => !gone.has(d.id)); markDirty(); flushSave();
+  sfx("ui-click", .3); if (added.length > 1) toast(added.length + "접시를 상에 올렸어요" + (added.length < picks.length ? " · 상이 가득 차서 나머지는 남겨 뒀어요" : "")); refreshSheet();
 }
 async function unlistDish(itemId) {
   const i = S.myStall >= 0 ? S.myStall : myOwnStall(); if (i < 0) return;
@@ -3789,46 +3822,140 @@ setInterval(() => {
   if (!S.online || !S.uid) return;
   S.stalls.forEach((st, i) => { if (st && st.owner === S.uid && i !== S.myStall && !stallAlive(st) && !S.closingStall) { S.closingStall = true; closeStall(true, i).finally(() => { S.closingStall = false; toast("알바 시간이 끝나서 " + (i + 1) + "번 노점을 닫았어요"); }); } });
 }, 5000);
-/* ---------- NPC 손님 ----------
-   마을 사람 NPC가 열린 노점의 회를 사 가요. 사는 건 그 노점 사장님 쪽 화면에서만 처리해서(노점 잠금) 한 접시가 두 번 팔리지 않아요.
-   사장님이 노점에 앉아 있거나 알바생이 있을 때, 40~70초마다 손님이 한 명 와요.
-   돈이 새지 않게: 원래 물고기 판매가의 1.3배까지만 사고(쌀수록 잘 삼), NPC에게는 하루 40접시까지만 팔려요.
-   시장 길의 손님 캐릭터 3명은 보기용이라 각자 화면에서 따로 움직여요 */
-const NPC_BUYERS = ["동네 할머니", "관광객", "낚시꾼 아저씨", "학생 손님", "횟집 단골", "등산객", "새댁 손님", "꼬마 손님"];
-const NPC_SALE_MAX = 40, NPC_SALE_CAP = 1.3;
+/* ---------- 내 횟집 영업 (v1.28) ----------
+   ● 직접 영업(노점에 앉아 있을 때): 마을 손님(NPC)이 줄을 서서 주문해요. 주문에 맞는 회를 「내기」로 내 주면
+     고정가(기본 판매가 ×1.5) + 팁. 빨리 낼수록 · 별(평판)이 높을수록 · 인테리어가 좋을수록 팁이 커요. 너무 오래 기다리면 화내며 가요(평판 -).
+   ● 알바 영업(자리를 비웠을 때): 40~70초마다 손님이 와서 아무 회나 하나 사 가요(팁 없음).
+   ● 사는 건 그 노점 사장님 쪽 화면에서만 노점을 잠그고 처리해요(한 접시가 두 번 팔리지 않게). 손님 줄은 내 화면에만 있어요.
+   ● NPC에게는 하루 150접시까지 팔려요. 시장 길의 손님 캐릭터 3명은 보기용(각자 화면) */
+const NPC_BUYERS = ["동네 할머니", "관광객", "낚시꾼 아저씨", "학생 손님", "횟집 단골", "등산객", "새댁 손님", "꼬마 손님", "퇴근길 직장인", "캠핑족", "신혼부부", "사진작가"];
+const GUEST_EMO = ["👵", "🧳", "🎣", "🎒", "😋", "🥾", "👩", "🧒", "💼", "🏕️", "💑", "📷"];
+const NPC_SALE_MAX = 150;
 function dishFishValue(m) {
   const f = findFish(m.fishId); if (!f) return TIERS[m.tier] ? TIERS[m.tier].base : 10;
   return priceFor(f, clamp((Number(m.size) || baseSize(f)) / baseSize(f), .3, 6));
 }
-function npcWants(m) { const r = m.price / Math.max(1, dishFishValue(m)); return r <= .8 ? .85 : r <= 1 ? .65 : r <= 1.15 ? .4 : r <= NPC_SALE_CAP ? .2 : 0; }
+const dishK = (m) => { const f = findFish(m.fishId); return f ? (Number(m.size) || baseSize(f)) / baseSize(f) : 1; };
 const npcSalesToday = () => (P.npcSales && P.npcSales.day === kstDay() ? P.npcSales.n : 0);
-S.npcNext = 0;
-async function npcVisit() {
-  const i = myOwnStall(); if (i < 0) return;
-  const st = S.stalls[i]; if (!stallAlive(st) || !st.menu.length || (S.myStall !== i && !npcActive(st))) return;
-  if (npcSalesToday() >= NPC_SALE_MAX) return;
-  const who = pick(NPC_BUYERS);
-  npcShopperTo(i);
-  const want = st.menu.filter(m => Math.random() < npcWants(m));
-  if (!want.length) { if (st.menu.every(m => npcWants(m) === 0) && Math.random() < .35) toast("🧑 " + who + "이(가) 메뉴판을 보더니 「좀 비싸네…」 하고 지나갔어요 · NPC 손님은 물고기 값의 1.3배까지만 사요", null, 5000); return; }
-  const target = pick(want);
+/* 주문 종류: any 아무 회 · fish 그 물고기 회 · tier 그 등급 이상 · big 큰 회(×1.3 이상). gourmet 미식가는 별 2개부터 가끔 와요 */
+function orderText(o) { return o.kind === "fish" ? "「" + o.name + "」 회 주세요" : o.kind === "tier" ? TIERS[o.tier].name + " 이상 회 주세요" : o.kind === "big" ? "큼직한 회 주세요 (×1.3 이상)" : "아무 회나 주세요"; }
+function orderMatch(o, m) { return o.kind === "fish" ? m.fishId === o.fishId : o.kind === "tier" ? m.tier >= o.tier : o.kind === "big" ? dishK(m) >= 1.3 : true; }
+function makeOrder(menu) {
+  const gourmet = shopStars() >= 2 && Math.random() < .08 + shopStars() * .02;
+  const fromMenu = menu.length && Math.random() < .85, m = fromMenu ? pick(menu) : null, r = Math.random();
+  if (gourmet) { const rare = menu.filter(x => x.tier >= 2); const g = rare.length ? pick(rare) : m; if (g) return { kind: "fish", fishId: g.fishId, name: g.name.replace(/ 회$/, ""), gourmet: true }; }
+  if (m && r < .4) return { kind: "fish", fishId: m.fishId, name: m.name.replace(/ 회$/, "") };
+  if (m && r < .55 && m.tier >= 1) return { kind: "tier", tier: Math.max(1, m.tier - (Math.random() < .5 ? 1 : 0)) };
+  if (m && r < .7 && dishK(m) >= 1.3) return { kind: "big" };
+  if (!fromMenu && Math.random() < .5) { const f = pick(BUILTIN.filter(x => x.tier <= 2)); return { kind: "fish", fishId: f.id, name: f.name }; }   // 없는 걸 찾는 손님도 있어요
+  return { kind: "any" };
+}
+S.guests = []; S.guestNext = 0; S.shopToday = { n: 0, gold: 0, tips: 0 };
+const guestWait = () => 35000 + SHOP_UPG.decor.eff[shopLv("decor")] / 3 * 1000 + shopStars() * 1000;
+function guestTick() {
+  const i = S.myStall, st = i >= 0 ? S.stalls[i] : null, now = Date.now();
+  if (!st || !stallAlive(st) || st.owner !== S.uid) { if (S.guests.length) { S.guests = []; renderGuests(); } return; }
+  // 오래 기다린 손님은 화내며 떠나요
+  for (const g of S.guests.slice()) if (now - g.born > g.wait) { S.guests = S.guests.filter(x => x !== g); shopRep(-2); toast("😤 " + g.name + "이(가) 기다리다 그냥 갔어요 · 평판 -2", null, 3500); sfx("ui-error", .25); }
+  // 새 손님: 메뉴가 있고 자리가 남으면
+  const cap = SHOP_UPG.table.eff[shopLv("table")];
+  if (now >= S.guestNext && st.menu.length && S.guests.length < cap && npcSalesToday() < NPC_SALE_MAX) {
+    const k = Math.floor(Math.random() * NPC_BUYERS.length), o = makeOrder(st.menu);
+    S.guests.push({ id: uid4(), name: o.gourmet ? "미식가" : NPC_BUYERS[k], emo: o.gourmet ? "🧐" : GUEST_EMO[k], order: o, born: now, wait: guestWait() * (o.gourmet ? .8 : 1) });
+    const iv = SHOP_UPG.sign.eff[shopLv("sign")] * (1 - shopStars() * .06) * 1000;
+    S.guestNext = now + iv * (.7 + Math.random() * .6);
+    npcShopperTo(i); sfx("ui-open", .25);
+    if (S.sheet !== "mystall") toast(GUEST_EMO[k] + " 손님이 왔어요 · " + orderText(o), null, 3000);
+  }
+  renderGuests();
+}
+function shopRep(n) { const before = shopStars(); P.shop.rep = Math.max(0, P.shop.rep + n); markDirty(); const after = shopStars(); if (after > before) { sfx("fanfare-hero", .4); toast([h("b", { text: "⭐ 가게 평판이 올랐어요! ★" + after }), h("div", { class: "muted", style: "font-size:12px", text: "손님이 더 자주 오고 팁이 커져요" + (after >= 2 ? " · 미식가 손님도 와요" : "") })], "lvup", 5000); } }
+async function serveGuest(gid) {
+  const g = S.guests.find(x => x.id === gid), i = S.myStall; if (!g || i < 0 || g.busy) return;
+  const st = S.stalls[i]; const cands = (st ? st.menu : []).filter(m => orderMatch(g.order, m)).sort((a, b) => a.price - b.price);
+  if (!cands.length) { toast("상 위에 맞는 회가 없어요 · " + orderText(g.order)); return; }
+  g.busy = true;
   let got = null;
   await stallEdit(i, async (cur, ref) => {
     if (!cur || cur.owner !== S.uid) return false;
-    const it = cur.menu.find(x => x.id === target.id); if (!it || it.price !== target.price) return false;
+    const it = cur.menu.filter(m => orderMatch(g.order, m)).sort((a, b) => a.price - b.price)[0]; if (!it) return false;
+    await ref.update({ menu: menuDoc(cur.menu.filter(x => x.id !== it.id)), hb: Date.now() }); got = it; return true;
+  }, true);
+  g.busy = false;
+  if (!got) { refreshSheet(); return; }
+  S.guests = S.guests.filter(x => x !== g);
+  const left = clamp(1 - (Date.now() - g.born) / g.wait, 0, 1), fast = left > .6;
+  const tipPct = Math.min(45, Math.round(left * 12 + shopStars() * 2 + SHOP_UPG.decor.eff[shopLv("decor")] + (g.order.kind === "any" ? 0 : 4) + (g.order.gourmet ? 15 : 0)));
+  const tip = Math.round(got.price * tipPct / 100), total = got.price + tip;
+  P.npcSales = { day: kstDay(), n: npcSalesToday() + 1 };
+  P.gold += total; P.shop.served++; P.shop.tips += tip; stat("stallSales"); stat("soldGold", total); gainJobXp("sashimi", 3); questProgress("sell", total);
+  S.saleLog.push({ name: got.name, price: total, ts: Date.now() }); S.shopToday.n++; S.shopToday.gold += total; S.shopToday.tips += tip;
+  shopRep(fast ? 2 : 1); markDirty(); flushSave();
+  sfx("coins", .5); if (g.order.gourmet) sfx("sparkle", .5);
+  toast(g.emo + " " + g.name + " 「" + (fast ? "빨리 나왔네요! 맛있어요" : "잘 먹을게요") + "」 · " + got.name + " +" + won(got.price) + (tip ? " · 팁 +" + won(tip) + " (" + tipPct + "%)" : ""), null, 3200);
+  refreshSheet();
+}
+/* 손님 줄 그리기: 영업 화면의 그 칸만 0.5초마다 새로 그려요(나머지 화면은 그대로) */
+function renderGuests() {
+  const el = document.getElementById("guestPanel"); if (!el) return;
+  const i = S.myStall, st = i >= 0 ? S.stalls[i] : null, now = Date.now(), cap = SHOP_UPG.table.eff[shopLv("table")];
+  // 손님 · 메뉴가 그대로면 막대와 표정만 고쳐요(버튼을 다시 만들지 않아야 누르는 게 안 씹혀요)
+  const sig = st ? [st.menu.map(m => m.id).join(","), S.guests.map(g => g.id + (g.busy ? "b" : "")).join(","), cap].join("|") : "";
+  if (el.dataset.sig === sig && sig) {
+    for (const g of S.guests) {
+      const row = el.querySelector('[data-g="' + g.id + '"]'); if (!row) continue;
+      const left = clamp(1 - (now - g.born) / g.wait, 0, 1), bar = row.querySelector(".gbar i");
+      bar.style.width = Math.round(left * 100) + "%"; bar.style.background = left > .6 ? "#2fae7f" : left > .3 ? "#f2b630" : "#e2402a";
+      row.classList.toggle("angry", left < .3); row.querySelector(".gemo").textContent = left < .3 ? "😠" : g.emo;
+    }
+    const wait = el.querySelector(".gwait"); if (wait) wait.textContent = "손님을 기다리는 중… (다음 손님 약 " + Math.max(0, Math.ceil((S.guestNext - now) / 1000)) + "초)";
+    return;
+  }
+  el.dataset.sig = sig; el.innerHTML = "";
+  if (!st) return;
+  if (!st.menu.length) { el.append(h("div", { class: "muted", style: "font-size:13px;padding:8px", text: "상 위에 회가 있어야 손님이 와요. 아래에서 회를 올려 주세요." })); return; }
+  if (!S.guests.length) el.append(h("div", { class: "muted gwait", style: "font-size:13px;padding:8px", text: "손님을 기다리는 중… (다음 손님 약 " + Math.max(0, Math.ceil((S.guestNext - now) / 1000)) + "초)" }));
+  for (const g of S.guests) {
+    const left = clamp(1 - (now - g.born) / g.wait, 0, 1), can = st.menu.some(m => orderMatch(g.order, m));
+    el.append(h("div", { class: "guest" + (g.order.gourmet ? " gourmet" : "") + (left < .3 ? " angry" : ""), "data-g": g.id },
+      h("span", { class: "gemo", text: left < .3 ? "😠" : g.emo }),
+      h("span", { class: "gtx" }, h("b", { text: g.name }), h("span", { text: orderText(g.order) }), h("i", { class: "gbar" }, h("i", { style: "width:" + Math.round(left * 100) + "%;background:" + (left > .6 ? "#2fae7f" : left > .3 ? "#f2b630" : "#e2402a") }))),
+      h("button", { class: "btn sm pri", disabled: !can || g.busy, onclick: () => serveGuest(g.id), text: can ? "🍣 내기" : "없어요" })));
+  }
+  for (let k = S.guests.length; k < cap; k++) el.append(h("div", { class: "guest empty" }, h("span", { class: "gemo", text: "🪑" }), h("span", { class: "muted", text: "빈 자리" })));
+}
+setInterval(() => { if (S.online && S.uid) guestTick(); }, 500);
+/* 알바 영업: 자리를 비웠을 때만 천천히 팔려요(팁 없음) */
+S.npcNext = 0;
+async function npcVisit() {
+  const i = myOwnStall(); if (i < 0 || S.myStall === i) return;
+  const st = S.stalls[i]; if (!stallAlive(st) || !st.menu.length || !npcActive(st)) return;
+  if (npcSalesToday() >= NPC_SALE_MAX || Math.random() > .7) return;
+  const who = pick(NPC_BUYERS), target = pick(st.menu);
+  npcShopperTo(i);
+  let got = null;
+  await stallEdit(i, async (cur, ref) => {
+    if (!cur || cur.owner !== S.uid) return false;
+    const it = cur.menu.find(x => x.id === target.id); if (!it) return false;
     await ref.update({ menu: menuDoc(cur.menu.filter(x => x.id !== it.id)), hb: Date.now() }); got = it; return true;
   }, true);
   if (!got) return;
   P.npcSales = { day: kstDay(), n: npcSalesToday() + 1 };
-  P.gold += got.price; stat("stallSales"); stat("soldGold", got.price); gainJobXp("sashimi", 3); questProgress("sell", got.price);
+  P.gold += got.price; P.shop.served++; stat("stallSales"); stat("soldGold", got.price); gainJobXp("sashimi", 3); questProgress("sell", got.price);
   S.saleLog.push({ name: got.name, price: got.price, ts: Date.now() }); markDirty(); flushSave();
-  sfx("jingle-catch", .3); toast("🧑 " + who + "이(가) 「" + got.name + "」를 사 갔어요 · +" + won(got.price)); refreshSheet();
+  sfx("jingle-catch", .3); toast("🧑 " + who + "이(가) 알바생에게서 「" + got.name + "」를 사 갔어요 · +" + won(got.price)); refreshSheet();
 }
 setInterval(() => {
   if (!S.online || !S.uid || S.npcBusy || Date.now() < S.npcNext || myOwnStall() < 0) return;
   S.npcNext = Date.now() + 40000 + Math.random() * 30000; S.npcBusy = true;
   npcVisit().catch((e) => console.warn("npc", e)).finally(() => { S.npcBusy = false; });
 }, 5000);
+function buyShopUpg(k) {
+  const u = SHOP_UPG[k], lv = shopLv(k); if (lv >= u.cost.length - 1) return;
+  const cost = u.cost[lv + 1]; if (P.gold < cost) { sfx("ui-error", .4); toast("돈이 부족해요"); return; }
+  P.gold -= cost; P.shop.upg[k] = lv + 1; markDirty(); flushSave(); sfx("ui-confirmation", .45);
+  toast(u.ico + " " + u.name + " " + (lv + 1) + "단계 · " + u.fx(u.eff[lv + 1])); refreshSheet(true);
+}
 /* ---------- 낚시 이펙트 (v1.26) ----------
    희귀 이상을 낚으면 낚은 사람 둘레에: 희귀 = 반짝이 · 영웅 = 반짝이 + 금빛 고리 · 전설 = + 빛기둥 · 신화 = 무지개 빛기둥 + 별가루.
    오늘의 생선은 금빛 반짝이. 다른 사람이 낚아도 그 사람 자리에서 보여요(updateChar 에서 catch 를 보고 띄움) */
@@ -6618,6 +6745,15 @@ function cutSashimi(item) {
   const d = makeDish(item); P.dishes.unshift(d); stat("cut"); gainJobXp("sashimi", 2); markDirty(); refreshSheet();
   toast("「" + d.name + "」를 떴어요 · 먹으면 " + dishBuffLine(d));
 }
+// 여러 마리를 한 번에 회로 (회 보관함이 차면 거기까지)
+function cutMany(items) {
+  const room = DISH_MAX - P.dishes.length; if (room <= 0) { toast("회 보관함이 가득 찼어요 (" + DISH_MAX + "접시) · 노점에 올리거나 먹어 주세요"); return; }
+  const list = items.slice(0, room); if (list.length === 1) { cutSashimi(list[0]); return; }
+  const ids = new Set(list.map(x => x.id)); P.bag = P.bag.filter(x => !ids.has(x.id));
+  for (const it of list) { P.dishes.unshift(makeDish(it)); stat("cut"); gainJobXp("sashimi", 2); }
+  markDirty(); sfx("ui-confirmation", .4); refreshSheet();
+  toast("🔪 " + list.length + "마리를 회로 떴어요" + (items.length > list.length ? " · 보관함이 차서 " + (items.length - list.length) + "마리는 남겨 뒀어요" : "") + " · 노점에 올리면 " + DISH_MUL + "배로 팔려요");
+}
 function eatDish(d) {
   P.dishes = P.dishes.filter(x => x.id !== d.id); stat("eat");
   if (P.listing[d.id]) { delete P.listing[d.id]; syncMenu(); }
@@ -6653,7 +6789,7 @@ SHEETS.bag = (body) => {
     if (chosen.length) {
       bar.append(...[h("span", { class: "abinfo" }, h("b", { text: chosen.length + "마리 고름" }), h("small", { class: "num", text: "합계 " + won(sum(chosen)) })),
         h("button", { class: "btn pri", onclick: () => { const ids = new Set(chosen.map(x => x.id)); S.bagSel = new Set(); sellItems(x => ids.has(x.id)); }, text: "팔기" }),
-        chosen.length === 1 && isJob("sashimi") ? h("button", { class: "btn", onclick: () => { S.bagSel = new Set(); cutSashimi(chosen[0]); }, text: "회 뜨기" }) : null,
+        isJob("sashimi") ? h("button", { class: "btn", onclick: () => { S.bagSel = new Set(); cutMany(chosen); }, text: "🔪 회 뜨기" + (chosen.length > 1 ? " (" + chosen.length + ")" : "") }) : null,
         chosen.length === 1 ? h("button", { class: "btn", onclick: () => { brag(chosen[0]); }, text: "자랑하기" }) : null,
         h("button", { class: "btn ghost", onclick: () => { S.bagSel = new Set(); refreshSheet(true); }, text: "취소" })].filter(Boolean));
     } else if (P.bag.length) {
@@ -8585,8 +8721,18 @@ SHEETS.mystall = (body) => {
   const i = S.myStall >= 0 ? S.myStall : myOwnStall(), st = S.stalls[i];
   if (i < 0 || !st) { setHead("노점", ""); body.append(h("div", { class: "empty-note", text: "운영 중인 노점이 없어요. 시장의 빈 노점에서 열어 보세요." })); return; }
   const seated = S.myStall === i, npc = npcActive(st), left = Math.max(0, Math.ceil((st.npcUntil - Date.now()) / 60000));
-  setHead("내 노점 · " + (i + 1) + "번", seated ? "높은 의자에 앉아 손님을 기다리는 중" : npc ? "알바생이 대신 팔고 있어요" : "자리를 비웠어요");
-  body.append(h("div", { class: "muted", style: "font-size:12.5px;margin-bottom:6px", text: "🧑 마을 손님(NPC)도 1분쯤마다 들러 사 가요 · 물고기 값의 1.3배까지만, 쌀수록 잘 사요 · 오늘 NPC에게 " + npcSalesToday() + "/" + NPC_SALE_MAX + "접시" }));
+  setHead("내 횟집 · " + (i + 1) + "번", seated ? "🔥 영업 중 · 손님 주문에 맞는 회를 내 주세요" : npc ? "알바생이 대신 팔고 있어요 (팁 없음)" : "자리를 비웠어요");
+  // 평판 · 오늘 영업
+  const stars = shopStars(), nextRep = REP_STARS[stars + 1];
+  body.append(h("div", { class: "shopbar" },
+    h("span", { class: "stars", text: "★".repeat(stars) + "☆".repeat(5 - stars) }),
+    h("span", { class: "muted", text: "평판 " + P.shop.rep + (nextRep ? " / 다음 별 " + nextRep : " (최고)") }),
+    h("span", { text: "오늘 " + S.shopToday.n + "접시 · " + won(S.shopToday.gold) + " (팁 " + won(S.shopToday.tips) + ")" }),
+    h("span", { class: "muted", text: "NPC 판매 " + npcSalesToday() + "/" + NPC_SALE_MAX })));
+  if (seated) {
+    body.append(h("div", { class: "sec", text: "🧑 손님 (" + SHOP_UPG.table.eff[shopLv("table")] + "자리) · 빨리 낼수록 팁이 커요" }), h("div", { id: "guestPanel", class: "guests" }));
+    setTimeout(renderGuests, 0);
+  } else body.append(h("div", { class: "listrow", style: "margin-bottom:8px" }, h("span", { class: "emo", text: "🪑" }), h("div", { class: "grow" }, h("b", { text: "노점에 앉아야 손님이 주문해요" }), h("div", { class: "muted", style: "font-size:12.5px", text: "직접 영업하면 팁과 평판을 받아요. 알바생은 천천히 팔고 팁이 없어요." })), h("button", { class: "btn sm pri", onclick: () => returnToStall(i), text: "가서 앉기" })));
   const pc = promoCanvas(st.promo, 300); pc.style.cssText = "width:100%;max-width:200px;margin:0 auto;display:block";
   const left_ = h("div", { class: "ishelf" }, pc, h("button", { class: "btn sm", onclick: () => openSheet("stallopen", "edit"), text: "홍보 종이 고치기" }),
     h("div", { class: "listrow", style: "flex-direction:column;align-items:stretch;gap:6px;background:rgba(255,255,255,.6)" },
@@ -8600,22 +8746,29 @@ SHEETS.mystall = (body) => {
   right.append(h("div", { class: "gearbar" },
     h("div", { class: "gi" }, h("span", { text: "상 위 메뉴" }), h("b", { text: st.menu.length + " / " + menuMax() + "접시" })),
     h("div", { class: "gi" }, h("span", { text: "이번 접속 판매" }), h("b", { text: S.saleLog.length + "접시 · " + won(sum) + "" }))));
-  right.append(h("div", { class: "sec", text: "상 위에 올린 회" }));
+  right.append(h("div", { class: "sec", text: "상 위에 올린 회 · 값은 기본 판매가의 " + DISH_MUL + "배로 정해져 있어요" }));
   if (!st.menu.length) right.append(h("div", { class: "muted", style: "font-size:13px", text: "상이 비어 있어요. 아래에서 회를 올려 보세요." }));
   else right.append(h("div", { class: "ilist" }, st.menu.map(m => { const f = findFish(m.fishId); return h("div", { class: "irow", style: "cursor:default" },
-    h("img", { class: "iic wide", src: f ? fishArt(f).src : "", alt: "" }), h("span", { class: "inm" }, h("b", { text: m.name }), h("small", { text: dishBuffLine(m) })),
+    h("img", { class: "iic wide", src: f ? fishArt(f).src : "", alt: "" }), h("span", { class: "inm" }, h("b", null, m.name + " ", tierChip(m.tier)), h("small", { text: (dishK(m) >= 1.3 ? "큼직 ×" + dishK(m).toFixed(2) + " · " : "") + dishBuffLine(m) })),
     h("span", { style: "display:flex;flex-direction:column;align-items:flex-end;gap:4px" }, h("b", { class: "num", text: won(m.price) + "" }), h("button", { class: "btn sm", onclick: () => unlistDish(m.id), text: "내리기" }))); })));
-  right.append(h("div", { class: "sec", text: "회 올리기" }));
-  if (!P.dishes.length) right.append(h("div", { class: "muted", style: "font-size:13px", text: "가진 회가 없어요. 회 센터에서 물고기를 회로 떠 오세요." }));
-  else right.append(h("div", { class: "ilist" }, P.dishes.map(d => {
-    const f = findFish(d.fishId), base = Math.round(TIERS[d.tier].base * 2.5);
-    const price = h("input", { type: "number", min: "100", step: "1000", value: String(base * WON), "aria-label": d.name + " 가격 (원)", style: "width:96px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 8px" });
-    return h("div", { class: "irow", style: "cursor:default;grid-template-columns:52px minmax(0,1fr)" },
-      h("img", { class: "iic wide", src: f ? fishArt(f).src : "", alt: "" }),
-      h("div", { style: "display:flex;flex-direction:column;gap:6px;min-width:0" }, h("span", { class: "inm" }, h("b", { text: d.name }), h("small", { text: dishBuffLine(d) })),
-        h("div", { class: "qp" }, price, ...[1, 1.5, 2].map(k => { const v = Math.max(10, Math.round(base * k / 10) * 10); return h("button", { class: "btn sm", onclick: () => { price.value = String(v * WON); }, text: won(v) }); }),
-          h("button", { class: "btn sm pri", disabled: !seated || st.menu.length >= menuMax(), title: seated ? "" : "노점에 앉아 있어야 올릴 수 있어요", onclick: () => listDish(d.id, Math.max(1, Math.round((Number(price.value) || 0) / WON))), text: "상에 올리기" }))));
-  })));
+  right.append(h("div", { class: "sec", text: "회 올리기 · " + st.menu.length + "/" + menuMax() + "접시" }));
+  if (!P.dishes.length) right.append(h("div", { class: "muted", style: "font-size:13px", text: "가진 회가 없어요. 가방에서 물고기를 골라 「회 뜨기」를 하면 회가 생겨요." }));
+  else {
+    const room = menuMax() - st.menu.length;
+    right.append(h("div", { class: "row" }, h("button", { class: "btn pri", disabled: !seated || room <= 0, title: seated ? "" : "노점에 앉아 있어야 올릴 수 있어요", onclick: () => listDishes(P.dishes.map(d => d.id)), text: "🍣 모두 올리기 (" + Math.min(room, P.dishes.length) + "접시)" })));
+    right.append(h("div", { class: "ilist" }, P.dishes.map(d => { const f = findFish(d.fishId);
+      return h("div", { class: "irow", style: "cursor:default" },
+        h("img", { class: "iic wide", src: f ? fishArt(f).src : "", alt: "" }), h("span", { class: "inm" }, h("b", null, d.name + " ", tierChip(d.tier)), h("small", { text: dishBuffLine(d) })),
+        h("span", { style: "display:flex;flex-direction:column;align-items:flex-end;gap:4px" }, h("b", { class: "num", text: won(dishPrice(d)) }),
+          h("button", { class: "btn sm pri", disabled: !seated || room <= 0, onclick: () => listDish(d.id), text: "올리기" }))); })));
+  }
+  // 가게 꾸미기
+  right.append(h("div", { class: "sec", text: "🛠 가게 꾸미기 · 어느 노점을 열어도 따라와요" }));
+  right.append(h("div", { class: "ilist" }, Object.entries(SHOP_UPG).map(([k, u]) => { const lv = shopLv(k), max = lv >= u.cost.length - 1, cost = max ? 0 : u.cost[lv + 1];
+    return h("div", { class: "irow" + (lv >= 3 ? " g4" : ""), style: "cursor:default" }, h("span", { class: "emo", style: "font-size:26px;text-align:center", text: u.ico }),
+      h("span", { class: "inm" }, h("b", { text: u.name + " · " + lv + "단계" }), h("small", { text: "지금: " + u.fx(u.eff[lv]) + (max ? "" : " → 다음: " + u.fx(u.eff[lv + 1])) })),
+      h("button", { class: "btn sm" + (max ? "" : " pri"), disabled: max || P.gold < cost, onclick: () => buyShopUpg(k), text: max ? "최고 단계" : won(cost) })); })));
+  right.append(h("div", { class: "muted", style: "font-size:11.5px", text: "누적 손님 " + fmt(P.shop.served) + "명 · 받은 팁 " + won(P.shop.tips) + " · 평판은 손님을 만족시키면 +1(빨리 내면 +2), 화나서 떠나면 -2" }));
   right.append(h("div", { class: "row" }, h("button", { class: "btn", onclick: () => { closeSheet(); closeStall(); }, text: "노점 닫기 (남은 회는 돌려받아요)" })));
   body.append(h("div", { class: "tshop" }, left_, right));
 };
