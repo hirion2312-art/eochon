@@ -1347,6 +1347,14 @@ input,select,textarea{background-color:rgba(255,255,255,.07);border-color:var(--
 /* v1.40: 오른쪽 아래 낚시 현황판 · 걸어 다닐 때 조작 안내는 없앴어요 (의뢰 · 출석 · 초보 수첩은 아래 막대 · 메뉴에 있어요) */
 .hud.stat{display:none!important}
 #hint.idle{display:none}
+/* v1.41 채널 */
+button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}button.chan:hover{filter:brightness(1.15)}
+.chlist{display:flex;flex-direction:column;gap:8px}
+.chrow{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;border:1.5px solid var(--line);background:var(--bg)}
+.chrow .chn{font-family:var(--f-display);font-weight:400;font-size:19px;min-width:62px}.chrow small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+.chrow .chbar{height:8px;border-radius:4px;background:rgba(127,127,127,.22);overflow:hidden}.chrow .chbar i{display:block;height:100%;background:#2fae7f}
+.chrow.full .chbar i{background:#e2402a}.chrow.here{border-color:#3fd6cc;box-shadow:0 0 0 3px rgba(63,214,204,.18)}
+.chrow .chtag{font-size:12px;font-weight:800;color:#3fd6cc}.chrow .grow{flex:1;min-width:0}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 </style>
 
@@ -1363,7 +1371,7 @@ input,select,textarea{background-color:rgba(255,255,255,.07);border-color:var(--
 
   <div class="hud tr">
     <div class="clock glass" id="clock"><span id="clockIco"></span><b id="clockTxt">오전 9:00</b></div>
-    <div class="chan glass"><b>어촌생활</b><i class="live" aria-hidden="true"></i><span id="chan">낭만 부두 1채널</span></div>
+    <button class="chan glass" id="chanBtn" title="채널 옮기기"><b>어촌생활</b><i class="live" aria-hidden="true"></i><span id="chan">낭만 부두 1채널</span></button>
     <button class="icobtn glass" id="soundBtn" aria-pressed="false" aria-label="물소리" title="물소리"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h3l5 4V6L7 10H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></button>
     <button class="icobtn glass" id="setBtn" aria-expanded="false" aria-label="설정" title="설정"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
   </div>
@@ -1489,7 +1497,7 @@ input,select,textarea{background-color:rgba(255,255,255,.07);border-color:var(--
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.40.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.41.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -3523,7 +3531,7 @@ const paidSum = (b) => Object.values(b.paid).reduce((a, v) => a + v, 0);
 const mySeatOnBoat = () => S.boat.seats.find(x => x.uid === S.uid);
 async function boatEdit(fn) {
   if (!S.online) { toast("배는 온라인에서만 탈 수 있어요"); return false; }
-  const ref = S.db.doc("boat/state");
+  const ref = S.db.doc(boatDocId());
   try {
     const r = await ref.acquire({ holder: S.uid, ttlMs: 4000 });
     if (!r.acquired) { toast("다른 분이 배를 정리하는 중이에요. 잠시 후 다시 눌러 주세요"); return false; }
@@ -3628,7 +3636,7 @@ function boatTick() {
 }
 async function boatEditQuiet(fn) {
   if (!S.online) return;
-  const ref = S.db.doc("boat/state");
+  const ref = S.db.doc(boatDocId());
   try {
     const r = await ref.acquire({ holder: S.uid, ttlMs: 3000 }); if (!r.acquired) return;
     const snap = await ref.get(); const next = fn(normBoat(snap.exists ? snap.data() : null)); if (next) await ref.set(next);
@@ -3982,6 +3990,67 @@ function doEmote(e) {
 
 /* ===================== 접속자 (room presence) ===================== */
 function pushPresence(patch) { if (S.room && !S.title) S.room.presence(patch).catch(() => {}); }
+/* ===================== 채널 (v1.41) =====================
+   한 채널에 최대 12명. 들어올 때 자리가 남은 가장 낮은 채널로 들어가요(다 차면 새 채널).
+   채널마다 사람 · 실시간 신호 · 채팅 · 배 · 노점이 따로예요. 저장 · 랭킹 · 친구 · 집 · 거래는 모두 같이 써요.
+   서버 API(room)는 그대로 두고 게임 쪽에서 감싸요: 내 presence에 ch를 달고, 받은 것 중 내 채널 것만 써요.
+   ch가 없는 예전 버전 접속자 · 신호 · 채팅은 1채널로 쳐요 */
+const CH_MAX = 12;
+S.ch = 1; S.allPeers = [];
+const peerCh = (p) => { const c = Math.floor(Number((p.presence || {}).ch)); return c >= 1 && c <= 99 ? c : 1; };
+const inWorld = (p) => p.kind === "viewer" && typeof (p.presence || {}).x === "number";
+function chCounts() {   // 채널 → 지금 들어와 있는 사람 수 (나는 빼고)
+  const m = new Map(); for (const p of S.allPeers) if (!p.sameTab && inWorld(p)) m.set(peerCh(p), (m.get(peerCh(p)) || 0) + 1); return m;
+}
+function pickChannel() { const m = chCounts(); for (let c = 1; c < 99; c++) if ((m.get(c) || 0) < CH_MAX) return c; return 99; }
+function chRoom(room) {
+  let peersFn = null;
+  const mine = (p) => p.sameTab || peerCh(p) === S.ch;
+  const feed = (left) => { if (peersFn) peersFn({ peers: S.allPeers.filter(mine), left }); };
+  return {
+    presence: (patch) => room.presence(Object.assign({}, patch, { ch: S.ch })),
+    onPeers(fn, err) { peersFn = fn; return room.onPeers((ev) => { S.allPeers = ev.peers || []; feed((ev.left || []).filter(mine)); }, err); },
+    on: (topic, fn, err) => room.on(topic, (m) => { const c = Math.floor(Number(m && m.data && m.data.ch)) || 1; if (m.sameTab || c === S.ch) fn(m); }, err),
+    emit: (topic, data) => room.emit(topic, Object.assign({}, data, { ch: S.ch })),
+    refeed(prev) { const now = new Set(S.allPeers.filter(mine).map(p => p.peer)); feed(prev.filter(p => !now.has(p.peer))); },
+  };
+}
+const boatDocId = () => S.ch === 1 ? "boat/state" : "boat/state_c" + S.ch;
+const stallDocId = (i) => S.ch === 1 ? "stalls/s" + i : "stalls/c" + S.ch + "s" + i;
+const stallIdRe = () => S.ch === 1 ? /^s([0-7])$/ : new RegExp("^c" + S.ch + "s([0-7])$");
+function setChannel(c) {   // 채널을 바꾸고 그 채널의 사람 · 배 · 노점 · 채팅으로 갈아 끼워요
+  if (c === S.ch) return;
+  const prev = S.peers.slice(); S.ch = c;
+  if (S.room) { S.room.refeed(prev); if (!S.title) S.room.presence(fullPresence()).catch(() => {}); }
+  if (S.watchCh) S.watchCh();
+  S.chat = (S.chatAll || []).filter(m => m.ch === S.ch); renderChat();
+  updateChanLabel();
+}
+function moveChannel(c) {
+  if (c === S.ch) return;
+  if (onBoat() || S.myStall >= 0 || (S.coop && S.coop.stage !== "inviting") || REEL.on) { toast("배 · 노점 · 함께 낚시 · 손맛 싸움 중에는 채널을 옮길 수 없어요"); return; }
+  if ((chCounts().get(c) || 0) >= CH_MAX) { toast(c + "채널은 꽉 찼어요 (최대 " + CH_MAX + "명)"); refreshSheet(); return; }
+  if (ME.seat) leaveSpot();
+  setChannel(c); closeSheet(); sfx("ui-confirmation", .35); toast("🌊 " + c + "채널로 옮겼어요");
+}
+function updateChanLabel() {
+  const n = (S.peers || []).filter(p => !p.sameTab && inWorld(p)).length + (S.title ? 0 : 1);
+  $("chan").textContent = "낭만 부두 " + S.ch + "채널 · " + Math.max(1, n) + "/" + CH_MAX + "명";
+}
+function channelsSheet(body) {   // SHEETS.channels
+  const m = chCounts(), top = Math.max(S.ch, ...m.keys(), 1), list = [];
+  for (let c = 1; c <= top + 1; c++) list.push(c);
+  setHead("🌊 채널", "한 채널에 최대 " + CH_MAX + "명 · 채널마다 사람 · 채팅 · 배 · 노점이 따로예요");
+  const friendsIn = (c) => S.allPeers.filter(p => !p.sameTab && inWorld(p) && peerCh(p) === c && isUid(p.by) && isFriend(p.by)).map(p => str((p.presence || {}).nick, 16) || "친구");
+  body.append(h("div", { class: "chlist" }, list.map(c => {
+    const n = (m.get(c) || 0) + (c === S.ch && !S.title ? 1 : 0), here = c === S.ch, full = !here && (m.get(c) || 0) >= CH_MAX, fr = friendsIn(c);
+    return h("div", { class: "chrow" + (here ? " here" : "") + (full ? " full" : "") },
+      h("b", { class: "chn", text: c + "채널" }),
+      h("div", { class: "grow" }, h("div", { class: "chbar" }, h("i", { style: "width:" + Math.min(100, n / CH_MAX * 100) + "%" })),
+        h("small", { text: n + " / " + CH_MAX + "명" + (fr.length ? " · 친구 " + fr.join(", ") : "") + (n === 0 ? " · 비어 있어요" : "") })),
+      here ? h("span", { class: "chtag", text: "지금 여기" }) : h("button", { class: "btn sm" + (fr.length ? " pri" : ""), disabled: full, onclick: () => moveChannel(c), text: full ? "꽉 찼어요" : "옮기기" }));
+  })));
+}
 function fullPresence() {
   return { nick: P.nick, color: P.color, skin: P.skin, uid: S.uid || null, x: ME.x, z: ME.z, ry: ME.ry, st: ME.st, seat: ME.seat,
     stall: S.myStall, phase: S.phase, fv: S.myFace ? S.myFace.ts || 0 : 0, wear: wearStr(P.wear), card: S.card ? S.card.id : null, lv: myLv(), rod: P.rod, reel: P.reel, cp: S.castPow || .6, ttl: myTag(), home: S.homeHost || null };
@@ -4046,8 +4115,7 @@ function onPeers(ch) {
   }
   S.friendHere = fh;
   if (S.sheet === "friends") refreshSheet();
-  const n = ch.peers.filter(p => p.kind === "viewer").length || 1;
-  $("chan").textContent = "낭만 부두 1채널 · 지금 " + n + "명";
+  updateChanLabel(); if (S.sheet === "channels") refreshSheet();
 }
 
 /* ===================== 채팅 ===================== */
@@ -4074,11 +4142,11 @@ function renderChat() {
 function normChat(id, d) {
   return { id, kind: ["sys", "brag"].includes(d.kind) ? d.kind : "msg", nick: str(d.nick, 16) || "손님", text: str(d.text, 160),
     color: /^#[0-9a-f]{6}$/i.test(d.color || "") ? d.color : "#888888", ts: Number(d.ts) || 0,
-    fishId: str(d.fishId, 80), tier: clamp(Math.floor(Number(d.tier) || 0), 0, 5), size: Number(d.size) || 0 };
+    fishId: str(d.fishId, 80), tier: clamp(Math.floor(Number(d.tier) || 0), 0, 5), size: Number(d.size) || 0, ch: clamp(Math.floor(Number(d.ch) || 1), 1, 99) };
 }
 async function postChat(msg) {
   if (S.online) {
-    try { await S.db.collection("chat").add(msg); }
+    try { await S.db.collection("chat").add(Object.assign({ ch: S.ch }, msg)); }
     catch (e) { toast(e && e.code === "quota_exceeded" ? "채팅 저장 공간이 가득 찼어요" : "메시지를 보내지 못했어요. 잠시 후 다시 보내 주세요"); }
     if (Math.random() < 0.1) pruneChat();
   } else { S.chat.push(normChat(uid4(), msg)); S.chat = S.chat.slice(-60); lsSet("mn.chat", S.chat); renderChat(); }
@@ -4276,7 +4344,7 @@ function dishPrice(d) { return clamp(Math.round(dishFishValue(d) * DISH_MUL), 1,
 const menuDoc = (menu) => menu.map(m => ({ id: m.id, fishId: m.fishId, name: m.name, tier: m.tier, size: m.size, buff: m.buff, ts: m.ts, price: m.price }));
 async function stallEdit(i, fn, quiet) {   // quiet: NPC 손님처럼 알아서 하는 일은 실패해도 안내를 띄우지 않음
   if (!S.online) { if (!quiet) toast("시장은 온라인에서만 쓸 수 있어요"); return null; }
-  const ref = S.db.doc("stalls/s" + i);
+  const ref = S.db.doc(stallDocId(i));
   try {
     const r = await ref.acquire({ holder: S.uid, ttlMs: 3000 });
     if (!r.acquired) { if (!quiet) toast("노점이 바빠요. 잠시 후 다시 눌러 주세요"); return null; }
@@ -4315,7 +4383,7 @@ function sitAtStall(i) {
   cam.yawGoal = ME.ry + Math.PI;
   pushPresence({ stall: i, st: "stall" }); presMove(true);
   clearInterval(hbTimer);
-  const ref = S.db.doc("stalls/s" + i);
+  const ref = S.db.doc(stallDocId(i));
   hbTimer = setInterval(() => { if (S.myStall === i) ref.update({ hb: Date.now(), nick: P.nick, color: P.color }).catch(() => {}); }, 45000);
   updateLeaveBtn(); updateHint();
 }
@@ -4340,7 +4408,7 @@ async function closeStall(silent, idx) {
   if (!silent) toast("노점을 닫았어요" + (n ? " · 남은 회 " + n + "접시를 돌려받았어요" : ""));
   refreshSheet();
 }
-function syncMenu() { const i = S.myStall; if (i >= 0 && S.online) S.db.doc("stalls/s" + i).update({ nick: P.nick, color: P.color, hb: Date.now() }).catch(() => {}); }
+function syncMenu() { const i = S.myStall; if (i >= 0 && S.online) S.db.doc(stallDocId(i)).update({ nick: P.nick, color: P.color, hb: Date.now() }).catch(() => {}); }
 // 회를 상에 올려요(여러 접시 한 번에). 값은 고정(dishPrice)이라 고를 게 없어요
 async function listDish(dishId) { return listDishes([dishId]); }
 async function listDishes(ids) {
@@ -7653,6 +7721,7 @@ function updateHint() {
 
 /* ===================== 시트 ===================== */
 const SHEETS = {};
+SHEETS.channels = channelsSheet;
 S.sheetStack = [];
 function openSheet(name, arg, opt) {
   if (name === "office" && isLocked("office")) { lockedToast("동사무소"); return; }
@@ -10086,12 +10155,12 @@ SHEETS.friends = (body) => {
     h("button", { class: "btn" + (S.card ? "" : " pri"), disabled: !S.online, onclick: () => { if (S.card) stopCard(); else { closeSheet(); startCard(); } }, text: !S.online ? "온라인 전용" : S.card ? "명함 거두기" : "명함 내밀기" })));
   if (!list.length) { body.append(h("div", { class: "empty-note big" }, h("div", { style: "font-size:40px", text: "👫" }), "아직 친구가 없어요.", h("br"), "명함을 내밀거나, 명함을 내민 사람에게 다가가 받아 보세요.")); return; }
   const card = (f) => {
-    const p = f.peer, st = friendStatus(p);
+    const p = f.peer, st = friendStatus(p), oc = p ? null : S.allPeers.find(x => !x.sameTab && inWorld(x) && x.by === f.uid);   // 다른 채널에 있는 친구
     return h("div", { class: "fcard" + (p ? " on" : "") },
       h("span", { class: "fav" + (p ? " on" : "") }, nickAvatar(f.nick, f.uid, 46), h("i", { class: "fbadge", title: st.t, text: st.ico })),
-      h("div", { class: "grow" }, h("b", { text: f.nick }), h("small", { text: p ? st.t + " · " + placeAt(p.x, p.z) : "친구가 된 날 " + new Date(f.ts).toLocaleDateString("ko-KR") })),
+      h("div", { class: "grow" }, h("b", { text: f.nick }), h("small", { text: p ? st.t + " · " + placeAt(p.x, p.z) : oc ? "🌊 " + peerCh(oc) + "채널에 있어요" : "친구가 된 날 " + new Date(f.ts).toLocaleDateString("ko-KR") })),
       h("div", { class: "facts" },
-        p ? h("button", { class: "btn sm pri", onclick: () => visitFriend(p), text: p.home ? "그 집으로" : "찾아가기" }) : null,
+        p ? h("button", { class: "btn sm pri", onclick: () => visitFriend(p), text: p.home ? "그 집으로" : "찾아가기" }) : oc ? h("button", { class: "btn sm pri", onclick: () => moveChannel(peerCh(oc)), text: "그 채널로" }) : null,
         p ? h("button", { class: "ibtn", title: "거래 · 함께 낚시", "aria-label": "거래 · 함께 낚시", onclick: () => openSheet("player", p.peer), text: "🤝" }) : null,
         h("button", { class: "ibtn", title: "집 놀러 가기", "aria-label": "집 놀러 가기", disabled: !S.online, onclick: () => { closeSheet(); enterHouse(f.uid); }, text: "🏠" }),
         armBtn("삭제", "한 번 더 누르면 삭제", () => removeFriend(f.uid), "ghost")));
@@ -10803,6 +10872,7 @@ $("hookBtn").addEventListener("pointerdown", (e) => { e.preventDefault(); hook()
   cb.addEventListener("contextmenu", (e) => e.preventDefault()); }
 $("hookBtn").addEventListener("keydown", (e) => { if (e.key === "Enter") hook(); });
 window.addEventListener("pointerup", () => reelHold(false));
+$("chanBtn").addEventListener("click", () => openSheet("channels"));
 $("standBtn").addEventListener("click", () => { if (S.card) stopCard(); else if (onBoat() && S.boat.status === "sailing") openSheet("boat"); else leaveSpot(); });
 $("actBtn").addEventListener("click", doAction);
 $("testGold").addEventListener("click", () => { P.gold += 5000; markDirty(); refreshSheet(); toast("테스트용 50만원을 받았어요"); });
@@ -11057,7 +11127,8 @@ function doEnter(back) {
     ME.x = STATION.x; ME.z = STATION.z; ME.ry = STATION.ry; ME.target = null;
     setTimeout(() => walkTo(STATION.x + Math.sin(STATION.ry) * 3.5, STATION.z + Math.cos(STATION.ry) * 3.5), 400);
   }
-  S.chatSince = Date.now(); S.chat = []; renderChat();
+  S.chatSince = Date.now(); S.chat = []; S.chatAll = []; renderChat();
+  { const c = pickChannel(); if (c !== S.ch) setChannel(c); }   // 채널당 12명 · 자리가 남은 가장 낮은 채널
   const t = $("title"); t.classList.add("out"); setTimeout(() => { t.hidden = true; }, 650);
   bgmUpdate();
   if (S.room) S.room.presence(fullPresence()).catch(() => {});
@@ -11110,10 +11181,10 @@ async function boot() {
   $("adminBtn").hidden = !S.isOwner; $("testGold").hidden = !S.isOwner; $("fbAdminBtn").hidden = !S.isOwner; $("adminToolsTag").textContent = S.isOwner ? "운영자" : "권한 받기";
   $("myCode").textContent = myCode();
   if (room) {
-    S.room = room;
-    room.onPeers(onPeers, () => { S.room = null; });
-    room.on("coop", onCoopMsg, () => {});
-    if (!S.title) room.presence(fullPresence()).catch(() => {});
+    const cr = chRoom(room); S.room = cr;
+    cr.onPeers(onPeers, () => { S.room = null; });
+    cr.on("coop", onCoopMsg, () => {});
+    if (!S.title) cr.presence(fullPresence()).catch(() => {});
   }
   if (!db || !uid) { goOffline(!db ? "no db" : "no uid"); return; }
   S.db = db; S.online = true;
@@ -11143,7 +11214,8 @@ async function boot() {
   db.collection("chat").orderBy("ts", "desc").limit(60).onSnapshot((snap) => {
     if (!snap.metadata.fromCache) { S.chatLoaded = true; clearTimeout(chatTimer); }
     const prevN = S.chat.length, prevLast = prevN ? S.chat[prevN - 1].id : null;
-    S.chat = snap.docs.map(d => normChat(d.id, d.data())).filter(m => m.ts >= (S.chatSince || 0) - 1500).reverse(); renderChat();
+    S.chatAll = snap.docs.map(d => normChat(d.id, d.data())).filter(m => m.ts >= (S.chatSince || 0) - 1500).reverse();
+    S.chat = S.chatAll.filter(m => m.ch === S.ch); renderChat();
     if (S.chatLoaded && prevLast && $("chatBox").classList.contains("min") && MOBILE()) { const i = S.chat.findIndex(m => m.id === prevLast); const n = i < 0 ? 1 : S.chat.length - 1 - i; if (n > 0) { S.chatUnread = (S.chatUnread || 0) + n; drawChatBadge(); } }
   }, (e) => { clearTimeout(chatTimer); console.warn("chat", e); });
   db.doc("config/notice").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; const prev = S.notice && S.notice.ts; S.notice = { text: str(d.text, 80), ts: Number(d.ts) || 0, until: Number(d.until) || 0 }; renderNoticeBar(); if (prev && S.notice.ts !== prev && S.notice.text) toast("📢 " + S.notice.text, null, 7000); }, () => {});
@@ -11168,11 +11240,24 @@ async function boot() {
     }, (e) => console.warn("members", e));
     db.doc("data/users/" + uid + "/support").get().then((sn) => { if (sn.exists) S.supportLog = JSON.parse(JSON.stringify((sn.data() || {}).entries || [])); }).catch(() => {});
   }
-  db.doc("boat/state").onSnapshot((snap) => {
-    S.boat = normBoat(snap.exists ? snap.data() : null);
-    if (S.sheet === "boat") refreshSheet();
-    updateLeaveBtn(); updateHint();
-  }, (e) => console.warn("boat", e));
+  let unBoat = null, unStalls = null;
+  S.watchCh = () => {   // 지금 채널의 배 · 노점 문서를 지켜봐요 (채널을 옮기면 다시)
+    if (unBoat) unBoat(); if (unStalls) unStalls();
+    unBoat = db.doc(boatDocId()).onSnapshot((snap) => {
+      S.boat = normBoat(snap.exists ? snap.data() : null);
+      if (S.sheet === "boat") refreshSheet();
+      updateLeaveBtn(); updateHint();
+    }, (e) => console.warn("boat", e));
+    unStalls = db.collection("stalls").onSnapshot((snap) => {
+      const arr = Array(8).fill(null), re = stallIdRe();
+      for (const d of snap.docs) { const m = re.exec(d.id); if (m) arr[+m[1]] = normStall(d.data()); }
+      S.stalls = arr;
+      if (S.myStall >= 0 && (!arr[S.myStall] || arr[S.myStall].owner !== uid)) { S.myStall = -1; clearInterval(hbTimer); ME.st = "idle"; updateLeaveBtn(); toast("노점이 닫혔어요"); }
+      if (S.sheet === "stall" || S.sheet === "mystall") refreshSheet();
+    }, (e) => console.warn("stalls", e));
+    if (typeof unBoat !== "function") unBoat = null; if (typeof unStalls !== "function") unStalls = null;
+  };
+  S.watchCh();
   S.records = new Map();
   db.collection("records").limit(500).onSnapshot((snap) => {
     S.records = new Map(snap.docs.map(d => { const v = d.data() || {}; return [d.id, { k: clamp(Number(v.k) || 0, 0, 10), nick: str(v.nick, 16) || "누군가" }]; }));
@@ -11182,13 +11267,6 @@ async function boot() {
   db.collection("faces").limit(500).onSnapshot((snap) => {
     for (const d of snap.docs) { const v = d.data() || {}; if (d.id === uid) continue; S.faces.set(d.id, normFace(v)); }
   }, (e) => console.warn("faces", e));
-  db.collection("stalls").onSnapshot((snap) => {
-    const arr = Array(8).fill(null);
-    for (const d of snap.docs) { const m = /^s([0-7])$/.exec(d.id); if (m) arr[+m[1]] = normStall(d.data()); }
-    S.stalls = arr;
-    if (S.myStall >= 0 && (!arr[S.myStall] || arr[S.myStall].owner !== uid)) { S.myStall = -1; clearInterval(hbTimer); ME.st = "idle"; updateLeaveBtn(); toast("노점이 닫혔어요"); }
-    if (S.sheet === "stall" || S.sheet === "mystall") refreshSheet();
-  }, (e) => console.warn("stalls", e));
   db.collection("inbox/" + uid + "/items").onSnapshot(onInbox, (e) => console.warn("inbox", e));
   db.collection("trades").orderBy("ts", "desc").limit(30).onSnapshot((snap) => {
     S.trades = snap.docs.map(d => normTrade(d.id, d.data() || {})).filter(Boolean);
