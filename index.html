@@ -140,6 +140,7 @@ button{cursor:pointer}
 .coop button:disabled{opacity:.6}
 .emopop{right:auto;left:50%;transform:translateX(-50%);top:auto;bottom:calc(var(--sb) + 78px);width:auto;flex-direction:row;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 24px)}
 .emopop button{font-size:14px;padding:8px 12px}
+.emopop .emo-title{flex-basis:100%;text-align:center;font-size:12px;opacity:.75;padding:2px 0 4px}
 .reel-coop{font-size:12px;color:#ffe2a8}
 .stat #questBtn b{font-weight:500;color:#ffd77a}
 .gear-slot{display:flex;gap:8px;flex-wrap:wrap}
@@ -768,11 +769,10 @@ body.cinema #hint,body.cinema #standBtn,body.cinema #castBtn,body.cinema .toasts
 .ws-c{padding:13px 12px;border-radius:14px;border:2px solid #1d5a7a;background:#f2f8fb;color:#1d3a5c;font:700 14px/1.2 inherit;cursor:pointer;text-align:left}
 .ws-c:hover{background:#e2f0f6}.ws-c.pri{background:#1d5a7a;color:#fff}.ws-c.ghost{border-style:dashed;background:transparent;color:inherit}
 @media (max-width:560px){.ws-stage{flex-direction:column;align-items:center}.ws-bubble::before{display:none}.ws-choices{grid-template-columns:1fr}}
-/* ===== 아래 막대 이모지 (v1.46) ===== */
-.hud.dock button.hasemo > svg.ico{display:none}
-.hud.dock button .qemo{display:grid;place-items:center;width:36px;height:36px;border-radius:13px;background:var(--qc,#8a8f96);font-size:21px;line-height:1;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 3px 8px rgba(0,0,0,.3);transition:transform .15s}
-.hud.dock button:hover .qemo{transform:translateY(-2px) rotate(-6deg) scale(1.06)}
-@media (max-width:820px){.hud.dock button .qemo{width:32px;height:32px;font-size:19px;border-radius:11px}}
+.ws-sellall{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 8px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+.ws-list{display:flex;flex-direction:column;gap:6px}
+.ws-row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.05)}
+.ws-row img{width:64px;height:32px;object-fit:contain}.ws-row small{display:block;font-size:11.5px;opacity:.7}
 /* ===== 인터페이스 개편 (v1.21) ===== */
 .fx-ex{position:sticky;top:-16px;z-index:3;margin:-16px -18px 0;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--line)}
 .fx-bench{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start}
@@ -1570,7 +1570,7 @@ button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}bu
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.46.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.47.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [
   { name: "일반", base: 25 },     // v1.31 가격 완화: 일반 1,000 → 2,500원 · 고급 3,000 → 7,500원 · 희귀 1.2만 → 3만원
   { name: "고급", base: 75 },     //               영웅 6만 → 14만원 · 전설 30만 → 60만원 · 신화 120만 → 220만원 (×1배 개체 기준)
@@ -3511,7 +3511,7 @@ function nearestAction() {
   if (ME.seat || S.myStall >= 0 || REEL.on || S.coop) return null;
   let best = null, bd = 1.9;
   const consider = (x, z, act, lim) => { const d = Math.hypot(ME.x - x, ME.z - z); if (d < (lim || bd) && (!best || d < best.d)) best = { ...act, d }; };
-  consider(FMKT.npc.x + 1.9, FMKT.npc.z, { key: "wholesaler", label: "💬 도매상 왕눈이 사장과 말하기", run: () => { ME.ry = -Math.PI / 2; presMove(true); openSheet("wholesale"); } }, 2.8);
+  consider(FMKT.npc.x + 1.9, FMKT.npc.z, { key: "wholesaler", label: "💬 도매상 왕눈이 사장과 말하기", run: () => { ME.ry = -Math.PI / 2; presMove(true); S.wsLine = null; openSheet("wholesale"); } }, 2.8);
   if (atHome()) { homeActions(consider); return best; }
   if (SEAT.b0) {
     const b = S.boat;
@@ -6352,7 +6352,7 @@ function buildFishMarket() {
     bn.position.set(x1 + .2, 2.6, z); bn.rotation.y = Math.PI / 2; scene.add(bn); });
   // 가운데 얼음 매대
   plain(new T3.BoxGeometry(6.4, .85, 2.2), steel, -22, .43, -33, det); plain(new T3.BoxGeometry(6.2, .16, 2.0), cmat(0xeaf7fb), -22, .93, -33, det);
-  for (let x = -24.9; x <= -19.1; x += .38) plain(GEOD.ice || (GEOD.ice = new T3.IcosahedronGeometry(.09, 0)), cmat(0xf4fbfd), x, 1.02, -33 + ((x * 7) % 1.6 - .8), det);
+  for (let x = -24.9; x <= -19.1; x += .38) plain(GEOD.ice || (GEOD.ice = new T3.IcosahedronGeometry(.09, 0)), cmat(0xf4fbfd), x, 1.02, -33 + (Math.abs(x * 7) % 1.4 - .7), det);
   for (let k = 0; k < 5; k++) { const tag = makeSign(.5, .26, { shape: "board", fill: { type: "grad", c: ["#ffe9a8", "#ffd84d"] }, frame: { c: "#5a3a06" }, t: { text: ["1kg 1만", "마리 2만", "오늘 특가", "1kg 3만", "자연산"][k], font: "hyeon", color: "#3a2410", size: .34, y: .55 } }, { cw: 200 });
     tag.position.set(-24.4 + k * 1.2, 1.2, -31.85); scene.add(tag); }
   BLOCKS.push([-25.5, -18.5, -34.4, -31.6]);
@@ -6377,7 +6377,7 @@ function buildFishMarket() {
     plain(new T3.CylinderGeometry(.45, .36, .4, 14), cmat(k % 2 ? 0xd8382c : 0x2a78bb), x + 1.3, .2, z0 + .7, det); }
   BLOCKS.push([x0, x1, z0, z0 + 1.2]);
   // 따뜻한 갓 조명 3개
-  for (const [x, z] of [[-26.5, -33], [-22, -33], [-18, -33]]) { plain(new T3.CylinderGeometry(.01, .01, 1.4, 4), dark, x, H - .7, z, det); plain(new T3.ConeGeometry(.5, .4, 16, 1, true), cmat(0x2f6f86), x, H - 1.5, z, det);
+  for (const [x, z] of [[-26.5, -33], [-22, -33], [-18, -33]]) { plain(new T3.CylinderGeometry(.01, .01, 1.4, 4), dark, x, H - .7, z, det); plain(new T3.ConeGeometry(.3, .26, 16, 1, true), cmat(0xd8382c), x, H - 1.55, z, det);
     const b = new T3.Mesh(GEOD.mlamp || (GEOD.mlamp = new T3.SphereGeometry(.16, 10, 8)), bulbMat(0xe8dcc0, 0xffd27a)); b.position.set(x, H - 1.65, z); scene.add(b); }
   const pl = new T3.PointLight(0xffd2a0, 0, 22, 1.6); pl.position.set(cx, 4, cz); scene.add(pl); glow.push({ light: pl, val: 1.2 });
   // 시장 앞 광장 (큰길 산책로와 이어짐)
@@ -6472,20 +6472,21 @@ const WH_TALK = [
   "내 눈? 안경 벗으면 콩알만 해. 허허허!",
 ];
 function wholesaleSheet(body) {
-  setHead(WHOLESALER.name, "어촌 수산시장 도매 카운터 · 잡은 물고기를 넘기고 시세를 물어봐요");
-  if (!S.wsLine) S.wsLine = pick(["어서 와! 오늘은 뭘 가져왔누?", "왔는가! 바다 냄새 나는 거 보니 한 건 했구먼?", "어이구 단골 왔네~ 물 좋은 거 있으면 보여 줘 봐!"]);
+  const fish = P.bag.filter(it => !isShell(it.fishId)).sort((a, b) => fishSell(b) - fishSell(a));
+  const total = fish.reduce((s, it) => s + fishSell(it), 0);
+  setHead(WHOLESALER.name, "잡은 물고기를 여기서 팔아요");
+  const line = S.wsLine || (fish.length ? "어서 와! 물 좋은 거 있으면 다 쳐 줄게~" : "아직 잡은 게 없구먼? 부두에서 한 마리 낚아 와!");
   const face = WHOLESALER.faces ? WHOLESALER.faces.happy.userData.canvas.toDataURL() : "";
-  body.append(h("div", { class: "ws-stage" },
-    h("div", { class: "ws-portrait" }, h("img", { src: face, alt: "" })),
-    h("div", { class: "ws-bubble" }, h("b", { text: WHOLESALER.name }), h("p", { text: S.wsLine }))));
-  const fishN = P.bag.filter(it => !isShell(it.fishId)).length;
-  const say = (line) => { S.wsLine = line; sfx("ui-click", .3); refreshSheet(true); };
-  body.append(h("div", { class: "ws-choices" },
-    h("button", { class: "ws-c pri", onclick: () => { S.wsLine = null; S.bagTab = "fish"; openSheet("bag"); }, text: "🐟 물고기 넘기기" + (fishN ? " (" + fishN + "마리)" : "") }),
-    h("button", { class: "ws-c", onclick: () => { const tf = findFish(todayFish()); const up = BUILTIN.map(f => [f, fishMul(f.id)]).filter(([f]) => f.id !== todayFish()).sort((a, b) => b[1] - a[1]).slice(0, 2);
-      say("오늘의 생선은 「" + (tf ? tf.name : "?") + "」! 1.5배로 쳐 주지. 그다음으로 값 좋은 건 " + up.map(([f, m]) => "「" + f.name + "」 ×" + m.toFixed(2)).join(", ") + "이여."); }, text: "📈 오늘 시세 물어보기" }),
-    h("button", { class: "ws-c", onclick: () => say(pick(WH_TALK)), text: "💬 이런저런 이야기" }),
-    h("button", { class: "ws-c ghost", onclick: () => { S.wsLine = null; closeSheet(); }, text: "👋 다음에 올게요" })));
+  body.append(h("div", { class: "ws-stage" }, h("div", { class: "ws-portrait" }, h("img", { src: face, alt: "" })),
+    h("div", { class: "ws-bubble" }, h("b", { text: WHOLESALER.name }), h("p", { text: line }))));
+  if (!fish.length) { body.append(h("div", { class: "empty-note", text: "팔 물고기가 없어요." })); return; }
+  const sold = (n, sum) => { S.wsLine = pick(["고마워~ 또 와!", "허허, 물이 좋네! 다음에도 부탁해~", "이거 오늘 경매 1등 하겠구먼!"]) + " (" + n + "마리 · " + won(sum) + ")"; refreshSheet(true); };
+  body.append(h("div", { class: "ws-sellall" }, h("span", null, "가방 물고기 ", h("b", { text: fish.length + "마리" }), " · 모두 ", h("b", { class: "num", text: won(total) })),
+    h("button", { class: "btn pri", onclick: () => { const n = fish.length; sellItems(it => !isShell(it.fishId)); sold(n, total); }, text: "전부 팔기" })));
+  body.append(h("div", { class: "ws-list" }, fish.map(it => h("div", { class: "ws-row" },
+    fishImg(it.fishId), h("span", { class: "grow" }, h("b", { text: it.name }), h("small", { text: fmtSize(it.size) + " · " + TIERS[it.tier].name })),
+    h("b", { class: "num", text: won(fishSell(it)) }),
+    h("button", { class: "btn sm", onclick: () => { const v = fishSell(it); sellItems(x => x.id === it.id); sold(1, v); }, text: "팔기" })))));
 }
 
 /* ---------- 거리·부두 디테일 (구조는 그대로, 소품만 더함) ----------
@@ -8067,7 +8068,7 @@ function tapAt(x0, y0) {
     if (best.kind === "building") { goBuilding(best.id); return; }
     if (best.kind === "hall") { goHall(best.cat); return; }
     if (best.kind === "office") { goOffice(); return; }
-    if (best.kind === "wholesaler") { walkTo(FMKT.npc.x + 1.9, FMKT.npc.z, () => { ME.ry = -Math.PI / 2; presMove(true); openSheet("wholesale"); }); return; }
+    if (best.kind === "wholesaler") { walkTo(FMKT.npc.x + 1.9, FMKT.npc.z, () => { ME.ry = -Math.PI / 2; presMove(true); S.wsLine = null; openSheet("wholesale"); }); return; }
     if (best.kind === "realty") { goRealty(); return; }
     if (best.kind === "housegate") return;   // 우리 집은 없앴어요 (v1.42)
     if (best.kind === "homegate") { const G = homeGeom(S.homeDoc); walkTo(HOME.x, G.yardZ1 - .4, leaveHouse); return; }
@@ -10448,7 +10449,7 @@ SHEETS.settings = (body) => {
 /* ===================== 퀵바 꾸미기 (v1.32) =====================
    화면 아래 막대에 자주 쓰는 메뉴를 최대 6개까지 골라 넣고 순서를 바꿔요. 「메뉴」 칸은 항상 맨 끝에 있어요.
    P.quick에 저장해서 다른 기기에서도 같아요 */
-const QUICK_MAX = 6, QUICK_DEF = ["bag", "dex", "travel", "community", "achieve", "settings"];   // v1.43: 고정 (퀵바 꾸미기 없앰)
+const QUICK_MAX = 7, QUICK_DEF = ["bag", "dex", "travel", "emote", "community", "achieve", "settings"];   // v1.43: 고정 (퀵바 꾸미기 없앰)
 const QSVG = {
   quests: '<path d="M7 3h10v18l-5-3-5 3z"/><path d="M10 8h4M10 12h4"/>',
   community: '<circle cx="9" cy="9" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="10" r="2.5"/><path d="M15.5 14.6A4.5 4.5 0 0 1 21 19"/>',
@@ -10481,7 +10482,7 @@ const QUICK_ITEMS = [
   { id: "rank", name: "랭킹", d: "명예의 전당 분야별 순위", open: "rank" },
   { id: "attend", name: "출석", d: "7일 출석 선물", open: "attend" },
   { id: "offers", name: "거래", d: "받은 거래 · 주문 제안", open: "offers" },
-  { id: "emote", name: "인사", d: "손 흔들기 · 박수 · 축하", run: () => { closeFloatingUI("emote"); $("emotePop").hidden = false; syncUIState(); } },
+  { id: "emote", name: "감정표현", short: "감정", d: "손 흔들기 · 박수 · 축하 · 꾸벅", run: () => $("emoteBtn").click() },
   { id: "card", name: "명함", d: "명함을 내밀어 친구 만들기", run: () => { S.card ? stopCard() : startCard(); } },
   { id: "profile", name: "내 정보", short: "내 정보", d: "레벨 · 기록 · 닉네임", open: "profile" },
   { id: "settings", name: "설정", d: "소리 · 그림자 · 계정", open: "settings" },
@@ -10517,18 +10518,7 @@ function applyQuick() {
   const chat = dock.querySelector(".chatonly"); if (chat) chat.style.order = 40;
   const menu = dock.querySelector(".menubtn"); if (menu) menu.style.order = 60;
   dock.dataset.n = P.quick.length;
-  dockEmoji();
   updateQuickBadges();
-}
-// (v1.46) 아래 막대 칸마다 이모지 (선 아이콘 대신)
-const QEMO = { bag: "🎒", dex: "📖", travel: "🗺️", friends: "🤝", community: "👥", achieve: "🏆", quests: "📜", guide: "📘", shop: "🎣", sashimi: "🍣", ach: "🏅", rank: "🥇", attend: "🎁", offers: "🤝", emote: "👋", card: "🪪", profile: "🙂", settings: "⚙️", chat: "💬", menu: "🧭" };
-function dockEmoji() {
-  for (const b of document.querySelectorAll(".dock > button")) {
-    const id = b.dataset.q || (b.classList.contains("chatonly") ? "chat" : b.classList.contains("menubtn") ? "menu" : b.dataset.open);
-    const e = QEMO[id]; if (!e || b.querySelector(".qemo")) continue;
-    if (!b.style.getPropertyValue("--qc")) b.style.setProperty("--qc", QCOL[id] || { chat: "#2f8fbf", menu: "#e2522c" }[id] || "#8a8f96");
-    b.classList.add("hasemo"); b.insertBefore(h("span", { class: "qemo", "aria-hidden": "true", text: e }), b.firstChild);
-  }
 }
 function updateQuickBadges() {
   const set = (id, n) => { const b = document.querySelector('.dock [data-q="' + id + '"] .qbadge'); if (b) { b.hidden = !n; b.textContent = n; } };
@@ -10630,7 +10620,7 @@ Object.assign(TUTS, {
   sheet_offers: { icon: "🤝", title: "거래 · 주문", steps: ["다른 사람이 보낸 거래 제안이 여기 와요. 내용을 보고 「받기」나 「거절」을 눌러요."] },
   sheet_settings: { icon: "⚙️", title: "설정", steps: ["소리 · 그림자를 켜고 꺼요. 휴대폰이 느리면 「그림자」를 꺼 보세요. 계정 · 내 코드 · 오류 제보도 여기 있어요."] },
   sheet_stall: { icon: "🏮", title: "노점", steps: ["다른 사람이 연 횟집이에요. 차림표에서 회를 골라 사 먹을 수 있어요."] },
-  sheet_wholesale: { icon: "🐟", title: "도매상 왕눈이 사장", steps: ["수산시장 도매 카운터의 터줏대감이에요. 「물고기 넘기기」를 누르면 가방이 열려서 잡은 물고기를 팔 수 있어요.", "「오늘 시세 물어보기」로 오늘의 생선과 값 좋은 물고기를 알려 줘요."] },
+  sheet_wholesale: { icon: "🐟", title: "도매상 왕눈이 사장", steps: ["수산시장 도매 카운터의 터줏대감이에요. 말을 걸면 잡은 물고기를 한 마리씩 또는 전부 팔 수 있어요."] },
   sheet_mystall: { icon: "🏮", title: "내 횟집", steps: ["회를 상에 올리고 손님 주문에 맞는 회를 내 주세요. 빨리 내면 팁과 평판이 올라요.", "평판이 쌓이면 별이 오르고 손님이 더 자주 와요."] },
 });
 SHEETS.wholesale = wholesaleSheet;   // 수산시장 도매상 대화 (v1.46)
@@ -11402,9 +11392,9 @@ $("mungBtn").addEventListener("click", () => setMung(true));
 $("adminBtn").addEventListener("click", () => openSheet("admin"));
 $("tutBtn").addEventListener("click", () => { P.tut = {}; markDirty(); closePop(); toast("안내를 처음부터 다시 보여 줄게요"); coach("welcome"); });
 { const ep = $("emotePop");
-  ep.replaceChildren(...Object.entries(EMOTES).map(([k, v]) => h("button", { onclick: () => doEmote(k), text: v })));
+  ep.replaceChildren(h("div", { class: "emo-title", text: "감정표현 · 주변 사람 모두에게 보여요" }), ...Object.entries(EMOTES).map(([k, v]) => h("button", { onclick: () => { doEmote(k); ep.hidden = true; syncUIState(); }, text: v })));
   $("emoteBtn").addEventListener("click", (e) => { e.stopPropagation(); const next = !ep.hidden; closeFloatingUI("emote"); ep.hidden = next; syncUIState(); });
-  document.addEventListener("pointerdown", (e) => { if (!e.target.closest("#emotePop,#emoteBtn") && !ep.hidden) { ep.hidden = true; syncUIState(); } }); }
+  document.addEventListener("pointerdown", (e) => { if (!e.target.closest('#emotePop,#emoteBtn,.dock [data-q="emote"]') && !ep.hidden) { ep.hidden = true; syncUIState(); } }); }
 $("codeBtn").addEventListener("click", () => {
   const code = myCode();
   try { navigator.clipboard.writeText(code).then(() => toast("후원 코드 " + code + "를 복사했어요"), () => toast("내 후원 코드: " + code)); } catch { toast("내 후원 코드: " + code); }
