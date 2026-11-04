@@ -58,6 +58,10 @@
   let myPres = {}, joined = false, lastPeers = new Map();
   const writePres = () => { const u = auth.currentUser; if (!u || !joined) return Promise.resolve(); return myRef().set({ by: u.uid, kind: "viewer", ts: firebase.database.ServerValue.TIMESTAMP, presence: clean(myPres) }); };
   rtdb.ref(".info/connected").on("value", (s) => { if (s.val() === true && joined) { myRef().onDisconnect().remove(); writePres(); } });
+  // v1.100.2 살아 있다는 신호: 1분마다 ts를 새로 써요 · 3분 넘게 신호가 없는 접속 기록(닫힌 탭이 못 지운 유령)은 모두가 무시해요
+  const STALE_MS = 180000;
+  setInterval(() => { if (joined && !document.hidden) writePres().catch(() => {}); }, 60000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && joined) writePres().catch(() => {}); });
   const room = {
     presence(patch) {
       for (const [k, v] of Object.entries(patch || {})) { if (v === null || v === undefined) delete myPres[k]; else myPres[k] = v; }
@@ -69,7 +73,13 @@
       let pend = null, timer = 0;
       const flush = () => { timer = 0; const snap = pend; pend = null; if (!snap) return;
         const v = snap.val() || {}, uid = auth.currentUser && auth.currentUser.uid, cur = new Map();
-        for (const [peer, d] of Object.entries(v)) if (d && typeof d === "object") cur.set(peer, { peer, by: d.by || null, kind: d.kind || "viewer", presence: d.presence || {}, sameTab: peer === myPeer, isMe: d.by === uid });
+        const t = now();
+        for (const [peer, d] of Object.entries(v)) {
+          if (!d || typeof d !== "object") continue;
+          const stale = peer !== myPeer && typeof d.ts === "number" && t - d.ts > STALE_MS;
+          if (stale) { if (d.by && d.by === uid) rtdb.ref("presence/" + peer).remove().catch(() => {}); continue; }   // 내 계정의 유령은 지우고, 남의 유령은 안 보이게
+          cur.set(peer, { peer, by: d.by || null, kind: d.kind || "viewer", presence: d.presence || {}, sameTab: peer === myPeer, isMe: d.by === uid });
+        }
         const left = [...lastPeers.keys()].filter((k) => !cur.has(k)).map((k) => lastPeers.get(k));
         lastPeers = cur; fn({ peers: [...cur.values()], left });
       };
