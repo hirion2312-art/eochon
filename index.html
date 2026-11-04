@@ -1534,6 +1534,10 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .rs-card .rs-ph{display:grid;place-items:center;width:100%;height:56px;border-radius:10px;background:linear-gradient(180deg,#7fd0e6,#2f7fa0)}.rs-card img{width:96px;height:48px;object-fit:contain}
 .rs-card b{font-size:13px}.rs-card small{font-size:11px;color:var(--muted)}
 @media (max-width:760px){.rs-cols{grid-template-columns:1fr}.rs-tank{height:140px}.rs-rail{flex-direction:row;flex-wrap:wrap}.rs-board{flex-direction:column;align-items:stretch}.rs-paper{flex:none;width:100%;box-sizing:border-box}.rs-tag{top:auto;bottom:26px}.rs-empty{place-items:start center;padding-top:22px}.rs-tool{width:auto;flex:1 0 54px}.rs-sizes{flex:1 0 100%}.rs-paints{grid-template-columns:repeat(8,1fr)}}
+.rtk.reg{box-shadow:inset 0 0 0 2px rgba(47,143,91,.85)}.rtk.vip{box-shadow:inset 0 0 0 2px #e8c060,0 0 14px rgba(232,192,96,.45)}
+.rtk-who{font-size:10.5px;font-weight:800;line-height:1.25;margin-bottom:2px;color:#23784a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rtk.vip .rtk-who{color:#9a6a06}
+.rm-regs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}.rm-reg{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg)}
+.rm-reg .rm-i{font-size:20px}.rm-reg small{display:block;font-size:11.5px;color:var(--muted)}.rm-reg.off{opacity:.45;filter:grayscale(1)}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 </style>
 
@@ -1677,7 +1681,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.81.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.82.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2378,7 +2382,24 @@ const REST_CFG = {
   dayTickets: 80,                        // 하루 주문 상한 (밸런스 가드 ①)
   chopHits: [5, 20],                     // 썰기 연타 수: 작은 생선 ~ 큰 생선
   stationCap: { board: 1, boil: 3, fry: 3, grill: 2 },
+  // 단골 (Lv.3~) · VIP (Lv.5) 손님 (v1.81): 단골은 늘 같은 얼굴 · 좋아하는 메뉴 · 올 때마다 팁이 조금씩 늘어요 / VIP는 가장 비싼 요리를 시키고 크게 내요
+  regular: { fromLv: 2, chance: .3, tip: .1, tipPerVisit: .01, tipMax: .2, patience: 1.5 },
+  vip: { fromLv: 4, chance: .12, pay: .5, perfectMul: 2, patience: 1.3 },
 };
+const REST_REGULARS = [   // 마을 단골 10명 · fav = 좋아하는 메뉴 순서 (가게에 있는 것 중 앞에서부터)
+  { id: "seonjang", name: "김 선장", ico: "⚓", fav: ["godeungeo-gui", "ureok-maeuntang", "gwangeo-hoe"] },
+  { id: "haenyeo", name: "해녀 순자 할머니", ico: "🤿", fav: ["chamdom-jorim", "gwangeo-hoe", "jukkumi-bokkeum"] },
+  { id: "student", name: "수산고 민재", ico: "🎒", fav: ["pirami-twigim", "jukkumi-bokkeum", "godeungeo-gui"] },
+  { id: "painter", name: "등대 화가 윤씨", ico: "🎨", fav: ["gwangeo-hoe", "daebangeo-course", "chamdom-jorim"] },
+  { id: "postman", name: "우체부 박씨", ico: "✉️", fav: ["jukkumi-bokkeum", "pirami-twigim", "ureok-maeuntang"] },
+  { id: "chef", name: "은퇴한 요리사 강씨", ico: "🔪", fav: ["badagaje-butter", "chamdom-jorim", "godeungeo-gui"] },
+  { id: "couple", name: "신혼부부 지우", ico: "💕", fav: ["badagaje-butter", "gwangeo-hoe", "pirami-twigim"] },
+  { id: "auction", name: "경매사 오씨", ico: "🔔", fav: ["daebangeo-course", "geumdom-special", "ureok-maeuntang"] },
+  { id: "tourist", name: "여행 작가 한별", ico: "📷", fav: ["geumdom-special", "ilgak-steak", "gwangeo-hoe"] },
+  { id: "mayor", name: "이장님", ico: "🏅", fav: ["ureok-maeuntang", "ilgak-steak", "godeungeo-gui"] },
+];
+const REST_REG = Object.fromEntries(REST_REGULARS.map(r => [r.id, r]));
+const regTipRate = (visits) => Math.min(REST_CFG.regular.tipMax, REST_CFG.regular.tip + visits * REST_CFG.regular.tipPerVisit);
 const REST_STAFF_KEYS = ["hs", "uni", "pro", "chef"];
 const REST_LV = [   // 가게 단계: 비용 · 알바 상한 · 동시 티켓 · 완벽 팁 가산 · 판매가 가산 · 하루 운영비 · 손님 자리 (외관은 다음 단계)
   { name: "포장마차", cost: 0, hire: 0, tickets: 2, tip: 0, price: 0, opex: 0, seats: 4 },
@@ -2423,6 +2444,7 @@ function normRest(r) {
   return {
     lv: clamp(Math.floor(Number(r.lv) || 0), 0, REST_LV.length - 1), mig: r.mig ? 1 : 0,
     off: (Array.isArray(r.off) ? r.off : []).filter(id => RECIPE[id]),
+    regs: Object.fromEntries(Object.entries(r.regs && typeof r.regs === "object" ? r.regs : {}).filter(([id]) => REST_REG[id]).map(([id, n]) => [id, clamp(Math.floor(Number(n) || 0), 0, 1e6)])), vips: clamp(Math.floor(Number(r.vips) || 0), 0, 1e8),
     fund: clamp(Math.floor(Number(r.fund) || 0), 0, 1e10), autoBuy: !!r.autoBuy,   // 가게 금고 · 재료 자동 구매 (v1.57)   // 해금했지만 주문은 안 받는 메뉴 (가게 관리)
     staff: (Array.isArray(r.staff) ? r.staff : []).filter(x => x && REST_STAFF_KEYS.includes(x.g)).slice(0, 4).map(x => ({ id: str(x.id, 16) || uid4(), g: x.g, post: ["all", "prep", "run", "cook"].includes(x.post) ? x.post : "all", name: str(x.name, 8) || "알바", since: str(x.since, 10) })),
     last: r.last && typeof r.last === "object" && typeof r.last.d === "string" ? { d: r.last.d, sales: Number(r.last.sales) || 0, tips: Number(r.last.tips) || 0, plates: Number(r.last.plates) || 0, wages: Number(r.last.wages) || 0, opex: Number(r.last.opex) || 0, net: Number(r.last.net) || 0, short: Number(r.last.short) || 0, closed: !!r.last.closed } : null,
@@ -5609,16 +5631,20 @@ function restChop(it, ln) {
 function serveDish(hand, byStaff) {
   const tk = (S.restTickets || []).filter(t => t.r === hand.dish && !t.served).sort((a, b) => a.t0 - b.t0)[0];
   if (!tk) { if (!byStaff) toast("이 요리를 시킨 손님이 없어요 · 손에 들고 있다가 주문이 오면 올려요"); return; }
-  const r = RECIPE[hand.dish], LV = REST_LV[P.rest.lv], base = Math.round(recipePrice(r) * (1 + LV.price)), tip = hand.q === "perfect" ? Math.round(base * (REST_CFG.perfectTip + LV.tip)) : 0, sum = base + tip;
+  const r = RECIPE[hand.dish], LV = REST_LV[P.rest.lv], gq = tk.guest || {}, base = Math.round(recipePrice(r) * (1 + LV.price));
+  let tip = hand.q === "perfect" ? Math.round(base * (REST_CFG.perfectTip + LV.tip) * (gq.vip ? REST_CFG.vip.perfectMul : 1)) : 0;
+  const extra = gq.vip ? Math.round(base * REST_CFG.vip.pay) : gq.reg ? Math.round(base * regTipRate(P.rest.regs[gq.reg] || 0)) : 0;   // VIP 웃돈 · 단골 팁 (팁으로 쳐요)
+  tip += extra; const sum = base + tip;
   P.gold += sum; P.rest.plates++; P.rest.sales += base; P.rest.tips += tip;
   const d = restDay(); d.sales += base; d.tips += tip; d.plates++; if (tip) d.perfect++;
   if (!byStaff) restK().hand = null; tk.served = Date.now();
   stat("soldGold", sum); questProgress("sell", sum); markDirty();
   restSnd("servingbell_1", .5); setTimeout(() => restSnd("register_1", .5), 250);
   const gst = (S.restGuests || []).find(gu => gu.tk === tk); if (gst) { gst.eatUntil = Date.now() + 4500; gst.dish = dishMesh(r.id); const tw = restW(gst.seat[0] < 5 ? 3.0 : 6.6, gst.seat[0] < 5 ? gst.seat[1] : gst.seat[1] * .45); gst.dish.position.set(tw.x, gst.seat[0] < 5 ? 1.06 : .78, tw.z); scene.add(gst.dish); }
-  { const fp = byStaff ? stationW("pass") : ME; fxPop(fp.x, 2.4, fp.z, "+" + won(sum) + (tip ? " (팁 " + won(tip) + ")" : ""), tip ? "#ffd84d" : "#ffffff"); }
+  { const fp = byStaff ? stationW("pass") : ME; fxPop(fp.x, 2.4, fp.z, "+" + won(sum) + (tip ? " (" + (gq.vip ? "VIP " : gq.reg ? "단골 " : "") + "팁 " + won(tip) + ")" : ""), tip ? "#ffd84d" : "#ffffff"); }
+  if (gq.vip) { const gp = restW(gq.seat[0], gq.seat[1]); fxBurst(gp.x, 1.6, gp.z, { n: 30, spd: 2, up: 1.8, size: .18, dur: 1.2, spread: .6, col: 0xffd84d }); restSnd("fanfare_1", .4); }
   try { ACT_FX.sell(sum); } catch {}
-  if (!byStaff) toast(r.ico + " " + r.name + " 서빙 · +" + won(sum) + (tip ? " · 완벽 팁 +" + won(tip) : ""));
+  if (!byStaff || gq.vip) toast(r.ico + " " + r.name + " 서빙 · +" + won(sum) + (tip - extra ? " · 완벽 팁 +" + won(tip - extra) : "") + (extra ? (gq.vip ? " · 👑 VIP 웃돈 +" : " · ⭐ 단골 팁 +") + won(extra) : ""));
   restChanged();
 }
 function restChanged() { markDirty(); restRenderStations(); renderRestHud(); updateRestBar(); if (S.sheet === "restbook") refreshSheet(); }
@@ -5656,10 +5682,24 @@ function restRenderStations(force) {
 S.restGuests = []; S.restTickets = []; S.restSlot = -1;
 function pickTicketRecipe() {
   const un = RECIPES.filter(restOnMenu); if (!un.length) return null;
-  const have = (id, n) => P.bag.filter(it => it.fishId === id).length + kitchenCount(id) >= n || (P.rest.staff.length && canAutoBuy(id));
-  const ok = un.filter(r => r.ing.every(([id, n]) => have(id, n)));
+  const ok = un.filter(restCanMake);
   const pool = ok.length && Math.random() < .8 ? ok : un;   // 대부분은 지금 만들 수 있는 메뉴로 와요
   return pick(pool);
+}
+function restCanMake(r) { return r.ing.every(([id, n]) => P.bag.filter(it => it.fishId === id).length + kitchenCount(id) >= n || (P.rest.staff.length && canAutoBuy(id))); }
+function restPickSpecial() {   // 이번 손님이 VIP · 단골인지 (아니면 null)
+  const lv = P.rest.lv, here = S.restGuests || [], C = REST_CFG;
+  if (lv >= C.vip.fromLv && !here.some(g => g.vip) && Math.random() < C.vip.chance) {
+    const best = RECIPES.filter(r => restOnMenu(r) && restCanMake(r)).sort((a, b) => recipePrice(b) - recipePrice(a))[0];
+    if (best) return { vip: true, r: best };
+  }
+  if (lv >= C.regular.fromLv && Math.random() < C.regular.chance) {
+    const pool = REST_REGULARS.filter(rg => !here.some(g => g.reg === rg.id)); if (!pool.length) return null;
+    const rg = pick(pool), fav = rg.fav.map(id => RECIPE[id]).filter(r => r && restOnMenu(r));
+    const r = fav.find(restCanMake) || fav[0] || pickTicketRecipe();
+    if (r) return { reg: rg.id, r };
+  }
+  return null;
 }
 function kitchenCount(fishId) { const k = restK(); let n = 0; const c = (it) => { if (it && it.fish === fishId) n++; }; c(k.hand); for (const s of ["board", "boil", "fry", "grill"]) k[s].forEach(x => c(x.it)); k.plate.items.forEach(c); return n; }
 function restPresence() {   // 다른 사람에게 보이는 내 가게: 자리 · 영업 · 앉은 손님 수 · 알바 (v1.61)
@@ -5681,16 +5721,21 @@ function restTick(t, dt) {
   const cap = REST_LV[P.rest.lv].tickets, busy = S.restGuests.length;
   const freeSeats = REST_SEATS.map((s, i) => i).filter(i => !S.restGuests.some(gu => gu.si === i)).slice(0, REST_LV[P.rest.lv].seats);
   if (S.restOpen && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length && d.tickets < REST_CFG.dayTickets) {
-    const r = pickTicketRecipe();
+    const spc = restPickSpecial(), r = spc ? spc.r : pickTicketRecipe();
     if (r) {
       const si = pick(freeSeats), seat = REST_SEATS[si];
-      const B = makeBody(), wear = {}, k2 = Math.floor(Math.random() * 99);
+      const B = makeBody(), wear = {}, k2 = spc && spc.reg ? hashStr(spc.reg) % 99 : Math.floor(Math.random() * 99);
       for (const slot of ["hat", "top", "bottom", "shoes"]) { const opts = CLOTHES.filter(c => c.slot === slot && !c.ev); if (opts.length && (k2 + slot.length) % 3) wear[slot] = opts[(k2 * 7 + slot.length * 3) % opts.length].id; }
-      applyOutfit(B, normWear(wear), COLORS[k2 % COLORS.length]); B.faceMat.map = faceTexture("npc"); B.faceMat.needsUpdate = true; scene.add(B.g);
+      if (spc && spc.vip) wear.hat = "h-crown";
+      applyOutfit(B, normWear(wear), spc && spc.vip ? "#e8c060" : COLORS[k2 % COLORS.length]); B.faceMat.map = faceTexture("npc"); B.faceMat.needsUpdate = true; scene.add(B.g);
+      if (spc && spc.vip) { const sp = new T3.Sprite(new T3.SpriteMaterial({ map: sparkTex(), color: 0xffd84d, transparent: true, depthWrite: false, blending: T3.AdditiveBlending })); sp.scale.setScalar(.9); sp.position.y = 1.2; B.g.add(sp); }
       const tag = makeText(); scene.add(tag);
       const from = Math.random() < .5 ? -1 : 1, st0 = restW(12, from * 3.2);
-      const gu = { B, tag, si, seat, x: st0.x, z: st0.z, path: [[10, seat[1] * .6], [seat[0] + (seat[0] < 5 ? .9 : 0), seat[1]], [seat[0], seat[1]]], stage: "in", r: r.id };
+      const gu = { B, tag, si, seat, x: st0.x, z: st0.z, path: [[10, seat[1] * .6], [seat[0] + (seat[0] < 5 ? .9 : 0), seat[1]], [seat[0], seat[1]]], stage: "in", r: r.id,
+        reg: spc && spc.reg || null, vip: !!(spc && spc.vip), pat: spc ? (spc.vip ? REST_CFG.vip.patience : REST_CFG.regular.patience) : 1 };
       S.restGuests.push(gu); d.tickets++;
+      if (gu.vip) { restSnd("fanfare_1", .35); toast("👑 VIP 미식가가 왔어요! 「" + r.name + "」을 시킬 거예요 · 크게 내요"); }
+      else if (gu.reg && (P.rest.regs[gu.reg] || 0) > 0) toast(REST_REG[gu.reg].ico + " 단골 " + REST_REG[gu.reg].name + " 님이 또 왔어요 (" + (P.rest.regs[gu.reg] + 1) + "번째)");
       S.restNextGuest = now + rnd(REST_CFG.guestGap[0], REST_CFG.guestGap[1]) * 1000;
     } else S.restNextGuest = now + 5000;
   }
@@ -5701,7 +5746,7 @@ function restTick(t, dt) {
     if (walking) { const sp = Math.min(dd, 1.6 * dt); gu.x += dx / dd * sp; gu.z += dz / dd * sp; gu.ry = Math.atan2(dx, dz); }
     else if (gu.path.length) gu.path.shift();
     if (!walking && !gu.path.length) {
-      if (gu.stage === "in") { gu.stage = "wait"; gu.tk = { id: uid4(), r: gu.r, t0: now, until: now + REST_CFG.patience * 1000, guest: gu }; S.restTickets.push(gu.tk); gu.ry = gu.seat[2]; renderRestHud(); restSnd("servingbell_1", .25); }
+      if (gu.stage === "in") { gu.stage = "wait"; gu.tk = { id: uid4(), r: gu.r, t0: now, until: now + REST_CFG.patience * 1000 * (gu.pat || 1), guest: gu }; S.restTickets.push(gu.tk); gu.ry = gu.seat[2]; renderRestHud(); restSnd("servingbell_1", .25); }
       else if (gu.stage === "wait") {
         if (gu.tk.served && now > (gu.eatUntil || 0)) restGuestLeave(gu, true);
         else if (!gu.tk.served && now > gu.tk.until) restGuestLeave(gu, false);
@@ -5711,9 +5756,10 @@ function restTick(t, dt) {
     gu.B.g.position.set(gu.x, seated ? .22 : 0, gu.z); gu.B.g.rotation.y = gu.ry || 0; gu.B.g.visible = !atHome();
     const sw = walking ? Math.sin(t * 9 + gu.si) : 0; gu.B.rig.position.y = Math.abs(sw) * .06; gu.B.feet[0].position.z = .05 + sw * .12; gu.B.feet[1].position.z = .05 - sw * .12;
     gu.B.rig.rotation.x = seated && gu.eatUntil && now < gu.eatUntil ? .12 + Math.sin(t * 8) * .06 : 0;   // 냠냠
-    const lbl = gu.stage === "out" ? (gu.happy ? "😋 잘 먹었어요!" : "😢 너무 늦었어요") : gu.tk && gu.tk.served ? "😋 냠냠" : gu.stage === "wait" ? RECIPE[gu.r].ico + " " + RECIPE[gu.r].name : "";
-    const left = gu.tk && !gu.tk.served ? (gu.tk.until - now) / (REST_CFG.patience * 1000) : 1;
-    const tcol = left < .25 ? "#c2402a" : left < .5 ? "#d9a514" : "#2a78bb", tk2 = lbl + tcol;
+    const who = gu.vip ? "👑 VIP · " : gu.reg ? REST_REG[gu.reg].ico + " " + REST_REG[gu.reg].name + " · " : "";
+    const lbl = gu.stage === "out" ? who + (gu.happy ? (gu.vip ? "최고였어요! 👑" : "😋 잘 먹었어요!") : "😢 너무 늦었어요") : gu.tk && gu.tk.served ? who + "😋 냠냠" : gu.stage === "wait" ? who + RECIPE[gu.r].ico + " " + RECIPE[gu.r].name : (gu.vip || gu.reg ? who.slice(0, -3) : "");
+    const left = gu.tk && !gu.tk.served ? (gu.tk.until - now) / (gu.tk.until - gu.tk.t0) : 1;
+    const tcol = left < .25 ? "#c2402a" : left < .5 ? "#d9a514" : gu.vip ? "#a8740a" : gu.reg ? "#2f8f5b" : "#2a78bb", tk2 = lbl + tcol;
     if (gu.tagKey !== tk2) { gu.tagKey = tk2; if (lbl) setText(gu.tag, lbl, tcol, "#ffffff", .24, true); }
     gu.tag.visible = !!lbl && !atHome(); gu.tag.position.set(gu.x, seated ? 2.0 : 1.85, gu.z);
   }
@@ -5734,6 +5780,10 @@ function restTick(t, dt) {
   if (Math.random() < .25) for (const s3 of restStations()) { const id = s3.id; if (!COOK_KO[id] || !restK()[id].some(x => lnOf(x) === s3.ln)) continue; const p = restW(s3.lx, s3.lz); fxBurst(p.x + .1, 1.25, p.z + (Math.random() - .5) * .3, { n: 1, spd: .15, up: .7, size: .14, dur: 1.1, spread: .1, col: id === "fry" ? 0xffe0a0 : 0xffffff }); }
 }
 function restGuestLeave(gu, happy) {
+  if (happy && gu.stage !== "out") {
+    if (gu.reg) { const n = (P.rest.regs[gu.reg] || 0) + 1; P.rest.regs[gu.reg] = n; markDirty(); if (n === 1) toast(REST_REG[gu.reg].ico + " " + REST_REG[gu.reg].name + " 님이 내 가게 단골이 됐어요! 올 때마다 팁이 조금씩 늘어요"); else if (n % 10 === 0) toast("🎉 " + REST_REG[gu.reg].name + " 님이 " + n + "번째 왔어요 · 오랜 단골이에요"); }
+    if (gu.vip) { P.rest.vips = (P.rest.vips || 0) + 1; markDirty(); }
+  }
   gu.stage = "out"; gu.happy = happy; gu.path = [[gu.seat[0] + (gu.seat[0] < 5 ? .9 : 0), gu.seat[1]], [10, gu.seat[1] * .6], [13, (Math.random() < .5 ? -1 : 1) * 3.2]];
   if (gu.tk) S.restTickets = S.restTickets.filter(t => t !== gu.tk);
   if (gu.dish) { scene.remove(gu.dish); gu.dish = null; }
@@ -5758,8 +5808,9 @@ function renderRestHud(quiet) {
   if (!quiet || key !== tx.dataset.k) {
     tx.dataset.k = key; tx.hidden = !tks.length;
     tx.replaceChildren(...tks.map(t => {
-      const r = RECIPE[t.r], left = clamp((t.until - now) / (REST_CFG.patience * 1000), 0, 1);
-      return h("div", { class: "rtk" + (left < .25 ? " hurry" : "") },
+      const r = RECIPE[t.r], left = clamp((t.until - now) / (t.until - t.t0), 0, 1), gq = t.guest || {};
+      return h("div", { class: "rtk" + (left < .25 ? " hurry" : "") + (gq.vip ? " vip" : gq.reg ? " reg" : "") },
+        gq.vip ? h("div", { class: "rtk-who", text: "👑 VIP 미식가 · 웃돈 +" + Math.round(REST_CFG.vip.pay * 100) + "%" }) : gq.reg ? h("div", { class: "rtk-who", text: REST_REG[gq.reg].ico + " " + REST_REG[gq.reg].name + " · 팁 +" + Math.round(regTipRate(P.rest.regs[gq.reg] || 0) * 100) + "%" }) : null,
         h("div", { class: "rtk-h" }, h("span", { class: "rtk-i", text: r.ico }), h("b", { text: r.name })),
         h("div", { class: "rtk-ing" }, r.ing.map(([id, n]) => { const f = findFish(id), have = P.bag.filter(it => it.fishId === id).length + kitchenCount(id); return h("span", { class: have >= n ? "ok" : "no", text: (f ? f.name : id) + (n > 1 ? "×" + n : "") }); })),
         h("div", { class: "rtk-f", text: (r.chop ? "🔪 " : "") + (r.cook ? (REST_ST.find(s => s.id === r.cook).ico + " ") : "") + "🍽 · " + won(recipePrice(r)) }),
@@ -6087,6 +6138,14 @@ function restManageSheet(body) {
       h("small", { class: "muted", text: ["", "다음 모습: 지붕 위 나무 간판 · 나무 카운터 · 펜던트 등 3 · 화분 · 입간판", "다음 모습: 벽돌 외벽 · 줄무늬 어닝 · 입구 수족관 · 칠판 메뉴 · 🔪 도마 2 (2라인)", "다음 모습: 2층 증축 · 테라스 · 샹들리에 · 네온 간판 · 🍲🔥🍤 주방 2라인", "다음 모습: 옥상 대형 간판 · 등대 정원 · 서치라이트 · 레드 카펫"][lv + 1] || "" })),
     h("button", { class: "btn pri", disabled: P.gold < nx.cost, onclick: upgradeRest, text: won(nx.cost) + " 키우기" })));
   else body.append(h("div", { class: "muted", text: "최고 단계예요!" }));
+  // 단골 · VIP 손님 (Lv.3 · Lv.5)
+  { const C = REST_CFG, on = lv >= C.regular.fromLv;
+    body.append(h("div", { class: "sec", text: "⭐ 단골 손님" + (on ? " · " + REST_REGULARS.filter(rg => P.rest.regs[rg.id]).length + "/" + REST_REGULARS.length + "명" : "") + (P.rest.vips ? " · 👑 VIP " + P.rest.vips + "명 다녀감" : "") }));
+    if (!on) body.append(h("div", { class: "empty-note", text: "Lv.3 동네 맛집이 되면 마을 단골이 찾아와요 (좋아하는 메뉴를 시키고 올 때마다 팁이 늘어요) · Lv.5엔 VIP 미식가도 와요" }));
+    else body.append(h("div", { class: "rm-regs" }, REST_REGULARS.map(rg => { const n = P.rest.regs[rg.id] || 0, fav = rg.fav.map(id => RECIPE[id]).find(r => r && restOnMenu(r));
+      return h("div", { class: "rm-reg" + (n ? "" : " off"), title: "좋아하는 메뉴: " + rg.fav.map(id => RECIPE[id] ? RECIPE[id].name : id).join(" · ") }, h("span", { class: "rm-i", text: n ? rg.ico : "❔" }),
+        h("div", {}, h("b", { text: n ? rg.name : "아직 모르는 손님" }), h("small", { text: n ? n + "번 · 팁 +" + Math.round(regTipRate(n) * 100) + "%" + (fav ? " · " + fav.ico + " " + fav.name : "") : "좋아하는 메뉴를 열어 두면 와요" }))); })));
+    if (on && lv < C.vip.fromLv) body.append(h("small", { class: "muted", text: "👑 Lv.5 어촌의 명소가 되면 VIP 미식가가 가장 비싼 요리를 시키러 와요 (웃돈 +" + Math.round(C.vip.pay * 100) + "% · 완벽 팁 ×" + C.vip.perfectMul + ")" })); }
   // 알바
   body.append(h("div", { class: "sec", text: "👥 알바 · " + P.rest.staff.length + " / " + L.hire + "명" + (L.hire ? "" : " (포장마차는 혼자 해요)") }));
   const list = h("div", { class: "rm-list" });
