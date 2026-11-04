@@ -775,6 +775,20 @@ body.cinema #hint,body.cinema #standBtn,body.cinema #castBtn,body.cinema .toasts
 .ws-tabs{margin-top:12px}.ws-chips{margin:10px 0 2px}.ws-row b .tierchip,.ws-row b .tier{margin-right:2px}
 .ws-row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.05)}
 .ws-row img{width:64px;height:32px;object-fit:contain}.ws-row small{display:block;font-size:11.5px;opacity:.7}
+/* ===== 로또 6/45 · 어촌 TV (v1.83) ===== */
+.tvframe{position:fixed;left:0;top:0;width:640px;height:360px;transform-origin:0 0;z-index:1;pointer-events:none;background:#000}
+.tvframe iframe{width:100%;height:100%;border:0;display:block}
+.tvframe.off{opacity:0;transform:translate(-9999px,0) !important}
+.l6-head{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,#1d3a8a,#2a78d6);color:#fff}.l6-head b{font-size:17px}.l6-head span{font-size:12.5px;opacity:.9}
+.l6-last{margin:10px 0;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}.l6-last small{opacity:.75}
+.l6-balls{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}.l6-plus{font-weight:900;opacity:.7}
+.lball{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;color:#fff;font-weight:900;font-size:14px;box-shadow:inset -3px -4px 0 rgba(0,0,0,.18),inset 3px 3px 0 rgba(255,255,255,.3)}
+.lball.q{background:rgba(255,255,255,.15)}.lball.dim{opacity:.35}.l6-balls.sm .lball{width:26px;height:26px;font-size:11.5px}
+.l6-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;max-width:430px}
+.l6-n{aspect-ratio:1;border-radius:50%;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:inherit;font-weight:800;font-size:13px;cursor:pointer}.l6-n.on{color:#fff;border-color:transparent}
+.l6-acts{flex-wrap:wrap;gap:6px;margin-top:10px}
+.l6-mine{display:flex;flex-direction:column;gap:6px}.l6-row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.05)}.l6-row small{flex:none;width:72px;opacity:.7}.l6-row .l6-balls{margin:0;flex:1}
+.l6-res{flex:none;font-size:12.5px;opacity:.8}.l6-res.win{color:#ffd84d;opacity:1}
 /* ===== 인터페이스 개편 (v1.21) ===== */
 .fx-ex{position:sticky;top:-16px;z-index:3;margin:-16px -18px 0;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--line)}
 .fx-bench{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start}
@@ -1681,7 +1695,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.83.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.84.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2504,6 +2518,7 @@ function normProfile(p) {
   }
   o.resident = Number(p.resident) || 0;
   o.home = normHome(p.home);
+  o.lotto6 = { t: (p.lotto6 && Array.isArray(p.lotto6.t) ? p.lotto6.t : []).filter(t => t && Array.isArray(t.n) && t.n.length === 6 && t.n.every(x => Number.isInteger(x) && x >= 1 && x <= 45) && Number.isInteger(t.d)).slice(-60).map(t => ({ d: t.d, n: t.n.slice(), a: !!t.a, at: Number(t.at) || 0, ...(t.done ? { done: true, r: clamp(Number(t.r) || 0, 0, 5) } : {}) })) };
   o.attend = { n: clamp(Math.floor(Number(p.attend && p.attend.n) || 0), 0, 7), last: str(p.attend && p.attend.last, 10) };
   o.ref = p.ref && typeof p.ref === "object" && isUid(p.ref.uid) ? { uid: p.ref.uid, nick: str(p.ref.nick, 16), code: str(p.ref.code, 6), at: Number(p.ref.at) || 0, paid: !!p.ref.paid } : null;
   return o;
@@ -7378,6 +7393,7 @@ function init3D() {
   buildBeach();
   buildHall();
   buildStation();
+  buildTV();
   buildUptown();
   buildFar();
   buildCoast();
@@ -9836,7 +9852,7 @@ function loop3D(ms) {
   seaMat.uniforms.sunDir.value.copy(_v2); skyMat.uniforms.sunDir.value.copy(_v2);
   for (const b of buoys) { b.position.y = waveY(b.position.x, b.position.z, t) - .1; b.rotation.z = Math.sin(t + b.position.x) * .12; }
   for (const s of SWING) s.g.rotation.x = Math.sin(t * 1.4 + s.ph) * .07;
-  updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); pochaExtTick(t); npcShopTick(t, dt); townTick(t, dt); ambTick(t, dt); updateFx(t, dt); for (const fa of FACADE_ANIM) fa(t); breachTick(t, dt); marketRoofTick(t);
+  updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); pochaExtTick(t); npcShopTick(t, dt); townTick(t, dt); ambTick(t, dt); updateFx(t, dt); for (const fa of FACADE_ANIM) fa(t); breachTick(t, dt); tvTick(t); marketRoofTick(t);
   SWIM_T.value = t; updateJumps(dt, t); updateTide3D(dt); updateDust(dt);
   updateBoat3D(t, now);
   if (onBoat()) { const bs = SEAT[ME.seat]; ME.x = bs.x; ME.z = bs.z; ME.ry = bs.ry; }
@@ -9962,6 +9978,7 @@ function tapAt(x0, y0) {
     if (best.kind === "building") { goBuilding(best.id); return; }
     if (best.kind === "hall") { goHall(best.cat); return; }
     if (best.kind === "office") { goOffice(); return; }
+    if (best.kind === "tv") { openSheet("tv"); return; }
     if (best.kind === "wholesaler") { walkTo(FMKT.npc.x + 1.9, FMKT.npc.z, () => { ME.ry = -Math.PI / 2; presMove(true); S.wsLine = null; openSheet("wholesale"); }); return; }
     if (best.kind === "realty") { goRealty(); return; }
     if (best.kind === "housegate") return;   // 우리 집은 없앴어요 (v1.42)
@@ -10871,10 +10888,224 @@ function islandMapSheet(body) {
   clearInterval(S.mapTimer); S.mapTimer = setInterval(() => { if (S.sheet !== "travel" || !cv.isConnected) { clearInterval(S.mapTimer); return; } drawIslandMap(cv); }, 1000);
 }
 /* ---------- 행운 복권방 ---------- */
+/* ===================== 로또 6/45 (v1.83) =====================
+   매일 밤 9시(한국 시각) 추첨. 전날 추첨 방송이 끝난 뒤(9시 10분)부터 당일 밤 8시까지 판매해요.
+   한 장(1게임) 1,000원 · 하루(한 회차) 1인 1만원(10장)까지. 자동 · 직접 고르기.
+   당첨 번호는 날짜로 정해져서 모두 같아요. 9시에 항구 TV에서 번호가 하나씩 공개되고, 방송이 끝나면 당첨금이 자동으로 들어와요.
+   (클라이언트 계산이라 당첨금은 상한을 둬요) */
+const L645 = { price: 10, limit: 100, base: Math.floor((Date.UTC(2026, 10, 4) / 3600000 + 9) / 24) - 1,
+  prize: [0, 50000, 10000, 3000, 500, 50], rankName: ["낙첨", "1등", "2등", "3등", "4등", "5등"] };   // 1등 500만원 · 2등 100만 · 3등 30만 · 4등 5만 · 5등 5천원
+const kDay = (t) => Math.floor(((t || Date.now()) / 3600000 + 9) / 24);
+const drawAt = (n) => (n * 24 + 21 - 9) * 3600000;
+const DRAW_BALL0 = 30000, DRAW_GAP = 20000, DRAW_END = 10 * 60000;   // 9시 30초에 첫 공, 20초마다 하나, 9시 10분까지 방송
+function saleDraw(now) { now = now || Date.now(); const n = kDay(now), h = gameHour(now); if (h < 20) return n; if (now >= drawAt(n) + DRAW_END) return n + 1; return null; }
+function drawNums(n) {
+  let s = mixHash("lotto645|" + n) || 1; const r = () => ((s = (Math.imul(s ^ (s >>> 15), 2246822519) + 0x9e3779b9) >>> 0) / 4294967296);
+  const pool = Array.from({ length: 45 }, (_, i) => i + 1), out = [];
+  for (let k = 0; k < 7; k++) out.push(pool.splice(Math.floor(r() * pool.length), 1)[0]);
+  return { main: out.slice(0, 6).sort((a, b) => a - b), bonus: out[6], order: out };
+}
+const ballsShown = (n, now) => clamp(Math.floor(((now || Date.now()) - drawAt(n) - DRAW_BALL0) / DRAW_GAP) + 1, 0, 7);
+const drawDone = (n, now) => ballsShown(n, now) >= 7;
+function lottoRank(nums, n) { const w = drawNums(n), hit = nums.filter(x => w.main.includes(x)).length;
+  return hit === 6 ? 1 : hit === 5 && nums.includes(w.bonus) ? 2 : hit === 5 ? 3 : hit === 4 ? 4 : hit === 3 ? 5 : 0; }
+function L6() { const o = P.lotto6 && typeof P.lotto6 === "object" ? P.lotto6 : (P.lotto6 = { t: [] }); if (!Array.isArray(o.t)) o.t = []; return o; }
+const autoNums = () => { const pool = Array.from({ length: 45 }, (_, i) => i + 1), out = []; for (let k = 0; k < 6; k++) out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]); return out.sort((a, b) => a - b); };
+const boughtFor = (d) => L6().t.filter(t => t.d === d).length;
+function buyLotto(nums, auto) {
+  const d = saleDraw(); if (d == null) { toast("지금은 판매 마감이에요 · 밤 9시 10분부터 다음 회차를 팔아요"); return false; }
+  if ((boughtFor(d) + 1) * L645.price > L645.limit) { toast("한 회차에 1인 1만원(10장)까지 살 수 있어요"); return false; }
+  if (P.gold < L645.price) { sfx("ui-error", .4); toast("돈이 부족해요"); return false; }
+  P.gold -= L645.price; L6().t.push({ d, n: nums.slice().sort((a, b) => a - b), a: !!auto, at: Date.now() }); markDirty(); sfx("ui-click", .4); return true;
+}
+// 방송이 끝난 회차는 자동으로 맞춰 보고 당첨금을 넣어요
+function lottoSettle() {
+  const o = L6(), now = Date.now(); let sum = 0, best = 0, n = 0;
+  for (const t of o.t) { if (t.done || !drawDone(t.d, now)) continue; t.done = true; t.r = lottoRank(t.n, t.d); n++; if (t.r) { sum += L645.prize[t.r]; if (!best || t.r < best) best = t.r; } }
+  if (!n) return;
+  o.t = o.t.filter(t => !t.done || now - drawAt(t.d) < 3 * 86400000).slice(-60);
+  if (sum) { P.gold += sum; stat("lottoWins"); try { ACT_FX.sell(sum); } catch {} sfx("fanfare-legend", .5);
+    toast([h("b", { text: "🎉 로또 " + L645.rankName[best] + " 당첨!" }), h("div", { class: "muted", style: "font-size:12px", text: "당첨금 +" + won(sum) + " 이 들어왔어요" })], "lvup", 9000);
+    if (best <= 2) postSys(P.nick + "님이 로또 6/45 " + L645.rankName[best] + "에 당첨됐어요! 🎉"); }
+  else toast("🎱 로또 결과: 이번엔 꽝이에요 (" + n + "장) · 다음 회차를 노려봐요");
+  markDirty(); refreshSheet();
+}
+setInterval(() => { try { if (!S.title) lottoSettle(); } catch (e) { console.warn("lotto", e); } }, 8000);
+const ballCol = (x) => x <= 10 ? "#f2b630" : x <= 20 ? "#2a78d6" : x <= 30 ? "#e2402a" : x <= 40 ? "#7a8088" : "#2fa85a";
+const ballEl = (x, dim) => h("span", { class: "lball" + (dim ? " dim" : ""), style: "background:" + ballCol(x), text: String(x) });
+function lotto645Sheet(body) {
+  const now = Date.now(), d = saleDraw(now), cur = d == null ? kDay(now) : d, round = cur - L645.base, mine = L6().t.filter(t => t.d === cur), left = (L645.limit - mine.length * L645.price) / L645.price;
+  const closeAt = drawAt(cur) - 3600000, mm = (ms) => { const m = Math.max(0, Math.ceil(ms / 60000)); return m >= 60 ? Math.floor(m / 60) + "시간 " + (m % 60) + "분" : m + "분"; };
+  body.append(h("div", { class: "l6-head" }, h("b", { text: "제 " + round + "회 로또 6/45" }),
+    h("span", { text: d == null ? "판매 마감 · 밤 9시 항구 TV에서 추첨 방송 중이에요" : "판매 마감까지 " + mm(closeAt - now) + " · 추첨은 오늘 밤 9시 항구 TV" })));
+  // 지난 회차 결과
+  const last = drawDone(cur, now) ? cur : cur - 1, w = drawNums(last), shown = drawDone(last, now) ? 7 : ballsShown(last, now);
+  if (last - L645.base >= 1) body.append(h("div", { class: "l6-last" }, h("small", { text: "제 " + (last - L645.base) + "회 당첨 번호" + (shown < 7 ? " (추첨 중…)" : "") }),
+    h("div", { class: "l6-balls" }, w.order.slice(0, 6).map((x, i) => i < shown ? ballEl(x) : h("span", { class: "lball q", text: "?" })), h("span", { class: "l6-plus", text: "+" }), shown >= 7 ? ballEl(w.bonus) : h("span", { class: "lball q", text: "?" }))));
+  if (d != null) {
+    S.l6pick = S.l6pick || [];
+    const pick = S.l6pick, grid = h("div", { class: "l6-grid" });
+    for (let x = 1; x <= 45; x++) grid.append(h("button", { class: "l6-n" + (pick.includes(x) ? " on" : ""), style: pick.includes(x) ? "background:" + ballCol(x) : "", onclick: () => { const i = pick.indexOf(x); if (i >= 0) pick.splice(i, 1); else if (pick.length < 6) pick.push(x); refreshSheet(true); }, text: String(x) }));
+    body.append(h("div", { class: "sec", text: "번호 고르기 (" + pick.length + "/6) · 남은 구매 " + left + "장" }), grid,
+      h("div", { class: "row l6-acts" },
+        h("button", { class: "btn", onclick: () => { S.l6pick = autoNums(); refreshSheet(true); }, text: "🎲 번호 채워 주기" }),
+        h("button", { class: "btn", onclick: () => { S.l6pick = []; refreshSheet(true); }, text: "지우기" }),
+        h("button", { class: "btn pri", disabled: pick.length !== 6 || left <= 0, onclick: () => { if (buyLotto(pick, false)) { S.l6pick = []; toast("🎱 직접 고른 번호로 1장 샀어요"); refreshSheet(true); } }, text: "직접 고른 번호로 사기 · " + won(L645.price) }),
+        h("button", { class: "btn pri", disabled: left <= 0, onclick: () => { if (buyLotto(autoNums(), true)) { toast("🎱 자동으로 1장 샀어요"); refreshSheet(true); } }, text: "자동 1장 · " + won(L645.price) }),
+        h("button", { class: "btn", disabled: left <= 0, onclick: () => { let k = 0; while (k < left && buyLotto(autoNums(), true)) k++; if (k) toast("🎱 자동으로 " + k + "장 샀어요"); refreshSheet(true); }, text: "자동 남은 만큼 (" + left + "장)" })));
+  }
+  body.append(h("div", { class: "sec", text: "내 로또 (제 " + round + "회 " + mine.length + "장)" }));
+  const recent = L6().t.slice().reverse().slice(0, 20);
+  if (!recent.length) body.append(h("div", { class: "empty-note", text: "아직 산 로또가 없어요." }));
+  else body.append(h("div", { class: "l6-mine" }, recent.map(t => { const ww = drawDone(t.d, now) ? drawNums(t.d) : null;
+    return h("div", { class: "l6-row" }, h("small", { text: (t.d - L645.base) + "회 · " + (t.a ? "자동" : "수동") }), h("div", { class: "l6-balls sm" }, t.n.map(x => ballEl(x, ww && !ww.main.includes(x) && x !== ww.bonus))),
+      h("b", { class: "l6-res" + (t.r ? " win" : ""), text: !ww ? "추첨 전" : t.done ? (t.r ? L645.rankName[t.r] + " +" + won(L645.prize[t.r]) : "낙첨") : "곧 정산" })); })));
+  body.append(h("div", { class: "muted", style: "font-size:12px;margin-top:8px;line-height:1.6", text: "판매: 전날 밤 9시 10분 ~ 당일 밤 8시 · 1장 1,000원 · 한 회차 1인 1만원까지 · 당첨: 6개 1등 500만원 · 5개+보너스 2등 100만원 · 5개 3등 30만원 · 4개 4등 5만원 · 3개 5등 5,000원 · 방송이 끝나면 당첨금이 자동으로 들어와요" }));
+}
+
+/* ===================== 항구 TV (v1.83) =====================
+   항구 앞 잔디밭의 대형 전광판. 운영자가 유튜브 링크를 넣으면 모든 채널에서 같은 영상이 같은 시각으로 나와요(config/tv).
+   매일 밤 9시 ~ 9시 10분은 영상 대신 로또 6/45 추첨 방송으로 바뀌어요.
+   소리: 유튜브 소리는 거리에 따라 커지고 작아져요(가까울수록 크게). 추첨 방송은 마을 확성기처럼 — 딩동댕 차임 · 확성기 웅웅 소리 · 메아리 · 아나운서 목소리 */
+const TV = { x: -27.2, z: -20.5, w: 6.4, hgt: 3.6, y0: 1.6, mesh: null, tex: null, cv: null, frame: null, ifr: null, vid: "", startAt: 0, lastDraw: 0, said: -1, chimed: 0, hum: null };
+function ytId(u) { u = String(u || "").trim(); const m = u.match(/(?:youtu\.be\/|v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/) || u.match(/^([A-Za-z0-9_-]{11})$/); return m ? m[1] : ""; }
+function buildTV() {
+  const det = new T3.Group(); scene.add(det); DETAIL_GROUPS.push(det);
+  const { x, z, w, hgt, y0 } = TV, dark = cmat(0x1e2226), steel = cmat(0x8a9298);
+  // 받침 · 기둥 · 테두리 (질감: 기단은 화강암)
+  const bt = wallTex("granite").clone(); bt.needsUpdate = true; bt.repeat.set(2.4, .4);
+  box(1.6, .5, w + .8, phong(0xc8c2b4, { map: bt }), x - .2, .25, z, det);
+  for (const s of [-1, 1]) { box(.35, y0 + .2, .35, steel, x - .25, (y0 + .2) / 2, z + s * (w / 2 - .6), det); }
+  box(.4, hgt + .5, w + .5, dark, x - .32, y0 + hgt / 2, z, det);
+  box(.2, .25, w + .7, cmat(0x2a78bb), x - .15, y0 + hgt + .3, z, det);
+  const lg = makeSign(2.6, .5, { shape: "board", fill: { type: "grad", c: ["#2a78bb", "#15486e"] }, frame: { c: "#f2c230" }, t: { text: "📺 어촌 TV", font: "hyeon", color: "#fff", size: .5, y: .55 } }, { cw: 520 });
+  lg.position.set(x - .02, y0 + hgt + .65, z); lg.rotation.y = Math.PI / 2; scene.add(lg);
+  // 확성기 2개 (마을 방송)
+  for (const s of [-1, 1]) { const hn = new T3.Mesh(new T3.CylinderGeometry(.08, .36, .6, 12, 1, true), cmat(0xd8d4c8)); hn.rotation.z = -Math.PI / 2; hn.rotation.y = s * .35; hn.position.set(x + .1, y0 + hgt + .95, z + s * (w / 2 - .2)); scene.add(hn); }
+  // 화면 (캔버스 그림: 대기 · 추첨 방송)
+  TV.cv = document.createElement("canvas"); TV.cv.width = 640; TV.cv.height = 360; TV.tex = new T3.CanvasTexture(TV.cv);
+  TV.mesh = new T3.Mesh(new T3.PlaneGeometry(w, hgt), new T3.MeshBasicMaterial({ map: TV.tex })); TV.mesh.position.set(x - .1, y0 + hgt / 2, z); TV.mesh.rotation.y = Math.PI / 2; scene.add(TV.mesh);
+  const hit = new T3.Mesh(new T3.BoxGeometry(1, hgt + 2, w), MAT.hit); hit.position.set(x, (y0 + hgt) / 2 + .5, z); hit.userData.pick = { kind: "tv" }; scene.add(hit); pickables.push(hit);
+  BLOCKS.push([x - 1.1, x + .7, z - w / 2 - .5, z + w / 2 + .5]);
+  drawTVCanvas(Date.now());
+}
+// 화면 위 유튜브 (실제 영상은 화면 위에 원근을 맞춘 iframe으로 겹쳐 보여요)
+function tvSetVideo(vid, startAt) {
+  if (vid === TV.vid && startAt === TV.startAt) return; TV.vid = vid; TV.startAt = startAt || 0;
+  if (TV.frame) { TV.frame.remove(); TV.frame = TV.ifr = null; }
+  if (!vid) return;
+  const el = h("div", { class: "tvframe" }), off = Math.max(0, Math.floor((Date.now() - TV.startAt) / 1000));
+  const ifr = h("iframe", { src: "https://www.youtube.com/embed/" + vid + "?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=" + vid + "&enablejsapi=1&start=" + off + "&rel=0&modestbranding=1", allow: "autoplay; encrypted-media", title: "어촌 TV", frameborder: "0" });
+  el.append(ifr); document.body.append(el); TV.frame = el; TV.ifr = ifr; TV.vol = -1; TV.unmuted = false; TV.dur = 0;
+  ifr.addEventListener("load", () => { try { ifr.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*"); } catch {} });
+}
+window.addEventListener("message", (e) => { if (!TV.ifr || e.source !== TV.ifr.contentWindow) return; try { const d = typeof e.data === "string" ? JSON.parse(e.data) : e.data; const inf = d && d.info; if (inf && inf.duration && !TV.dur) { TV.dur = inf.duration; const want = ((Date.now() - TV.startAt) / 1000) % TV.dur; if (Math.abs((inf.currentTime || 0) - want) > 4) ytCmd("seekTo", [want, true]); } } catch {} });
+function ytCmd(func, args) { try { TV.ifr && TV.ifr.contentWindow.postMessage(JSON.stringify({ event: "command", func, args: args || [] }), "*"); } catch {} }
+// 사각형(w×h)을 화면의 네 점으로 옮기는 CSS matrix3d
+function quadMatrix(w, h, p) {
+  const adj = (m) => [m[4] * m[8] - m[5] * m[7], m[2] * m[7] - m[1] * m[8], m[1] * m[5] - m[2] * m[4], m[5] * m[6] - m[3] * m[8], m[0] * m[8] - m[2] * m[6], m[2] * m[3] - m[0] * m[5], m[3] * m[7] - m[4] * m[6], m[1] * m[6] - m[0] * m[7], m[0] * m[4] - m[1] * m[3]];
+  const mm = (a, b) => { const c = []; for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { let s = 0; for (let k = 0; k < 3; k++) s += a[3 * i + k] * b[3 * k + j]; c[3 * i + j] = s; } return c; };
+  const mv = (m, v) => [m[0] * v[0] + m[1] * v[1] + m[2] * v[2], m[3] * v[0] + m[4] * v[1] + m[5] * v[2], m[6] * v[0] + m[7] * v[1] + m[8] * v[2]];
+  const basis = (q) => { const m = [q[0][0], q[1][0], q[2][0], q[0][1], q[1][1], q[2][1], 1, 1, 1], v = mv(adj(m), [q[3][0], q[3][1], 1]); return mm(m, [v[0], 0, 0, 0, v[1], 0, 0, 0, v[2]]); };
+  const s = basis([[0, 0], [w, 0], [0, h], [w, h]]), d = basis(p), t = mm(d, adj(s)); for (let i = 0; i < 9; i++) t[i] /= t[8];
+  return "matrix3d(" + [t[0], t[3], 0, t[6], t[1], t[4], 0, t[7], 0, 0, 1, 0, t[2], t[5], 0, t[8]].join(",") + ")";
+}
+const _tvV = [];
+function tvTick(t) {
+  if (!TV.mesh || !camera) return;
+  const now = Date.now(), n = kDay(now), since = now - drawAt(n), live = since >= 0 && since < DRAW_END;
+  const d = Math.hypot(ME.x - TV.x, ME.z - TV.z), vis = !atHome() && !S.title && !atRest();
+  // 화면 그림 (방송 · 대기) 4번/초
+  if (now - TV.lastDraw > 250 && (live || !TV.vid || !TV.frame)) { TV.lastDraw = now; drawTVCanvas(now); }
+  // 유튜브 겹치기 · 거리 볼륨
+  if (TV.frame) {
+    const show = vis && !live && d < 90;
+    let ok = false;
+    if (show) {
+      const { x, z, w, hgt, y0 } = TV, cs = [[x - .09, y0 + hgt, z + w / 2], [x - .09, y0 + hgt, z - w / 2], [x - .09, y0, z + w / 2], [x - .09, y0, z - w / 2]];
+      const rc = cv.getBoundingClientRect(), pts = []; ok = camera.position.x > x;
+      for (const c of cs) { const v = (_tvV[0] || (_tvV[0] = new T3.Vector3())).set(c[0], c[1], c[2]).project(camera); if (v.z > 1 || v.z < -1) ok = false; pts.push([rc.left + (v.x + 1) / 2 * rc.width, rc.top + (1 - v.y) / 2 * rc.height]); }
+      if (ok) TV.frame.style.transform = quadMatrix(640, 360, pts);
+    }
+    TV.frame.classList.toggle("off", !ok);
+    const vol = !S.sound || !vis || live ? 0 : Math.round(100 * Math.pow(clamp(1 - (d - 6) / 70, 0, 1), 1.6));
+    if (vol > 0 && !TV.unmuted && S.lastInput) { ytCmd("unMute"); TV.unmuted = true; }
+    if (Math.abs(vol - TV.vol) >= 3 || (vol === 0 && TV.vol !== 0)) { TV.vol = vol; ytCmd("setVolume", [vol]); if (vol === 0) ytCmd("mute"); else ytCmd("unMute"); }
+  }
+  // 추첨 방송 소리: 딩동댕 · 확성기 웅웅 · 번호 읽기 (거리에 따라)
+  const near = clamp(1 - (d - 8) / 110, 0, 1) * (vis ? 1 : 0);
+  if (live && S.sound && near > 0) {
+    tvHum(near * .9);
+    if (TV.chimed !== n) { TV.chimed = n; paChime(near); setTimeout(() => paSay("어촌 마을 주민 여러분께 알려 드립니다. 지금부터 제 " + (n - L645.base) + "회 로또 육 사 오 추첨을 시작하겠습니다.", near), 2600); }
+    const b = ballsShown(n, now);
+    if (b > 0 && TV.said !== n * 10 + b) { TV.said = n * 10 + b; const w = drawNums(n); paSay(b <= 6 ? ["첫", "두", "세", "네", "다섯", "여섯"][b - 1] + " 번째 당첨 번호는, " + w.order[b - 1] + "번입니다." : "보너스 번호는, " + w.bonus + "번입니다. 당첨을 축하드립니다.", near); if (b === 7) setTimeout(() => paChime(near), 4500); }
+  } else tvHum(0);
+}
+function drawTVCanvas(now) {
+  const g = TV.cv.getContext("2d"), W = 640, H = 360, n = kDay(now), since = now - drawAt(n), live = since >= 0 && since < DRAW_END;
+  const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, live ? "#0d2a5a" : "#1d3a5c"); bg.addColorStop(1, live ? "#071a3a" : "#0f2236"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  g.textAlign = "center"; g.textBaseline = "middle";
+  if (live) {
+    const w = drawNums(n), b = ballsShown(n, now), t = now / 1000;
+    for (let i = 0; i < 14; i++) { g.fillStyle = "rgba(255,255,255," + (.05 + .04 * Math.sin(t * 2 + i)) + ")"; g.beginPath(); g.arc((i * 97 + t * 40) % W, 40 + (i * 53) % 280, 30 + (i % 4) * 14, 0, 7); g.fill(); }
+    g.fillStyle = "#ffd84d"; g.font = "900 34px 'Black Han Sans',sans-serif"; g.fillText("🎱 제 " + (n - L645.base) + "회 로또 6/45 추첨", W / 2, 46);
+    g.fillStyle = "#e8f0ff"; g.font = "700 18px sans-serif"; g.fillText(b < 7 ? "추첨 중 · 어촌 TV 생방송" : "당첨을 축하합니다! · 방송이 끝나면 당첨금이 자동으로 들어와요", W / 2, 82);
+    // 추첨기 (공이 빙글빙글)
+    if (b < 7) { g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 3; g.beginPath(); g.arc(W / 2, 168, 58, 0, 7); g.stroke();
+      for (let k = 0; k < 12; k++) { const a = t * (2 + k * .3) + k; g.fillStyle = ballCol((k * 7) % 45 + 1); g.beginPath(); g.arc(W / 2 + Math.cos(a) * (20 + k * 2.5), 168 + Math.sin(a * 1.3) * (20 + k * 2), 9, 0, 7); g.fill(); } }
+    for (let i = 0; i < 7; i++) { const x = 70 + i * 78 + (i === 6 ? 14 : 0), y = b < 7 ? 290 : 220, shown = i < b, v = i < 6 ? w.order[i] : w.bonus;
+      if (i === 6) { g.fillStyle = "#fff"; g.font = "900 30px sans-serif"; g.fillText("+", x - 46, y); }
+      g.fillStyle = shown ? ballCol(v) : "rgba(255,255,255,.15)"; g.beginPath(); g.arc(x, y, 30, 0, 7); g.fill();
+      g.fillStyle = "rgba(255,255,255,.35)"; g.beginPath(); g.arc(x - 9, y - 10, 9, 0, 7); g.fill();
+      g.fillStyle = "#fff"; g.font = "900 26px sans-serif"; g.fillText(shown ? String(v) : "?", x, y + 1); }
+  } else {
+    g.fillStyle = "#ffd84d"; g.font = "900 44px 'Black Han Sans',sans-serif"; g.fillText("📺 어촌 TV", W / 2, 120);
+    const left = drawAt(now >= drawAt(n) ? n + 1 : n) - now, hh = Math.floor(left / 3600000), m = Math.floor(left / 60000) % 60;
+    g.fillStyle = "#e8f0ff"; g.font = "700 22px sans-serif"; g.fillText(TV.vid ? "영상을 불러오는 중…" : "매일 밤 9시 · 로또 6/45 추첨 생방송", W / 2, 190);
+    g.fillStyle = "#9fc3d6"; g.font = "600 18px sans-serif"; g.fillText("다음 추첨까지 " + hh + "시간 " + m + "분 · 로또는 행운 복권방에서", W / 2, 232);
+  }
+  TV.tex.needsUpdate = true;
+}
+/* 마을 확성기 소리: 좁은 대역(300~3000Hz) · 살짝 찌그러짐 · 메아리(딜레이 되먹임) */
+function paBus(vol) {
+  if (!AC) return null;
+  const inp = AC.createGain(), hp = AC.createBiquadFilter(), lp = AC.createBiquadFilter(), sh = AC.createWaveShaper(), dl = AC.createDelay(1), fb = AC.createGain(), out = AC.createGain();
+  hp.type = "highpass"; hp.frequency.value = 320; lp.type = "lowpass"; lp.frequency.value = 2900;
+  const k = 12, cur = new Float32Array(256); for (let i = 0; i < 256; i++) { const x = i / 128 - 1; cur[i] = (1 + k) * x / (1 + k * Math.abs(x)); } sh.curve = cur;
+  dl.delayTime.value = .32; fb.gain.value = .38; out.gain.value = vol;
+  inp.connect(hp).connect(lp).connect(sh); sh.connect(out); sh.connect(dl); dl.connect(fb).connect(dl); dl.connect(out); out.connect(AC.destination);
+  return inp;
+}
+function paChime(vol) {   // 딩 · 동 · 댕
+  if (!AC || !S.sound) return; const bus = paBus(vol * .9); if (!bus) return;
+  [[784, 0], [659, .45], [523, .9]].forEach(([f, d]) => { const o = AC.createOscillator(), g = AC.createGain(), t0 = AC.currentTime + d; o.type = "triangle"; o.frequency.value = f; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.5, t0 + .02); g.gain.exponentialRampToValueAtTime(.001, t0 + 1.4); o.connect(g).connect(bus); o.start(t0); o.stop(t0 + 1.5); });
+}
+function tvHum(vol) {   // 확성기 켜진 웅웅 · 지지직
+  if (!AC) return;
+  if (!TV.hum) { if (!vol) return; const len = AC.sampleRate * 2, buf = AC.createBuffer(1, len, AC.sampleRate), dd = buf.getChannelData(0); for (let i = 0; i < len; i++) dd[i] = (Math.random() * 2 - 1) * .5 + Math.sin(i / AC.sampleRate * 2 * Math.PI * 120) * .3;
+    const src = AC.createBufferSource(); src.buffer = buf; src.loop = true; const g = AC.createGain(); g.gain.value = 0; const bus = paBus(1); src.connect(g).connect(bus); src.start(); TV.hum = g; }
+  TV.hum.gain.setTargetAtTime(vol * .05, AC.currentTime, .3);
+}
+function paSay(text, vol) {   // 아나운서 (브라우저 음성 · 거리만큼 작게)
+  try { if (!window.speechSynthesis || !S.sound || vol <= 0) return; const u = new SpeechSynthesisUtterance(text); u.lang = "ko-KR"; u.rate = .92; u.pitch = .9; u.volume = clamp(vol, 0, 1); speechSynthesis.speak(u); } catch {}
+}
+function tvSheet(body) {
+  const now = Date.now(), n = kDay(now), live = now >= drawAt(n) && now < drawAt(n) + DRAW_END;
+  setHead("📺 어촌 TV", live ? "지금 로또 6/45 추첨 생방송 중!" : TV.vid ? "모든 채널에서 같은 영상이 나와요 · 가까이 갈수록 소리가 커져요" : "매일 밤 9시에 로또 6/45 추첨 방송을 해요");
+  body.append(h("div", { class: "muted", style: "font-size:13px;line-height:1.6", text: "매일 밤 9시 ~ 9시 10분에는 영상 대신 로또 추첨 방송이 나오고, 마을 확성기로 번호를 불러 줘요. 로또는 행운 복권방에서 밤 8시까지 살 수 있어요." }),
+    h("div", { class: "row" }, h("button", { class: "btn pri", onclick: () => { S.lottoTab = "lotto645"; openSheet("lotto"); }, text: "🎱 로또 사러 가기" })));
+  if (!S.isOwner) return;
+  const inp = h("input", { class: "btn", style: "flex:1;min-width:220px;text-align:left", placeholder: "유튜브 링크 (예: https://youtu.be/...)", value: TV.vid ? "https://youtu.be/" + TV.vid : "" });
+  body.append(h("div", { class: "sec", text: "운영자 · 틀 영상" }), h("div", { class: "row" }, inp,
+    h("button", { class: "btn pri", onclick: async () => { const id = ytId(inp.value); if (!id) { toast("유튜브 링크를 알아볼 수 없어요"); return; } try { await S.db.doc("config/tv").set({ vid: id, startAt: Date.now(), by: S.uid }); toast("📺 모든 채널 TV에 영상을 틀었어요"); } catch (e) { toast("저장하지 못했어요"); } }, text: "틀기" }),
+    h("button", { class: "btn", onclick: async () => { try { await S.db.doc("config/tv").set({ vid: "", startAt: 0, by: S.uid }); toast("TV 영상을 껐어요"); } catch {} }, text: "끄기" })));
+}
+SHEETS.tv = tvSheet;
 SHEETS.lotto = (body) => {
   setHead("행운 복권방", "슬롯머신과 즉석 복권 · 10만원 이상 당첨되면 부두 채팅에 소문이 나요");
-  body.append(h("div", { class: "tabs", role: "tablist" }, [["slot", "🎰 슬롯머신"], ["scratch", "🎟️ 즉석 복권"], ["log", "당첨 기록"]].map(([id, l]) =>
+  body.append(h("div", { class: "tabs", role: "tablist" }, [["lotto645", "🎱 로또 6/45"], ["slot", "🎰 슬롯머신"], ["scratch", "🎟️ 즉석 복권"], ["log", "당첨 기록"]].map(([id, l]) =>
     h("button", { role: "tab", "aria-selected": String(S.lottoTab === id), onclick: () => { if (S.slotBusy) return; S.lottoTab = id; refreshSheet(true); }, text: l }))));
+  if (S.lottoTab === "lotto645") { lotto645Sheet(body); return; }
   if (S.lottoTab === "slot") {
     const reels = h("div", { class: "reels", id: "reels" }, [0, 1, 2].map(k => h("div", { class: "rwin" }, h("div", { class: "rstrip" }, h("img", { src: symImg(["seven", "star", "lantern"][k]), alt: "" })))));
     const box = h("div", { class: "slotbox" },
@@ -13698,6 +13929,7 @@ async function boot() {
   }, (e) => { clearTimeout(chatTimer); console.warn("chat", e); });
   db.doc("config/notice").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; const prev = S.notice && S.notice.ts; S.notice = { text: str(d.text, 80), ts: Number(d.ts) || 0, until: Number(d.until) || 0 }; renderNoticeBar(); if (prev && S.notice.ts !== prev && S.notice.text) toast("📢 " + S.notice.text, null, 7000); }, () => {});
   db.doc("config/event").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.event = EVENTS.some(e => e.id === d.id) ? { id: d.id, until: Number(d.until) || 0 } : null; renderNoticeBar(); }, () => {});
+  db.doc("config/tv").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; try { tvSetVideo(ytId(d.vid), Number(d.startAt) || 0); } catch (e) { console.warn("tv", e); } }, () => {});
   db.doc("config/mutes").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.mutes = new Set((Array.isArray(d.uids) ? d.uids : []).filter(isUid)); }, () => {});
   db.doc("config/main").onSnapshot((snap) => {
     const d = snap.exists ? snap.data() : {};
