@@ -1741,11 +1741,17 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="platform.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="platform.js"></script>
 <script>
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.89.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.90.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -3186,8 +3192,22 @@ const xpNeed = (lv) => XP_TABLE[clamp(Math.floor(lv) || 0, 0, LV_MAX)];
 /* ---------- 운영자 실험실 (v1.64): 이 기기에만 저장되는 테스트 설정 · 소비 지점에서 S.isOwner일 때만 적용돼요 ---------- */
 const LAB = { fish: lsGet("mn.lab.fish2", 1), xp: lsGet("mn.lab.xp", 1), move: lsGet("mn.lab.move", 1), time: lsGet("mn.lab.time", -1),
   noHeat: !!lsGet("mn.lab.noHeat", 0), noBreak: !!lsGet("mn.lab.noBreak", 0), fastBite: !!lsGet("mn.lab.fastBite", 0), perfect: !!lsGet("mn.lab.perfect", 0), tier: lsGet("mn.lab.tier", -1),
-  instant: !!lsGet("mn.lab.instant", 0), fishId: lsGet("mn.lab.fishId", "") };
+  instant: !!lsGet("mn.lab.instant", 0), fishId: lsGet("mn.lab.fishId", ""), forceGuest: lsGet("mn.lab.forceGuest", "") };
 const labSet = (k, v) => { LAB[k] = v; lsSet("mn.lab." + k, v); if (S.sheet === "admintools") refreshSheet(true); };
+function labRestLv(dv) {   // 실험실: 가게 등급 테스트 (비용 없이 · 내 가게에만 저장돼요)
+  const v = clamp(P.rest.lv + dv, 0, REST_LV.length - 1);
+  if (v === P.rest.lv) { toast(dv > 0 ? "이미 최고 등급이에요" : "이미 최저 등급이에요"); return; }
+  P.rest.lv = v; markDirty(); if (S.restSlot >= 0) buildRestScene(true); updateRestBar(); refreshSheet(true);
+  toast("🧪 테스트: 가게 등급이 「" + REST_LV[v].name + "」이 됐어요 (비용 없이 · 내 가게에 저장)");
+}
+function labPickSpecial() {   // 실험실: 다음 손님을 단골 · VIP로 강제 (등급 조건 무시 · 한 번 쓰면 꺼져요)
+  const mode = LAB.forceGuest; labSet("forceGuest", "");
+  if (mode === "vip") { const best = RECIPES.filter(r => restOnMenu(r) && restCanMake(r)).sort((a, b) => recipePrice(b) - recipePrice(a))[0] || pickTicketRecipe(); return best ? { vip: true, r: best } : null; }
+  if (mode === "reg") { const here = S.restGuests || [], pool = REST_REGULARS.filter(rg => !here.some(g => g.reg === rg.id)), rg = pick(pool.length ? pool : REST_REGULARS); if (!rg) return null;
+    const fav = rg.fav.map(id => RECIPE[id]).filter(r => r && restOnMenu(r)), r = fav.find(restCanMake) || fav[0] || pickTicketRecipe(); return r ? { reg: rg.id, r } : null; }
+  return null;
+}
+
 function levelOf(xp) { let lv = 1; while (lv < LV_MAX && xp >= xpNeed(lv + 1)) lv++; return lv; }
 const myLv = () => levelOf(P.xp || 0);
 function xpFor(r, perfect, auto) {
@@ -5985,7 +6005,7 @@ function restTick(t, dt) {
   const cap = REST_LV[P.rest.lv].tickets, busy = S.restGuests.length;
   const freeSeats = REST_SEATS.map((s, i) => i).filter(i => !S.restGuests.some(gu => gu.si === i)).slice(0, REST_LV[P.rest.lv].seats);
   if (S.restOpen && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length && d.tickets < REST_CFG.dayTickets) {
-    const spc = restPickSpecial(), r = spc ? spc.r : pickTicketRecipe();
+    const spc = S.isOwner && LAB.forceGuest ? labPickSpecial() : restPickSpecial(), r = spc ? spc.r : pickTicketRecipe();
     if (r) {
       const si = pick(freeSeats), seat = REST_SEATS[si];
       const B = makeBody(), wear = {}, k2 = spc && spc.reg ? hashStr(spc.reg) % 99 : Math.floor(Math.random() * 99);
@@ -11307,7 +11327,7 @@ function lotto645Sheet(body) {
    항구 앞 잔디밭의 대형 전광판. 운영자가 유튜브 링크를 넣으면 모든 채널에서 같은 영상이 같은 시각으로 나와요(config/tv).
    매일 밤 9시 ~ 9시 10분은 영상 대신 로또 6/45 추첨 방송으로 바뀌어요.
    소리: 유튜브 소리는 거리에 따라 커지고 작아져요(가까울수록 크게). 추첨 방송은 마을 확성기처럼 — 딩동댕 차임 · 확성기 웅웅 소리 · 메아리 · 아나운서 목소리 */
-const TV = { x: -27.2, z: -20.5, w: 6.4, hgt: 3.6, y0: 1.6, mesh: null, tex: null, cv: null, frame: null, ifr: null, vid: "", startAt: 0, lastDraw: 0, said: -1, chimed: 0, hum: null };
+const TV = { x: -27.2, z: -20.5, w: 6.4, hgt: 3.6, y0: 1.6, mesh: null, tex: null, cv: null, frame: null, ifr: null, vid: "", startAt: 0, lastDraw: 0, said: -1, chimed: 0, hum: null, test: null };
 function ytId(u) { u = String(u || "").trim(); const m = u.match(/(?:youtu\.be\/|v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/) || u.match(/^([A-Za-z0-9_-]{11})$/); return m ? m[1] : ""; }
 function buildTV() {
   const det = new T3.Group(); scene.add(det); DETAIL_GROUPS.push(det);
@@ -11352,9 +11372,17 @@ function quadMatrix(w, h, p) {
   return "matrix3d(" + [t[0], t[3], 0, t[6], t[1], t[4], 0, t[7], 0, 0, 1, 0, t[2], t[5], 0, t[8]].join(",") + ")";
 }
 const _tvV = [];
+/* 실험실 로또 테스트 방송 판정 (v1.90): 켜져 있으면 실제 밤 9시 방송 대신 테스트 타임라인을 써요.
+   이 기기 안에서만 도는 연출이라 서버 · 다른 사람 · 당첨금에는 영향이 없어요. 테스트 회차 번호(-7)는 실제 회차가 될 수 없어요. */
+const TEST_DRAW_N = -7, TEST_END = 100000;
+const tvNow = (now) => {
+  if (TV.test && now - TV.test.t0 > TEST_END) { TV.test = null; try { tvHum(0); toast("🧪 로또 테스트 방송이 끝났어요"); } catch {} }
+  if (TV.test) { const since = now - TV.test.t0; return { n: TEST_DRAW_N, since, test: true, b: clamp(Math.floor((since - 4000) / 6000) + 1, 0, 7) }; }
+  const n = kDay(now); return { n, since: now - drawAt(n), test: false, b: ballsShown(n, now) };
+};
 function tvTick(t) {
   if (!TV.mesh || !camera) return;
-  const now = Date.now(), n = kDay(now), since = now - drawAt(n), live = since >= 0 && since < DRAW_END;
+  const now = Date.now(), TVN = tvNow(now), n = TVN.n, since = TVN.since, live = since >= 0 && since < (TVN.test ? TEST_END : DRAW_END);
   const d = Math.hypot(ME.x - TV.x, ME.z - TV.z), vis = !atHome() && !S.title && !atRest();
   // 화면 그림 (방송 · 대기) 4번/초
   if (now - TV.lastDraw > 250 && (live || !TV.vid || !TV.frame)) { TV.lastDraw = now; drawTVCanvas(now); }
@@ -11377,20 +11405,20 @@ function tvTick(t) {
   const near = clamp(1 - (d - 8) / 110, 0, 1) * (vis ? 1 : 0);
   if (live && S.sound && near > 0) {
     tvHum(near * .9);
-    if (TV.chimed !== n) { TV.chimed = n; paChime(near); setTimeout(() => paSay("어촌 마을 주민 여러분께 알려 드립니다. 지금부터 제 " + (n - L645.base) + "회 로또 육 사 오 추첨을 시작하겠습니다.", near), 2600); }
-    const b = ballsShown(n, now);
+    if (TV.chimed !== n) { TV.chimed = n; paChime(near); setTimeout(() => paSay(TVN.test ? "테스트 방송입니다. 지금부터 로또 육 사 오 추첨 테스트를 시작하겠습니다." : "어촌 마을 주민 여러분께 알려 드립니다. 지금부터 제 " + (n - L645.base) + "회 로또 육 사 오 추첨을 시작하겠습니다.", near), 2600); }
+    const b = TVN.b;
     if (b > 0 && TV.said !== n * 10 + b) { TV.said = n * 10 + b; const w = drawNums(n); paSay(b <= 6 ? ["첫", "두", "세", "네", "다섯", "여섯"][b - 1] + " 번째 당첨 번호는, " + w.order[b - 1] + "번입니다." : "보너스 번호는, " + w.bonus + "번입니다. 당첨을 축하드립니다.", near); if (b === 7) setTimeout(() => paChime(near), 4500); }
   } else tvHum(0);
 }
 function drawTVCanvas(now) {
-  const g = TV.cv.getContext("2d"), W = 640, H = 360, n = kDay(now), since = now - drawAt(n), live = since >= 0 && since < DRAW_END;
+  const g = TV.cv.getContext("2d"), W = 640, H = 360, TVN = tvNow(now), n = TVN.n, since = TVN.since, live = since >= 0 && since < (TVN.test ? TEST_END : DRAW_END);
   const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, live ? "#0d2a5a" : "#1d3a5c"); bg.addColorStop(1, live ? "#071a3a" : "#0f2236"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
   g.textAlign = "center"; g.textBaseline = "middle";
   if (live) {
-    const w = drawNums(n), b = ballsShown(n, now), t = now / 1000;
+    const w = drawNums(n), b = TVN.b, t = now / 1000;
     for (let i = 0; i < 14; i++) { g.fillStyle = "rgba(255,255,255," + (.05 + .04 * Math.sin(t * 2 + i)) + ")"; g.beginPath(); g.arc((i * 97 + t * 40) % W, 40 + (i * 53) % 280, 30 + (i % 4) * 14, 0, 7); g.fill(); }
-    g.fillStyle = "#ffd84d"; g.font = "900 34px 'Black Han Sans',sans-serif"; g.fillText("🎱 제 " + (n - L645.base) + "회 로또 6/45 추첨", W / 2, 46);
-    g.fillStyle = "#e8f0ff"; g.font = "700 18px sans-serif"; g.fillText(b < 7 ? "추첨 중 · 어촌 TV 생방송" : "당첨을 축하합니다! · 방송이 끝나면 당첨금이 자동으로 들어와요", W / 2, 82);
+    g.fillStyle = "#ffd84d"; g.font = "900 34px 'Black Han Sans',sans-serif"; g.fillText(TVN.test ? "🧪 테스트 방송 · 로또 6/45 추첨" : "🎱 제 " + (n - L645.base) + "회 로또 6/45 추첨", W / 2, 46);
+    g.fillStyle = "#e8f0ff"; g.font = "700 18px sans-serif"; g.fillText(TVN.test ? "테스트 방송이에요 · 실제 추첨 · 당첨금과 관계없어요" : b < 7 ? "추첨 중 · 어촌 TV 생방송" : "당첨을 축하합니다! · 방송이 끝나면 당첨금이 자동으로 들어와요", W / 2, 82);
     // 추첨기 (공이 빙글빙글)
     if (b < 7) { g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 3; g.beginPath(); g.arc(W / 2, 168, 58, 0, 7); g.stroke();
       for (let k = 0; k < 12; k++) { const a = t * (2 + k * .3) + k; g.fillStyle = ballCol((k * 7) % 45 + 1); g.beginPath(); g.arc(W / 2 + Math.cos(a) * (20 + k * 2.5), 168 + Math.sin(a * 1.3) * (20 + k * 2), 9, 0, 7); g.fill(); } }
@@ -11431,8 +11459,8 @@ function paSay(text, vol) {   // 아나운서 (브라우저 음성 · 거리만�
   try { if (!window.speechSynthesis || !S.sound || vol <= 0) return; const u = new SpeechSynthesisUtterance(text); u.lang = "ko-KR"; u.rate = .92; u.pitch = .9; u.volume = clamp(vol, 0, 1); speechSynthesis.speak(u); } catch {}
 }
 function tvSheet(body) {
-  const now = Date.now(), n = kDay(now), live = now >= drawAt(n) && now < drawAt(n) + DRAW_END;
-  setHead("📺 어촌 TV", live ? "지금 로또 6/45 추첨 생방송 중!" : TV.vid ? "모든 채널에서 같은 영상이 나와요 · 가까이 갈수록 소리가 커져요" : "매일 밤 9시에 로또 6/45 추첨 방송을 해요");
+  const now = Date.now(), n = kDay(now), TVN2 = tvNow(now), live = TVN2.since >= 0 && TVN2.since < (TVN2.test ? TEST_END : DRAW_END);
+  setHead("📺 어촌 TV", live ? (TV.test ? "지금 로또 테스트 방송 중! (실제 추첨 아님)" : "지금 로또 6/45 추첨 생방송 중!") : TV.vid ? "모든 채널에서 같은 영상이 나와요 · 가까이 갈수록 소리가 커져요" : "매일 밤 9시에 로또 6/45 추첨 방송을 해요");
   body.append(h("div", { class: "muted", style: "font-size:13px;line-height:1.6", text: "매일 밤 9시 ~ 9시 10분에는 영상 대신 로또 추첨 방송이 나오고, 마을 확성기로 번호를 불러 줘요. 로또는 행운 복권방에서 밤 8시까지 살 수 있어요." }),
     h("div", { class: "row" }, h("button", { class: "btn pri", onclick: () => { S.lottoTab = "lotto645"; openSheet("lotto"); }, text: "🎱 로또 사러 가기" })));
   if (!S.isOwner) return;
@@ -12921,6 +12949,19 @@ SHEETS.admintools = (body) => {
       h("button", { class: "btn sm", onclick: () => { let n = 0; for (const f of allFish()) if (!P.dex[f.id]) { P.dex[f.id] = { n: 1, best: baseSize(f), bestK: 1 }; n++; } markDirty(); toast("도감에 " + n + "종을 채웠어요 (표시용 · 크기는 기본값)"); }, text: "도감 전부 채우기" }),
       armBtn("도전과제 전부 달성", "한 번 더 누르면 전부 달성 처리해요", () => { let n = 0; for (const a of ACH) if (!P.ach[a.id]) { P.ach[a.id] = { t: Date.now(), c: false }; n++; } markDirty(); toast("도전과제 " + n + "개를 달성 처리했어요 · 보상은 과제 화면에서 받아요"); refreshSheet(true); })));
     const ta = h("textarea", { class: "fbtext", rows: "3", placeholder: "가져올 세이브 JSON을 붙여넣어요" });
+    body.append(h("div", { class: "sec", text: "🎰 로또 테스트 방송 (이 기기에서만 · 서버 영향 없음)" }), h("div", { class: "row" },
+      h("button", { class: "btn sm", onclick: () => { TV.test = { t0: Date.now() }; TV.chimed = 0; TV.said = -1; closeSheet(); toast("🧪 테스트 방송 시작 · 항구 어촌 TV 앞으로 가 보세요 (첫 공 4초 뒤 · 6초 간격 · 실제 추첨과 무관해요)"); }, text: "▶ 테스트 방송 시작" }),
+      h("button", { class: "btn sm", onclick: () => { TV.test = null; tvHum(0); toast("테스트 방송을 껐어요"); }, text: "⏹ 끄기" })),
+      h("div", { class: "muted", style: "font-size:12px;line-height:1.5", text: "밤 9시 본방과 다른 테스트 전용 방송이에요. 내 화면과 스피커에서만 나오고, 다른 사람 · 서버 · 당첨금에는 영향이 전혀 없어요. 화면에도 「테스트 방송」이라고 표시돼요." }));
+    body.append(h("div", { class: "sec", text: "🍳 내 가게 테스트 (내 가게에만 적용 · 저장돼요)" }), h("div", { class: "row" },
+      h("button", { class: "btn sm", onclick: () => labRestLv(-1), text: "⬇ 등급 내리기" }),
+      h("span", { style: "font-size:13px", text: "지금: " + REST_LV[P.rest.lv].name + " (" + (P.rest.lv + 1) + "/" + REST_LV.length + "단계)" }),
+      h("button", { class: "btn sm", onclick: () => labRestLv(1), text: "⬆ 등급 올리기" })),
+      h("div", { class: "row" },
+        h("button", { "aria-pressed": String(LAB.forceGuest === "reg"), onclick: () => labSet("forceGuest", LAB.forceGuest === "reg" ? "" : "reg"), text: (LAB.forceGuest === "reg" ? "🟢 " : "⚪ ") + "다음 손님 단골로" }),
+        h("button", { "aria-pressed": String(LAB.forceGuest === "vip"), onclick: () => labSet("forceGuest", LAB.forceGuest === "vip" ? "" : "vip"), text: (LAB.forceGuest === "vip" ? "🟢 " : "⚪ ") + "다음 손님 VIP로" }),
+        h("button", { class: "btn sm", onclick: () => { S.restNextGuest = 0; toast("다음 손님을 바로 불러요 · 장사 중이고 빈자리와 주문 여유가 있을 때 와요"); }, text: "🔔 손님 바로 부르기" })),
+      h("div", { class: "muted", style: "font-size:12px;line-height:1.5", text: "등급은 비용 없이 오르내리고 내 가게에 저장돼요. 단골 · VIP 강제는 등급 조건을 무시하고 다음 손님 한 번만 적용돼요." }));
     body.append(h("div", { class: "sec", text: "💾 세이브 백업 · 복원" }), h("div", { class: "row" },
       h("button", { class: "btn sm", onclick: () => copyText(JSON.stringify(P), "세이브 JSON을 복사했어요"), text: "내보내기 (JSON 복사)" }),
       armBtn("가져오기", "한 번 더 누르면 지금 세이브를 덮어써요", async () => { try { const o = JSON.parse(ta.value); if (!o || typeof o !== "object" || typeof o.nick !== "string") throw new Error("bad"); await S.db.doc("data/users/" + S.uid + "/profile").set(o); toast("가져왔어요 · 새로고침해요"); setTimeout(() => location.reload(), 700); } catch { toast("JSON이 올바르지 않아요"); } })), ta);
