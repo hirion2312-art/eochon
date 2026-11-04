@@ -1742,7 +1742,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.93.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.94.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -11925,6 +11925,7 @@ function normRank(uid, v) {
 S.ranks = {}; S.rankAt = 0; S.rankPushAt = 0;
 function pushRank(force) {
   if (!S.online || !S.db || !S.uid || S.title) return;
+  if (P.nick === "우사기") { if (!S.rankCleaned) { S.rankCleaned = 1; S.db.doc("records/rank_" + S.uid).delete().catch(() => {}); } return; }   // 테스트 계정(우사기)은 랭킹에 남기지 않아요 (v1.94)
   if (!force && Date.now() - S.rankPushAt < 60000) return;
   const row = myRankRow(); if (!row.caught && !row.xp && !row.dex) return;
   S.rankPushAt = Date.now();
@@ -11934,9 +11935,9 @@ async function loadRanks(force) {
   if (!force && Date.now() - S.rankAt < 20000) return;
   S.rankAt = Date.now();
   const me = normRank(S.uid || "me", myRankRow());
-  if (!S.online || !S.db) { for (const c of RANK_CATS) S.ranks[c.id] = me[c.f] > 0 ? [me] : []; hallDirty(); return; }
+  if (!S.online || !S.db) { for (const c of RANK_CATS) S.ranks[c.id] = me.nick !== "우사기" && me[c.f] > 0 ? [me] : []; hallDirty(); return; }
   await Promise.all(RANK_CATS.map(async (c) => {
-    try { const q = await S.db.collection("records").orderBy(c.f, "desc").limit(12).get(); S.rankErr = false; S.ranks[c.id] = q.docs.filter(d => d.id.startsWith("rank_")).map(d => normRank(d.id.slice(5), d.data())).slice(0, 10).filter(r => r[c.f] > 0); }
+    try { const q = await S.db.collection("records").orderBy(c.f, "desc").limit(12).get(); S.rankErr = false; S.ranks[c.id] = q.docs.filter(d => d.id.startsWith("rank_")).map(d => normRank(d.id.slice(5), d.data())).filter(r => r.nick !== "우사기").slice(0, 10).filter(r => r[c.f] > 0); }
     catch (e) { console.warn("rank load", c.id, e); S.rankErr = true; }
   }));
   hallDirty();
