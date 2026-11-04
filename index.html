@@ -1745,7 +1745,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.88.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.88.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -7458,7 +7458,7 @@ const SIGNS = {
   housing: { shape: "round", fill: { type: "wood", base: "#9a6a40", dark: "#4a2c16" }, frame: { c: "#3a2414" }, nails: true, icons: ["house"], iconSize: .6,
     t: { text: "어촌 주택가", font: "round", color: "#fff3d6", size: .5 } },
   stallEmpty: (i) => ({ shape: "round", fill: { type: "chalk", base: "#3b4a4e" }, frame: { c: "#8a8f86" },
-    t: { text: "낭만포차 " + (i + 1) + "호", font: "hand", color: "#f2f0e6", y: .4, size: .4 }, sub: { text: "비어 있음 · 누구나 열 수 있어요", font: "hand", color: "#cfe8d8", size: .2, y: .74 } }),
+    t: { text: i >= 8 ? "회 부스 " + (i - 7) + "번" : "낭만포차 " + (i + 1) + "호", font: "hand", color: "#f2f0e6", y: .4, size: .4 }, sub: { text: "비어 있음 · 누구나 열 수 있어요", font: "hand", color: "#cfe8d8", size: .2, y: .74 } }),
 };
 const SHOP_SIGNS = {
   bait: { shape: "board", fill: { type: "grad", c: ["#1d5480", "#0f2c44"] }, frame: { c: "#f2c230", inner: "rgba(242,194,48,.55)" }, icons: ["hook", "fish"],
@@ -8128,13 +8128,8 @@ function buildPocha() {
 // 카운터 (손님 쪽 앞) · 사장님 의자 · 홍보 종이 · 접시 · 노점 이름판
 function buildStallCounter(s) {
   const counter = phong(0x9b7653), top = phong(0xe8e2d4);
-  const g = new T3.Group(); g.position.set(s.x, 0, s.z); scene.add(g); g.userData.pocha = !s.market;
-  if (s.market) {   // v1.87 시장 회 부스: 기둥 4 · 줄무늬 차양 · 뒤 선반 · 막기
-    for (const [dx, dz] of [[-1.5, -1.75], [-1.5, 1.75], [1.5, -1.75], [1.5, 1.75]]) cyl(.05, .05, 2.5, 8, cmat(0x5a5f66), dx, 1.25, dz, g);
-    const aw = new T3.Mesh(new T3.PlaneGeometry(3.4, 3.8), phong(0xffffff, { map: extTex("stripe"), side: T3.DoubleSide })); aw.rotation.set(-Math.PI / 2, 0, Math.PI / 2); aw.rotateX(.12); aw.position.set(0, 2.55, 0); g.add(aw);
-    box(.1, .25, 3.8, cmat(0xc8352a), 1.72, 2.4, 0, g);
-    box(.5, .9, 3.2, cmat(0xd8dde0), -1.6, .45, 0, g);   // 뒤 얼음 보관함
-    for (let k = 0; k < 5; k++) plain(GEOD.ice || (GEOD.ice = new T3.IcosahedronGeometry(.09, 0)), cmat(0xf4fbfd), -1.6 + (k % 2) * .12, .95, -1.2 + k * .6, g);
+  const g = new T3.Group(); g.position.set(s.x, 0, s.z); scene.add(g); g.userData.pocha = !s.market; g.userData.market = !!s.market;
+  if (s.market) {   // v1.88.1 시장 회 부스: 구조물 없이 테이블(카운터) · 의자 · 배너만
     BLOCKS.push([s.x + .45, s.x + 1.6, s.z - 1.85, s.z + 1.85]);
   }
   const proc = new T3.Group(); g.add(proc); g.userData.proc = proc; STALL_GROUPS.push(g);
@@ -8539,9 +8534,9 @@ function loadProps() {
           for (let q = 0; q < 3; q++) { v.fromBufferAttribute(pos, idx.getX(t + q)).applyMatrix4(o.matrixWorld); const fx = (v.x - bb.min.x) / sz.x, fy = (v.y - bb.min.y) / sz.y; if (!(fx > .24 && fx < .5 && fy < .3)) { inside = false; break; } }
           if (!inside) keep.push(idx.getX(t), idx.getX(t + 1), idx.getX(t + 2)); }
         o.geometry = o.geometry.clone(); o.geometry.setIndex(keep); }); }
-    if (!STALL_GROUPS.every(g => g.userData.pocha)) STALL_DECO = { x: .35 + .15 * sz.x * k, y: (sz.y * .252) * k + .03 };
+    if (STALL_GROUPS.some(g => !g.userData.pocha && !g.userData.market)) STALL_DECO = { x: .35 + .15 * sz.x * k, y: (sz.y * .252) * k + .03 };
     STALL_GROUPS.forEach((g, i) => {
-      if (g.userData.pocha) return;   // 포차 카운터는 직접 만든 카운터 그대로
+      if (g.userData.pocha || g.userData.market) return;   // 포차 카운터 · 시장 회 부스(v1.88.1: 구조물 없이 테이블 · 의자 · 배너만)는 직접 만든 그대로
       const m = src.clone(true); m.scale.setScalar(k); m.position.set(.35 - c.x * k, -bb.min.y * k, -c.z * k); g.add(m);
       g.userData.proc.visible = false;
       const sign = stallSigns.find(sg => sg.userData.i === i); if (sign) sign.position.set(.35 + sz.x * k / 2 + .06, sz.y * k + .35, 0);
