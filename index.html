@@ -1820,7 +1820,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.99.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.99.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -13004,7 +13004,13 @@ SHEETS.admintools = (body) => {
             on && !on.home ? h("button", { class: "btn sm", onclick: () => { closeSheet(); leaveHouse(); ME.x = on.x + 1; ME.z = on.z; ME.target = null; presMove(true); }, text: "옆으로 가기" }) : null)); }));
       if (!ms.length) list.append(h("div", { class: "empty-note", text: S.members ? "찾는 사람이 없어요" : "회원 목록을 불러오는 중이에요" }));
     };
-    q.addEventListener("input", draw); body.append(q, list); draw();
+    q.addEventListener("input", draw);
+    { const live = (S.allPeers || S.peers || []).filter(p => !p.sameTab && p.kind === "viewer" && p.peer !== S.myPeer);
+      body.append(h("div", { class: "sec", text: "⏏ 지금 접속 중인 연결 " + live.length + "개 (탭마다 · GM 포함)" }));
+      body.append(live.length ? h("div", { class: "ilist" }, live.map(pp => { const pr = pp.presence || {}, nk = str(pr.nick, 16) || "이름 없음", gm = !!pr.gm || !!pr.owner;
+        return h("div", { class: "listrow" }, h("div", { class: "grow" }, h("b", { text: nk + (gm ? " · GM" : "") + (pp.by === S.uid ? " · 내 계정의 다른 탭" : "") }), h("div", { class: "muted", style: "font-size:12px", text: (pr.ch ? pr.ch + "채널 · " : "") + "연결 " + String(pp.peer).slice(0, 8) })),
+          armBtn("⏏ 접속 끊기", "한 번 더 누르면 끊어요", () => adminKickPeer(pp.peer, nk))); })) : h("div", { class: "empty-note", text: "지금 다른 연결이 없어요" })); }
+    body.append(q, list); draw();
     body.append(h("div", { class: "row" }, h("button", { class: "btn sm", onclick: () => openSheet("admin"), text: "후원자 관리 (방류권)" }), h("button", { class: "btn sm", onclick: () => openSheet("fbadmin"), text: "제보함" }), h("button", { class: "btn sm", onclick: () => openSheet("rank"), text: "랭킹 관리" })));
   } else if (t === "chat") {
     body.append(h("div", { class: "muted", style: "font-size:12.5px", text: "최근 채팅 60개 · 지우면 모든 사람 화면에서 사라져요" }));
@@ -14463,7 +14469,17 @@ function enterGame() {
 }
 // v1.97.2 강퇴: 운영자가 config/bans에 넣으면 그 사람 화면을 바로 막고, 기간이 끝날 때까지 다시 못 들어와요
 S.bans = new Map();
-const myBan = () => { const b = S.uid && !S.isOwner && S.bans.get(S.uid); return b && b.until > Date.now() ? b : null; };
+const myBan = () => { const b = S.uid && S.bans.get(S.uid); return b && b.until > Date.now() ? b : null; };   // v1.99.1: GM 계정도 강퇴돼요 (자기 자신은 못 해요)
+async function onKickMsg(m) {   // 운영자가 이 연결(탭)을 끊었어요 · 보낸 사람이 정말 운영자인지 확인하고 따라요
+  const d = (m && m.data) || {}; if (m.sameTab || d.to !== S.myPeer || !isUid(m.by)) return;
+  try { if (!(await S.db.doc("admins/" + m.by).get()).exists) return; } catch { return; }
+  if (document.getElementById("banOv")) return;
+  document.body.append(h("div", { class: "banov", id: "banOv" }, h("div", { class: "bc" }, h("span", { class: "bi", text: "⏏" }), h("b", { text: "운영자가 접속을 끊었어요" }),
+    h("p", { text: "처음 화면으로 돌아가요. 다시 들어오려면 「이어서 낚시하기」를 눌러 주세요." }), h("button", { class: "btn pri", onclick: () => location.reload(), text: "처음 화면으로" }))));
+  try { S.room && S.room.presence({ home: true, st: "gone" }).catch(() => {}); } catch {}
+  setTimeout(() => location.reload(), 3000);
+}
+function adminKickPeer(peer, nick) { if (!S.isOwner || !S.rawRoom || peer === S.myPeer) return; S.rawRoom.emit("kick", { to: peer }).then(() => toast("⏏ " + nick + "님 접속을 끊었어요")).catch(() => toast("접속을 끊지 못했어요")); }
 const banFmt = (ms) => { if (ms > 3e10) return "영구"; const d = Math.floor(ms / 864e5), hh = Math.floor(ms / 36e5) % 24, mm = Math.ceil(ms / 6e4) % 60; return d ? d + "일" + (hh ? " " + hh + "시간" : "") : hh ? hh + "시간" + (mm ? " " + mm + "분" : "") : Math.max(1, Math.ceil(ms / 6e4)) + "분"; };
 const banLeft = (b) => b.until - Date.now() > 3e10 ? "영구" : banFmt(b.until - Date.now()) + " 남음";
 function banCheck() {
@@ -14547,6 +14563,7 @@ async function boot() {
     const cr = chRoom(room); S.room = cr;
     cr.onPeers(onPeers, () => { S.room = null; });
     cr.on("coop", onCoopMsg, () => {});
+    S.rawRoom = room; room.on("kick", onKickMsg, () => {});   // v1.99.1 운영자 「접속 끊기」 (채널 상관없이)
     if (!S.title) cr.presence(fullPresence()).catch(() => {});
   }
   if (!db || !uid) { goOffline(!db ? "no db" : "no uid"); return; }
