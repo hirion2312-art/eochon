@@ -196,7 +196,6 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 .tabs button[aria-selected="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
 .empty-note{color:var(--muted);font-size:13px;padding:18px;border:1px dashed var(--line);border-radius:12px;text-align:center}
 
-.studio{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:16px}
 .canvasbox{position:relative;width:100%;max-width:640px;aspect-ratio:2/1;border-radius:12px;overflow:hidden;border:1px solid var(--line);
   background:repeating-linear-gradient(0deg,transparent 0 22px,rgba(255,255,255,.08) 22px 23px),linear-gradient(180deg,#5fa3b8,#1f5f73)}
 .canvasbox canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
@@ -1480,6 +1479,61 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .rm-list{display:flex;flex-direction:column;gap:6px}.rm-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg)}
 .rm-row .grow{flex:1;min-width:140px}.rm-row small{display:block;font-size:12px;color:var(--muted)}.rm-i{font-size:24px}
 .rm-hire{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}.rm-card{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;padding:12px 8px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg)}.rm-card small{font-size:11.5px;color:var(--muted)}
+/* v1.75 방류소 = 해양 방류소: 살아 있는 수조 · 이젤 스케치북 · 방류 신청서 · 내 물고기 진열장 */
+.rs{display:flex;flex-direction:column;gap:14px}
+.rs-tank{position:relative;height:170px;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#7fd0e6 0%,#3a9ab8 45%,#1f5f80 100%);box-shadow:inset 0 0 0 4px rgba(255,255,255,.35),inset 0 -30px 40px rgba(0,30,50,.35),0 10px 24px rgba(0,0,0,.3)}
+.rs-tank>i{position:absolute;pointer-events:none}
+.rs-ray{inset:0;background:repeating-linear-gradient(105deg,rgba(255,255,255,.14) 0 22px,transparent 22px 70px);animation:rsRay 9s linear infinite}
+@keyframes rsRay{to{background-position:300px 0}}
+.rs-sand{left:0;right:0;bottom:0;height:22px;background:radial-gradient(ellipse at 30% 0,#f2dcb0,#d8b98a);border-radius:50% 50% 0 0/40% 40% 0 0}
+.rs-weed{bottom:12px;width:14px;border-radius:50% 50% 0 0;background:linear-gradient(#5fbf7a,#2f7a4a);transform-origin:bottom;animation:rsWeed 3.4s ease-in-out infinite alternate}
+.rs-weed.a{left:6%;height:70px}.rs-weed.b{left:9%;height:48px;animation-delay:-1.2s}.rs-weed.c{right:7%;height:62px;animation-delay:-2s}
+@keyframes rsWeed{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
+.rs-bub{bottom:14px;width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,.75);animation:rsBub 4.5s ease-in infinite}
+@keyframes rsBub{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-160px) translateX(10px);opacity:0}}
+.rs-swimmer{position:absolute;left:6%;top:30%;width:150px;animation:rsSwim 11s ease-in-out infinite}
+.rs-swim{display:block;width:150px;height:75px;object-fit:contain;filter:drop-shadow(0 6px 6px rgba(0,30,50,.35));animation:rsBob 1.6s ease-in-out infinite}
+@keyframes rsSwim{0%{left:6%;transform:scaleX(-1)}45%{left:calc(100% - 170px);transform:scaleX(-1)}50%{left:calc(100% - 170px);transform:scaleX(1)}95%{left:6%;transform:scaleX(1)}100%{left:6%;transform:scaleX(-1)}}   /* 그림은 왼쪽을 보니까 오른쪽으로 갈 땐 뒤집어요 */
+@keyframes rsBob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+.rs-tank.released .rs-swimmer{animation:rsGo 1.3s ease-in forwards}
+@keyframes rsGo{to{left:110%;transform:scaleX(-1) translateY(-30px) scale(.6);opacity:0}}
+.rs-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:0 40px;color:#fff;font-weight:700;font-size:13.5px;text-shadow:0 1px 4px rgba(0,30,50,.6)}
+.rs-tag{position:absolute;right:12px;top:10px;align-items:flex-end;display:flex;flex-direction:column;gap:3px;padding:6px 12px;border-radius:12px;background:rgba(8,30,44,.45);color:#fff;font-size:12px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.rs-tag b{font-size:15px}
+.rs-cols{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px;align-items:start}
+.rs-easel{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:18px;background:linear-gradient(160deg,#8a5a34,#6a4226);box-shadow:inset 0 0 0 2px rgba(255,255,255,.12),0 8px 0 #4a2c16}
+.rs-board{display:flex;gap:10px;align-items:flex-start}
+.rs-rail{display:flex;flex-direction:column;gap:6px;flex:none}
+.rs-tool{display:flex;flex-direction:column;align-items:center;gap:1px;width:62px;padding:6px 2px;border-radius:12px;border:0;background:rgba(255,255,255,.12);color:#fff7ea;font:inherit;cursor:pointer}
+.rs-tool span{font-size:19px;line-height:1.1}.rs-tool small{font-size:10.5px;font-weight:700}
+.rs-tool[aria-pressed="true"]{background:#fff3d6;color:#3a2414;box-shadow:0 0 0 2px #f2c230}.rs-tool:disabled{opacity:.4}.rs-tool.danger{background:rgba(226,82,44,.35)}
+.rs-sizes{display:flex;justify-content:space-around;padding:6px 2px;border-radius:12px;background:rgba(0,0,0,.18)}
+.rs-dot{width:20px;height:20px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;padding:0}.rs-dot i{display:block;border-radius:50%}.rs-dot[aria-pressed="true"]{box-shadow:0 0 0 2px #fff3d6}
+.rs-paper{position:relative;flex:1;min-width:0;padding:10px;border-radius:6px;background:#fffdf6;box-shadow:0 3px 0 rgba(0,0,0,.25),inset 0 0 0 1px #e8dcc4}
+.rs-paper .canvasbox{max-width:none;border:0;background:repeating-linear-gradient(0deg,#f4f9fb 0 23px,#e2eef4 23px 24px)}
+.rs-clip{position:absolute;left:50%;top:-12px;width:60px;height:20px;margin-left:-30px;border-radius:6px;background:linear-gradient(#c9ced3,#8a9096);box-shadow:0 2px 0 #5a5f66}
+.rs-paints{display:grid;grid-template-columns:repeat(16,1fr);gap:5px}
+.rs-tin{aspect-ratio:1;border-radius:50%;border:0;padding:0;cursor:pointer;background:#c9ced3;box-shadow:0 2px 0 #6a7077;display:grid;place-items:center;min-width:0}
+.rs-tin i{display:block;width:72%;height:72%;border-radius:50%;background:var(--c);box-shadow:inset 0 -2px 0 rgba(0,0,0,.2)}
+.rs-tin[aria-pressed="true"]{box-shadow:0 0 0 3px #fff3d6,0 2px 0 #6a7077;transform:translateY(-2px)}
+.rs-form{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:14px;background:repeating-linear-gradient(0deg,#fffaf0 0 27px,#f1e6cf 27px 28px);color:#3a2c18;box-shadow:0 6px 0 #d9c49a,0 12px 22px rgba(0,0,0,.25)}
+.rs-formhead{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #3a2c18;padding-bottom:6px}.rs-formhead b{font-family:var(--f-display);font-weight:400;font-size:20px}.rs-formhead small{font-size:11px;color:#8a6a3a}
+.rs-steps span{background:rgba(58,44,24,.1)!important;color:#6a5434!important}.rs-steps span.done{background:#2f8f5b!important;color:#fff!important}
+.rs-line{display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:800;color:#6a5434}.rs-line small{font-weight:600;color:#a08a64;align-self:flex-end;margin-top:-2px}
+.rs-line input,.rs-line textarea{background:rgba(255,255,255,.7)!important;border:0!important;border-bottom:2px solid #c9ad7a!important;border-radius:6px 6px 0 0!important;color:#2a1e10!important;font:inherit;font-size:15px;font-weight:600;padding:6px 8px;resize:none}
+.rs-tix{display:flex;flex-direction:column;gap:8px}.rs-tix .field>label{font-size:12px;font-weight:800;color:#6a5434}
+.rs-tix .rgrades{display:flex;flex-direction:column;gap:6px}
+.rs-tix .rgrade{display:flex;gap:8px;align-items:center;text-align:left;padding:8px 10px;border-radius:10px;border:1.5px dashed #c9ad7a;background:#fffaf0;color:#3a2c18;font:inherit;cursor:pointer;position:relative}
+.rs-tix .rgrade[aria-pressed="true"]{border-style:solid;border-color:#2a78bb;background:#e8f3fb;box-shadow:0 0 0 2px rgba(42,120,187,.2)}
+.rs-tix .rgrade .muted{color:#8a6a3a!important}.rs-tix .listrow{background:#fffaf0;color:#3a2c18;border-color:#e0c890}.rs-tix .listrow .muted{color:#7a6444!important}
+.rs-go{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:14px;border:0;cursor:pointer;color:#fff;font:inherit;font-size:16px;background:linear-gradient(180deg,#3fb0d0,#1f6f90);box-shadow:0 5px 0 #154e66,0 10px 18px rgba(0,0,0,.25);transition:transform .1s}
+.rs-go span{font-size:22px}.rs-go:active{transform:translateY(3px);box-shadow:0 2px 0 #154e66}.rs-go:disabled{filter:grayscale(.7);opacity:.6}
+.rs-form .err{color:#c2402a;font-size:12.5px;font-weight:700}.rs-note{font-size:11.5px;line-height:1.5;color:#7a6444}
+.rs-mine{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.rs-card{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);text-align:center}
+.rs-card .rs-ph{display:grid;place-items:center;width:100%;height:56px;border-radius:10px;background:linear-gradient(180deg,#7fd0e6,#2f7fa0)}.rs-card img{width:96px;height:48px;object-fit:contain}
+.rs-card b{font-size:13px}.rs-card small{font-size:11px;color:var(--muted)}
+@media (max-width:760px){.rs-cols{grid-template-columns:1fr}.rs-tank{height:140px}.rs-rail{flex-direction:row;flex-wrap:wrap}.rs-board{flex-direction:column;align-items:stretch}.rs-paper{flex:none;width:100%;box-sizing:border-box}.rs-tag{top:auto;bottom:26px}.rs-empty{place-items:start center;padding-top:22px}.rs-tool{width:auto;flex:1 0 54px}.rs-sizes{flex:1 0 100%}.rs-paints{grid-template-columns:repeat(8,1fr)}}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 </style>
 
@@ -1623,7 +1677,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.74.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.75.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -12656,12 +12710,13 @@ function studioChanged() {
   if (!studio.ctx) return;
   const img = exportDrawing(); studio.drawn = !!img;
   const pv = document.getElementById("fprev");
-  if (pv) {
+  if (pv) {   // 수조: 바닷물 · 물풀 · 거품 · 그린 물고기가 헤엄쳐요 (v1.75)
     const t = canReleaseFree() ? RELEASE[studio.grade] : (() => { const tk = myTickets().find(x => x.id === studio.ticket); return tk ? RELEASE[tk.tier] : null; })();
-    pv.replaceChildren(img ? h("img", { src: img, alt: "방류할 물고기 미리보기" }) : h("div", { style: "width:120px;height:60px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11.5px;opacity:.85;text-align:center;border:1.5px dashed rgba(255,255,255,.5);border-radius:8px", text: "그림이 여기 보여요" }),
-      h("div", { class: "t" }, h("b", { text: studio.name.trim() || "이름 없는 물고기" }),
-        t ? h("span", null, tierChip(t.tier), " 기준 " + fmtSize(Math.sqrt(t.min * t.max))) : h("span", { text: "방류권을 골라 주세요" }),
-        h("span", { style: "font-size:11px;opacity:.85", text: "바다에서 이렇게 보여요" })));
+    pv.replaceChildren(h("i", { class: "rs-ray" }), h("i", { class: "rs-weed a" }), h("i", { class: "rs-weed b" }), h("i", { class: "rs-weed c" }), h("i", { class: "rs-sand" }),
+      ...[0, 1, 2, 3, 4].map(k => h("i", { class: "rs-bub", style: "left:" + (12 + k * 19) + "%;animation-delay:" + (k * .9) + "s" })),
+      img ? h("div", { class: "rs-swimmer" }, h("img", { class: "rs-swim", src: img, alt: "방류할 물고기 미리보기" })) : h("div", { class: "rs-empty", text: "아래 스케치북에 물고기를 그려 보세요 · 그리는 대로 여기서 헤엄쳐요" }),
+      h("div", { class: "rs-tag" }, h("b", { text: studio.name.trim() || "이름 없는 물고기" }),
+        t ? h("span", null, tierChip(t.tier), " 기준 " + fmtSize(Math.sqrt(t.min * t.max))) : h("span", { text: "방류권을 골라 주세요" })));
   }
   const el = document.getElementById("steps");
   if (el) {
@@ -12673,35 +12728,46 @@ function studioChanged() {
 function renderStudio(body) {
   ensureStudioCanvas();
   $("sheetTitle").textContent = "방류소";
-  $("sheetSub").textContent = "후원자가 직접 그린 물고기를 바다에 풀면 모든 낚시꾼이 낚을 수 있어요";
-  const tools = h("div", { class: "toolrow" });
-  const toolBtn = (id, label) => h("button", { class: "btn sm", "aria-pressed": String(studio.tool === id), onclick: () => { studio.tool = id; refreshSheet(true); }, text: label });
-  tools.append(toolBtn("pen", "펜"), toolBtn("eraser", "지우개"), toolBtn("fill", "채우기"));
-  for (const [s, l] of [[3, "가늘게"], [6, "보통"], [12, "굵게"]]) tools.append(h("button", { class: "btn sm", "aria-pressed": String(studio.size === s), onclick: () => { studio.size = s; refreshSheet(true); }, text: l }));
-  tools.append(h("button", { class: "btn sm", disabled: !studio.undo.length, onclick: () => { const u = studio.undo.pop(); if (u) studio.ctx.putImageData(u, 0, 0); refreshSheet(true); }, text: "되돌리기" }));
-  tools.append(h("button", { class: "btn sm", onclick: (e) => {
+  $("sheetSub").textContent = "직접 그린 물고기를 바다에 풀면 모든 낚시꾼이 낚을 수 있어요";
+  // ① 위: 살아 있는 수조 — 그리는 물고기가 바로 헤엄쳐요
+  const tank = h("div", { class: "rs-tank", id: "fprev" });
+  // ② 왼쪽: 이젤 위 스케치북 — 세로 도구 막대 · 물감 통
+  const tool = (id, ico, l) => h("button", { class: "rs-tool", "aria-pressed": String(studio.tool === id), title: l, onclick: () => { studio.tool = id; refreshSheet(true); } }, h("span", { text: ico }), h("small", { text: l }));
+  const sizes = h("div", { class: "rs-sizes" }, [[3, "가늘게"], [6, "보통"], [12, "굵게"]].map(([s, l]) => h("button", { class: "rs-dot", title: l, "aria-label": l, "aria-pressed": String(studio.size === s), onclick: () => { studio.size = s; refreshSheet(true); } }, h("i", { style: "width:" + (4 + s) + "px;height:" + (4 + s) + "px;background:" + (studio.tool === "eraser" ? "#bbb" : studio.color) }))));
+  const clr = h("button", { class: "rs-tool danger", title: "모두 지우기", onclick: (e) => {
     const b = e.currentTarget;
-    if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "한 번 더 누르면 지워요"; setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = "모두 지우기"; } }, 2500); return; }
-    pushUndo(); studio.ctx.clearRect(0, 0, 320, 160); refreshSheet(true); }, text: "모두 지우기" }));
-  const pal = h("div", { class: "palette" }, PALETTE16.map(c => h("button", { "aria-label": "색 " + c, "aria-pressed": String(studio.color === c), style: "background:" + c,
-    onclick: () => { studio.color = c; if (studio.tool === "eraser") studio.tool = "pen"; refreshSheet(true); } })));
-  tools.append(h("button", { class: "btn sm", "aria-pressed": String(studio.guide), onclick: () => { studio.guide = !studio.guide; refreshSheet(true); }, text: "밑그림" }));
-  const box = h("div", { class: "canvasbox" }, studio.canvas, studio.guide ? guideCanvas() : null);
-  // 오른쪽: 정보 + 등급
+    if (!b.dataset.armed) { b.dataset.armed = "1"; b.lastChild.textContent = "한 번 더"; setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.lastChild.textContent = "모두 지우기"; } }, 2500); return; }
+    pushUndo(); studio.ctx.clearRect(0, 0, 320, 160); studioChanged(); refreshSheet(true); } }, h("span", { text: "🧽" }), h("small", { text: "모두 지우기" }));
+  const rail = h("div", { class: "rs-rail" },
+    tool("pen", "✏️", "펜"), tool("eraser", "🩹", "지우개"), tool("fill", "🪣", "채우기"), sizes,
+    h("button", { class: "rs-tool", disabled: !studio.undo.length, title: "되돌리기", onclick: () => { const u = studio.undo.pop(); if (u) studio.ctx.putImageData(u, 0, 0); studioChanged(); refreshSheet(true); } }, h("span", { text: "↶" }), h("small", { text: "되돌리기" })),
+    h("button", { class: "rs-tool", "aria-pressed": String(studio.guide), title: "밑그림", onclick: () => { studio.guide = !studio.guide; refreshSheet(true); } }, h("span", { text: "🐟" }), h("small", { text: "밑그림" })), clr);
+  const paper = h("div", { class: "rs-paper" }, h("div", { class: "canvasbox" }, studio.canvas, studio.guide ? guideCanvas() : null), h("span", { class: "rs-clip", "aria-hidden": "true" }));
+  const paints = h("div", { class: "rs-paints" }, PALETTE16.map(c => h("button", { class: "rs-tin", "aria-label": "색 " + c, "aria-pressed": String(studio.color === c && studio.tool !== "eraser"), style: "--c:" + c,
+    onclick: () => { studio.color = c; if (studio.tool === "eraser") studio.tool = "pen"; refreshSheet(true); } }, h("i"))));
+  const easel = h("div", { class: "rs-easel" }, h("div", { class: "rs-board" }, rail, paper), paints);
+  // ③ 오른쪽: 방류 신청서
   const err = h("div", { class: "err", id: "studioErr" });
   const nameIn = h("input", { id: "fishName", maxlength: "12", placeholder: "예: 노을빛 꽁치", value: studio.name });
   nameIn.addEventListener("input", () => { studio.name = nameIn.value; studioChanged(); });
   const descIn = h("textarea", { id: "fishDesc", maxlength: "60", rows: "2", placeholder: "도감에 보일 한 줄 설명" });
   descIn.value = studio.desc; descIn.addEventListener("input", () => { studio.desc = descIn.value; });
-  const side = h("div", { style: "display:flex;flex-direction:column;gap:12px;min-width:0" },
-    h("div", { class: "steps", id: "steps" }),
-    h("div", { class: "fpreview", id: "fprev" }),
-    h("div", { class: "field" }, h("label", { for: "fishName", text: "이름 (12자)" }), nameIn),
-    h("div", { class: "field" }, h("label", { for: "fishDesc", text: "설명 (60자)" }), descIn),
-    h("div", { id: "releaseBox", style: "display:flex;flex-direction:column;gap:10px" }),
-    h("button", { class: "btn pri", id: "releaseBtn", onclick: doRelease, text: "바다에 방류하기" }), err,
-    h("div", { class: "muted", style: "font-size:12px;line-height:1.5", text: "내 물고기가 낚일 때마다 판매가의 10%를 로열티로 받아요. 신고가 3번 쌓이면 목록에서 숨겨지고, 내 물고기를 거두면 방류권이 다시 돌아와요." }));
-  body.append(h("div", { class: "studio" }, h("div", { style: "display:flex;flex-direction:column;gap:10px;min-width:0" }, tools, box, pal), side));
+  const form = h("div", { class: "rs-form" },
+    h("div", { class: "rs-formhead" }, h("b", { text: "방류 신청서" }), h("small", { text: "어촌 방류소 · No." + String(1000 + ((S.userFish || []).length % 9000)).padStart(4, "0") })),
+    h("div", { class: "steps rs-steps", id: "steps" }),
+    h("label", { class: "rs-line" }, h("span", { text: "물고기 이름" }), nameIn, h("small", { text: "12자" })),
+    h("label", { class: "rs-line" }, h("span", { text: "한 줄 소개" }), descIn, h("small", { text: "60자" })),
+    h("div", { id: "releaseBox", class: "rs-tix" }),
+    h("button", { class: "rs-go", id: "releaseBtn", onclick: doRelease }, h("span", { text: "🌊" }), h("b", { text: "바다에 방류하기" })), err,
+    h("div", { class: "rs-note", text: "내 물고기가 낚일 때마다 판매가의 10%가 로열티로 들어와요 · 신고가 3번 쌓이면 목록에서 숨겨져요 · 도감 「방류된 물고기」에서 거둘 수 있어요" }));
+  // ④ 아래: 내가 방류한 물고기 진열장
+  const mine = (S.userFish || []).filter(f => f.owner === (S.uid || "local")).sort((a, b) => b.ts - a.ts);
+  const shelf = h("div", { class: "rs-shelf" }, h("div", { class: "sec", text: "🐠 내가 방류한 물고기 · " + mine.length + "마리" }),
+    mine.length ? h("div", { class: "rs-mine" }, mine.slice(0, 12).map(f => h("div", { class: "rs-card", title: f.desc || f.name },
+      h("span", { class: "rs-ph" }, h("img", { src: f.img, alt: "" })), h("b", { text: f.name }), tierChip(f.tier),
+      h("small", { text: new Date(f.ts).toLocaleDateString("ko-KR") + (f.reports && f.reports.length ? " · 신고 " + f.reports.length : "") }))))
+      : h("div", { class: "empty-note", text: "아직 방류한 물고기가 없어요. 첫 물고기를 그려 바다에 풀어 보세요!" }));
+  body.append(h("div", { class: "rs" }, tank, h("div", { class: "rs-cols" }, easel, form), shelf));
   renderReleaseBox();
 }
 let releasing = false;
@@ -12721,6 +12787,7 @@ async function doRelease() {
     if (S.online) await S.db.collection("fish").add(doc);
     else { S.userFish.push(normUserFish(uid4(), doc)); saveLocalFish(); }
     studio.ticket = null;
+    { const tk = document.getElementById("fprev"); if (tk) { tk.classList.add("released"); sfx("splash", .5); await new Promise(res => setTimeout(res, 1300)); } }
     postSys(P.nick + "님이 " + r.name + " 「" + name + "」을 바다에 방류했어요");
     toast("「" + name + "」이 바다로 헤엄쳐 갔어요");
     studio.ctx.clearRect(0, 0, 320, 160); studio.undo = []; studio.name = ""; studio.desc = "";
