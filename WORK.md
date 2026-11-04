@@ -7,6 +7,7 @@
 
 | 누가 | 무엇 | 건드리는 곳 | 시작 |
 |---|---|---|---|
+| Claude (두 번째 계정) | **식당 단골 · VIP 손님** (Lv.3 · Lv.5) | 손님 오기 · `serveDish` · `restGuestLeave` · 주문 티켓 · `restManageSheet` · `normRest` | 2026-11-04 |
 
 ## 다음에 할 일 (아무나 가져가요)
 
