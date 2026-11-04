@@ -1634,6 +1634,16 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
   .restbar button{flex:none;padding:8px 10px!important;font-size:12.5px!important}
 }
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
+/* 개인정보 안내 · 동의 (v1.96) */
+.consent-ov{position:fixed;inset:0;background:rgba(4,10,14,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:14px}
+.consent-card{background:var(--bg);border-radius:18px;max-width:540px;width:100%;max-height:88vh;overflow:auto;padding:20px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.consent-card h3{margin:0 0 6px;font-size:19px}
+.pcard{display:flex;gap:10px;align-items:flex-start;padding:9px 12px}
+.pcard .pico{font-size:19px;flex:none;line-height:1.3}
+.pcard small{display:block;opacity:.75;font-size:12px;line-height:1.45;margin-top:2px}
+.pol{margin-top:6px}
+.polsec{margin-top:12px}
+.polsec p{margin:4px 0 0;font-size:12.5px;line-height:1.6}
 </style>
 
 <div class="app" id="app">
@@ -1748,7 +1758,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
     <div class="tcolors" id="tColors"></div>
     <label class="tsound"><input type="checkbox" id="tSound" checked> 물소리·효과음 켜고 시작</label>
     <button class="tstart" id="tStart" type="button" disabled>불러오는 중…</button>
-    <div class="tlinks"><button type="button" id="tBug">🐞 오류 제보</button><button type="button" id="tIdea">💡 건의하기</button><button type="button" id="tInvite">🤝 초대 코드</button></div>
+    <div class="tlinks"><button type="button" id="tBug">🐞 오류 제보</button><button type="button" id="tIdea">💡 건의하기</button><button type="button" id="tInvite">🤝 초대 코드</button><button type="button" id="tPrivacy">🛡️ 개인정보 안내</button></div>
     <div class="tfoot"><span id="tVer">v1.21.0</span> · Enter 키로도 들어갈 수 있어요</div>
   </div>
 </div>
@@ -1776,7 +1786,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.95.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.96.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -13072,6 +13082,9 @@ SHEETS.settings = (body) => {
   const acct = h("div", { class: "setlist" },
     h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "👤 계정" }), h("small", { text: window.WEB_ACCT ? window.WEB_ACCT + "로 로그인됨" : S.online ? "claude.ai 계정" : "로그인 안 됨" }))),
     h("button", { class: "setrow", onclick: () => $("codeBtn").click() }, h("span", { class: "grow" }, h("b", { text: "🔑 내 코드 " + (S.uid ? myCode() : "------") }), h("small", { text: "후원 · 친구 초대에 쓰는 코드 · 눌러서 복사" })), h("span", { class: "chev", text: "⧉" })));
+  acct.append(
+    h("button", { class: "setrow", onclick: () => openSheet("privacy") }, h("span", { class: "grow" }, h("b", { text: "🛡️ 개인정보 안내" }), h("small", { text: "무슨 정보를 왜 모으는지 · 언제 지우는지" })), h("span", { class: "chev", text: "›" })),
+    h("button", { class: "setrow", onclick: () => openSheet("mydata") }, h("span", { class: "grow" }, h("b", { text: "📦 내 정보 · 탈퇴" }), h("small", { text: "내 기록 보기 · 계정과 기록 지우기" })), h("span", { class: "chev", text: "›" })));
   const wl = $("webLink"), wo = $("webLogout");
   if (wl) acct.append(h("button", { class: "setrow", onclick: () => wl.click() }, h("span", { class: "grow" }, h("b", { text: "🔗 구글 계정에 연결" }), h("small", { text: "게스트 진행을 다른 기기에서도 이어 하기" })), h("span", { class: "chev", text: "›" })));
   if (wo) acct.append(h("button", { class: "setrow danger", onclick: () => wo.click() }, h("span", { class: "grow" }, h("b", { text: "🚪 로그아웃" })), h("span", { class: "chev", text: "›" })));
@@ -13084,6 +13097,98 @@ SHEETS.settings = (body) => {
   else more.append(h("button", { class: "setrow", onclick: () => openSheet("admintools") }, h("span", { class: "grow" }, h("b", { text: "운영자 권한 받기" }), h("small", { text: "운영자라면 여기서 계정 ID를 확인해요" })), h("span", { class: "chev", text: "›" })));
   body.append(h("div", { class: "sec", text: "더 보기" }), more, h("div", { class: "muted", style: "font-size:12px;text-align:center", text: "어촌생활 v" + GAME_VER }));
 };
+/* ===================== 개인정보 안내 · 동의 · 내 정보 (v1.96) =====================
+   첫 입장 동의 모달 + 상시 안내 시트 + 내 정보(열람·탈퇴). 수집 항목은 실제 코드 기준으로 적었어요. */
+const POLICY_VER = 1;
+const consentOk = () => lsGet("mn.consent", 0) >= POLICY_VER;
+const POLICY_CARDS = [
+  ["👤", "계정 정보", "구글 이메일·표시 이름·계정 ID — 로그인 확인과 기기 간 이어 하기에 써요. 익명 로그인은 ID만 생겨요."],
+  ["🎮", "게임 기록", "닉네임·캐릭터·레벨·골드·아이템·도감·집·가게 등 진행 전체 — 게임을 저장하려고 서버에 보관해요."],
+  ["📍", "실시간 정보", "접속 중 위치·채널·입은 옷 — 서로를 보여주려고 주고받고, 접속을 끊으면 사라져요."],
+  ["💬", "채팅 · 방명록 · 거래", "함께 노는 기능의 기록이에요. 채팅은 이틀, 거래 기록은 하루가 지나면 자동 정리돼요."],
+  ["☁️", "저장 장소", "Google Firebase — 게임 기록은 서울, 실시간 정보는 싱가포르 서버에 저장돼요 (국외 이전)."],
+];
+const POLICY_SECTIONS = [
+  ["1. 수집하는 정보와 목적", "계정 정보(구글 이메일·표시 이름·계정 고유 ID)는 로그인 확인과 기기 간 이어 하기에, 게임 기록(닉네임·캐릭터 외형과 얼굴 그림·레벨·골드·아이템·도감·집·가게·주식·우편 등)은 게임 진행 저장에, 실시간 정보(접속 중 위치·채널·닉네임·입은 옷)는 다른 플레이어 표시와 소통에, 커뮤니티 기록(채팅·방명록·거래·노점·물고기 자랑·랭킹)과 제보 내용은 함께 노는 기능과 운영에 써요. 소리·화면 같은 기기 설정은 이 기기 안에만 저장되고 밖으로 나가지 않아요."],
+  ["2. 저장 장소 · 국외 이전", "모든 서버 정보는 Google Firebase(구글 클라우드)에 저장돼요. 게임 기록은 대한민국(서울), 실시간 접속 정보는 싱가포르 서버에 있어 정보가 국외로 이전·보관되며, Google의 개인정보 정책이 함께 적용돼요."],
+  ["3. 보유 기간과 파기", "게임 기록은 탈퇴할 때까지 보관하고, 탈퇴하면 지체 없이 지워요. 채팅은 이틀, 거래 기록은 하루가 지난 것부터 자동으로 정리돼요. 탈퇴할 때 내 프로필·랭킹·집·얼굴·우편과 내가 쓴 채팅·방명록을 함께 지워요. 다만 후원(방류권) 지급 기록처럼 운영 기록으로 남은 일부는 탈퇴 후에도 남을 수 있어요."],
+  ["4. 제3자에게 주는 경우", "없어요. 법령에 따른 요청이 있는 경우에만 예외예요. 광고나 마케팅에 쓰지 않고, 팔지 않아요."],
+  ["5. 내 권리", "언제든 내 정보를 보고(설정 → 내 정보), 잘못된 것을 고치고, 지우고, 동의를 철회(탈퇴)할 수 있어요."],
+  ["6. 만 14세 미만", "만 14세 미만은 법정대리인(보호자)의 동의가 필요해요."],
+  ["7. 문의", "개인정보 책임자는 어촌생활 운영자예요. 문의는 게임 안 「설정 → 오류 제보 · 건의」로 보내 주세요. 이 안내는 2026년 11월 5일부터 적용되고, 내용이 바뀌면 게임 안에서 다시 알려드리고 동의를 다시 받아요."],
+];
+function renderPolicy(box) {
+  for (const [t, d] of POLICY_SECTIONS) box.append(h("div", { class: "polsec" }, h("b", { text: t }), h("p", { class: "muted", text: d })));
+}
+function policyCards(box) {
+  for (const [ico, t, d] of POLICY_CARDS) box.append(h("div", { class: "pcard" }, h("span", { class: "pico", text: ico }), h("span", { class: "grow" }, h("b", { text: t }), h("small", { text: d }))));
+}
+SHEETS.privacy = (body) => {
+  setHead("🛡️ 개인정보 안내", "어촌생활이 모으는 정보와 그 쓰임 · 안내 v" + POLICY_VER);
+  body.append(h("p", { class: "muted", style: "font-size:13px", text: "요약하면 아래 다섯 가지예요. 자세한 안내는 그 아래에 있어요." }));
+  const cards = h("div", { class: "setlist" }); policyCards(cards); body.append(cards);
+  const pol = h("div", { class: "pol" }); renderPolicy(pol); body.append(pol);
+  if (S.uid) body.append(h("div", { class: "row", style: "margin-top:10px" }, h("button", { class: "btn", onclick: () => openSheet("mydata"), text: "📦 내 정보 보기 · 탈퇴하기" })));
+};
+async function wipeMyData() {
+  const uid = S.uid, db = S.db;
+  if (!uid || !db) { toast("온라인일 때만 지울 수 있어요"); return; }
+  let ok = 0, fail = 0;
+  const del = async (p) => { try { await p; ok++; } catch { fail++; } };
+  for (const d of ["data/users/" + uid + "/profile", "data/users/" + uid + "/support", "records/rank_" + uid, "houses/" + uid, "faces/" + uid, "members/" + uid]) await del(db.doc(d).delete());
+  try { const q = await db.collection("chat").where("uid", "==", uid).limit(300).get(); for (const d of q.docs) await del(d.ref.delete()); } catch { fail++; }
+  try { const q = await db.collection("guestbook").where("from", "==", uid).limit(300).get(); for (const d of q.docs) await del(d.ref.delete()); } catch { fail++; }
+  try { const q = await db.collection("inbox/" + uid + "/items").limit(300).get(); for (const d of q.docs) await del(d.ref.delete()); } catch { fail++; }
+  try { for (const k of Object.keys(localStorage)) if (k.startsWith("mn.")) localStorage.removeItem(k); } catch {}
+  let acctMsg = "";
+  try {
+    const au = window.firebase && firebase.auth ? firebase.auth() : null, u = au && au.currentUser;
+    if (u) { await u.delete(); acctMsg = " 로그인 계정도 삭제했어요."; }
+  } catch { acctMsg = " 로그인 계정 삭제는 재로그인 직후에만 돼요 — 로그아웃했다가 다시 로그인해서 탈퇴를 한 번 더 눌러 주세요."; }
+  toast("내 기록 " + ok + "건을 지웠어요" + (fail ? " (" + fail + "건은 지우지 못했어요 — 운영자에게 알려 주세요)" : "") + acctMsg, "lvup", 9000);
+  setTimeout(() => location.reload(), 1800);
+}
+SHEETS.mydata = (body) => {
+  setHead("📦 내 정보", "내 계정에 저장된 것을 확인하고 지울 수 있어요");
+  body.append(h("div", { class: "sec", text: "계정" }), h("div", { class: "setlist" },
+    h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "👤 " + (P.nick || "어부") }), h("small", { text: "Lv." + levelOf(P.xp || 0) + " · " + won(P.gold || 0) + " · 내 코드 " + (S.uid ? myCode() : "------") }))),
+    h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "계정" }), h("small", { text: window.WEB_ACCT ? window.WEB_ACCT + "로 로그인됨" : S.online ? "로그인됨" : "혼자 모드 (이 기기에만 저장)" })))));
+  const mdEl = h("small", { text: S.online ? "서버 기록 확인 중…" : "혼자 모드라 서버 기록이 없어요" });
+  body.append(h("div", { class: "sec", text: "저장된 기록" }), h("div", { class: "setlist" }, h("div", { class: "setrow" }, h("span", { class: "grow" }, mdEl))));
+  if (S.online && S.db && S.uid) (async () => {
+    const parts = [];
+    try { const r = await S.db.doc("records/rank_" + S.uid).get(); parts.push("랭킹 기록 " + (r.exists ? "있음" : "없음")); } catch {}
+    try { const r = await S.db.doc("houses/" + S.uid).get(); parts.push("집 " + (r.exists ? "있음" : "없음")); } catch {}
+    try { const q = await S.db.collection("inbox/" + S.uid + "/items").limit(50).get(); parts.push("우편 " + q.size + "통"); } catch {}
+    if (parts.length) mdEl.textContent = parts.join(" · ") + " · 채팅·방명록은 쓴 만큼 저장돼요";
+  })();
+  let mnKeys = 0; try { mnKeys = Object.keys(localStorage).filter(k => k.startsWith("mn.")).length; } catch {}
+  body.append(h("div", { class: "sec", text: "이 기기" }), h("div", { class: "setlist" },
+    h("div", { class: "setrow" }, h("span", { class: "grow" }, h("b", { text: "기기 안 설정·기록 " + mnKeys + "개" }), h("small", { text: "이 브라우저 안에만 있어요" })))));
+  const del = h("div", { class: "setlist" });
+  del.append(armBtn("이 기기 데이터 지우기", "한 번 더 누르면 이 기기의 설정을 지워요", () => { try { for (const k of Object.keys(localStorage)) if (k.startsWith("mn.")) localStorage.removeItem(k); } catch {} toast("이 기기 데이터를 지웠어요 · 새로고침해요"); setTimeout(() => location.reload(), 700); }, "ghost"));
+  if (S.online && S.uid) del.append(armBtn("계정 탈퇴 · 모든 기록 지우기", "한 번 더 누르면 정말 지워요", wipeMyData, "danger"));
+  body.append(h("div", { class: "sec", text: "지우기" }), del,
+    h("p", { class: "muted", style: "font-size:12px", text: "탈퇴하면 프로필·랭킹·집·얼굴·우편과 내가 쓴 채팅·방명록이 지워지고 되돌릴 수 없어요. 후원 지급 기록 같은 운영 기록은 남을 수 있어요." }));
+};
+function showConsent(next) {
+  if (document.getElementById("consentOv")) return;
+  const ov = h("div", { class: "consent-ov", id: "consentOv" });
+  const card = h("div", { class: "consent-card" });
+  card.append(h("h3", { text: "🌊 시작하기 전에 · 개인정보 안내" }),
+    h("p", { class: "muted", style: "font-size:13px", text: "어촌생활은 함께 노는 게임이라 아래 정보를 모아요. 확인하고 동의하면 시작할 수 있어요." }));
+  const cards = h("div", { class: "setlist" }); policyCards(cards); card.append(cards);
+  const full = h("div", { class: "pol" }); full.style.display = "none"; renderPolicy(full); card.append(full);
+  const note = h("p", { class: "nerr", text: "동의하지 않으면 게임을 시작할 수 없어요. 이미 만든 기록을 지우려면 로그인 후 「설정 → 내 정보」에서 탈퇴할 수 있어요." });
+  note.style.display = "none";
+  card.append(h("div", { class: "row", style: "margin-top:12px;gap:8px;flex-wrap:wrap" },
+    h("button", { class: "btn pri lg", text: "동의하고 시작하기", onclick: () => { lsSet("mn.consent", POLICY_VER); try { P.consentV = POLICY_VER; markDirty(); } catch {} ov.remove(); if (next) next(); } }),
+    h("button", { class: "btn", text: "자세히 보기", onclick: (e) => { const open = full.style.display !== "none"; full.style.display = open ? "none" : ""; e.currentTarget.textContent = open ? "자세히 보기" : "접기"; } }),
+    h("button", { class: "btn ghost", text: "동의하지 않기", onclick: () => { note.style.display = ""; } })), note);
+  ov.append(card);
+  document.body.append(ov);
+}
+
 /* ===================== 퀵바 꾸미기 (v1.32) =====================
    화면 아래 막대에 자주 쓰는 메뉴를 최대 6개까지 골라 넣고 순서를 바꿔요. 「메뉴」 칸은 항상 맨 끝에 있어요.
    P.quick에 저장해서 다른 기기에서도 같아요 */
@@ -14261,6 +14366,7 @@ function setupTitle() {
   $("tBug").addEventListener("click", () => openSheet("feedback", "bug"));
   $("tIdea").addEventListener("click", () => openSheet("feedback", "idea"));
   $("tInvite").addEventListener("click", () => openSheet("invite"));
+  $("tPrivacy").addEventListener("click", () => openSheet("privacy"));
   try { const rc = new URLSearchParams(location.search).get("ref"); if (rc && /^[0-9A-Za-z]{6}$/.test(rc)) lsSet("mn.pref", rc.toUpperCase()); } catch {}
   $("tSound").checked = lsGet("mn.tsound", true);
   setTimeout(() => { if (!S.profileReady) { S.titleForce = true; renderTitle(); } }, 8000);
@@ -14268,6 +14374,7 @@ function setupTitle() {
 }
 function enterGame() {
   if (!S.title || $("tStart").disabled || S.creating || S.cut) return;
+  if (!consentOk()) { showConsent(() => enterGame()); return; }   // 개인정보 동의 (v1.96)
   const back = (P.caught || 0) > 0 || Object.keys(P.dex).length > 0;
   lsSet("mn.tsound", $("tSound").checked);
   if ($("tSound").checked && !S.sound) { S.sound = true; startSound(); $("soundBtn").setAttribute("aria-pressed", "true"); }
