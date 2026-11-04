@@ -1681,7 +1681,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.82.3";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.83.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -3461,11 +3461,11 @@ function startReel(r, opts) {
   r.manual = REEL.manual; const type = REEL.type;
   showFightPerks(REEL.g);
   setPhase("reel", 125000);
-  const nm = $("fightName"); nm.textContent = "??? · " + TIERS[r.f.tier].name + " · " + MOTION_KO[type]; nm.style.background = cssVarCache.tiers[r.f.tier];
+  const nm = $("fightName"); nm.textContent = "??? · " + MOTION_KO[type]; nm.style.background = "";   // v1.83: 잡기 전에는 등급을 미리 보여 주지 않아요
   $("fightCoop").hidden = !REEL.coop;
   $("fight").hidden = false; document.body.classList.add("fighting");
-  $("fight").classList.toggle("boss", r.f.tier >= 3); $("fight").dataset.tier = r.f.tier;
-  if (r.f.tier >= 3) { toast([h("b", { text: r.f.tier >= 9 ? "🌌 태초의 존재가 물었어요!!" : r.f.tier >= 8 ? "✨ 초월급 존재가 물었어요!!" : r.f.tier >= 7 ? "✨ 신화 속 물고기가 물었어요!!" : r.f.tier >= 5 ? "⚠ 전설급 대물이에요!" : "⚠ 대물 입질!" }), h("div", { class: "muted", style: "font-size:12px", text: "몸부림칠 땐 꼭 손을 떼요 · 약한 낚싯대와 줄로는 버티기 어려워요" })], "lvup", 4000); sfx("jingle-rare", .3); }
+  $("fight").classList.remove("boss"); $("fight").removeAttribute("data-tier");   // v1.83: 등급별 글로우도 잡기 전엔 숨겨요
+  if (r.f.tier >= 3) { toast([h("b", { text: "⚠ 대물 입질!" }), h("div", { class: "muted", style: "font-size:12px", text: "몸부림칠 땐 꼭 손을 떼요 · 약한 낚싯대와 줄로는 버티기 어려워요" })], "lvup", 4000); sfx("jingle-rare", .3); }
   coach("fight");
   drawFight(); requestAnimationFrame(reelFrame);
 }
@@ -3588,7 +3588,7 @@ function endReel(ok, silent, why) {
   try { wearGear(); } catch {}
   if (!ok) { sfx("ui-error", .35); try { navigator.vibrate && navigator.vibrate(60); } catch {} }
   if (REEL.coop) { coopReelDone(ok, REEL.perfect); return; }
-  if (ok && REEL.r.f.tier >= 3) { try { startBreach(REEL.r, REEL.perfect); return; } catch (e) { console.warn("breach", e); BREACH = null; } }   // 영웅 이상: 수면 돌파 연출 뒤에 들어 올림
+  if (ok && REEL.r.f.tier >= 5) { try { startBreach(REEL.r, REEL.perfect); return; } catch (e) { console.warn("breach", e); BREACH = null; } }   // v1.83: 전설 이상부터 수면 돌파 컷씬 뒤에 들어 올림
   if (ok) { try { landFish(REEL.r, REEL.perfect, false); } catch (e) { console.warn("landFish", e); setPhase("miss", MISS_MS); toast("물고기를 담다가 문제가 생겼어요. 다시 던질게요"); } }
   else missFish(REEL.r, why || "놓쳤어요… " + TIERS[REEL.r.f.tier].name + " 물고기가 도망갔어요");
 }
