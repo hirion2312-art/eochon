@@ -1828,7 +1828,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.100.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.100.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -4774,11 +4774,11 @@ const serverCount = () => { let n = 0; for (const v of chCounts().values()) n +=
 const crowdN = () => (S.peers || []).filter(p => !p.sameTab && inWorld(p)).length;   // 내 채널 사람 수 (나 빼고)
 function chRoom(room) {
   let peersFn = null;
-  const mine = (p) => p.sameTab || peerCh(p) === S.ch;
+  const mine = (p) => p.sameTab || (peerCh(p) === S.ch && !banned(p));   // v1.100.1: 강퇴된 계정은 (예전 버전 화면으로 버텨도) 아무에게도 안 보여요
   const feed = (left) => { if (peersFn) peersFn({ peers: S.allPeers.filter(mine), left }); };
   return {
     presence: (patch) => room.presence(Object.assign({}, patch, { ch: S.ch })),
-    onPeers(fn, err) { peersFn = fn; return room.onPeers((ev) => { S.allPeers = ev.peers || []; feed((ev.left || []).filter(mine)); }, err); },
+    onPeers(fn, err) { peersFn = fn; return room.onPeers((ev) => { S.allPeers = (ev.peers || []).filter(p => p.sameTab || !banned(p)); feed((ev.left || []).filter(mine)); }, err); },
     on: (topic, fn, err) => room.on(topic, (m) => { const c = Math.floor(Number(m && m.data && m.data.ch)) || 1; if (m.sameTab || c === S.ch) fn(m); }, err),
     emit: (topic, data) => room.emit(topic, Object.assign({}, data, { ch: S.ch })),
     refeed(prev) { const now = new Set(S.allPeers.filter(mine).map(p => p.peer)); feed(prev.filter(p => !now.has(p.peer))); },
@@ -14526,6 +14526,7 @@ function enterGame() {
 }
 // v1.97.2 강퇴: 운영자가 config/bans에 넣으면 그 사람 화면을 바로 막고, 기간이 끝날 때까지 다시 못 들어와요
 S.bans = new Map();
+function banned(p) { const u = p && (isUid(p.by) ? p.by : p.presence && p.presence.uid); const b = u && S.bans.get(u); return !!(b && b.until > Date.now()); }
 const myBan = () => { const b = S.uid && S.bans.get(S.uid); return b && b.until > Date.now() ? b : null; };   // v1.99.1: GM 계정도 강퇴돼요 (자기 자신은 못 해요)
 async function onKickMsg(m) {   // 운영자가 이 연결(탭)을 끊었어요 · 보낸 사람이 정말 운영자인지 확인하고 따라요
   const d = (m && m.data) || {}; if (m.sameTab || d.to !== S.myPeer || !isUid(m.by)) return;
@@ -14662,7 +14663,7 @@ async function boot() {
   db.doc("config/mutes").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.mutes = new Set((Array.isArray(d.uids) ? d.uids : []).filter(isUid)); }, () => {});
   db.doc("config/minver").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; const need = str(d.v, 12), ts = Number(d.ts) || 0;   // v1.99.2: 운영자가 「모두 새로고침」하면 예전 버전 화면이 새로 받아요
     if (need && verLess(GAME_VER, need) && lsGet("mn.minverTs", 0) !== ts) { lsSet("mn.minverTs", ts); toast("🔄 새 버전으로 바꿀게요", null, 2000); setTimeout(() => location.reload(), 1500); } }, () => {});
-  db.doc("config/bans").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.bans = new Map((Array.isArray(d.list) ? d.list : []).filter(x => x && isUid(x.uid)).map(x => [x.uid, { until: Number(x.until) || 0, nick: str(x.nick, 16), why: str(x.why, 60) }])); banCheck(); if (S.sheet === "admintools") refreshSheet(true); }, () => {});   // v1.97.2 강퇴
+  db.doc("config/bans").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.bans = new Map((Array.isArray(d.list) ? d.list : []).filter(x => x && isUid(x.uid)).map(x => [x.uid, { until: Number(x.until) || 0, nick: str(x.nick, 16), why: str(x.why, 60) }])); banCheck(); if (S.room && S.room.refeed) { const prev = S.peers || []; try { S.allPeers = (S.allPeers || []).filter(p => p.sameTab || !banned(p)); S.room.refeed(prev); } catch {} } if (S.sheet === "admintools") refreshSheet(true); }, () => {});   // v1.97.2 강퇴 · v1.100.1 화면에서도 빼기
   db.doc("config/main").onSnapshot((snap) => {
     const d = snap.exists ? snap.data() : {};
     S.config = { ownerUid: str(d.ownerUid, 200), donateText: str(d.donateText, 200), donateUrl: str(d.donateUrl, 300) };
