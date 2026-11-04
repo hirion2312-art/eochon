@@ -1745,7 +1745,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.88.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.89.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2315,6 +2315,27 @@ const CLOTHES = [
   { id: "b-rookie", slot: "bottom", name: "새내기 작업 바지", price: 0, ev: 5, color: 0x55636e, straps: true, desc: "무릎이 튼튼한 멜빵 작업복 · 출석 5일차" },
   { id: "s-rookie", slot: "shoes", name: "새내기 고무장화", price: 0, ev: 6, color: 0x2f7f86, tall: true, desc: "청록색 고무장화 · 출석 6일차" },
   { id: "k-rookie", slot: "back", name: "새내기 망태기", price: 0, ev: 7, desc: "첫 월척을 담을 대나무 망태기 · 출석 7일차" },
+  // 3D 의상 프리셋 (v1.89) — glb: a/outfits.json의 모델 이름. 조각마다 캐릭터 비율에 맞춰 제작
+  { id: "h-captain", slot: "hat", name: "선장모", price: 2500, color: 0xf7f4ec, glb: "captain_hat", desc: "남색 밴드에 금 배지 · 선장 세트" },
+  { id: "t-captain", slot: "top", name: "선장 재킷", price: 2800, color: 0x22355e, glb: "captain_top", desc: "금 단추 두 줄과 견장 · 선장 세트" },
+  { id: "b-captain", slot: "bottom", name: "선장 바지", price: 1500, color: 0xf2efe6, glb: "captain_bottom", desc: "깨끗한 흰 바지 · 선장 세트" },
+  { id: "s-captain", slot: "shoes", name: "선장 덱슈즈", price: 1200, color: 0x23232b, glb: "captain_shoes", desc: "갑판에서도 안 미끄러지는 · 선장 세트" },
+  { id: "h-haenyeo", slot: "hat", name: "해녀 잠수 후드", price: 1200, color: 0x24242a, glb: "haenyeo_hat", desc: "흰 수건 띠를 두른 · 해녀 세트" },
+  { id: "t-haenyeo", slot: "top", name: "해녀 잠수복 상의", price: 1800, color: 0x24242a, glb: "haenyeo_top", desc: "흰 X 멜빵과 주황 가슴띠 · 해녀 세트" },
+  { id: "b-haenyeo", slot: "bottom", name: "해녀 잠수 바지", price: 1300, color: 0x24242a, glb: "haenyeo_bottom", desc: "흰 허리띠에 주황 밑단 · 해녀 세트" },
+  { id: "s-haenyeo", slot: "shoes", name: "해녀 아쿠아 부츠", price: 900, color: 0x24242a, glb: "haenyeo_shoes", desc: "바위에서도 끄떡없는 · 해녀 세트" },
+  { id: "h-rain", slot: "hat", name: "우비 후드", price: 900, color: 0xf6c637, glb: "rain_hat", desc: "비 오는 날의 노란 후드 · 우비 어부 세트" },
+  { id: "t-rain", slot: "top", name: "우비 재킷", price: 1600, color: 0xf6c637, glb: "rain_top", desc: "반사띠가 반짝이는 · 우비 어부 세트" },
+  { id: "b-rain", slot: "bottom", name: "방수 멜빵바지", price: 1400, color: 0x2e4a6b, glb: "rain_bottom", desc: "물이 안 새는 PVC 앞판 · 우비 어부 세트" },
+  { id: "s-rain", slot: "shoes", name: "노란 장화 (3D)", price: 800, color: 0xf6c637, glb: "rain_shoes", desc: "종아리까지 오는 진짜 장화 · 우비 어부 세트" },
+  { id: "h-sailor", slot: "hat", name: "세일러 캡", price: 800, color: 0xf7f4ec, glb: "sailor_hat", desc: "뒤에 리본이 달랑 · 마린 세일러 세트" },
+  { id: "t-sailor", slot: "top", name: "세일러복", price: 1500, color: 0xf7f4ec, glb: "sailor_top", desc: "남색 칼라에 빨간 네커치프 · 마린 세일러 세트" },
+  { id: "b-sailor", slot: "bottom", name: "세일러 반바지", price: 900, color: 0x274b73, glb: "sailor_bottom", desc: "흰 벨트의 남색 반바지 · 마린 세일러 세트" },
+  { id: "s-sailor", slot: "shoes", name: "세일러 스니커즈", price: 700, color: 0xf7f4ec, glb: "sailor_shoes", desc: "빨간 솔이 포인트 · 마린 세일러 세트" },
+  { id: "h-winter", slot: "hat", name: "귀달이 털모자", price: 1100, color: 0x7a4a2e, glb: "winter_hat", desc: "귀까지 따뜻한 우샨카 · 겨울 어부 세트" },
+  { id: "t-winter", slot: "top", name: "버건디 패딩", price: 2200, color: 0x8e2f3c, glb: "winter_top", desc: "주황 목도리까지 한 벌에 · 겨울 어부 세트" },
+  { id: "b-winter", slot: "bottom", name: "방한 바지", price: 1200, color: 0x4a4a55, glb: "winter_bottom", desc: "짙은 회색의 두툼한 · 겨울 어부 세트" },
+  { id: "s-winter", slot: "shoes", name: "방한 부츠", price: 1000, color: 0x5d3a22, glb: "winter_shoes", desc: "흰 털 커프스 · 겨울 어부 세트" },
 ];
 const CLOTH = Object.fromEntries(CLOTHES.map(c => [c.id, c]));
 const ROOKIE_SET = CLOTHES.filter(c => c.ev).map(c => c.id);
@@ -8941,7 +8962,7 @@ function fitHeldReel(F, reelId) {
 }
 function loadFishModels() {
   if (!T3) return;
-  loadRodModels(); loadReelModels();
+  loadRodModels(); loadReelModels(); loadOutfitModels();
   buildProcFish(); makeThumbs(); try { decorateFishMarket(); } catch (e) { console.warn("market deco", e); }   // 직접 만든 3D 물고기는 바로 · 에셋 모델은 불러온 다음
   if (!T3.GLTFLoader) return;
   const loader = new T3.GLTFLoader();
@@ -9606,19 +9627,42 @@ function buildCloth(c, B) {
   return out;
 }
 /* 몸(B: rig·head·body·feet·shirt·shoeM)에 옷 한 벌을 입힘. 같은 차림이면 아무것도 안 함 */
+/* ===================== 3D 의상 프리셋 (v1.89) ===================== */
+const OUTFIT3D = new Map(); let outfitPackP = null, OUTFIT_MAT = null, OUTFIT_REV = 0;
+function outfitMat() { return OUTFIT_MAT || (OUTFIT_MAT = phong(0xffffff, { vertexColors: true })); }
+function loadOutfitModels() {
+  if (!T3 || !T3.GLTFLoader || outfitPackP) return;
+  outfitPackP = fetch("a/outfits.json?v=" + GAME_VER).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((pack) => {
+    const loader = new T3.GLTFLoader();
+    return Promise.all(Object.entries(pack).map(([name, b64]) => new Promise((done) => {
+      const bin = atob(b64), buf = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      loader.parse(buf.buffer, "", (g) => {
+        g.scene.traverse(o => { if (o.isMesh) { if (!o.geometry.attributes.normal) o.geometry.computeVertexNormals(); o.material = outfitMat(); } });
+        OUTFIT3D.set(name, g.scene); done();
+      }, (e) => { console.warn("outfit", name, e); done(); });
+    }))).then(() => { OUTFIT_REV++; });   // 준비되면 키가 바뀌어 모두가 새 옷으로 다시 입어요
+  }).catch((e) => console.warn("outfits.json", e));
+}
+function outfitClone(name, parent) {
+  const t = OUTFIT3D.get(name); if (!t) return null;
+  const c = t.clone(); c.userData.glb = true; parent.add(c); return c;
+}
 function applyOutfit(B, wear, color) {
   wear = wear || NOWEAR;
-  const key = wearStr(wear) + "|" + color;
+  const key = wearStr(wear) + "|" + color + "|" + OUTFIT_REV;
   if (B.outKey === key) return;
   B.outKey = key;
-  for (const o of B.out || []) { if (o.parent) o.parent.remove(o); o.traverse(n => { if (n.geometry) n.geometry.dispose(); }); }
+  for (const o of B.out || []) { if (o.parent) o.parent.remove(o); if (!o.userData.glb) o.traverse(n => { if (n.geometry) n.geometry.dispose(); }); }
   B.out = [];
   const top = CLOTH[wear.top];
-  if (top && top.tex) { B.shirt.map = topTex(top.tex); B.shirt.color.set(0xffffff); }
+  if (top && top.glb) { const c = outfitClone(top.glb, B.rig); if (c) B.out.push(c); B.shirt.map = null; B.shirt.color.set(top.color); }
+  else if (top && top.tex) { B.shirt.map = topTex(top.tex); B.shirt.color.set(0xffffff); }
   else { B.shirt.map = null; B.shirt.color.set(top && !top.vest ? top.color : color); }
   B.shirt.needsUpdate = true;
   const bot = CLOTH[wear.bottom];
-  if (bot) {
+  if (bot && bot.glb) { const c = outfitClone(bot.glb, B.rig); if (c) B.out.push(c); }
+  else if (bot) {
     const m = mk(new T3.SphereGeometry(.41, 18, 8, 0, Math.PI * 2, Math.PI * .53, Math.PI * .47), cmat(bot.color), 0, .42, 0, B.rig); m.scale.set(1, .92, .88); B.out.push(m);
     if (bot.straps) {
       for (const sx of [-1, 1]) { const s = mk(new T3.BoxGeometry(.06, .34, .03), cmat(bot.color), sx * .14, .56, .345, B.rig); s.rotation.x = -.35; B.out.push(s); }
@@ -9629,9 +9673,10 @@ function applyOutfit(B, wear, color) {
   B.shoeM.color.set(sh ? sh.color : 0x3a3340);
   for (const f of B.feet) {
     f.scale.set(1, sh && sh.flat ? .5 : .75, 1.25);
-    if (sh && sh.tall) { const b = mk(new T3.CylinderGeometry(.115, .12, .24, 12), B.shoeM, 0, .16, -.02, f); b.scale.set(1, 1.33, .8); B.out.push(b); }
+    if (sh && sh.glb) { const t = OUTFIT3D.get(sh.glb); if (t) { const w = new T3.Group(); w.scale.set(1, 1.333, .8); w.userData.glb = true; w.add(t.clone()); f.add(w); B.out.push(w); } }
+    else if (sh && sh.tall) { const b = mk(new T3.CylinderGeometry(.115, .12, .24, 12), B.shoeM, 0, .16, -.02, f); b.scale.set(1, 1.33, .8); B.out.push(b); }
   }
-  for (const slot of ["hat", "face", "top", "back"]) { const c = CLOTH[wear[slot]]; if (c) B.out.push(...buildCloth(c, B)); }
+  for (const slot of ["hat", "face", "top", "back"]) { const c = CLOTH[wear[slot]]; if (!c) continue; if (c.glb) { if (slot === "hat") { const m = outfitClone(c.glb, B.head); if (m) B.out.push(m); } continue; } B.out.push(...buildCloth(c, B)); }
 }
 /* 옷가게 미리보기용 인형 (별도 작은 렌더러) */
 function makeBody() {

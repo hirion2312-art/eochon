@@ -21,6 +21,8 @@
 
 ## 최근 끝낸 일
 
+- **v1.89.0 3D 의상 프리셋 5세트** (2026-11-04, 우사기 · 이재헌님 직접 지시): 외부 에셋은 비율 조건(2등신·무스켈레톤)에 맞는 게 없어 직접 제작 — `~/workspace/outfit3d/gen_outfits.py`(trimesh, 게임 실측 좌표계: hat=머리 로컬/top·bottom=rig/shoes=발 로컬)로 20조각 GLB 생성, 법선 포함 내보내기(include_normals+vertex_normals 캐시 필수). a/outfits.json(base64 번들 481KB, 물고기와 같은 방식)으로 배포. applyOutfit에 glb 분기 추가 (top/bottom→rig, hat→head, shoes→발 자식에 역스케일 (1,1.333,.8) 래퍼), 로드 완료 시 OUTFIT_REV++로 전체 재적용, GLB 클론은 dispose 제외(userData.glb). CLOTHES 20종 가격 700~2800U. NPC 무작위 착용 풀에도 자동 포함됨.
+
 - **v1.87.0 릴 3D 모델 4종 적용** (2026-11-04, 우사기 · 이재헌님 제공 OBJ 팩): tools/reels_pack.py로 a/reels.json 패킹(낚싯대와 같은 포맷, 방향은 그룹 실측으로 보정 — 스피닝은 풋이 대를 향하고 스풀이 팁 방향, 베이트·전동은 무회전). 손에 든 원통 릴을 장착 릴 모델로 교체(fitHeldReel, 동료 캐릭터 포함), 상점/가방 그림도 3D 렌더(REEL_PIC)로. 모델 로드 전에는 기존 원통·그림 폴백. 커밋 948f39d(reels.json) · c6099fd(도구) · d0fd60c(index). 라이브 바이트 검증 완료(빌드 주입 6줄 제외 일치).
 
 - **v1.85.0 튜토리얼 전면 리뉴얼** (2026-11-04, 우사기 · 이재헌님 직접 지시, 가이드라인 문서 your_files/eochon-tutorial-guideline-2026-11-04.html 기준): TUTS 개정 — welcome/fight/catch/beach/sheet_sashimi/sheet_bank/sheet_office 문구 교체, market 전면 교체(식당 소개+자격증 목표), jobnotice 삭제(+coach 가드 예외 정리), sheet_lotto 로또 추가. 신규 카드 4종: rest(기존 coach("rest") 호출에 연결)/coop(startReel)/dex(도감 5종 기록 시점)/late(gainXp Lv.10). 가시성: .ccard 확대(470px·본문 16.5px·아이콘 46px·글로우 테두리), 배경 딤 .52, cdots에 진행 숫자(.cprog) 추가. 기존 유저 P.tut 기록은 유지해 본 카드는 재상영 안 함.
