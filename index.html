@@ -1681,7 +1681,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.82.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.82.2";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -3866,8 +3866,8 @@ function nearestAction() {
   if (tideLow() && inMudArea(ME.x, ME.z)) for (const sp of digSpots()) if (!sp.dug) consider(sp.x, sp.z, { key: "dig:" + sp.x.toFixed(1), label: P.tools.hoe ? "호미로 캐기" : "호미가 필요해요", run: () => digAt(sp) }, 1.6);
   { const n = shellItems().length; if (n) consider(SHELL_BUYER.x, SHELL_BUYER.z, { key: "shellsell:" + n, label: "조개 팔기 · " + n + "개 " + won(shellItems().reduce((a, it) => a + sellValue(curPrice(it)), 0)) + "", run: sellShells }, 1.9); }
   for (const st of STALLS) {   // 낭만포차 N호 = 식당 문 (v1.45 · 노점 장사 대신 실내 식당)
-    const cur = S.stalls[st.i], alive = stallAlive(cur), mine = alive && cur.owner === S.uid, own = myOwnStall();
-    const label = mine ? (S.restSlot === st.i ? "🏮 내 포차 안으로" : "🏮 내 포차 다시 열기") : alive ? "🏮 " + cur.nick + "네 포차 · 영업 중" : own >= 0 ? "🏮 낭만포차 " + (st.i + 1) + "호 · 비어 있음" : "🏮 내 포차 차리기 (" + (st.i + 1) + "호)";
+    const cur = S.stalls[st.i], alive = stallAlive(cur), mine = alive && cur.owner === S.uid, own = myLiveRest(), was = !alive && cur && cur.owner === S.uid;   // was: 신호가 끊긴 내 옛 자리 → 다시 열 수 있어요
+    const label = mine ? (S.restSlot === st.i ? "🏮 내 포차 안으로" : "🏮 내 포차 다시 열기") : alive ? "🏮 " + cur.nick + "네 포차 · 영업 중" : own >= 0 ? "🏮 낭만포차 " + (st.i + 1) + "호 · 비어 있음" : was ? "🏮 내 포차 다시 열기 (" + (st.i + 1) + "호)" : "🏮 내 포차 차리기 (" + (st.i + 1) + "호)";
     consider(st.x + 2.6, st.z, { key: "stall:" + st.i + ":" + label, label, run: () => { if (mine || (!alive && own < 0)) openRest(st.i); else if (alive) toast(cur.nick + "님 포차예요 · 다른 사람 가게 구경은 다음 업데이트에서 열려요"); else toast("내 포차는 " + (own + 1) + "호예요"); } }, 2.4);
   }
   if (inHall(ME.x, ME.z)) {
@@ -4746,6 +4746,7 @@ let hbTimer = null;
 const stallAlive = (st) => !!st && isUid(st.owner) && (Date.now() - (Number(st.hb) || 0) < STALL_HB || (Number(st.npcUntil) || 0) > Date.now());
 const npcActive = (st) => !!st && (Number(st.npcUntil) || 0) > Date.now();
 const myOwnStall = () => S.uid ? S.stalls.findIndex(st => st && st.owner === S.uid) : -1;
+const myLiveRest = () => S.uid ? S.stalls.findIndex(st => st && st.owner === S.uid && stallAlive(st)) : -1;   // 지금 살아 있는 내 포차 (신호가 끊긴 옛 자리는 빼요 · v1.82.2)
 const ownerAtStall = (i) => { const st = S.stalls[i]; if (!st) return false; if (st.owner === S.uid) return S.myStall === i; return otherPeers().some(p => p.uid === st.owner && p.stall === i); };
 const PROMO_PAPERS = ["#fff7e0", "#ffe3ec", "#e3f3ff", "#e6f7de", "#fff1a8", "#2b2b33"];
 const PROMO_STICKERS = ["fish", "sashimi", "star", "sun", "wave", "lantern"];
@@ -4758,7 +4759,7 @@ function normPromo(pr) {
 function normStall(d) {
   if (!d) return null;
   return { owner: str(d.owner, 200), nick: str(d.nick, 16) || "사장님", color: /^#[0-9a-f]{6}$/i.test(d.color || "") ? d.color : "#888888", hb: Number(d.hb) || 0,
-    npcUntil: Number(d.npcUntil) || 0, promo: normPromo(d.promo),
+    npcUntil: Number(d.npcUntil) || 0, promo: normPromo(d.promo), rest: !!d.rest,
     menu: (Array.isArray(d.menu) ? d.menu : []).slice(0, MENU_LIMIT).map(m => { const dd = normDish(m); if (!dd) return null; dd.price = dishPrice(dd); return dd; }).filter(Boolean) };
 }
 /* 회 값은 고정 (v1.28): 그 물고기 기본 판매가(크기 반영, 시세 · 버프 없이)의 1.5배. 예전에 직접 정한 가격도 불러올 때 이 값으로 맞춰요 */
@@ -5488,19 +5489,24 @@ function dishMesh(dishId, items) {
 let restHb = null;
 async function claimRestSlot(i) {
   if (!S.online) { S.restSlot = i; return true; }   // 혼자 모드: 자리 표시 없이 바로
-  const cur = await stallEdit(i, (st) => {
+  const cur = await stallEdit(i, async (st, ref) => {   // v1.82.2: 실제로 자리를 저장해요 (전에는 만들기만 하고 저장을 안 해서 남에게 빈자리로 보였어요)
     if (stallAlive(st) && st.owner !== S.uid) return null;
-    return { ...(st || {}), owner: S.uid, nick: P.nick, color: P.color, hb: Date.now(), ts: Date.now(), menu: [], rest: true };
+    if (st && st.owner && st.owner !== S.uid && st.menu && st.menu.length) sendInbox(st.owner, { type: "stall_return", dishes: menuDoc(st.menu) }).catch(() => {});   // 남이 두고 간 회는 우편으로 돌려줘요
+    const keep = st && st.owner === S.uid && st.menu && st.menu.length ? menuDoc(st.menu) : [];   // 내 옛 노점 회는 그대로 둬요
+    const doc = { owner: S.uid, nick: P.nick, color: P.color, hb: Date.now(), ts: Date.now(), npcUntil: 0, promo: normPromo(st && st.promo), menu: keep, rest: true };
+    await ref.set(doc); return doc;
   });
   if (!cur) { toast("이미 다른 분이 차린 자리예요"); return false; }
   S.restSlot = i;
+  // 신호가 끊긴 내 옛 포차 자리는 비워 줘요 (안 그러면 그 자리가 계속 「내 것」으로 잡혀요 · v1.82.2)
+  S.stalls.forEach((st, k) => { if (k !== i && st && st.owner === S.uid && st.rest && !st.menu.length && !stallAlive(st)) stallEdit(k, async (x, ref) => { if (x && x.owner === S.uid && !stallAlive(x) && !x.menu.length) { await ref.update({ owner: "", hb: 0 }); return true; } return null; }, true).catch(() => {}); });
   clearInterval(restHb); restHb = setInterval(() => { if (S.restSlot >= 0 && S.online) S.db.doc(stallDocId(S.restSlot)).update({ hb: Date.now(), nick: P.nick, color: P.color }).catch(() => {}); }, 45000);
   return true;
 }
 async function openRest(i) {   // 포차 앞에서 「차리기」 → 그 자리가 내 가게 · 주방이 생겨요
   if (!(P.tools && P.tools.license)) { sfx("ui-error", .4); toast("📜 장사자격증이 있어야 가게를 열 수 있어요 · 낚시 상점 > 도구에서 200만원에 팔아요"); return; }   // 장사자격증 게이트 (v1.60.0 · 이재헌님 지시)
   if (S.restSlot === i) { walkInRest(); return; }
-  const own = myOwnStall();
+  const own = myLiveRest();
   if (own >= 0 && own !== i) { toast("내 포차는 낭만포차 " + (own + 1) + "호예요"); return; }
   if (!(await claimRestSlot(i))) return;
   loadRestModels(); buildRestScene(true);
