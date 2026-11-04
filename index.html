@@ -5472,7 +5472,7 @@ function dishMesh(dishId, items) {
     const m = fishMesh(r.ing[0][0]); if (m) { m.material = m.material.clone(); if (m.material.color) m.material.color.lerp(new T3.Color(0x8a5a2a), .55); m.scale.setScalar(.42); m.rotation.set(0, Math.PI / 2, Math.PI / 2); m.position.y = .08; g.add(m); }
     const lemon = new T3.Mesh(GEOD.restLemon || (GEOD.restLemon = new T3.CylinderGeometry(.05, .05, .02, 12)), phong(0xf2d84d)); lemon.position.set(.16, .05, .1); g.add(lemon);
   } else if (r.dish === "fried") {
-    for (let i = 0; i < 5; i++) { const m = new T3.Mesh(GEOD.restFry || (GEOD.restFry = new T3.CapsuleGeometry ? new T3.SphereGeometry(.05, 8, 6) : new T3.SphereGeometry(.05, 8, 6)), phong(0xe0a640)); m.scale.set(1, .7, 2.2); m.position.set((i - 2) * .07, .07, (i % 2) * .05 - .02); m.rotation.y = i * .7; g.add(m); }
+    for (let i = 0; i < 5; i++) { const m = new T3.Mesh(GEOD.restFry || (GEOD.restFry = new T3.SphereGeometry(.05, 8, 6)), phong(0xe0a640)); m.scale.set(1, .7, 2.2); m.position.set((i - 2) * .07, .07, (i % 2) * .05 - .02); m.rotation.y = i * .7; g.add(m); }
   } else if (r.dish === "stirfry") {
     for (let i = 0; i < 7; i++) { const m = new T3.Mesh(GEOD.restChunk || (GEOD.restChunk = new T3.BoxGeometry(.13, .06, .2)), phong(i % 3 ? 0xc8402a : 0x4f9a52)); m.scale.setScalar(.6); m.position.set(Math.sin(i * 2.4) * .12, .06 + (i % 2) * .02, Math.cos(i * 2.4) * .1); m.rotation.y = i; g.add(m); }
   } else if (r.dish === "stewRed" || r.dish === "braise") {
