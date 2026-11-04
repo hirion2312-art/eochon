@@ -1750,11 +1750,17 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="platform.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="platform.js"></script>
 <script>
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.90.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.91.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2337,6 +2343,10 @@ const CLOTHES = [
   { id: "t-rain", slot: "top", name: "우비 재킷", price: 1600, color: 0xf6c637, glb: "rain_top", desc: "반사띠가 반짝이는 · 우비 어부 세트" },
   { id: "b-rain", slot: "bottom", name: "방수 멜빵바지", price: 1400, color: 0x2e4a6b, glb: "rain_bottom", desc: "물이 안 새는 PVC 앞판 · 우비 어부 세트" },
   { id: "s-rain", slot: "shoes", name: "노란 장화 (3D)", price: 800, color: 0xf6c637, glb: "rain_shoes", desc: "종아리까지 오는 진짜 장화 · 우비 어부 세트" },
+  // 전용 지급 세트 (v1.91) — 상점에 안 뜨고(hidden) 프로필 정리 때 닉네임으로만 지급돼요
+  { id: "h-geto", slot: "hat", name: "올린 묶음머리", price: 0, hidden: true, color: 0x151823, glb: "geto_hat", desc: "뒤로 묶어 올리고 한 가닥만 길게 · 게토 전용" },
+  { id: "t-geto", slot: "top", name: "고카라 교복 자켓", price: 0, hidden: true, color: 0x262c3f, glb: "geto_top", desc: "사선 여밈에 금 단추 하나 · 게토 전용" },
+  { id: "b-geto", slot: "bottom", name: "벌룬 교복 바지", price: 0, hidden: true, color: 0x242a3c, glb: "geto_bottom", desc: "밑단이 조여지는 풍성한 실루엣 · 게토 전용" },
   { id: "h-sailor", slot: "hat", name: "세일러 캡", price: 800, color: 0xf7f4ec, glb: "sailor_hat", desc: "뒤에 리본이 달랑 · 마린 세일러 세트" },
   { id: "t-sailor", slot: "top", name: "세일러복", price: 1500, color: 0xf7f4ec, glb: "sailor_top", desc: "남색 칼라에 빨간 네커치프 · 마린 세일러 세트" },
   { id: "b-sailor", slot: "bottom", name: "세일러 반바지", price: 900, color: 0x274b73, glb: "sailor_bottom", desc: "흰 벨트의 남색 반바지 · 마린 세일러 세트" },
@@ -2590,6 +2600,7 @@ function normProfile(p) {
   o.quests = p.quests && typeof p.quests === "object" && Array.isArray(p.quests.list) ? p.quests : null;
   o.friends = normFriends(p.friends);
   o.closet = [...new Set((Array.isArray(p.closet) ? p.closet : []).filter(id => CLOTH[id]))];
+  if (String(p.nick || "") === "게토스그루") for (const gid of ["h-geto", "t-geto", "b-geto"]) if (CLOTH[gid] && !o.closet.includes(gid)) o.closet.push(gid);   // 전용 지급: 게토 세트 (v1.91)
   o.wear = normWear(p.wear); for (const k of Object.keys(o.wear)) if (!o.closet.includes(o.wear[k])) delete o.wear[k];
   o.invited = {}; if (p.invited && typeof p.invited === "object") for (const [k, v] of Object.entries(p.invited).slice(0, 300)) if (isUid(k)) o.invited[k] = v === 2 ? 2 : 1;
   o.job = { id: "", xp: {}, changedAt: 0 };
@@ -10767,10 +10778,10 @@ SHEETS.clothes = (body) => {
   const right = h("div", { class: "racks" });
   right.append(h("div", { class: "tabs", role: "tablist" }, CLOTH_SLOTS.map(([id, l]) =>
     h("button", { role: "tab", "aria-selected": String(S.clothTab === id), onclick: () => { S.clothTab = id; refreshSheet(true); },
-      text: l + " " + CLOTHES.filter(c => c.slot === id && P.closet.includes(c.id)).length + "/" + CLOTHES.filter(c => c.slot === id).length }))));
+      text: l + " " + CLOTHES.filter(c => c.slot === id && P.closet.includes(c.id)).length + "/" + CLOTHES.filter(c => c.slot === id && (!c.hidden || P.closet.includes(c.id))).length }))));
   right.append(h("label", { class: "ownbox" }, (() => { const cb = h("input", { type: "checkbox" }); cb.checked = !!S.clothOwned; cb.addEventListener("change", () => { S.clothOwned = cb.checked; refreshSheet(true); }); return cb; })(), "산 옷만 보기"));
   const grid = h("div", { class: "grid cgrid" });
-  for (const c of CLOTHES.filter(c => c.slot === S.clothTab && (!S.clothOwned || P.closet.includes(c.id)))) {
+  for (const c of CLOTHES.filter(c => c.slot === S.clothTab && (!c.hidden || P.closet.includes(c.id)) && (!S.clothOwned || P.closet.includes(c.id)))) {
     const own = P.closet.includes(c.id), trying = S.tryWear[c.slot] === c.id, wearing = P.wear[c.slot] === c.id;
     if (c.ev && !own) {
       grid.append(h("button", { class: "card ccard evlock", onclick: () => openSheet("attend") },
