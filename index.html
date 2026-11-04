@@ -1677,7 +1677,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.80.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.81.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -8888,22 +8888,41 @@ const FACADE = {
     facePlane(txtTex(128, 160, "#2a2a2a", [["헤어", 40, "#ffd8e6", .3], ["컷 1만", 22, "#ffffff", .58], ["펌 · 염색", 22, "#ffffff", .78]]), .62, .8, -.25, .6, 0, ab);
     return { signY: 4.0, signW: 5.2 };
   },
-  release(g, H, dg) {   // 어촌계 마을회관 같은 방류소: 흰 벽 · 파란 박공지붕 · 시계탑 · 현수막
-    const blue = cmat(0x2a6fb8);
-    const roof = new T3.Mesh(new T3.CylinderGeometry(.01, 5.9, 2.2, 4), blue); roof.rotation.y = Math.PI / 4; roof.scale.set(1, 1, 1.08); roof.position.set(0, H + 1.4, 0); dg.add(roof);
-    box(.1, 2.4, 1.8, cmat(0x2a4a7a), -4.02, 1.2, 0, g);
-    for (const dz of [-2.8, 2.8]) box(.08, 1.2, 1.6, bulbMat(0x9fc3d6, 0xffd89a), -4.03, 1.55, dz, g);
-    box(.2, .4, 9.1, blue, -4.05, .2, 0, g);
-    // 시계탑
-    const tw = new T3.Group(); tw.position.set(-1.2, H, 3.0); g.add(tw);
-    box(1.4, 2.4, 1.4, cmat(0xf4f2ec), 0, 1.2, 0, tw); const tr = new T3.Mesh(new T3.ConeGeometry(1.1, 1.2, 4), blue); tr.rotation.y = Math.PI / 4; tr.position.y = 3.0; tw.add(tr);
-    const ck = canvasTex(128, 128, (c) => { c.fillStyle = "#fffdf6"; c.beginPath(); c.arc(64, 64, 58, 0, 7); c.fill(); c.strokeStyle = "#1d3a5c"; c.lineWidth = 8; c.stroke(); c.lineWidth = 6; c.beginPath(); c.moveTo(64, 64); c.lineTo(64, 26); c.moveTo(64, 64); c.lineTo(90, 70); c.stroke(); }, 1, 1);
-    facePlane(ck, .9, .9, -.72, 1.6, 0, tw);
-    // 현수막 · 게시대
-    facePlane(txtTex(512, 80, "#ffffff", [["🐟 치어 방류 사업 · 우리 바다 우리가 지켜요", 30, "#1d5a9a", .5, "800 "]]), 5.2, .7, -4.12, 3.05, 0, g);
-    for (const dz of [2.4, 4.2]) cyl(.05, .05, 1.8, 6, cmat(0x9aa3aa), -5.4, .9, dz, g);
-    facePlane(txtTex(256, 80, "#ffe08a", [["어촌계 게시판", 36, "#1d3a5c", .5]]), 1.8, .56, -5.4, 1.5, 3.3, g);
-    return { signY: H - .75, signW: 4.4, signX: -4.12 };
+  release(g, H, dg) {   // 수산자원 방류센터: 파도 벽화 · 대형 수족관 창(치어가 헤엄) · 가게 앞 원형 치어 수조 · 옥상 물탱크 · 물고기 풍향계
+    const sea = cmat(0x1d6a9a), deep = cmat(0x15486e), conc = cmat(0xc9c6bd);
+    // 아래 띠 · 위 파도 벽화
+    box(.12, .9, 9.05, deep, -4.03, .45, 0, g);
+    const wave = canvasTex(512, 128, (c, w, hh) => { const gr = c.createLinearGradient(0, 0, 0, hh); gr.addColorStop(0, "#bfe6f4"); gr.addColorStop(1, "#4fa8d0"); c.fillStyle = gr; c.fillRect(0, 0, w, hh);
+      for (let k = 0; k < 4; k++) { c.fillStyle = ["#2f8ac0", "#1d6a9a", "#15486e", "#0f3550"][k]; c.beginPath(); c.moveTo(0, hh); for (let x = 0; x <= w; x += 8) c.lineTo(x, 40 + k * 22 + Math.sin(x / 38 + k * 1.7) * 10); c.lineTo(w, hh); c.fill(); }
+      c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 3; for (let k = 0; k < 3; k++) { c.beginPath(); for (let x = 0; x <= w; x += 8) { const y = 44 + k * 22 + Math.sin(x / 38 + k * 1.7) * 10; x ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke(); }
+      c.fillStyle = "#ffd84d"; for (const [x, y] of [[90, 30], [300, 22], [430, 34]]) { c.beginPath(); c.ellipse(x, y, 14, 6, 0, 0, 7); c.fill(); c.beginPath(); c.moveTo(x + 12, y); c.lineTo(x + 22, y - 6); c.lineTo(x + 22, y + 6); c.fill(); } }, 1, 1);
+    facePlane(wave, 8.9, H - 3.4, -4.06, 3.4 + (H - 3.4) / 2, 0, g);
+    // 대형 수족관 창 (치어 떼가 헤엄쳐요)
+    const aq = new T3.Group(); aq.position.set(-4.0, 1.75, -1.6); g.add(aq);
+    box(.2, 2.3, 4.6, deep, .05, 0, 0, aq);
+    const water = new T3.Mesh(new T3.PlaneGeometry(4.2, 1.95), new T3.MeshBasicMaterial({ map: canvasTex(256, 128, (c, w, hh) => { const gr = c.createLinearGradient(0, 0, 0, hh); gr.addColorStop(0, "#7fd4ec"); gr.addColorStop(1, "#1d6a9a"); c.fillStyle = gr; c.fillRect(0, 0, w, hh); c.fillStyle = "rgba(255,255,255,.25)"; for (let i = 0; i < 18; i++) { c.beginPath(); c.arc(Math.random() * w, Math.random() * hh, 2 + Math.random() * 3, 0, 7); c.fill(); } c.fillStyle = "#3f8a4a"; for (let i = 0; i < 9; i++) { const x = 10 + i * 30; c.beginPath(); c.moveTo(x, hh); c.quadraticCurveTo(x + 8, hh - 40, x - 4, hh - 70); c.lineTo(x + 4, hh); c.fill(); } }, 1, 1) }));
+    water.position.x = -.06; water.rotation.y = -Math.PI / 2; aq.add(water);
+    const fry = []; for (let k = 0; k < 12; k++) { const f = new T3.Mesh(GEOD.fry || (GEOD.fry = new T3.SphereGeometry(.07, 6, 4)), cmat([0xffd84d, 0xff8a5a, 0xe8f4f8][k % 3])); f.scale.set(.6, .6, 1.8); aq.add(f); fry.push({ f, ph: k * .9, y: -.6 + (k % 5) * .3 }); }
+    FACADE_ANIM.push((t) => { for (const q of fry) { const z = Math.sin(t * .6 + q.ph) * 1.8; q.f.position.set(-.1, q.y + Math.sin(t * 2 + q.ph) * .06, z); q.f.rotation.y = Math.cos(t * .6 + q.ph) > 0 ? 0 : Math.PI; } });
+    box(.06, 2.2, 4.4, glassMat(), -.12, 0, 0, aq);
+    // 유리문
+    box(.1, 2.4, 1.7, cmat(0x2a4a6a), -4.02, 1.2, 2.6, g); box(.06, 2.1, 1.4, glassMat(), -4.08, 1.2, 2.6, g);
+    // 가게 앞 원형 치어 수조 2개 + 방류 안내판
+    for (const [dz, sc] of [[-2.6, 1], [1.0, .8]]) { const tk = new T3.Group(); tk.position.set(-6.0, 0, dz); tk.scale.setScalar(sc); g.add(tk);
+      const rim = new T3.Mesh(new T3.CylinderGeometry(1.1, 1.15, .7, 24, 1, true), conc); rim.position.y = .35; tk.add(rim); plain(new T3.TorusGeometry(1.1, .08, 6, 24), conc, 0, .7, 0, tk).rotation.x = Math.PI / 2;
+      const wt = new T3.Mesh(new T3.CircleGeometry(1.05, 24), new T3.MeshBasicMaterial({ color: 0x3fa8d8 })); wt.rotation.x = -Math.PI / 2; wt.position.y = .6; tk.add(wt); glow.push({ m: wt.material, day: 0x3fa8d8, night: 0x2a6aff });
+      const fs = []; for (let k = 0; k < 6; k++) { const f = new T3.Mesh(GEOD.fry, cmat(0xffb04d)); f.scale.set(.6, .6, 1.8); tk.add(f); fs.push(k); FACADE_ANIM.push((t) => { const a = t * (.8 + k * .1) + k; f.position.set(Math.cos(a) * .6, .58, Math.sin(a) * .6); f.rotation.y = -a; }); }
+      for (let k = 0; k < 3; k++) { const p = cyl(.03, .03, .6, 6, cmat(0x9aa3aa), Math.cos(k * 2.1) * .9, .95, Math.sin(k * 2.1) * .9, tk); }   // 산소 호스
+    }
+    { const sg = new T3.Group(); sg.position.set(-6.3, 0, 3.4); g.add(sg); for (const s of [-1, 1]) cyl(.04, .04, 1.4, 6, cmat(0x2a2d33), 0, .7, s * .55, sg);
+      facePlane(txtTex(256, 160, "#ffffff", [["치어 방류", 40, "#1d6a9a", .3], ["참돔 · 광어 · 전복", 22, "#2a2d33", .58], ["오늘 3,000마리", 24, "#d8382c", .82]]), 1.3, .8, 0, 1.15, 0, sg); }
+    // 옥상: 파란 물탱크 · 파이프 · 물고기 풍향계
+    cyl(.9, .9, 1.4, 16, sea, 1.6, H + .9, 2.4, g); cyl(.95, .95, .12, 16, deep, 1.6, H + 1.65, 2.4, g);
+    const pipe = cyl(.08, .08, 3.2, 8, conc, .2, H + .45, 2.4, g); pipe.rotation.z = Math.PI / 2;
+    { const vane = new T3.Group(); vane.position.set(-1.6, H, -2.6); g.add(vane); cyl(.04, .04, 2.2, 6, cmat(0x2a2d33), 0, 1.1, 0, vane);
+      const fishV = new T3.Group(); fishV.position.y = 2.25; vane.add(fishV); const fb = new T3.Mesh(new T3.SphereGeometry(.3, 10, 6), cmat(0xf2c230)); fb.scale.set(.35, .8, 2.0); fishV.add(fb); const ft = new T3.Mesh(new T3.ConeGeometry(.3, .4, 4), cmat(0xf2c230)); ft.rotation.x = Math.PI / 2; ft.position.z = -.75; fishV.add(ft);
+      FACADE_ANIM.push((t) => { fishV.rotation.y = Math.sin(t * .4) * .8; }); }
+    return { signY: H - .55, signW: 4.6 };
   },
   bait(g, H, dg) {   // 동네 낚시점: 낡은 상가 · 창에 스티커 · 입구에 낚싯대통 · 아이스박스 · 뜰채 · 조황 게시판
     box(.1, 2.4, 2, cmat(0x3a3a3a), -4.02, 1.2, 0, g);
@@ -8971,7 +8990,7 @@ function buildShops() {
     const g = new T3.Group(); g.position.set(11, 0, b.z); scene.add(g);
     box(8, hgt, 9, phong(L.col, { flatShading: false }), 0, hgt / 2, 0, g);
     const dg = new T3.Group(); g.add(dg); DETAIL_GROUPS.push(dg);
-    if (b.id !== "release") { box(8.6, .35, 9.6, phong(0x3d3d48), 0, hgt + .17, 0, g); plain(GEOD.cornice || (GEOD.cornice = new T3.BoxGeometry(8.3, .22, 9.3)), cmat(0xf2efe8), 0, hgt - .11, 0, dg); }
+    if (true) { box(8.6, .35, 9.6, phong(0x3d3d48), 0, hgt + .17, 0, g); plain(GEOD.cornice || (GEOD.cornice = new T3.BoxGeometry(8.3, .22, 9.3)), cmat(0xf2efe8), 0, hgt - .11, 0, dg); }
     const f = FACADE[b.id] ? FACADE[b.id](g, hgt, dg) : { signY: 3.95, signW: 5.6 };
     const spec = SHOP_SIGNS[b.id];
     const sign = makeSign(f.signW, f.signW * .26, spec);
@@ -8994,7 +9013,7 @@ function buildShops() {
       box(.3, 3.6, 8.6, phong(0x2a2d33), -3.05, hgt + .35 + 1.6, 0, g);
     }
     // 옥상 설비
-    if (b.id !== "release" && b.id !== "bank") plain(GEOD.ac || (GEOD.ac = new T3.BoxGeometry(1.3, .7, 1)), cmat(0xb8bcc2), 1.2, hgt + .7, -2.4, dg);
+    if (b.id !== "bank" && b.id !== "release") plain(GEOD.ac || (GEOD.ac = new T3.BoxGeometry(1.3, .7, 1)), cmat(0xb8bcc2), 1.2, hgt + .7, -2.4, dg);
     const hit = new T3.Mesh(new T3.BoxGeometry(8.4, hgt, 9.4), MAT.hit || new T3.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }));
     hit.position.set(11, hgt / 2, b.z); hit.userData.pick = { kind: "building", id: b.id }; scene.add(hit); pickables.push(hit);
   }
