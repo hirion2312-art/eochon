@@ -1742,7 +1742,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.92.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.93.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2465,7 +2465,6 @@ const REST_CFG = {
   ticketCap: [2, 3, 4, 5, 6],            // 가게 단계(Lv.1~5)별 동시 주문 티켓
   guestGap: [8, 16],                     // 다음 손님까지 (초)
   patience: 110,                         // 손님이 기다리는 시간 (초) · 지나면 그냥 나가요(손해 없음)
-  dayTickets: 80,                        // 하루 주문 상한 (밸런스 가드 ①)
   chopHits: [5, 20],                     // 썰기 연타 수: 작은 생선 ~ 큰 생선
   stationCap: { board: 1, boil: 3, fry: 3, grill: 2 },
   // 단골 (Lv.3~) · VIP (Lv.5) 손님 (v1.81): 단골은 늘 같은 얼굴 · 좋아하는 메뉴 · 올 때마다 팁이 조금씩 늘어요 / VIP는 가장 비싼 요리를 시키고 크게 내요
@@ -6000,7 +5999,7 @@ function restTick(t, dt) {
   // 손님 오기 (v1.67: 주인이 멀리 있어도 영업해요 · 단, 15분 무입력 자동 종료는 돈 복사 방지라 그대로예요)
   const cap = REST_LV[P.rest.lv].tickets, busy = S.restGuests.length;
   const freeSeats = REST_SEATS.map((s, i) => i).filter(i => !S.restGuests.some(gu => gu.si === i)).slice(0, REST_LV[P.rest.lv].seats);
-  if (S.restOpen && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length && d.tickets < REST_CFG.dayTickets) {
+  if (S.restOpen && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length) {
     const spc = S.isOwner && LAB.forceGuest ? labPickSpecial() : restPickSpecial(), r = spc ? spc.r : pickTicketRecipe();
     if (r) {
       const si = pick(freeSeats), seat = REST_SEATS[si];
@@ -6018,7 +6017,7 @@ function restTick(t, dt) {
       else if (gu.reg && (P.rest.regs[gu.reg] || 0) > 0) toast(REST_REG[gu.reg].ico + " 단골 " + REST_REG[gu.reg].name + " 님이 또 왔어요 (" + (P.rest.regs[gu.reg] + 1) + "번째)");
       S.restNextGuest = now + rnd(REST_CFG.guestGap[0], REST_CFG.guestGap[1]) * 1000;
     } else { S.restNextGuest = now + 5000; restNoGuest("menu"); }
-  } else if (S.restOpen && d.tickets >= REST_CFG.dayTickets) restNoGuest("cap");
+  }
   for (const gu of S.restGuests.slice()) {
     let tx = gu.x, tz = gu.z;
     if (gu.path.length) { const p = restW(gu.path[0][0], gu.path[0][1]); tx = p.x; tz = p.z; }
@@ -6061,8 +6060,7 @@ function restTick(t, dt) {
 }
 function restNoGuest(why) {   // v1.86.1: 손님이 안 오는 이유를 한 번씩 알려 줘요
   S.restNoWhy = S.restNoWhy || {}; const k = why + kstDay(); if (S.restNoWhy[k]) return; S.restNoWhy[k] = 1;
-  if (why === "cap") toast([h("b", { text: "🏮 오늘 주문 " + REST_CFG.dayTickets + "개를 다 받았어요" }), h("div", { class: "muted", style: "font-size:12px", text: "하루 주문 상한이에요 · 자정(한국 시간)이 지나면 다시 손님이 와요" })], null, 7000);
-  else toast([h("b", { text: "🏮 주문 받을 메뉴가 없어요" }), h("div", { class: "muted", style: "font-size:12px", text: "🧑‍🍳 가게 → 오늘의 메뉴에서 메뉴를 하나 이상 켜 주세요" })], null, 7000);
+  toast([h("b", { text: "🏮 주문 받을 메뉴가 없어요" }), h("div", { class: "muted", style: "font-size:12px", text: "🧑‍🍳 가게 → 오늘의 메뉴에서 메뉴를 하나 이상 켜 주세요" })], null, 7000);
 }
 function restGuestLeave(gu, happy) {
   if (happy && gu.stage !== "out") {
