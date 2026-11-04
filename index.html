@@ -1623,7 +1623,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.72.2";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.73.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -1871,8 +1871,7 @@ BUILTIN.push(
   { id: "b-megalodon", name: "태초의 메갈로돈", tier: 9, min: 1200, max: 1800, where: "sea", desc: "고대 바다의 절대 포식자.", model: "fish/b-megalodon.glb", pack: 5, art: { body: "#7d8894", belly: "#eef0f2", fin: "#626c76", len: 1, th: 1.0 } }
 );
 
-// v1.72 오프라인 제작 3D 모델 묶음 지정 (기존 어종 53종)
-for (const [fid, pk] of Object.entries({"b-pirami": 3, "b-bungeo": 3, "b-mangdung": 3, "b-ureok": 3, "b-godeungeo": 3, "b-bollak": 3, "b-chamdom": 3, "b-nongeo": 3, "b-cheongsaechi": 3, "b-goraesangeo": 3, "b-sangalchi": 3, "b-jeongaeng": 3, "b-hakkkong": 3, "b-bokseom": 3, "b-noraemi": 3, "b-sungeo": 3, "b-jwichi": 3, "b-galchi": 3, "b-jukkumi": 3, "b-gwangeo": 3, "b-dodari": 3, "b-gamseongdom": 3, "b-doldom": 3, "b-bengedom": 3, "b-bangeo": 3, "b-munui": 3, "b-samchi": 3, "b-butjangeo": 3, "b-busiri": 3, "b-hokdom": 3, "b-daewangmuneo": 3, "b-neungseong": 3, "b-dotdom": 3, "b-dageumbari": 3, "b-geumdom": 3, "b-byeolgaori": 3, "b-haeryong": 3, "b-jeoneo": 3, "b-myeolchi": 3, "b-kkongchi": 3, "b-jeongeori": 3, "b-nolraegi": 3, "b-yeolgi": 3, "b-chamjogi": 3, "b-imyeonsu": 3, "b-hwangeo": 3, "b-mineo": 3, "b-daegu": 3, "b-hongeo": 3, "b-daebangeo": 3, "s-bajirak": 4, "s-matjogae": 4, "s-kkotge": 4})) { const f = BUILTIN.find(x => x.id === fid); if (f && !f.model) { f.model = "fish/" + fid + ".glb"; f.pack = pk; } }
+// v1.73 (이재헌님 지시): 오프라인 제작 모델은 v1.72에서 새로 등록한 어종에만 적용. 기존 어종은 원래 표시(에셋 팩 모델·절차 생성)로 되돌림 — 이 지정 블록을 되살리지 말 것.
 
 const NICK_A = ["졸린", "멍한", "느긋한", "배고픈", "수줍은", "심심한", "행복한", "반짝이는", "꾸벅꾸벅", "조용한", "엉뚱한", "따끈한", "노곤한", "말랑한"];
 const NICK_B = ["붕어", "고등어", "멸치", "갈매기", "해달", "문어", "복어", "가자미", "꽁치", "물개", "소라", "해파리", "오징어", "도다리"];
