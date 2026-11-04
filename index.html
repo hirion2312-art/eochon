@@ -1739,7 +1739,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.86.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.86.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -5010,15 +5010,17 @@ function leaveStallSeat() {
   pushPresence({ stall: -1, st: "idle" }); presMove(true); updateLeaveBtn(); updateHint(); closeSheet();
   toast("알바생이 노점을 지켜요. 시간이 끝나면 노점이 닫히고 남은 회는 돌려받아요", null, 5000);
 }
-async function closeStall(silent, idx) {
-  const i = idx != null ? idx : S.myStall >= 0 ? S.myStall : myOwnStall(); if (i < 0) return;
+async function closeStall(silent, idx, quiet) {   // quiet: 알아서 닫을 때 · 실패해도 「노점이 바빠요」를 띄우지 않아요 (v1.86.1)
+  const i = idx != null ? idx : S.myStall >= 0 ? S.myStall : myOwnStall(); if (i < 0) return false;
   let back = [];
-  await stallEdit(i, async (cur, ref) => { if (cur && cur.owner === S.uid) { back = cur.menu; await ref.delete(); } return true; });
+  const ok = await stallEdit(i, async (cur, ref) => { if (cur && cur.owner === S.uid) { back = cur.menu; await ref.delete(); } return true; }, quiet);
+  if (quiet && !ok) return false;
   if (S.myStall === i) { S.myStall = -1; clearInterval(hbTimer); ME.st = "idle"; pushPresence({ stall: -1, st: "idle" }); }
   const n = takeBackDishes(back);
   updateLeaveBtn(); updateHint();
   if (!silent) toast("노점을 닫았어요" + (n ? " · 남은 회 " + n + "접시를 돌려받았어요" : ""));
   refreshSheet();
+  return true;
 }
 function syncMenu() { const i = S.myStall; if (i >= 0 && S.online) S.db.doc(stallDocId(i)).update({ nick: P.nick, color: P.color, hb: Date.now() }).catch(() => {}); }
 // 회를 상에 올려요(여러 접시 한 번에). 값은 고정(dishPrice)이라 고를 게 없어요
@@ -5088,7 +5090,12 @@ async function savePromo(promo) {
 // 사장님 쪽: 자리를 비운 내 노점의 알바 시간이 끝나면 닫고 회를 돌려받음
 setInterval(() => {
   if (!S.online || !S.uid) return;
-  S.stalls.forEach((st, i) => { if (st && st.owner === S.uid && i !== S.myStall && !stallAlive(st) && !S.closingStall) { S.closingStall = true; closeStall(true, i).finally(() => { S.closingStall = false; toast("알바 시간이 끝나서 " + (i + 1) + "번 노점을 닫았어요"); }); } });
+  S.closeRetry = S.closeRetry || {};
+  S.stalls.forEach((st, i) => {
+    if (!st || st.owner !== S.uid || i === S.myStall || i === S.restSlot || st.rest || stallAlive(st) || S.closingStall || Date.now() < (S.closeRetry[i] || 0)) return;   // v1.86.1: 내 포차는 빼고 · 실패하면 10분 뒤
+    S.closingStall = true; S.closeRetry[i] = Date.now() + 600000;
+    closeStall(true, i, true).then((ok) => { if (ok) { delete S.closeRetry[i]; toast("알바 시간이 끝나서 " + (i + 1) + "번 노점을 닫았어요"); } }).finally(() => { S.closingStall = false; });
+  });
 }, 5000);
 /* ---------- 내 횟집 영업 (v1.28) ----------
    ● 직접 영업(노점에 앉아 있을 때): 마을 손님(NPC)이 줄을 서서 주문해요. 주문에 맞는 회를 「내기」로 내 주면
@@ -5932,8 +5939,8 @@ function restTick(t, dt) {
       if (gu.vip) { restSnd("fanfare_1", .35); toast("👑 VIP 미식가가 왔어요! 「" + r.name + "」을 시킬 거예요 · 크게 내요"); }
       else if (gu.reg && (P.rest.regs[gu.reg] || 0) > 0) toast(REST_REG[gu.reg].ico + " 단골 " + REST_REG[gu.reg].name + " 님이 또 왔어요 (" + (P.rest.regs[gu.reg] + 1) + "번째)");
       S.restNextGuest = now + rnd(REST_CFG.guestGap[0], REST_CFG.guestGap[1]) * 1000;
-    } else S.restNextGuest = now + 5000;
-  }
+    } else { S.restNextGuest = now + 5000; restNoGuest("menu"); }
+  } else if (S.restOpen && d.tickets >= REST_CFG.dayTickets) restNoGuest("cap");
   for (const gu of S.restGuests.slice()) {
     let tx = gu.x, tz = gu.z;
     if (gu.path.length) { const p = restW(gu.path[0][0], gu.path[0][1]); tx = p.x; tz = p.z; }
@@ -5973,6 +5980,11 @@ function restTick(t, dt) {
   if (RESTG.oil) RESTG.oil.material.color.setHSL(.1, .75, .52 + (restK().fry.some(x => !x.ln) ? Math.sin(t * 20) * .05 : 0));
   if (RESTG.oil2) RESTG.oil2.material.color.setHSL(.1, .75, .52 + (restK().fry.some(x => x.ln) ? Math.sin(t * 20 + 1) * .05 : 0));
   if (Math.random() < .25) for (const s3 of restStations()) { const id = s3.id; if (!COOK_KO[id] || !restK()[id].some(x => lnOf(x) === s3.ln)) continue; const p = restW(s3.lx, s3.lz); fxBurst(p.x + .1, 1.25, p.z + (Math.random() - .5) * .3, { n: 1, spd: .15, up: .7, size: .14, dur: 1.1, spread: .1, col: id === "fry" ? 0xffe0a0 : 0xffffff }); }
+}
+function restNoGuest(why) {   // v1.86.1: 손님이 안 오는 이유를 한 번씩 알려 줘요
+  S.restNoWhy = S.restNoWhy || {}; const k = why + kstDay(); if (S.restNoWhy[k]) return; S.restNoWhy[k] = 1;
+  if (why === "cap") toast([h("b", { text: "🏮 오늘 주문 " + REST_CFG.dayTickets + "개를 다 받았어요" }), h("div", { class: "muted", style: "font-size:12px", text: "하루 주문 상한이에요 · 자정(한국 시간)이 지나면 다시 손님이 와요" })], null, 7000);
+  else toast([h("b", { text: "🏮 주문 받을 메뉴가 없어요" }), h("div", { class: "muted", style: "font-size:12px", text: "🧑‍🍳 가게 → 오늘의 메뉴에서 메뉴를 하나 이상 켜 주세요" })], null, 7000);
 }
 function restGuestLeave(gu, happy) {
   if (happy && gu.stage !== "out") {
@@ -6578,7 +6590,7 @@ function npcShopperTo(i) {
   s.stall = i; s.tx = SHOP_FRONT_X; s.tz = STALLS[i].z; s.wait = 6 + Math.random() * 4;
 }
 function shopperNext(s) {
-  const alive = STALLS.filter(st => S.stalls && stallAlive(S.stalls[st.i]));
+  const alive = STALLS.filter(st => S.stalls && stallAlive(S.stalls[st.i]) && !S.stalls[st.i].rest && S.restSlot !== st.i);   // v1.86.1: 포차(식당)는 진짜 식당 손님만 와요 · 옛 시장 손님이 카운터 앞에 서 있기만 하던 것
   if (alive.length && Math.random() < .7) { const st = pick(alive); s.stall = st.i; s.tx = SHOP_FRONT_X; s.tz = st.z + (Math.random() - .5) * .8; s.wait = 4 + Math.random() * 5; }
   else { s.stall = -1; s.tx = -13 - Math.random() * 5; s.tz = 18 + Math.random() * 44; s.wait = 1 + Math.random() * 3; }
 }
