@@ -1735,11 +1735,17 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="a/tier-badges.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="platform.js"></script>
 <script>
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.86.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.87.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -8835,9 +8841,75 @@ function fitHeldRod(F, rd) {
   if (m.reel) F.reelM.position.set(m.reel[0] * ROD_HOLD, m.reel[1] * ROD_HOLD, m.reel[2] * ROD_HOLD + .02);
   else F.reelM.position.set(.07, .42, 0);
 }
+/* ---------- 릴 3D 모델 4종 (v1.87): a/reels.json — 손에 든 릴 · 상점/가방 그림 ----------
+   tools/reels_pack.py가 OBJ 팩을 줄여 담은 묶음. 오기 전에는 예전처럼 원통 릴 · 그린 그림으로 보여요 */
+const REEL3D = new Map();   // 릴 id → { geo, parts, size }
+const REEL_PIC = new Map(); // 릴 id → 그림(캔버스)
+let reelPackP = null;
+function loadReelModels() {
+  if (!T3 || reelPackP) return;
+  const dec = (b, Arr) => { const s = atob(b), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return new Arr(u.buffer); };
+  reelPackP = fetch("a/reels.json?v=" + GAME_VER).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((pack) => {
+    for (const [id, m] of Object.entries(pack)) {
+      const q = dec(m.v, Int16Array), pos = new Float32Array(q.length);
+      for (let i = 0; i < q.length; i++) { const k = i % 3; pos[i] = m.lo[k] + (q[i] + 32767) * m.sc[k]; }
+      const idx = [], geo = new T3.BufferGeometry();
+      m.g.forEach((g, k) => { const a = dec(g.i, Uint16Array); geo.addGroup(idx.length, a.length, k); for (let i = 0; i < a.length; i++) idx.push(a[i]); });
+      geo.setAttribute("position", new T3.BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals(); geo.computeBoundingBox();
+      const bb = geo.boundingBox, size = Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z, .01);
+      REEL3D.set(id, { geo, parts: m.g, size });
+    }
+    makeReelPics();
+    for (const k of [...iconCache.keys()]) if (k.startsWith("reel|")) iconCache.delete(k);
+    refreshSheet();
+  }).catch((e) => console.warn("reels.json", e));
+}
+const reelMatCache = new Map();
+function reelMats(id) {
+  if (reelMatCache.has(id)) return reelMatCache.get(id);
+  const m = REEL3D.get(id), arr = m.parts.map(p => {
+    const mt = phong(new T3.Color(p.c).getHex(), { side: T3.DoubleSide });
+    if (p.e) { mt.emissive = new T3.Color(p.e); mt.emissiveIntensity = 1.3; }
+    if (p.o) { mt.transparent = true; mt.opacity = p.o; }
+    if (p.s) mt.color.offsetHSL(0, 0, .06);
+    return mt;
+  });
+  reelMatCache.set(id, arr); return arr;
+}
+function reelMesh(id) { const m = REEL3D.get(id); return m ? new T3.Mesh(m.geo, reelMats(id)) : null; }
+// 상점 · 가방 그림: 릴을 살짝 비틀어 한 장씩 찍어요
+function makeReelPics() {
+  try {
+    const W = 192, tr = new T3.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+    tr.setPixelRatio(1); tr.setSize(W, W, false);
+    const sc = new T3.Scene(); sc.add(new T3.HemisphereLight(0xffffff, 0x8a7a6a, 1.05));
+    const dl = new T3.DirectionalLight(0xffffff, .55); dl.position.set(2, 3, 4); sc.add(dl);
+    const cam = new T3.OrthographicCamera(-.5, .5, .5, -.5, .1, 10); cam.position.set(0, 0, 3); cam.lookAt(0, 0, 0);
+    for (const [id, m] of REEL3D) {
+      const mesh = reelMesh(id); if (!mesh) continue;
+      const holder = new T3.Group(), k = 1.04 / m.size;
+      mesh.scale.setScalar(k); holder.add(mesh); holder.rotation.set(.5, -.6, 0); sc.add(holder);
+      tr.render(sc, cam); sc.remove(holder);
+      const c = document.createElement("canvas"); c.width = c.height = W; c.getContext("2d").drawImage(tr.domElement, 0, 0);
+      REEL_PIC.set(id, c);
+    }
+    tr.dispose(); if (tr.forceContextLoss) tr.forceContextLoss();
+  } catch (e) { console.warn("reel pics", e); }
+}
+// 캐릭터 손의 원통 릴을 그 릴 모델로 (모델이 없으면 원통 그대로)
+function fitHeldReel(F, reelId) {
+  const rod = F.reelM && F.reelM.parent; if (!rod) return;
+  if (F.reelModel) { rod.remove(F.reelModel); F.reelModel = null; }
+  const m = REEL3D.get(reelId || "basic");
+  F.reelM.visible = !m;
+  if (!m) return;
+  const mesh = reelMesh(reelId || "basic"); if (!mesh) { F.reelM.visible = true; return; }
+  mesh.castShadow = true; mesh.position.copy(F.reelM.position);
+  rod.add(mesh); F.reelModel = mesh;
+}
 function loadFishModels() {
   if (!T3) return;
-  loadRodModels();
+  loadRodModels(); loadReelModels();
   buildProcFish(); makeThumbs(); try { decorateFishMarket(); } catch (e) { console.warn("market deco", e); }   // 직접 만든 3D 물고기는 바로 · 에셋 모델은 불러온 다음
   if (!T3.GLTFLoader) return;
   const loader = new T3.GLTFLoader();
@@ -9763,10 +9835,10 @@ function updateChar(F, f, t, dt, now) {
   if (fishing && f.phase === "catch") { F.hands[0].position.set(-.2, .88, .48); F.hands[1].position.set(.22, .88, .48); }   // 잡은 순간 두 손으로 번쩍 (KayKit Fishing_Catch 포즈 이식, v1.68)
   F.head.rotation.z = Math.sin(t * .9 + F.px) * .05;
   F.pivot.visible = !!fishing && f.phase !== "idle";
-  { const rk = (f.rod || "bamboo") + "|" + (f.reel || "basic") + "|" + ROD3D.size; if (F.rodKey !== rk) { F.rodKey = rk; const rd = RODS.find(r => r.id === f.rod) || RODS[0], prem = rd.lv >= 25; fitHeldRod(F, rd);
+  { const rk = (f.rod || "bamboo") + "|" + (f.reel || "basic") + "|" + ROD3D.size + "|" + REEL3D.size; if (F.rodKey !== rk) { F.rodKey = rk; const rd = RODS.find(r => r.id === f.rod) || RODS[0], prem = rd.lv >= 25; fitHeldRod(F, rd);
       F.rodMat.color.setHex(rd.color); F.rodMat.emissive.setHex(prem ? rd.color : 0); F.rodMat.emissiveIntensity = prem ? .45 : 1;   // 전설 이상 낚싯대는 은은하게 빛남
       const gl = F.rodMat.userData.glow; if (gl) { gl.visible = prem; gl.material.color.setHex(rd.color === 0x1b1b1f || rd.color === 0x23356e ? 0xbfd8ff : rd.color); }
-      F.reelMat.color.setHex((REELS.find(r => r.id === f.reel) || REELS[0]).color); } }
+      F.reelMat.color.setHex((REELS.find(r => r.id === f.reel) || REELS[0]).color); fitHeldReel(F, f.reel || "basic"); } }
   { const gl = F.rodMat.userData.glow; if (gl && gl.visible) gl.scale.setScalar(.42 + Math.sin(t * 4 + F.px) * .12); }
   const fighting = f.phase === "bite" || f.phase === "reel" || f.phase === "catch";
   const targetRx = f.me && REEL.on ? .62 - Math.min(1.3, REEL.tension) * .32 + Math.sin(t * 24) * .025 * REEL.tension : fighting ? .55 + Math.sin(t * 18) * .05 : .95;
@@ -10432,6 +10504,8 @@ function itemIcon(cat, it, size) {
     g.restore();
     g.beginPath(); g.moveTo(s * .8, s * .2); g.quadraticCurveTo(s * .9, s * .55, s * .78, s * .82); g.lineWidth = s * .012; g.strokeStyle = "rgba(60,60,60,.6)"; g.stroke();
     if ((it.lv || 1) >= 25) SICON.star(g, s * .22, s * .22, s * .2);   // 전설 이상 낚싯대
+  } else if (cat === "reel" && REEL_PIC.has(it.id)) {
+    g.drawImage(REEL_PIC.get(it.id), 0, 0, s, s);   // 3D 모델로 찍은 그림 (v1.87)
   } else if (cat === "reel") {
     const col = hex(it.color);
     g.beginPath(); g.arc(x - s * .04, y + s * .02, s * .27, 0, 7); g.fillStyle = col; g.fill(); olStroke(g, S2);
@@ -14202,5 +14276,4 @@ async function boot() {
 boot();
 })();
 </script>
-
 </body></html>
