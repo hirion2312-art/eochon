@@ -1745,7 +1745,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.87.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.88.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2507,6 +2507,7 @@ function normRest(r) {
   const pl = k.plate && typeof k.plate === "object" ? k.plate : {};
   return {
     lv: clamp(Math.floor(Number(r.lv) || 0), 0, REST_LV.length - 1), mig: r.mig ? 1 : 0,
+    booth: r.booth && typeof r.booth === "object" && ["hs", "uni", "pro", "chef"].includes(r.booth.g) ? { g: r.booth.g, paid: str(r.booth.paid, 10) } : null,   // v1.87 부스 알바
     off: (Array.isArray(r.off) ? r.off : []).filter(id => RECIPE[id]),
     regs: Object.fromEntries(Object.entries(r.regs && typeof r.regs === "object" ? r.regs : {}).filter(([id]) => REST_REG[id]).map(([id, n]) => [id, clamp(Math.floor(Number(n) || 0), 0, 1e6)])), vips: clamp(Math.floor(Number(r.vips) || 0), 0, 1e8),
     fund: clamp(Math.floor(Number(r.fund) || 0), 0, 1e10), autoBuy: !!r.autoBuy,   // 가게 금고 · 재료 자동 구매 (v1.57)   // 해금했지만 주문은 안 받는 메뉴 (가게 관리)
@@ -3875,6 +3876,9 @@ const SEAT = {};
 })();
 function TABLES() { return Array.from({ length: 8 }, (_, i) => [-19.4, 21 + i * 5.6]); }   // 포차 천막 아래 바깥 테이블
 const STALLS = Array.from({ length: 8 }, (_, i) => ({ i, x: -24.4, z: 21 + i * 5.6 }));   // 낭만포차 1~8호 카운터 (v1.35)
+// v1.87: 수산시장 회 부스 6칸 (STALLS 8~13) — 옛 노점 장사를 시장 안으로 복구 · 입구(동쪽)를 바라봐요 · fx = 손님이 서는 곳
+[[-23.5, -38], [-23.5, -33.5], [-23.5, -29], [-18.5, -38], [-18.5, -33.5], [-18.5, -29]].forEach(([x, z], k) => STALLS.push({ i: 8 + k, x, z, market: true, fx: x + 2.6 }));
+const boothName = (i) => i >= 8 ? "수산시장 회 부스 " + (i - 7) + "번" : "낭만포차 " + (i + 1) + "호";
 const BUILDINGS = [
   { id: "bait", name: "낚시 상점", z: 0, color: 0x6fa3c7, sheet: "shop" },
   { id: "release", name: "방류소", z: 12, color: 0xe2a35c, sheet: "studio" },
@@ -4058,7 +4062,12 @@ function nearestAction() {
   }
   if (tideLow() && inMudArea(ME.x, ME.z)) for (const sp of digSpots()) if (!sp.dug) consider(sp.x, sp.z, { key: "dig:" + sp.x.toFixed(1), label: P.tools.hoe ? "호미로 캐기" : "호미가 필요해요", run: () => digAt(sp) }, 1.6);
   { const n = shellItems().length; if (n) consider(SHELL_BUYER.x, SHELL_BUYER.z, { key: "shellsell:" + n, label: "조개 팔기 · " + n + "개 " + won(shellItems().reduce((a, it) => a + sellValue(curPrice(it)), 0)) + "", run: sellShells }, 1.9); }
-  for (const st of STALLS) {   // 낭만포차 N호 = 식당 문 (v1.45 · 노점 장사 대신 실내 식당)
+  for (const st of STALLS.filter(x => x.market)) {   // v1.87 수산시장 회 부스
+    const cur = S.stalls[st.i], alive = stallAlive(cur), mine = alive && cur.owner === S.uid;
+    const label = mine ? (S.myStall === st.i ? "🐟 내 부스 장사 중" : "🐟 내 회 부스 (" + (st.i - 7) + "번)") : alive ? "🐟 " + cur.nick + "네 회 부스" : "🐟 회 부스 " + (st.i - 7) + "번 · 열기";
+    consider(st.fx, st.z, { key: "booth:" + st.i + ":" + label, label, run: () => { ME.ry = -Math.PI / 2; presMove(true); if (S.myStall === st.i) openSheet("mystall"); else openSheet("stall", st.i); } }, 2.2);
+  }
+  for (const st of STALLS.filter(x => !x.market)) {   // 낭만포차 N호 = 식당 문 (v1.45 · 노점 장사 대신 실내 식당)
     const cur = S.stalls[st.i], alive = stallAlive(cur), mine = alive && cur.owner === S.uid, own = myLiveRest(), was = !alive && cur && cur.owner === S.uid;   // was: 신호가 끊긴 내 옛 자리 → 다시 열 수 있어요
     const label = mine ? (S.restSlot === st.i ? "🏮 내 포차 안으로" : "🏮 내 포차 다시 열기") : alive ? "🏮 " + cur.nick + "네 포차 · 영업 중" : own >= 0 ? "🏮 내 포차(" + (own + 1) + "호) 열기" : was ? "🏮 내 포차 다시 열기 (" + (st.i + 1) + "호)" : "🏮 내 포차 차리기 (" + (st.i + 1) + "호)";
     consider(st.x + 2.6, st.z, { key: "stall:" + st.i + ":" + label, label, run: () => { if (mine || !alive) openRest(st.i); else toast(cur.nick + "님이 장사 중인 포차예요 · 다른 빈 포차에서 차려 주세요"); } }, 2.4);   // v1.82.3: 빈자리는 언제나 openRest로 (내 가게가 다른 곳이면 그쪽을 열어요)
@@ -4633,7 +4642,7 @@ function chRoom(room) {
 }
 const boatDocId = () => S.ch === 1 ? "boat/state" : "boat/state_c" + S.ch;
 const stallDocId = (i) => S.ch === 1 ? "stalls/s" + i : "stalls/c" + S.ch + "s" + i;
-const stallIdRe = () => S.ch === 1 ? /^s([0-7])$/ : new RegExp("^c" + S.ch + "s([0-7])$");
+const stallIdRe = () => S.ch === 1 ? /^s(\d{1,2})$/ : new RegExp("^c" + S.ch + "s(\\d{1,2})$");
 function setChannel(c) {   // 채널을 바꾸고 그 채널의 사람 · 배 · 노점 · 채팅으로 갈아 끼워요
   if (c === S.ch) return;
   const prev = S.peers.slice(); S.ch = c;
@@ -4936,11 +4945,36 @@ async function cancelTrade(tid) {
    값은 사장님 우편함(sale)으로 감 → 사장님이 자리를 비워도(알바) 팔림.
    알바(npcUntil): 500 G에 10분. 시간이 끝나면 사장님 쪽에서 노점을 닫고 남은 회를 돌려받음 */
 const STALL_HB = 180000, NPC_MS = 600000, NPC_PRICE = 500, MENU_MAX = 12, MENU_LIMIT = 30;
+// v1.87 부스 알바: 처음 한 번 고용비 + 날마다 일당 (그날 처음 일할 때 나가요) · speed = 손님이 사 가는 빠르기 · bonus = 더 받는 값
+const BOOTH_STAFF = {
+  hs: { name: "고등학생 알바", ico: "🧑‍🎓", hire: 300, wage: 100, speed: .6, bonus: 0, d: "느긋하게 팔아요" },
+  uni: { name: "대학생 알바", ico: "🧑", hire: 1000, wage: 300, speed: 1, bonus: 0, d: "무난하게 팔아요" },
+  pro: { name: "수산 베테랑", ico: "🧔", hire: 4000, wage: 800, speed: 1.5, bonus: .05, d: "손님을 잘 불러 빨리 팔고 5% 더 받아요" },
+  chef: { name: "횟집 장인", ico: "👨‍🍳", hire: 12000, wage: 2000, speed: 2.2, bonus: .1, d: "가장 빨리 팔고 10% 더 받아요" },
+};
+const boothStaff = () => P.rest && P.rest.booth && BOOTH_STAFF[P.rest.booth.g] ? BOOTH_STAFF[P.rest.booth.g] : null;
+function hireBoothStaff(g) {
+  const B = BOOTH_STAFF[g]; if (!B) return; const cur = P.rest.booth;
+  if (cur && cur.g === g) return;
+  const cost = B.hire + B.wage; if (P.gold < cost) { sfx("ui-error", .4); toast("돈이 부족해요 · 고용비 " + won(B.hire) + " + 오늘 일당 " + won(B.wage)); return; }
+  P.gold -= cost; P.rest.booth = { g, paid: kstDay() }; markDirty(); flushSave(); sfx("ui-confirmation", .45);
+  toast(B.ico + " " + B.name + "를 고용했어요 · 고용비 " + won(B.hire) + " + 오늘 일당 " + won(B.wage)); boothKeep(true); refreshSheet();
+}
+function fireBoothStaff() { if (!P.rest.booth) return; const B = boothStaff(); P.rest.booth = null; markDirty(); toast((B ? B.name : "알바") + "를 내보냈어요 · 내일부터 일당이 안 나가요"); refreshSheet(); }
+function boothKeep(now) {   // 알바가 있으면 내 부스를 열어 둬요 (일당은 그날 처음 일할 때)
+  const B = boothStaff(), i = myOwnStall(); if (!B || i < 0 || !S.online) return;
+  if (P.rest.booth.paid !== kstDay()) {
+    if (P.gold < B.wage) { P.rest.booth = null; markDirty(); toast("💸 일당 " + won(B.wage) + "이 없어서 " + B.name + "가 그만뒀어요"); return; }
+    P.gold -= B.wage; P.rest.booth.paid = kstDay(); markDirty(); toast(B.ico + " " + B.name + " 오늘 일당 " + won(B.wage) + "을 줬어요");
+  }
+  S.db.doc(stallDocId(i)).update({ npcUntil: Date.now() + NPC_MS, hb: Date.now() }).catch(() => {});
+}
+setInterval(() => boothKeep(false), 30000);
 let hbTimer = null;
 const stallAlive = (st) => !!st && isUid(st.owner) && (Date.now() - (Number(st.hb) || 0) < STALL_HB || (Number(st.npcUntil) || 0) > Date.now());
 const npcActive = (st) => !!st && (Number(st.npcUntil) || 0) > Date.now();
-const myOwnStall = () => S.uid ? S.stalls.findIndex(st => st && st.owner === S.uid) : -1;
-const myLiveRest = () => S.uid ? S.stalls.findIndex(st => st && st.owner === S.uid && Date.now() - (Number(st.hb) || 0) < STALL_HB) : -1;   // v1.82.3: 옛 노점의 NPC 알바(npcUntil)로만 살아 있는 자리는 포차로 안 쳐요   // 지금 살아 있는 내 포차 (신호가 끊긴 옛 자리는 빼요 · v1.82.2)
+const myOwnStall = () => S.uid ? S.stalls.findIndex((st, i) => i >= 8 && st && st.owner === S.uid) : -1;   // v1.87: 노점 = 수산시장 회 부스만
+const myLiveRest = () => S.uid ? S.stalls.findIndex((st, i) => i < 8 && st && st.owner === S.uid && Date.now() - (Number(st.hb) || 0) < STALL_HB) : -1;   // v1.82.3: 옛 노점의 NPC 알바(npcUntil)로만 살아 있는 자리는 포차로 안 쳐요   // 지금 살아 있는 내 포차 (신호가 끊긴 옛 자리는 빼요 · v1.82.2)
 const ownerAtStall = (i) => { const st = S.stalls[i]; if (!st) return false; if (st.owner === S.uid) return S.myStall === i; return otherPeers().some(p => p.uid === st.owner && p.stall === i); };
 const PROMO_PAPERS = ["#fff7e0", "#ffe3ec", "#e3f3ff", "#e6f7de", "#fff1a8", "#2b2b33"];
 const PROMO_STICKERS = ["fish", "sashimi", "star", "sun", "wave", "lantern"];
@@ -4965,7 +4999,7 @@ async function stallEdit(i, fn, quiet) {   // quiet: NPC 손님처럼 알아서 
   const ref = S.db.doc(stallDocId(i));
   try {
     const r = await ref.acquire({ holder: S.uid, ttlMs: 3000 });
-    if (!r.acquired) { if (!quiet) toast("노점이 바빠요. 잠시 후 다시 눌러 주세요"); return null; }
+    if (!r.acquired) console.warn("stall lock skipped", i);   // v1.87: 잠금이 안 돼도 그대로 진행 (잠금이 계속 실패해 「노점이 바빠요」에서 멈추던 문제)
     const snap = await ref.get();
     return await fn(snap.exists ? normStall(snap.data()) : null, ref);
   } catch (e) { console.warn("stall", e); if (!quiet) toast("노점 정보를 바꾸지 못했어요. 다시 시도해 주세요"); return null; }
@@ -5211,7 +5245,7 @@ S.npcNext = 0;
 async function npcVisit() {
   const i = myOwnStall(); if (i < 0 || S.myStall === i) return;
   const st = S.stalls[i]; if (!stallAlive(st) || !st.menu.length || !npcActive(st)) return;
-  if (npcSalesToday() >= NPC_SALE_MAX || Math.random() > .7) return;
+  if (npcSalesToday() >= NPC_SALE_MAX || Math.random() > Math.min(.95, .7 * ((boothStaff() || {}).speed || 1))) return;
   const who = pick(NPC_BUYERS), target = pick(st.menu);
   npcShopperTo(i);
   let got = null;
@@ -5222,13 +5256,14 @@ async function npcVisit() {
   }, true);
   if (!got) return;
   P.npcSales = { day: kstDay(), n: npcSalesToday() + 1 };
-  P.gold += got.price; P.shop.served++; stat("stallSales"); stat("soldGold", got.price); gainJobXp("sashimi", 3); questProgress("sell", got.price);
-  S.saleLog.push({ name: got.name, price: got.price, ts: Date.now() }); markDirty(); flushSave();
-  sfx("jingle-catch", .3); toast("🧑 " + who + "이(가) 알바생에게서 「" + got.name + "」를 사 갔어요 · +" + won(got.price)); refreshSheet();
+  const earn = Math.round(got.price * (1 + ((boothStaff() || {}).bonus || 0)));
+  P.gold += earn; P.shop.served++; stat("stallSales"); stat("soldGold", earn); gainJobXp("sashimi", 3); questProgress("sell", earn);
+  S.saleLog.push({ name: got.name, price: earn, ts: Date.now() }); markDirty(); flushSave();
+  sfx("jingle-catch", .3); toast("🧑 " + who + "이(가) " + ((boothStaff() || {}).name || "알바생") + "에게서 「" + got.name + "」를 사 갔어요 · +" + won(earn)); refreshSheet();
 }
 setInterval(() => {
   if (!S.online || !S.uid || S.npcBusy || Date.now() < S.npcNext || myOwnStall() < 0) return;
-  S.npcNext = Date.now() + 40000 + Math.random() * 30000; S.npcBusy = true;
+  S.npcNext = Date.now() + (40000 + Math.random() * 30000) / ((boothStaff() || {}).speed || 1); S.npcBusy = true;
   npcVisit().catch((e) => console.warn("npc", e)).finally(() => { S.npcBusy = false; });
 }, 5000);
 function buyShopUpg(k) {
@@ -6593,12 +6628,12 @@ const SHOP_FRONT_X = -21.9;
 function npcShopperTo(i) {
   if (!SHOPPERS.length) return;
   const s = SHOPPERS.reduce((a, b) => Math.abs(a.z - STALLS[i].z) <= Math.abs(b.z - STALLS[i].z) ? a : b);
-  s.stall = i; s.tx = SHOP_FRONT_X; s.tz = STALLS[i].z; s.wait = 6 + Math.random() * 4;
+  s.stall = i; s.tx = STALLS[i].fx || SHOP_FRONT_X; s.tz = STALLS[i].z; s.wait = 6 + Math.random() * 4;
 }
 function shopperNext(s) {
-  const alive = STALLS.filter(st => S.stalls && stallAlive(S.stalls[st.i]) && !S.stalls[st.i].rest && S.restSlot !== st.i);   // v1.86.1: 포차(식당)는 진짜 식당 손님만 와요 · 옛 시장 손님이 카운터 앞에 서 있기만 하던 것
-  if (alive.length && Math.random() < .7) { const st = pick(alive); s.stall = st.i; s.tx = SHOP_FRONT_X; s.tz = st.z + (Math.random() - .5) * .8; s.wait = 4 + Math.random() * 5; }
-  else { s.stall = -1; s.tx = -13 - Math.random() * 5; s.tz = 18 + Math.random() * 44; s.wait = 1 + Math.random() * 3; }
+  const alive = STALLS.filter(st => st.market && S.stalls && stallAlive(S.stalls[st.i]));   // v1.86.1: 포차(식당)는 진짜 식당 손님만 와요 · 옛 시장 손님이 카운터 앞에 서 있기만 하던 것
+  if (alive.length && Math.random() < .7) { const st = pick(alive); s.stall = st.i; s.tx = st.fx || SHOP_FRONT_X; s.tz = st.z + (Math.random() - .5) * .8; s.wait = 4 + Math.random() * 5; }
+  else { s.stall = -1; s.tx = -13 - Math.random() * 2.5; s.tz = -40 + Math.random() * 15; s.wait = 1 + Math.random() * 3; }
 }
 function npcShopTick(t, dt) {
   if (!T3 || !scene) return;
@@ -6608,7 +6643,7 @@ function npcShopTick(t, dt) {
       for (const slot of ["hat", "top", "bottom", "shoes"]) { const opts = CLOTHES.filter(c => c.slot === slot && !c.ev); if (opts.length && (k + slot.length) % 3) wear[slot] = opts[(k * 7 + slot.length * 3) % opts.length].id; }
       applyOutfit(B, normWear(wear), COLORS[(k * 3 + 1) % COLORS.length]);
       B.faceMat.map = faceTexture("npc"); B.faceMat.needsUpdate = true; scene.add(B.g);
-      SHOPPERS.push({ B, x: -15, z: 22 + k * 14, tx: -15, tz: 22 + k * 14, wait: 1 + k * 2, stall: -1, ry: Math.PI, walking: false });
+      SHOPPERS.push({ B, x: -14, z: -38 + k * 6, tx: -14, tz: -38 + k * 6, wait: 1 + k * 2, stall: -1, ry: Math.PI, walking: false });
     }
   }
   const vis = !atHome();
@@ -8093,7 +8128,15 @@ function buildPocha() {
 // 카운터 (손님 쪽 앞) · 사장님 의자 · 홍보 종이 · 접시 · 노점 이름판
 function buildStallCounter(s) {
   const counter = phong(0x9b7653), top = phong(0xe8e2d4);
-  const g = new T3.Group(); g.position.set(s.x, 0, s.z); scene.add(g); g.userData.pocha = true;
+  const g = new T3.Group(); g.position.set(s.x, 0, s.z); scene.add(g); g.userData.pocha = !s.market;
+  if (s.market) {   // v1.87 시장 회 부스: 기둥 4 · 줄무늬 차양 · 뒤 선반 · 막기
+    for (const [dx, dz] of [[-1.5, -1.75], [-1.5, 1.75], [1.5, -1.75], [1.5, 1.75]]) cyl(.05, .05, 2.5, 8, cmat(0x5a5f66), dx, 1.25, dz, g);
+    const aw = new T3.Mesh(new T3.PlaneGeometry(3.4, 3.8), phong(0xffffff, { map: extTex("stripe"), side: T3.DoubleSide })); aw.rotation.set(-Math.PI / 2, 0, Math.PI / 2); aw.rotateX(.12); aw.position.set(0, 2.55, 0); g.add(aw);
+    box(.1, .25, 3.8, cmat(0xc8352a), 1.72, 2.4, 0, g);
+    box(.5, .9, 3.2, cmat(0xd8dde0), -1.6, .45, 0, g);   // 뒤 얼음 보관함
+    for (let k = 0; k < 5; k++) plain(GEOD.ice || (GEOD.ice = new T3.IcosahedronGeometry(.09, 0)), cmat(0xf4fbfd), -1.6 + (k % 2) * .12, .95, -1.2 + k * .6, g);
+    BLOCKS.push([s.x + .45, s.x + 1.6, s.z - 1.85, s.z + 1.85]);
+  }
   const proc = new T3.Group(); g.add(proc); g.userData.proc = proc; STALL_GROUPS.push(g);
   box(1.0, 1.0, 3.4, counter, 1.0, .5, 0, proc); box(1.15, .08, 3.6, top, 1.0, 1.04, 0, proc);
   box(.05, .7, 3.2, cmat(0xc9a86a), 1.52, .5, 0, proc);
@@ -8150,12 +8193,7 @@ function buildFishMarket() {
   for (let k = 0; k < 8; k++) { const st = box(2.2, .08, 1.0, cmat(k % 2 ? 0xf4f2ec : 0x2a7fa8), x1 + 1.0, 3.9 - .35, FMKT.door[0] + .5 + k * 1.0, det); st.rotation.z = -.32; }
   for (const z of FMKT.door) cyl(.06, .06, 3.4, 6, dark, x1 + 2.0, 1.7, z, det);
   const sg = makeSign(8.4, 2.2, SIGNS.market); sg.position.set(x1 + .2, H + 1.15, cz); sg.rotation.y = Math.PI / 2; FMKT_ROOF.add(sg);   // 안에 들어가면 지붕과 같이 숨김
-  // 가운데 얼음 매대
-  plain(new T3.BoxGeometry(6.4, .85, 2.2), steel, -22, .43, -33, det); plain(new T3.BoxGeometry(6.2, .16, 2.0), cmat(0xeaf7fb), -22, .93, -33, det);
-  for (let x = -24.9; x <= -19.1; x += .38) plain(GEOD.ice || (GEOD.ice = new T3.IcosahedronGeometry(.09, 0)), cmat(0xf4fbfd), x, 1.02, -33 + (Math.abs(x * 7) % 1.4 - .7), det);
-  for (let k = 0; k < 5; k++) { const tag = makeSign(.5, .26, { shape: "board", fill: { type: "grad", c: ["#ffe9a8", "#ffd84d"] }, frame: { c: "#5a3a06" }, t: { text: ["1kg 1만", "마리 2만", "오늘 특가", "1kg 3만", "자연산"][k], font: "hyeon", color: "#3a2410", size: .34, y: .55 } }, { cw: 200 });
-    tag.position.set(-24.4 + k * 1.2, 1.2, -31.85); scene.add(tag); }
-  BLOCKS.push([-25.5, -18.5, -34.4, -31.6]);
+  // (v1.87) 가운데 얼음 매대는 치우고 그 자리에 회 부스 6칸을 놓았어요
   // 북쪽 벽: 2단 활어 수조
   for (let k = 0; k < 3; k++) { const tx = -27.5 + k * 4.2, g = new T3.Group(); g.position.set(tx, 0, z1 - .9); det.add(g);
     box(3.6, .6, 1.2, steel, 0, .3, 0, g); box(3.6, .1, 1.2, steel, 0, 1.6, 0, g); box(3.6, .1, 1.2, steel, 0, 2.7, 0, g);
@@ -8177,7 +8215,7 @@ function buildFishMarket() {
     plain(new T3.CylinderGeometry(.45, .36, .4, 14), cmat(k % 2 ? 0xd8382c : 0x2a78bb), x + 1.3, .2, z0 + .7, det); }
   BLOCKS.push([x0, x1, z0, z0 + 1.2]);
   // 따뜻한 갓 조명 3개
-  for (const [x, z] of [[-26.5, -33], [-22, -33], [-18, -33]]) { plain(new T3.CylinderGeometry(.01, .01, 1.4, 4), dark, x, H - .7, z, det); plain(new T3.ConeGeometry(.3, .26, 16, 1, true), cmat(0xd8382c), x, H - 1.55, z, det);
+  for (const [x, z] of [[-22.5, -33.5], [-17.5, -33.5], [-27.5, -33]]) { plain(new T3.CylinderGeometry(.01, .01, 1.4, 4), dark, x, H - .7, z, det); plain(new T3.ConeGeometry(.3, .26, 16, 1, true), cmat(0xd8382c), x, H - 1.55, z, det);
     const b = new T3.Mesh(GEOD.mlamp || (GEOD.mlamp = new T3.SphereGeometry(.16, 10, 8)), bulbMat(0xe8dcc0, 0xffd27a)); b.position.set(x, H - 1.65, z); scene.add(b); }
   const pl = new T3.PointLight(0xffd2a0, 0, 22, 1.6); pl.position.set(cx, 4, cz); scene.add(pl); glow.push({ light: pl, val: 1.2 });
   // 시장 앞 광장 (큰길 산책로와 이어짐)
@@ -8189,7 +8227,6 @@ function decorateFishMarket() {
   const ids = ["b-chamdom", "b-gwangeo", "b-godeungeo", "b-galchi", "b-ureok", "b-nongeo", "b-jeoneo", "b-samchi", "b-bollak", "b-mineo"].filter(id => FISH3D.has(id));
   if (!ids.length) return;
   let k = 0;
-  for (let x = -24.6; x <= -19.4; x += .65) for (const dz of [-.5, .45]) { const m = fishMesh(ids[k++ % ids.length]); if (!m) continue; m.scale.setScalar(.55); m.position.set(x, 1.08, -33 + dz); m.rotation.set(0, Math.PI / 2 + (k % 2 ? .08 : -.08), Math.PI / 2); scene.add(m); }
   for (let t = 0; t < 3; t++) for (const y of [1.05, 2.15]) for (let q = 0; q < 2; q++) { const m = fishMesh(ids[(t * 3 + q + (y > 2 ? 2 : 0)) % ids.length]); if (!m) continue; m.scale.setScalar(.45); scene.add(m); FMKT_SWIM.push({ m, cx: -27.5 + t * 4.2, cy: y, cz: FMKT.z1 - .9, ph: t * 2 + q * 3 + y }); }
 }
 const FMKT_SWIM = [];
@@ -10123,7 +10160,7 @@ function loop3D(ms) {
   }
   S.stalls.forEach((st, i) => {
     if (!npcActive(st) || ownerAtStall(i)) return;
-    desired.set("npc" + i, { npc: true, me: false, peer: "npc" + i, uid: null, x: STALLS[i].x - .95, z: STALLS[i].z, ry: Math.PI / 2, st: "stall", seat: null, nick: "알바생 · " + Math.max(1, Math.ceil((st.npcUntil - now) / 60000)) + "분",
+    desired.set("npc" + i, { npc: true, me: false, peer: "npc" + i, uid: null, x: STALLS[i].x - .95, z: STALLS[i].z, ry: Math.PI / 2, st: "stall", seat: null, nick: (st.owner === S.uid && boothStaff() ? boothStaff().ico + " " + boothStaff().name : "🧑 알바생"),
       color: "#2f8f5b", skin: "#f6d2b4", phase: "idle", faceUid: "_", wear: { hat: "h-cap", bottom: "b-overall" }, lv: 0, emo: null, card: null, rod: "bamboo", reel: "basic" });
   });
   for (const [k2, F] of folks) if (!desired.has(k2)) { removeChar(F); folks.delete(k2); }
@@ -13321,7 +13358,7 @@ SHEETS.stallopen = (body, i) => {
 SHEETS.stall = (body, i) => {
   const st = S.stalls[i];
   if (!stallAlive(st)) {
-    setHead("낭만포차 " + (i + 1) + "호", "비어 있는 노점이에요");
+    setHead(boothName(i), "비어 있는 회 부스예요");
     body.append(h("div", { class: "muted", style: "font-size:13px;line-height:1.6", text: "노점을 열면 홍보 종이를 붙이고 회를 팔 수 있어요. 높은 의자에 앉아 손님을 기다리고, 5만원으로 알바를 쓰면 10분 동안 대신 팔아 줘요." }));
     body.append(h("div", { class: "row" }, h("button", { class: "btn pri", disabled: !S.online, onclick: () => openSheet("stallopen", i), text: S.online ? "홍보 종이 꾸미고 노점 열기" : "온라인에서만 열 수 있어요" })));
     return;
@@ -13363,10 +13400,13 @@ SHEETS.mystall = (body) => {
   const pc = promoCanvas(st.promo, 300); pc.style.cssText = "width:100%;max-width:200px;margin:0 auto;display:block";
   const left_ = h("div", { class: "ishelf" }, pc, h("button", { class: "btn sm", onclick: () => openSheet("stallopen", "edit"), text: "홍보 종이 고치기" }),
     h("div", { class: "listrow", style: "flex-direction:column;align-items:stretch;gap:6px;background:rgba(255,255,255,.6)" },
-      h("b", { text: npc ? "알바생 근무 중 · " + left + "분 남음" : "알바생 없음" }),
-      h("span", { class: "muted", style: "font-size:12px", text: "알바를 쓰면 내가 자리를 비워도 노점이 열려 있고 회가 팔려요. 판 돈은 우편함으로 들어와요." }),
-      h("button", { class: "btn sm pri", disabled: P.gold < NPC_PRICE, onclick: hireNpc, text: (npc ? "10분 더 쓰기" : "알바 고용") + " · " + won(NPC_PRICE) }),
-      seated && npc ? h("button", { class: "btn sm", onclick: leaveStallSeat, text: "알바에게 맡기고 자리 뜨기" }) : null,
+      h("b", { text: boothStaff() ? boothStaff().ico + " " + boothStaff().name + " 근무 중" : "알바생 없음" }),
+      h("span", { class: "muted", style: "font-size:12px", text: "알바가 있으면 내가 자리를 비워도 부스가 열려 있고 회가 팔려요. 고용비는 처음 한 번, 일당은 날마다(그날 처음 일할 때) 나가요." }),
+      ...Object.entries(BOOTH_STAFF).map(([g, B]) => { const on = P.rest.booth && P.rest.booth.g === g;
+        return h("div", { class: "row", style: "gap:8px;align-items:center;justify-content:space-between;flex-wrap:nowrap" },
+          h("span", { style: "font-size:12.5px;line-height:1.35;min-width:0" }, h("b", { text: B.ico + " " + B.name }), h("br"), h("small", { class: "muted", text: B.d + " · 고용 " + won(B.hire) + " · 일당 " + won(B.wage) })),
+          on ? h("button", { class: "btn sm", onclick: fireBoothStaff, text: "내보내기" }) : h("button", { class: "btn sm pri", disabled: P.gold < B.hire + B.wage, onclick: () => hireBoothStaff(g), text: P.rest.booth ? "바꾸기" : "고용" })); }),
+      seated && boothStaff() ? h("button", { class: "btn sm", onclick: () => { boothKeep(true); setTimeout(leaveStallSeat, 400); }, text: "알바에게 맡기고 자리 뜨기" }) : null,
       !seated ? h("button", { class: "btn sm", onclick: () => returnToStall(i), text: "노점으로 돌아가 앉기" }) : null));
   const right = h("div", { style: "display:flex;flex-direction:column;gap:10px;min-width:0" });
   const sum = S.saleLog.reduce((a, x) => a + x.price, 0);
@@ -14247,7 +14287,7 @@ async function boot() {
       updateLeaveBtn(); updateHint();
     }, (e) => console.warn("boat", e));
     unStalls = db.collection("stalls").onSnapshot((snap) => {
-      const arr = Array(8).fill(null), re = stallIdRe();
+      const arr = Array(STALLS.length).fill(null), re = stallIdRe();
       for (const d of snap.docs) { const m = re.exec(d.id); if (m) arr[+m[1]] = normStall(d.data()); }
       S.stalls = arr;
       if (S.myStall >= 0 && (!arr[S.myStall] || arr[S.myStall].owner !== uid)) { S.myStall = -1; clearInterval(hbTimer); ME.st = "idle"; updateLeaveBtn(); toast("노점이 닫혔어요"); }
