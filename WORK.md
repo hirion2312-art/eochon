@@ -23,6 +23,8 @@
 
 - **v1.90.0 운영자 실험실 테스트 기능** (2026-11-04, 우사기 · 이재헌님 지시): 로또 테스트 방송(tvNow 공용 판정 — TV.test면 테스트 타임라인 우선, 회차 -7·첫 공 4초·6초 간격·100초 자동 종료, 화면/시트에 「테스트 방송」 명시, 서버 기록·정산과 완전 분리) · 가게 등급 ±(labRestLv, 비용 없이 내 가게에 저장) · 다음 손님 단골/VIP 강제(labPickSpecial, 등급 조건 무시·1회성) · 손님 바로 부르기. 커밋 e86a0b0. 라이브 검증 완료(빌드 주입 6줄만 차이).
 
+- **v1.90.1 가방 등급 테두리 정리** (2026-11-04, 우사기 · 이재헌님 직접 지시): .itile/.card .g3~.g9 글로우가 구 팔레트+중복 정의(g4 보라→금색 덮어씀, g5 무지개 잔재)였던 것을 현행 등급 색 var(--t3~--t9)+color-mix 글로우로 통일. 단계 설계: g3 정적 은은 / g4~g8 gpulse(--gb 8→16px로 확대, 주기 2.8→2.0s) / g8·g9 twinkle 파티클(::after) / g9만 rainbow 3.2s(완화). gpulse 키프레임 --gb 변수화(.irow.g4 장비 글로우는 기본값 9px로 무변화 확인). reduced-motion 목록 g6~g9+::after 확장. ※ .sc-fish.g*(자랑 물고기 그림자)는 별도 컴포넌트라 미포함.
+
 - **v1.89.0 3D 의상 프리셋 5세트** (2026-11-04, 우사기 · 이재헌님 직접 지시): 외부 에셋은 비율 조건(2등신·무스켈레톤)에 맞는 게 없어 직접 제작 — `~/workspace/outfit3d/gen_outfits.py`(trimesh, 게임 실측 좌표계: hat=머리 로컬/top·bottom=rig/shoes=발 로컬)로 20조각 GLB 생성, 법선 포함 내보내기(include_normals+vertex_normals 캐시 필수). a/outfits.json(base64 번들 481KB, 물고기와 같은 방식)으로 배포. applyOutfit에 glb 분기 추가 (top/bottom→rig, hat→head, shoes→발 자식에 역스케일 (1,1.333,.8) 래퍼), 로드 완료 시 OUTFIT_REV++로 전체 재적용, GLB 클론은 dispose 제외(userData.glb). CLOTHES 20종 가격 700~2800U. NPC 무작위 착용 풀에도 자동 포함됨.
 
 - **v1.87.0 릴 3D 모델 4종 적용** (2026-11-04, 우사기 · 이재헌님 제공 OBJ 팩): tools/reels_pack.py로 a/reels.json 패킹(낚싯대와 같은 포맷, 방향은 그룹 실측으로 보정 — 스피닝은 풋이 대를 향하고 스풀이 팁 방향, 베이트·전동은 무회전). 손에 든 원통 릴을 장착 릴 모델로 교체(fitHeldReel, 동료 캐릭터 포함), 상점/가방 그림도 3D 렌더(REEL_PIC)로. 모델 로드 전에는 기존 원통·그림 폴백. 커밋 948f39d(reels.json) · c6099fd(도구) · d0fd60c(index). 라이브 바이트 검증 완료(빌드 주입 6줄 제외 일치).

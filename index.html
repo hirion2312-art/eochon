@@ -1203,8 +1203,9 @@ details.guidebox summary{cursor:pointer;font-weight:700}
 .mhead canvas{width:52px;height:52px;border-radius:50%}.mhead b{font-size:17px}.mhead small{display:block;color:var(--muted);font-size:12.5px}
 /* v1.26 좋은 물고기 · 물건 반짝임 · 오늘의 생선 · 시세표 */
 @keyframes tshine{0%{background-position:160% 0}60%,100%{background-position:-60% 0}}
-@keyframes gpulse{0%,100%{box-shadow:0 0 0 1.5px var(--gc),0 0 8px var(--gs)}50%{box-shadow:0 0 0 2px var(--gc),0 0 18px var(--gs)}}
-@keyframes rainbow{0%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}33%{box-shadow:0 0 0 2px #7b8cff,0 0 16px rgba(123,140,255,.6)}66%{box-shadow:0 0 0 2px #3fd6cc,0 0 16px rgba(63,214,204,.6)}100%{box-shadow:0 0 0 2px #ff6fb5,0 0 16px rgba(255,111,181,.6)}}
+@keyframes gpulse{0%,100%{box-shadow:0 0 0 1.5px var(--gc),0 0 var(--gb,9px) var(--gs)}50%{box-shadow:0 0 0 2px var(--gc),0 0 calc(var(--gb,9px)*2) var(--gs)}}
+@keyframes rainbow{0%{box-shadow:0 0 0 2px #ff6fb5,0 0 14px rgba(255,111,181,.5)}33%{box-shadow:0 0 0 2px #7b8cff,0 0 14px rgba(123,140,255,.5)}66%{box-shadow:0 0 0 2px #3fd6cc,0 0 14px rgba(63,214,204,.5)}100%{box-shadow:0 0 0 2px #ff6fb5,0 0 14px rgba(255,111,181,.5)}}
+@keyframes twinkle{0%,100%{opacity:0}50%{opacity:.45}}
 .tier.t3,.tier.t4,.tier.t5,.tier.t6,.tier.t7,.tier.t8,.tier.t9{background-image:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.65) 50%,transparent 65%),var(--tb,none);background-size:250% 100%,100% 100%;background-repeat:no-repeat;animation:tshine 2.6s ease-in-out infinite}
 .tier.t3{--tb:linear-gradient(var(--t3),var(--t3))}.tier.t4{--tb:linear-gradient(var(--t4),var(--t4))}.tier.t5{--tb:linear-gradient(var(--t5),var(--t5))}.tier.t6{--tb:linear-gradient(var(--t6),var(--t6))}.tier.t7{--tb:linear-gradient(var(--t7),var(--t7))}.tier.t8{--tb:linear-gradient(var(--t8),var(--t8))}.tier.t9{--tb:linear-gradient(90deg,#0f9f9a,#7b5cd6,#e0479a)}
 /* v1.35 입장 흐름: 캐릭터 만들기 · 비행기 도착 장면 · 마우스 고정 시점 */
@@ -1253,14 +1254,16 @@ body.creating #sheetClose,body.creating #sheetBack{display:none}
 .ratetbl .up{color:#2fae7f;font-weight:700}.ratetbl .down{color:#d8402a;font-weight:700}
 .fperks{font-size:11.5px;color:#cfe9f2;padding:2px 2px 0;text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .irow.g4{--gc:#f2b630;--gs:rgba(242,182,48,.5);animation:gpulse 2.2s ease-in-out infinite}.irow.g5{animation:rainbow 2.6s linear infinite}
-.itile.g3,.card.g3{--gc:#2fd4bc;--gs:rgba(47,212,188,.5);animation:gpulse 2.4s ease-in-out infinite;border-color:transparent}
-.itile.g4,.card.g4{--gc:#9a6ee0;--gs:rgba(154,110,224,.5);animation:gpulse 2.2s ease-in-out infinite;border-color:transparent}
-.itile.g6,.card.g6{--gc:#3fd6cc;--gs:rgba(63,214,204,.5);animation:gpulse 2.2s ease-in-out infinite;border-color:transparent}
-.itile.g7,.card.g7{--gc:#f06fc0;--gs:rgba(240,111,192,.55);animation:gpulse 2s ease-in-out infinite;border-color:transparent}
-.itile.g8,.card.g8{--gc:#a95fff;--gs:rgba(169,95,255,.6);animation:gpulse 1.9s ease-in-out infinite;border-color:transparent}
-.itile.g9,.card.g9{animation:rainbow 2.2s linear infinite;border-color:transparent}
-.itile.g4,.card.g4{--gc:#f2b630;--gs:rgba(242,182,48,.6);animation:gpulse 1.8s ease-in-out infinite;border-color:transparent}
-.itile.g5,.card.g5{animation:rainbow 2.4s linear infinite;border-color:transparent}
+/* 등급 테두리 (v1.90.1): 색은 공식 등급 색(--t3~--t9)으로 통일 · 등급이 오를수록 빛이 넓어지고, 초월·태초만 반짝이 파티클 · 태초만 무지개 */
+.itile.g3,.card.g3{--gc:var(--t3);--gs:color-mix(in srgb,var(--t3) 45%,transparent);border-color:transparent;box-shadow:0 0 0 1.5px var(--gc),0 0 7px var(--gs)}
+.itile.g4,.card.g4{--gc:var(--t4);--gs:color-mix(in srgb,var(--t4) 50%,transparent);--gb:8px;animation:gpulse 2.8s ease-in-out infinite;border-color:transparent}
+.itile.g5,.card.g5{--gc:var(--t5);--gs:color-mix(in srgb,var(--t5) 55%,transparent);--gb:10px;animation:gpulse 2.6s ease-in-out infinite;border-color:transparent}
+.itile.g6,.card.g6{--gc:var(--t6);--gs:color-mix(in srgb,var(--t6) 50%,transparent);--gb:12px;animation:gpulse 2.4s ease-in-out infinite;border-color:transparent}
+.itile.g7,.card.g7{--gc:var(--t7);--gs:color-mix(in srgb,var(--t7) 55%,transparent);--gb:14px;animation:gpulse 2.2s ease-in-out infinite;border-color:transparent}
+.itile.g8,.card.g8{--gc:var(--t8);--gs:color-mix(in srgb,var(--t8) 60%,transparent);--gb:16px;animation:gpulse 2s ease-in-out infinite;border-color:transparent}
+.itile.g9,.card.g9{animation:rainbow 3.2s linear infinite;border-color:transparent}
+.itile.g8,.card.g8,.itile.g9,.card.g9{position:relative}
+.itile.g8::after,.card.g8::after,.itile.g9::after,.card.g9::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.9) 1.1px,transparent 1.6px),radial-gradient(circle,rgba(255,255,255,.55) 1px,transparent 1.5px);background-size:52px 52px,78px 78px;background-position:8px 12px,34px 40px;opacity:0;animation:twinkle 3s ease-in-out infinite}
 .itile.gtoday,.card.gtoday{outline:2px dashed #f2c230;outline-offset:2px}
 .imul{font-size:10.5px;font-weight:700;color:var(--muted,#8a8f96);font-variant-numeric:tabular-nums}
 .imul.up,.mm.up{color:#d8402a}.imul.down,.mm.down{color:#2a78bb}.imul.today{color:#b8860b}
@@ -1271,7 +1274,7 @@ body.creating #sheetClose,body.creating #sheetBack{display:none}
 .mktrow{display:grid;grid-template-columns:56px 1fr auto 72px;align-items:center;gap:8px;padding:5px 8px;border-radius:12px;border:1px solid var(--line)}
 .mktrow img{width:56px;height:28px;object-fit:contain}.mktrow .mn{display:flex;gap:6px;align-items:center;min-width:0}.mktrow .mn b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mktrow .mp{font-weight:700}.mktrow .mm{text-align:right;font-size:12px;font-weight:700}
-@media (prefers-reduced-motion:reduce){.tier.t3,.tier.t4,.tier.t5,.itile.g3,.itile.g4,.itile.g5,.card.g3,.card.g4,.card.g5{animation:none}}
+@media (prefers-reduced-motion:reduce){.tier.t3,.tier.t4,.tier.t5,.tier.t6,.tier.t7,.tier.t8,.tier.t9,.itile.g3,.itile.g4,.itile.g5,.itile.g6,.itile.g7,.itile.g8,.itile.g9,.card.g3,.card.g4,.card.g5,.card.g6,.card.g7,.card.g8,.card.g9,.itile.g8::after,.card.g8::after,.itile.g9::after,.card.g9::after{animation:none}}
 /* ===================== v1.38.1 UI 겹침 방지 ===================== */
 .toasts{z-index:65}
 body.has-notice .place,body.on-boat .place,body.athome .place,body.has-coop .place{opacity:0;pointer-events:none}
@@ -1751,7 +1754,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.90.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.90.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
