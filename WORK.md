@@ -21,6 +21,8 @@
 
 ## 최근 끝낸 일
 
+- **v1.87.0 릴 3D 모델 4종 적용** (2026-11-04, 우사기 · 이재헌님 제공 OBJ 팩): tools/reels_pack.py로 a/reels.json 패킹(낚싯대와 같은 포맷, 방향은 그룹 실측으로 보정 — 스피닝은 풋이 대를 향하고 스풀이 팁 방향, 베이트·전동은 무회전). 손에 든 원통 릴을 장착 릴 모델로 교체(fitHeldReel, 동료 캐릭터 포함), 상점/가방 그림도 3D 렌더(REEL_PIC)로. 모델 로드 전에는 기존 원통·그림 폴백. 커밋 948f39d(reels.json) · c6099fd(도구) · d0fd60c(index). 라이브 바이트 검증 완료(빌드 주입 6줄 제외 일치).
+
 - **v1.85.0 튜토리얼 전면 리뉴얼** (2026-11-04, 우사기 · 이재헌님 직접 지시, 가이드라인 문서 your_files/eochon-tutorial-guideline-2026-11-04.html 기준): TUTS 개정 — welcome/fight/catch/beach/sheet_sashimi/sheet_bank/sheet_office 문구 교체, market 전면 교체(식당 소개+자격증 목표), jobnotice 삭제(+coach 가드 예외 정리), sheet_lotto 로또 추가. 신규 카드 4종: rest(기존 coach("rest") 호출에 연결)/coop(startReel)/dex(도감 5종 기록 시점)/late(gainXp Lv.10). 가시성: .ccard 확대(470px·본문 16.5px·아이콘 46px·글로우 테두리), 배경 딤 .52, cdots에 진행 숫자(.cprog) 추가. 기존 유저 P.tut 기록은 유지해 본 카드는 재상영 안 함.
 
 - **v1.83.0 컷씬·등급 비공개** (2026-11-04, 우사기 · 이재헌님 직접 지시): startBreach 조건 tier>=3→>=5(전설부터). 파이팅 중 등급 노출 제거 — fightName에서 등급명·등급 배경색 삭제, .boss 클래스·data-tier 속성 부여 중단(등급별 글로우 CSS는 남았으나 발동 안 됨), 입질 토스트 등급별 문구를 "⚠ 대물 입질!" 하나로 통일. 도망 후 missFish의 등급 공개는 사후 공개라 유지.
