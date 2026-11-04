@@ -777,7 +777,7 @@ body.cinema #hint,body.cinema #standBtn,body.cinema #castBtn,body.cinema .toasts
 .ws-row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.05)}
 .ws-row img{width:64px;height:32px;object-fit:contain}.ws-row small{display:block;font-size:11.5px;opacity:.7}
 /* ===== 로또 6/45 · 어촌 TV (v1.83) ===== */
-.tvframe{position:fixed;left:0;top:0;width:640px;height:360px;transform-origin:0 0;z-index:1;pointer-events:none;background:#000}
+.tvframe{position:absolute;left:0;top:0;width:640px;height:360px;transform-origin:0 0;z-index:-1;pointer-events:none;background:#000}   /* 3D 캔버스 뒤에 깔고, TV 자리만 캔버스에 구멍을 뚫어 보여 줘요 → 건물 · 사람이 가리면 정확히 가려져요 */
 .tvframe iframe{width:100%;height:100%;border:0;display:block}
 .tvframe.off{opacity:0;transform:translate(-9999px,0) !important}
 .l6-head{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,#1d3a8a,#2a78d6);color:#fff}.l6-head b{font-size:17px}.l6-head span{font-size:12.5px;opacity:.9}
@@ -1696,7 +1696,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.85.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.85.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -7334,7 +7334,7 @@ function cyl(rt, rb, hh, seg, mat, x, y, z, parent) { const m = new T3.Mesh(new 
 function bulbMat(day, night) { const m = new T3.MeshBasicMaterial({ color: day }); glow.push({ m, day, night }); return m; }
 
 function init3D() {
-  R = new T3.WebGLRenderer({ canvas: cv, antialias: true, powerPreference: "high-performance" });
+  R = new T3.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, powerPreference: "high-performance" }); R.setClearColor(0x173845, 1);
   R.shadowMap.enabled = true; R.shadowMap.type = T3.PCFSoftShadowMap;
   initPost();
   R.setPixelRatio(Math.min(window.devicePixelRatio || 1, matchMedia("(max-width: 820px)").matches ? 1.5 : 2));
@@ -7473,7 +7473,7 @@ function initPost() {
         uniform sampler2D tDiffuse; uniform vec2 res; uniform float warm; uniform float bloom; varying vec2 vUv;
         vec3 bright(vec2 uv){ vec3 c = texture2D(tDiffuse, uv).rgb; float l = max(c.r, max(c.g, c.b)); return c * smoothstep(0.86, 1.0, l); }
         void main(){
-          vec3 c = texture2D(tDiffuse, vUv).rgb;
+          vec4 c0 = texture2D(tDiffuse, vUv); vec3 c = c0.rgb;
           vec3 b = vec3(0.0); vec2 px = 1.0 / res;
           for (int i = 0; i < 10; i++) {
             float a = float(i) * 0.6283;
@@ -7484,7 +7484,7 @@ function initPost() {
           c = mix(c, c * vec3(1.04, 1.0, 0.93) + vec3(0.012, 0.006, 0.0), warm);
           float l = dot(c, vec3(0.299, 0.587, 0.114)); c = mix(vec3(l), c, 0.96);
           float v = smoothstep(0.95, 0.35, length(vUv - 0.5)); c *= mix(0.86, 1.0, v);
-          gl_FragColor = vec4(c, 1.0);
+          gl_FragColor = vec4(c * c0.a, c0.a);   // TV 구멍(알파 0)은 그대로 비워 둬서 뒤의 유튜브가 보여요
         }`, depthTest: false, depthWrite: false });
     const sc = new T3.Scene(); sc.add(new T3.Mesh(new T3.PlaneGeometry(2, 2), mat));
     POST = { rt, mat, scene: sc, cam: new T3.OrthographicCamera(-1, 1, 1, -1, 0, 1) };
@@ -11005,7 +11005,8 @@ function buildTV() {
   for (const s of [-1, 1]) { const hn = new T3.Mesh(new T3.CylinderGeometry(.08, .36, .6, 12, 1, true), cmat(0xd8d4c8)); hn.rotation.z = -Math.PI / 2; hn.rotation.y = s * .35; hn.position.set(x + .1, y0 + hgt + .95, z + s * (w / 2 - .2)); scene.add(hn); }
   // 화면 (캔버스 그림: 대기 · 추첨 방송)
   TV.cv = document.createElement("canvas"); TV.cv.width = 640; TV.cv.height = 360; TV.tex = new T3.CanvasTexture(TV.cv);
-  TV.mesh = new T3.Mesh(new T3.PlaneGeometry(w, hgt), new T3.MeshBasicMaterial({ map: TV.tex })); TV.mesh.position.set(x - .1, y0 + hgt / 2, z); TV.mesh.rotation.y = Math.PI / 2; scene.add(TV.mesh);
+  TV.texMat = new T3.MeshBasicMaterial({ map: TV.tex }); TV.holeMat = new T3.MeshBasicMaterial({ color: 0x000000, opacity: 0, blending: T3.NoBlending });
+  TV.mesh = new T3.Mesh(new T3.PlaneGeometry(w, hgt), TV.texMat); TV.mesh.position.set(x - .1, y0 + hgt / 2, z); TV.mesh.rotation.y = Math.PI / 2; scene.add(TV.mesh);
   const hit = new T3.Mesh(new T3.BoxGeometry(1, hgt + 2, w), MAT.hit); hit.position.set(x, (y0 + hgt) / 2 + .5, z); hit.userData.pick = { kind: "tv" }; scene.add(hit); pickables.push(hit);
   BLOCKS.push([x - 1.1, x + .7, z - w / 2 - .5, z + w / 2 + .5]);
   drawTVCanvas(Date.now());
@@ -11013,11 +11014,11 @@ function buildTV() {
 // 화면 위 유튜브 (실제 영상은 화면 위에 원근을 맞춘 iframe으로 겹쳐 보여요)
 function tvSetVideo(vid, startAt) {
   if (vid === TV.vid && startAt === TV.startAt) return; TV.vid = vid; TV.startAt = startAt || 0;
-  if (TV.frame) { TV.frame.remove(); TV.frame = TV.ifr = null; }
+  if (TV.frame) { TV.frame.remove(); TV.frame = TV.ifr = null; } if (TV.mesh) TV.mesh.material = TV.texMat;
   if (!vid) return;
   const el = h("div", { class: "tvframe" }), off = Math.max(0, Math.floor((Date.now() - TV.startAt) / 1000));
   const ifr = h("iframe", { src: "https://www.youtube.com/embed/" + vid + "?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=" + vid + "&enablejsapi=1&start=" + off + "&rel=0&modestbranding=1", allow: "autoplay; encrypted-media", title: "어촌 TV", frameborder: "0" });
-  el.append(ifr); document.body.append(el); TV.frame = el; TV.ifr = ifr; TV.vol = -1; TV.unmuted = false; TV.dur = 0;
+  el.append(ifr); ($("app") || document.body).prepend(el); TV.frame = el; TV.ifr = ifr; TV.vol = -1; TV.unmuted = false; TV.dur = 0;
   ifr.addEventListener("load", () => { try { ifr.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*"); } catch {} });
 }
 window.addEventListener("message", (e) => { if (!TV.ifr || e.source !== TV.ifr.contentWindow) return; try { const d = typeof e.data === "string" ? JSON.parse(e.data) : e.data; const inf = d && d.info; if (inf && inf.duration && !TV.dur) { TV.dur = inf.duration; const want = ((Date.now() - TV.startAt) / 1000) % TV.dur; if (Math.abs((inf.currentTime || 0) - want) > 4) ytCmd("seekTo", [want, true]); } } catch {} });
@@ -11048,7 +11049,7 @@ function tvTick(t) {
       for (const c of cs) { const v = (_tvV[0] || (_tvV[0] = new T3.Vector3())).set(c[0], c[1], c[2]).project(camera); if (v.z > 1 || v.z < -1) ok = false; pts.push([rc.left + (v.x + 1) / 2 * rc.width, rc.top + (1 - v.y) / 2 * rc.height]); }
       if (ok) TV.frame.style.transform = quadMatrix(640, 360, pts);
     }
-    TV.frame.classList.toggle("off", !ok);
+    TV.frame.classList.toggle("off", !ok); TV.mesh.material = ok ? TV.holeMat : TV.texMat;
     const vol = !S.sound || !vis || live ? 0 : Math.round(100 * Math.pow(clamp(1 - (d - 6) / 70, 0, 1), 1.6));
     if (vol > 0 && !TV.unmuted && S.lastInput) { ytCmd("unMute"); TV.unmuted = true; }
     if (Math.abs(vol - TV.vol) >= 3 || (vol === 0 && TV.vol !== 0)) { TV.vol = vol; ytCmd("setVolume", [vol]); if (vol === 0) ytCmd("mute"); else ytCmd("unMute"); }
