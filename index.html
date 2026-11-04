@@ -1695,7 +1695,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.84.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.84.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -5504,19 +5504,19 @@ function dishMesh(dishId, items) {
 let restHb = null;
 async function claimRestSlot(i) {
   if (!S.online) { S.restSlot = i; return true; }   // 혼자 모드: 자리 표시 없이 바로
-  const cur = await stallEdit(i, async (st, ref) => {   // v1.82.2: 실제로 자리를 저장해요 (전에는 만들기만 하고 저장을 안 해서 남에게 빈자리로 보였어요)
-    if (stallAlive(st) && st.owner !== S.uid) return { taken: st.nick || "다른 분" };
-    if (st && st.owner && st.owner !== S.uid && st.menu && st.menu.length) sendInbox(st.owner, { type: "stall_return", dishes: menuDoc(st.menu) }).catch(() => {});   // 남이 두고 간 회는 우편으로 돌려줘요
-    const keep = st && st.owner === S.uid && st.menu && st.menu.length ? menuDoc(st.menu) : [];   // 내 옛 노점 회는 그대로 둬요
-    const doc = { owner: S.uid, nick: P.nick, color: P.color, hb: Date.now(), ts: Date.now(), npcUntil: 0, promo: normPromo(st && st.promo), menu: keep, rest: true };
-    await ref.set(doc); return doc;
-  });
-  if (!cur) return false;   // 잠금 · 저장 실패는 stallEdit가 이미 알려 줘요
-  if (cur.taken) { toast("🏮 " + cur.taken + "님이 장사 중인 자리예요 · 다른 빈 포차에서 차려 주세요"); return false; }
+  // v1.82.4: 잠금(acquire) 없이 — 잠금이 실패하면 「노점이 바빠요」만 뜨고 가게가 영영 안 열렸어요.
+  // 식당은 내 화면에서 돌아가니, 자리 문서는 「누가 쓰는지」 보여 주기용으로만 뒤에서 저장해요 (실패해도 가게는 열려요)
+  const ref = S.db.doc(stallDocId(i));
+  let st = S.stalls[i] || null;
+  try { const snap = await ref.get(); st = snap.exists ? normStall(snap.data()) : null; } catch (e) { console.warn("rest slot read", e); }
+  if (stallAlive(st) && st.owner !== S.uid) { toast("🏮 " + (st.nick || "다른 분") + "님이 장사 중인 자리예요 · 다른 빈 포차에서 차려 주세요"); return false; }
   S.restSlot = i;
-  // 신호가 끊긴 내 옛 포차 자리는 비워 줘요 (안 그러면 그 자리가 계속 「내 것」으로 잡혀요 · v1.82.2)
-  S.stalls.forEach((st, k) => { if (k !== i && st && st.owner === S.uid && st.rest && !st.menu.length && !stallAlive(st)) stallEdit(k, async (x, ref) => { if (x && x.owner === S.uid && !stallAlive(x) && !x.menu.length) { await ref.update({ owner: "", hb: 0 }); return true; } return null; }, true).catch(() => {}); });
-  clearInterval(restHb); restHb = setInterval(() => { if (S.restSlot >= 0 && S.online) S.db.doc(stallDocId(S.restSlot)).update({ hb: Date.now(), nick: P.nick, color: P.color }).catch(() => {}); }, 45000);
+  const doc = () => ({ owner: S.uid, nick: P.nick, color: P.color, hb: Date.now(), ts: Date.now(), npcUntil: 0, promo: normPromo(st && st.promo), menu: st && st.owner === S.uid && st.menu && st.menu.length ? menuDoc(st.menu) : [], rest: true });
+  if (st && st.owner && st.owner !== S.uid && st.menu && st.menu.length) sendInbox(st.owner, { type: "stall_return", dishes: menuDoc(st.menu) }).catch(() => {});   // 남이 두고 간 회는 우편으로 돌려줘요
+  ref.set(doc()).catch((e) => console.warn("rest slot save", e));
+  // 신호가 끊긴 내 옛 포차 자리는 비워 줘요 (안 그러면 그 자리가 계속 「내 것」으로 잡혀요)
+  S.stalls.forEach((x, k) => { if (k !== i && x && x.owner === S.uid && x.rest && !x.menu.length && !stallAlive(x)) S.db.doc(stallDocId(k)).update({ owner: "", hb: 0 }).catch(() => {}); });
+  clearInterval(restHb); restHb = setInterval(() => { if (S.restSlot >= 0 && S.online) { const r2 = S.db.doc(stallDocId(S.restSlot)); r2.update({ hb: Date.now(), nick: P.nick, color: P.color }).catch(() => r2.set(doc()).catch(() => {})); } }, 45000);
   return true;
 }
 async function openRest(i) {   // 포차 앞에서 「차리기」 → 그 자리가 내 가게 · 주방이 생겨요
