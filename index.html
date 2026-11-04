@@ -1738,29 +1738,11 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="a/tier-badges.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="platform.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="platform.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="platform.js"></script>
 <script>
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.91.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.92.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -12976,6 +12958,9 @@ SHEETS.admintools = (body) => {
         h("button", { "aria-pressed": String(LAB.forceGuest === "vip"), onclick: () => labSet("forceGuest", LAB.forceGuest === "vip" ? "" : "vip"), text: (LAB.forceGuest === "vip" ? "🟢 " : "⚪ ") + "다음 손님 VIP로" }),
         h("button", { class: "btn sm", onclick: () => { S.restNextGuest = 0; toast("다음 손님을 바로 불러요 · 장사 중이고 빈자리와 주문 여유가 있을 때 와요"); }, text: "🔔 손님 바로 부르기" })),
       h("div", { class: "muted", style: "font-size:12px;line-height:1.5", text: "등급은 비용 없이 오르내리고 내 가게에 저장돼요. 단골 · VIP 강제는 등급 조건을 무시하고 다음 손님 한 번만 적용돼요." }));
+    body.append(h("div", { class: "sec", text: "✈️ 연출 테스트" }), h("div", { class: "row" },
+      h("button", { class: "btn sm", onclick: () => { if (S.cut) return; closeSheet(); playArrival(() => {}); }, text: "✈️ 오프닝 비행기 컷씬 재생" })),
+      h("div", { class: "muted", style: "font-size:12px;line-height:1.5", text: "처음 들어올 때 나오는 비행기 도착 장면을 다시 봐요. 카메라만 움직이고 진행 · 위치에는 영향이 없어요." }));
     body.append(h("div", { class: "sec", text: "💾 세이브 백업 · 복원" }), h("div", { class: "row" },
       h("button", { class: "btn sm", onclick: () => copyText(JSON.stringify(P), "세이브 JSON을 복사했어요"), text: "내보내기 (JSON 복사)" }),
       armBtn("가져오기", "한 번 더 누르면 지금 세이브를 덮어써요", async () => { try { const o = JSON.parse(ta.value); if (!o || typeof o !== "object" || typeof o.nick !== "string") throw new Error("bad"); await S.db.doc("data/users/" + S.uid + "/profile").set(o); toast("가져왔어요 · 새로고침해요"); setTimeout(() => location.reload(), 700); } catch { toast("JSON이 올바르지 않아요"); } })), ta);
