@@ -65,12 +65,15 @@
       return writePres();
     },
     onPeers(fn, err) {
-      rtdb.ref("presence").on("value", (snap) => {
+      // 사람이 많으면 움직임마다 전체 목록을 다시 계산하지 않도록 0.12초에 한 번만 모아서 넘겨요
+      let pend = null, timer = 0;
+      const flush = () => { timer = 0; const snap = pend; pend = null; if (!snap) return;
         const v = snap.val() || {}, uid = auth.currentUser && auth.currentUser.uid, cur = new Map();
         for (const [peer, d] of Object.entries(v)) if (d && typeof d === "object") cur.set(peer, { peer, by: d.by || null, kind: d.kind || "viewer", presence: d.presence || {}, sameTab: peer === myPeer, isMe: d.by === uid });
         const left = [...lastPeers.keys()].filter((k) => !cur.has(k)).map((k) => lastPeers.get(k));
         lastPeers = cur; fn({ peers: [...cur.values()], left });
-      }, (e) => { console.warn("presence", e); if (err) err(e); });
+      };
+      rtdb.ref("presence").on("value", (snap) => { pend = snap; if (!timer) timer = setTimeout(flush, lastPeers.size > 20 ? 200 : 120); }, (e) => { console.warn("presence", e); if (err) err(e); });
       return () => rtdb.ref("presence").off();
     },
     on(topic, fn, err) {

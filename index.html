@@ -1388,6 +1388,9 @@ input,select,textarea{background-color:rgba(255,255,255,.07);border-color:var(--
 /* v1.41 채널 */
 button.chan{font:inherit;font-size:12.5px;color:var(--hud-ink);cursor:pointer}button.chan:hover{filter:brightness(1.15)}
 .chlist{display:flex;flex-direction:column;gap:8px}
+.fullbox{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;background:rgba(10,20,30,.55);padding:16px}
+.fullcard{background:#fffaf0;color:#2a1d10;border:2px solid #e3d3b5;border-radius:20px;padding:22px 20px;max-width:340px;width:100%;text-align:center;display:grid;gap:8px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.fullcard .fullico{font-size:40px}.fullcard b{font-size:20px}.fullcard p{margin:0;font-size:14px}.fullcard small{color:#8a7a60}
 .chrow{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;border:1.5px solid var(--line);background:var(--bg)}
 .chrow .chn{font-family:var(--f-display);font-weight:400;font-size:19px;min-width:62px}.chrow small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
 .chrow .chbar{height:8px;border-radius:4px;background:rgba(127,127,127,.22);overflow:hidden}.chrow .chbar i{display:block;height:100%;background:#2fae7f}
@@ -1807,7 +1810,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.97.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.98.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -4119,7 +4122,7 @@ function lerpAngle(a, b, t) { let d = ((b - a + Math.PI) % (Math.PI * 2)); if (d
 let lastPres = 0;
 function presMove(force) {
   const now = performance.now();
-  if (!force && now - lastPres < 160) return;
+  if (!force && now - lastPres < (crowdN() >= 12 ? 300 : crowdN() >= 6 ? 220 : 160)) return;   // 붐비면 신호를 덜 보내요
   lastPres = now;
   pushPresence({ x: Math.round(ME.x * 100) / 100, z: Math.round(ME.z * 100) / 100, ry: Math.round(ME.ry * 100) / 100, st: ME.st });
 }
@@ -4722,14 +4725,17 @@ function pushPresence(patch) { if (S.room && !S.title) S.room.presence(patch).ca
    채널마다 사람 · 실시간 신호 · 채팅 · 배 · 노점이 따로예요. 저장 · 랭킹 · 친구 · 집 · 거래는 모두 같이 써요.
    서버 API(room)는 그대로 두고 게임 쪽에서 감싸요: 내 presence에 ch를 달고, 받은 것 중 내 채널 것만 써요.
    ch가 없는 예전 버전 접속자 · 신호 · 채팅은 1채널로 쳐요 */
-const CH_MAX = 12;
+const CH_MAX = 20;      // 한 채널 최대 인원 (v1.96 증축: 12 → 20)
+const CH_LIMIT = 40;    // 채널 수 상한 → 서버 전체 최대 800명. 다 차면 「서버가 꽉 찼어요」 안내
 S.ch = 1; S.allPeers = [];
 const peerCh = (p) => { const c = Math.floor(Number((p.presence || {}).ch)); return c >= 1 && c <= 99 ? c : 1; };
 const inWorld = (p) => p.kind === "viewer" && typeof (p.presence || {}).x === "number";
 function chCounts() {   // 채널 → 지금 들어와 있는 사람 수 (나는 빼고)
   const m = new Map(); for (const p of S.allPeers) if (!p.sameTab && inWorld(p)) m.set(peerCh(p), (m.get(peerCh(p)) || 0) + 1); return m;
 }
-function pickChannel() { const m = chCounts(); for (let c = 1; c < 99; c++) if ((m.get(c) || 0) < CH_MAX) return c; return 99; }
+function pickChannel() { const m = chCounts(); for (let c = 1; c <= CH_LIMIT; c++) if ((m.get(c) || 0) < CH_MAX) return c; return 0; }   // 0 = 서버 꽉 참
+const serverCount = () => { let n = 0; for (const v of chCounts().values()) n += v; return n; };
+const crowdN = () => (S.peers || []).filter(p => !p.sameTab && inWorld(p)).length;   // 내 채널 사람 수 (나 빼고)
 function chRoom(room) {
   let peersFn = null;
   const mine = (p) => p.sameTab || peerCh(p) === S.ch;
@@ -4766,8 +4772,8 @@ function updateChanLabel() {
 }
 function channelsSheet(body) {   // SHEETS.channels
   const m = chCounts(), top = Math.max(S.ch, ...m.keys(), 1), list = [];
-  for (let c = 1; c <= top + 1; c++) list.push(c);
-  setHead("🌊 채널", "한 채널에 최대 " + CH_MAX + "명 · 채널마다 사람 · 채팅 · 배 · 노점이 따로예요");
+  for (let c = 1; c <= Math.min(CH_LIMIT, top + 1); c++) list.push(c);
+  setHead("🌊 채널", "한 채널에 최대 " + CH_MAX + "명 · 채널 " + CH_LIMIT + "개 · 지금 서버 " + (serverCount() + (S.title ? 0 : 1)) + "/" + CH_MAX * CH_LIMIT + "명");
   const friendsIn = (c) => S.allPeers.filter(p => !p.sameTab && inWorld(p) && peerCh(p) === c && isUid(p.by) && isFriend(p.by)).map(p => str((p.presence || {}).nick, 16) || "친구");
   body.append(h("div", { class: "chlist" }, list.map(c => {
     const n = (m.get(c) || 0) + (c === S.ch && !S.title ? 1 : 0), here = c === S.ch, full = !here && (m.get(c) || 0) >= CH_MAX, fr = friendsIn(c);
@@ -4884,6 +4890,10 @@ function sendChat(text) {
   if (!text) return;
   if (S.uid && S.mutes.has(S.uid)) { toast("운영자가 채팅을 잠시 막아 두었어요"); return; }
   if (Date.now() - lastSend < 900) { toast("조금 천천히 보내 주세요"); return; }
+  S.chatLog = (S.chatLog || []).filter(t => Date.now() - t < 15000);
+  if (S.chatLog.length >= 6) { toast("채팅을 너무 빨리 보내고 있어요. 잠깐 쉬었다 보내 주세요"); return; }   // 15초에 6번까지
+  if (text === S.lastChatText && Date.now() - lastSend < 8000) { toast("같은 말을 연달아 보낼 수 없어요"); return; }
+  S.chatLog.push(Date.now()); S.lastChatText = text;
   lastSend = Date.now();
   S.myBubble = { t: text, at: Date.now() };
   pushPresence({ bubble: { t: text.slice(0, 40), ts: Date.now() } });
@@ -14406,7 +14416,29 @@ function setupTitle() {
   setTimeout(() => { if (!S.profileReady) { S.titleForce = true; renderTitle(); } }, 8000);
   renderTitle();
 }
+/* 서버 꽉 참 안내 (v1.96): 들어올 자리가 날 때까지 기다리며 5초마다 다시 확인해요 */
+function serverFull(back) {
+  let el = $("fullBox");
+  if (!el) {
+    el = h("div", { id: "fullBox", class: "fullbox", role: "alertdialog" },
+      h("div", { class: "fullcard" }, h("div", { class: "fullico", text: "🚢" }), h("b", { text: "서버가 꽉 찼어요" }),
+        h("p", { id: "fullMsg" }), h("small", { id: "fullWait" }),
+        h("button", { class: "btn", onclick: () => { clearInterval(S.fullTimer); S.fullTimer = 0; el.remove(); }, text: "기다리지 않기" })));
+    document.body.append(el);
+  }
+  const t0 = Date.now(), upd = () => {
+    $("fullMsg").textContent = "지금 " + serverCount() + "명이 접속해 있어서 들어갈 자리가 없어요 (채널 " + CH_LIMIT + "개 × " + CH_MAX + "명)";
+    $("fullWait").textContent = "자리가 나면 자동으로 들어가요 · 기다린 시간 " + Math.round((Date.now() - t0) / 1000) + "초";
+  };
+  upd(); clearInterval(S.fullTimer);
+  S.fullTimer = setInterval(() => {
+    if (!S.title) { clearInterval(S.fullTimer); el.remove(); return; }
+    if (pickChannel()) { clearInterval(S.fullTimer); S.fullTimer = 0; el.remove(); toast("자리가 났어요! 들어갈게요"); doEnter(back); return; }
+    upd();
+  }, 5000);
+}
 function enterGame() {
+  if (S.fullTimer) return;
   if (!S.title || $("tStart").disabled || S.creating || S.cut) return;
   if (!consentOk()) { showConsent(() => enterGame()); return; }   // 개인정보 동의 (v1.96)
   const back = (P.caught || 0) > 0 || Object.keys(P.dex).length > 0;
@@ -14416,13 +14448,14 @@ function enterGame() {
   doEnter(back);
 }
 function doEnter(back) {
+  if (!pickChannel() && !S.isOwner) { serverFull(back); return; }   // 운영자는 들어갈 수 있어요   // 모든 채널이 꽉 찼어요
   S.title = false; document.body.classList.remove("titling");
   if (STATION) {   // 역에서 걸어 나와요
     ME.x = STATION.x; ME.z = STATION.z; ME.ry = STATION.ry; ME.target = null;
     setTimeout(() => walkTo(STATION.x + Math.sin(STATION.ry) * 3.5, STATION.z + Math.cos(STATION.ry) * 3.5), 400);
   }
   S.chatSince = Date.now(); S.chat = []; S.chatAll = []; renderChat();
-  { const c = pickChannel(); if (c !== S.ch) setChannel(c); }   // 채널당 12명 · 자리가 남은 가장 낮은 채널
+  { const c = pickChannel() || 1; if (c !== S.ch) setChannel(c); }   // 채널당 12명 · 자리가 남은 가장 낮은 채널
   const t = $("title"); t.classList.add("out"); setTimeout(() => { t.hidden = true; }, 650);
   bgmUpdate();
   if (S.room) S.room.presence(fullPresence()).catch(() => {});
