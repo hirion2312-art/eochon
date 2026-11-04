@@ -1658,6 +1658,14 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 }
 .banov{position:fixed;inset:0;z-index:100000;background:rgba(4,8,12,.92);display:flex;align-items:center;justify-content:center;padding:20px;color:#eef3f5;text-align:center}
 .banov .bc{max-width:380px;display:flex;flex-direction:column;gap:12px;align-items:center}.banov .bi{font-size:52px}.banov b{font-size:20px}.banov p{margin:0;font-size:14px;line-height:1.6;color:#b9c7cf}
+/* v1.100 감정표현 고르는 창 */
+.emopop{max-width:min(440px,calc(100% - 20px))!important;padding:10px!important;gap:8px!important;flex-direction:column!important;align-items:stretch!important}
+.emo-tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}.emo-tabs button{flex:1 0 auto;padding:7px 10px!important;border-radius:999px;font-size:12.5px!important;white-space:nowrap;background:rgba(255,255,255,.08)}
+.emo-tabs button.on{background:var(--hud-accent,#e2522c);color:#fff}
+.emo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.emo-b{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px!important;border-radius:14px;min-height:62px}
+.emo-b .ei{font-size:26px;line-height:1.1}.emo-b small{font-size:11.5px;white-space:nowrap}
+.emo-b:active{transform:scale(.94)}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 /* 개인정보 안내 · 동의 (v1.96) */
 .consent-ov{position:fixed;inset:0;background:rgba(4,10,14,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:14px}
@@ -1751,9 +1759,9 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
   <div class="mering" id="meRing" hidden></div>
 
   <aside class="hud chat glass" id="chatBox">
-    <div class="chat-head"><span>부두 채팅</span><button id="chatToggle" aria-expanded="true">접기</button></div>
-    <ol id="chatList"><li class="empty">채팅을 불러오는 중이에요.</li></ol>
-    <form id="chatForm" autocomplete="off">
+    <div class="chat-head"><span>📜 부두 소식</span><button id="chatToggle" aria-expanded="true">접기</button></div>
+    <ol id="chatList"><li class="empty">소식을 불러오는 중이에요.</li></ol>
+    <form id="chatForm" autocomplete="off" hidden style="display:none">
       <input id="chatInput" maxlength="120" placeholder="멍때리며 한마디" aria-label="채팅 입력">
       <button type="submit">보내기</button>
     </form>
@@ -1774,7 +1782,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
     <button data-open="travel"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>지도</span></button>
     <button data-open="friends"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5A5 5 0 0 1 21 19"/></svg><span>친구</span><span class="badge" id="friendBadge" hidden>0</span></button>
     <button id="homeDockBtn" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg><span id="homeDockTx">우리 집</span></button>
-    <button class="chatonly" id="chatDockBtn"><span class="badge" id="chatBadge" hidden>0</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H9l-4 4z"/></svg><span>채팅</span></button>
+    <button class="chatonly" id="chatDockBtn"><span class="badge" id="chatBadge" hidden>0</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H9l-4 4z"/></svg><span>소식</span></button>
     <button id="menuBtn" class="menubtn" aria-label="메뉴"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg><span>메뉴</span><span class="badge" id="menuBadge" hidden>0</span></button>
     <span hidden><button id="emoteBtn"></button><button data-open="offers" id="offersBtn"><span class="badge" id="offerBadge" hidden>0</span></button></span>
   </nav>
@@ -1820,7 +1828,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.99.2";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.100.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -4720,7 +4728,25 @@ function cardTexture(nick, color) {
 }
 
 /* ===================== 인사 (이모트) ===================== */
-const EMOTES = { wave: "👋 안녕", clap: "👏 짝짝", cheer: "🎉 축하", bow: "🙇 꾸벅", fish: "🎣 낚시 가자" };
+/* v1.100 감정표현 (채팅 대신 소통) — a = 몸짓 · f = 얼굴 · fx = 머리 위 효과 · 예전 5개(wave · clap · cheer · bow · fish)는 이름 그대로 */
+const EMO_CATS = [["hi", "👋 인사"], ["joy", "😆 기쁨"], ["feel", "😢 기분"], ["talk", "💬 대답"], ["fish", "🎣 낚시"]];
+const EMO = {
+  wave: { t: "👋 안녕", c: "hi", a: "wave", f: "happy" }, bow: { t: "🙇 꾸벅", c: "hi", a: "bow", f: "base" }, hiya: { t: "🙌 반가워", c: "hi", a: "cheer", f: "happy" },
+  bye: { t: "👋 잘 가", c: "hi", a: "wave", f: "base" }, gn: { t: "🌙 잘 자", c: "hi", a: "bow", f: "sleepy", fx: "💤" }, come: { t: "👉 이리 와", c: "hi", a: "point", f: "happy" },
+  clap: { t: "👏 짝짝", c: "joy", a: "clap", f: "happy" }, cheer: { t: "🎉 축하", c: "joy", a: "cheer", f: "happy", fx: "🎉" }, laugh: { t: "😆 하하", c: "joy", a: "laugh", f: "happy" },
+  dance: { t: "💃 신난다", c: "joy", a: "dance", f: "happy", fx: "🎵" }, heart: { t: "❤️ 좋아해", c: "joy", a: "heart", f: "happy", fx: "❤️" }, best: { t: "👍 최고", c: "joy", a: "point", f: "happy", fx: "✨" },
+  spin: { t: "🌀 빙글빙글", c: "joy", a: "spin", f: "happy" },
+  cry: { t: "😭 엉엉", c: "feel", a: "cry", f: "sad", fx: "💧" }, angry: { t: "😤 흥!", c: "feel", a: "stomp", f: "sad", fx: "💢" }, sigh: { t: "😮‍💨 휴…", c: "feel", a: "shrug", f: "sleepy" },
+  wow: { t: "😲 우와", c: "feel", a: "jump", f: "surprise", fx: "❗" }, shock: { t: "😱 헉!", c: "feel", a: "jump", f: "surprise", fx: "⚡" }, shy: { t: "😳 부끄", c: "feel", a: "cry", f: "happy", fx: "💗" },
+  sleepy: { t: "😴 졸려", c: "feel", a: "bow", f: "sleepy", fx: "💤" }, hmm: { t: "🤔 흠…", c: "feel", a: "shrug", f: "base", fx: "❓" },
+  yes: { t: "⭕ 좋아요", c: "talk", a: "nod", f: "happy" }, no: { t: "❌ 싫어요", c: "talk", a: "shake", f: "sad" }, thanks: { t: "🙏 고마워", c: "talk", a: "bow", f: "happy", fx: "💛" },
+  sorry: { t: "🙇 미안해", c: "talk", a: "bow", f: "sad" }, wait: { t: "✋ 잠깐만", c: "talk", a: "point", f: "base" }, what: { t: "❓ 응?", c: "talk", a: "shrug", f: "surprise" },
+  ok: { t: "👌 알겠어", c: "talk", a: "nod", f: "base" }, follow: { t: "🚶 따라와", c: "talk", a: "point", f: "happy" }, trade: { t: "🤝 거래할래?", c: "talk", a: "point", f: "happy" },
+  fish: { t: "🎣 낚시 가자", c: "fish", a: "fish", f: "happy" }, big: { t: "🐋 대물이다!", c: "fish", a: "cheer", f: "surprise", fx: "🐟" }, miss: { t: "💦 놓쳤다…", c: "fish", a: "cry", f: "sad", fx: "💦" },
+  boat: { t: "⛵ 배 타자", c: "fish", a: "point", f: "happy" }, pocha: { t: "🍶 한잔해", c: "fish", a: "cheer", f: "happy", fx: "🍶" }, hungry: { t: "🍣 배고파", c: "fish", a: "shrug", f: "sad" },
+  gg: { t: "🏆 GG", c: "fish", a: "clap", f: "happy", fx: "🏆" },
+};
+const EMOTES = Object.fromEntries(Object.entries(EMO).map(([k, v]) => [k, v.t]));
 function doEmote(e) {
   if (!EMOTES[e]) return;
   S.myEmo = { e, at: Date.now() };
@@ -4869,7 +4895,7 @@ function renderChat() {
   const list = $("chatList");
   const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 60;
   list.replaceChildren();
-  if (!S.chat.length) list.append(h("li", { class: "empty", text: "아직 조용해요. 첫 인사를 남겨 보세요." }));
+  if (!S.chat.length) list.append(h("li", { class: "empty", text: "아직 소식이 없어요. 누가 대물을 낚으면 여기 떠요 · 대화는 👋 감정표현으로!" }));
   for (const m of S.chat) {
     const t = new Date(m.ts);
     const tm = h("span", { class: "tm", text: String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0") });
@@ -4897,6 +4923,7 @@ async function postChat(msg) {
   } else { S.chat.push(normChat(uid4(), msg)); S.chat = S.chat.slice(-60); lsSet("mn.chat", S.chat); renderChat(); }
 }
 function sendChat(text) {
+  return;   // v1.100: 채팅 없음 (감정표현으로 소통해요)
   text = text.trim().slice(0, 120);
   if (!text) return;
   if (S.uid && S.mutes.has(S.uid)) { toast("운영자가 채팅을 잠시 막아 두었어요"); return; }
@@ -7093,7 +7120,7 @@ function exprFor(F, f, now) {
   if (f.phase === "miss") return "sad";
   const ek = f.emo ? f.emo.e + "|" + f.emo.ts : "";
   if (ek !== F.emoKey) { F.emoKey = ek; F.emoAt = ek ? now : 0; }
-  if (F.emoAt && now - F.emoAt < 3500) return f.emo.e === "bow" ? "base" : "happy";
+  if (F.emoAt && now - F.emoAt < 3500) return (EMO[f.emo.e] || {}).f || "happy";
   if (f.me && S.mung) return "sleepy";
   if (F.stillSince && now - F.stillSince > 60000 && (f.phase === "idle" || f.phase === "wait")) return "sleepy";
   return "base";
@@ -10002,7 +10029,7 @@ function updateChar(F, f, t, dt, now) {
   F.hands[0].position.set(-.43, .42, .08 - sw * .1);
   F.hands[1].position.set(fishing ? .26 : .43, fishing ? .45 : .42, fishing ? .34 : .08 + sw * .1);
   if (f.st === "coop") { F.hands[0].position.set(-.16, .62, .44); F.hands[1].position.set(.18, .7, .5); }
-  F.rig.rotation.x = 0;
+  F.rig.rotation.x = 0; F.rig.rotation.y = 0;   // v1.100: 감정표현(빙글 · 도리도리) 뒤 원래대로
   if (runAnim) { F.rig.rotation.x = .17; F.rig.position.y = Math.abs(Math.sin(F.walkT)) * .13; const sw2 = Math.sin(F.walkT); F.hands[0].position.set(-.42, .5, .08 - sw2 * .22); F.hands[1].position.set(.42, .5, .08 + sw2 * .22); }
   F.head.rotation.x = f.phase === "miss" && fishing ? .32 : 0;   // 놓치면 고개를 푹 숙여요
   if (f.phase === "miss" && fishing) F.rig.rotation.x = .16;
@@ -10145,11 +10172,24 @@ function updateChar(F, f, t, dt, now) {
   const emoAt = f.me ? (S.myEmo && S.myEmo.at) : (f.emo && seen && seen.eAt), emoE = f.me ? (S.myEmo && S.myEmo.e) : (f.emo && f.emo.e);
   if (emoAt && now - emoAt < 3200 && EMOTES[emoE]) {
     const q = (now - emoAt) / 1000;
-    if (emoE === "wave") F.hands[1].position.set(.66, 1.2 + Math.sin(q * 14) * .1, .14);
-    else if (emoE === "clap") { const cl = Math.abs(Math.sin(q * 12)); F.hands[0].position.set(-.1 - cl * .18, .66, .58); F.hands[1].position.set(.1 + cl * .18, .66, .58); }
-    else if (emoE === "cheer") { F.hands[0].position.set(-.62, 1.42, .06); F.hands[1].position.set(.62, 1.42, .06); F.rig.position.y += Math.abs(Math.sin(q * 9)) * .18; }
-    else if (emoE === "bow") F.rig.rotation.x = Math.sin(Math.min(1, q / 1.6) * Math.PI) * .45;
-    else if (emoE === "fish") { F.hands[1].position.set(.56, .86 + Math.sin(q * 6) * .22, .34); }
+    const an = (EMO[emoE] || {}).a || emoE;
+    if (an === "wave") F.hands[1].position.set(.66, 1.2 + Math.sin(q * 14) * .1, .14);
+    else if (an === "clap") { const cl = Math.abs(Math.sin(q * 12)); F.hands[0].position.set(-.1 - cl * .18, .66, .58); F.hands[1].position.set(.1 + cl * .18, .66, .58); }
+    else if (an === "cheer") { F.hands[0].position.set(-.62, 1.42, .06); F.hands[1].position.set(.62, 1.42, .06); F.rig.position.y += Math.abs(Math.sin(q * 9)) * .18; }
+    else if (an === "bow") F.rig.rotation.x = Math.sin(Math.min(1, q / 1.6) * Math.PI) * .45;
+    else if (an === "fish") { F.hands[1].position.set(.56, .86 + Math.sin(q * 6) * .22, .34); }
+    else if (an === "point") { F.hands[1].position.set(.42, 1.0, .72); }
+    else if (an === "nod") F.rig.rotation.x = Math.max(0, Math.sin(q * 9)) * .2;
+    else if (an === "shake") F.rig.rotation.y = Math.sin(q * 11) * .35;
+    else if (an === "jump") F.rig.position.y += Math.max(0, Math.sin(Math.min(q, 1.2) * Math.PI / 1.2)) * .45;
+    else if (an === "spin") F.rig.rotation.y = Math.min(1, q / 1.4) * Math.PI * 2;
+    else if (an === "laugh") { F.rig.rotation.x = -.12 + Math.sin(q * 16) * .05; F.rig.position.y += Math.abs(Math.sin(q * 16)) * .05; }
+    else if (an === "dance") { F.rig.rotation.z = Math.sin(q * 7) * .18; F.hands[0].position.set(-.58, 1.0 + Math.sin(q * 7) * .3, .1); F.hands[1].position.set(.58, 1.0 - Math.sin(q * 7) * .3, .1); F.rig.position.y += Math.abs(Math.sin(q * 7)) * .08; }
+    else if (an === "heart") { F.hands[0].position.set(-.16, 1.48, .12); F.hands[1].position.set(.16, 1.48, .12); }
+    else if (an === "cry") { F.hands[0].position.set(-.2, .98, .52); F.hands[1].position.set(.2, .98, .52); F.rig.position.y += Math.abs(Math.sin(q * 18)) * .03; }
+    else if (an === "stomp") { F.rig.position.y += Math.abs(Math.sin(q * 10)) * .1; F.hands[0].position.set(-.5, .55, .2); F.hands[1].position.set(.5, .55, .2); }
+    else if (an === "shrug") { const up = Math.min(1, q * 3); F.hands[0].position.set(-.66, .7 + up * .3, .2); F.hands[1].position.set(.66, .7 + up * .3, .2); }
+    { const fx = (EMO[emoE] || {}).fx; if (fx && F.emoFxKey !== emoE + emoAt) { F.emoFxKey = emoE + emoAt; try { const wp = new T3.Vector3(); F.g.getWorldPosition(wp); fxPop(wp.x, 2.6, wp.z, fx, "#ffffff"); setTimeout(() => fxPop(wp.x + .3, 2.9, wp.z, fx, "#ffffff"), 450); } catch {} } }
     setText(F.emoL, EMOTES[emoE], "rgba(255,255,255,.95)", "#132f38", .32, true); F.emoL.visible = true; F.emoL.position.set(0, y, 0);
   } else F.emoL.visible = false;
   // 명함 내밀기
@@ -14253,7 +14293,12 @@ $("mungBtn").addEventListener("click", () => setMung(true));
 $("adminBtn").addEventListener("click", () => openSheet("admin"));
 $("tutBtn").addEventListener("click", () => { P.tut = {}; markDirty(); closePop(); toast("안내를 처음부터 다시 보여 줄게요"); coach("welcome"); });
 { const ep = $("emotePop");
-  ep.replaceChildren(h("div", { class: "emo-title", text: "감정표현 · 주변 사람 모두에게 보여요" }), ...Object.entries(EMOTES).map(([k, v]) => h("button", { onclick: () => { doEmote(k); ep.hidden = true; syncUIState(); }, text: v })));
+  S.emoCat = S.emoCat || "hi";
+  const draw = () => ep.replaceChildren(h("div", { class: "emo-title", text: "감정표현 · 주변 사람 모두에게 보여요 · 말 대신 이걸로 이야기해요" }),
+    h("div", { class: "emo-tabs" }, EMO_CATS.map(([id, l]) => h("button", { class: S.emoCat === id ? "on" : "", onclick: (e) => { e.stopPropagation(); S.emoCat = id; draw(); }, text: l }))),
+    h("div", { class: "emo-grid" }, Object.entries(EMO).filter(([, v]) => v.c === S.emoCat).map(([k, v]) => { const sp = v.t.indexOf(" "), ic = v.t.slice(0, sp), rest = v.t.slice(sp + 1);
+      return h("button", { class: "emo-b", onclick: () => { doEmote(k); ep.hidden = true; syncUIState(); } }, h("span", { class: "ei", text: ic }), h("small", { text: rest })); })));
+  draw();
   $("emoteBtn").addEventListener("click", (e) => { e.stopPropagation(); const next = !ep.hidden; closeFloatingUI("emote"); ep.hidden = next; syncUIState(); });
   document.addEventListener("pointerdown", (e) => { if (!e.target.closest('#emotePop,#emoteBtn,.dock [data-q="emote"]') && !ep.hidden) { ep.hidden = true; syncUIState(); } }); }
 $("codeBtn").addEventListener("click", () => {
@@ -14603,11 +14648,11 @@ async function boot() {
     for (const f of S.userFishAll) { const c = artCache.get(f.id); if (c && c.src !== safeImg(f.img)) { artCache.delete(f.id); fishTex.delete(f.id); } }
     validateFish();
   }, (e) => console.warn("fish", e));
-  const chatTimer = setTimeout(() => { if (!S.chatLoaded) $("chatList").replaceChildren(h("li", { class: "empty", text: "채팅 서버에 아직 닿지 않았어요. 연결되면 바로 보여요." })); }, 10000);
+  const chatTimer = setTimeout(() => { if (!S.chatLoaded) $("chatList").replaceChildren(h("li", { class: "empty", text: "소식 서버에 아직 닿지 않았어요. 연결되면 바로 보여요." })); }, 10000);
   db.collection("chat").orderBy("ts", "desc").limit(60).onSnapshot((snap) => {
     if (!snap.metadata.fromCache) { S.chatLoaded = true; clearTimeout(chatTimer); }
     const prevN = S.chat.length, prevLast = prevN ? S.chat[prevN - 1].id : null;
-    S.chatAll = snap.docs.map(d => normChat(d.id, d.data())).filter(m => m.ts >= (S.chatSince || 0) - 1500).reverse();
+    S.chatAll = snap.docs.map(d => normChat(d.id, d.data())).filter(m => m.kind !== "msg" && m.ts >= (S.chatSince || 0) - 1500).reverse();   // v1.100: 채팅은 없애고 소식(로그)만
     S.chat = S.chatAll.filter(m => m.ch === S.ch); renderChat();
     if (S.chatLoaded && prevLast && $("chatBox").classList.contains("min") && MOBILE()) { const i = S.chat.findIndex(m => m.id === prevLast); const n = i < 0 ? 1 : S.chat.length - 1 - i; if (n > 0) { S.chatUnread = (S.chatUnread || 0) + n; drawChatBadge(); } }
   }, (e) => { clearTimeout(chatTimer); console.warn("chat", e); });
