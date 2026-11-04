@@ -1820,7 +1820,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.99.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.99.2";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -12976,6 +12976,9 @@ SHEETS.admintools = (body) => {
       h("button", { class: "btn pri", onclick: async () => { const tx = ta.value.trim(); const hh = Number(hours.value); if (await adminSet("config/notice", { text: tx, ts: Date.now(), until: hh ? Date.now() + hh * 36e5 : 0 })) { if (tx) postSys("📢 공지: " + tx); toast(tx ? "공지를 띄웠어요" : "공지를 내렸어요"); } }, text: "공지 띄우기" }),
       h("button", { class: "btn", onclick: async () => { if (await adminSet("config/notice", { text: "", ts: Date.now(), until: 0 })) toast("공지를 내렸어요"); }, text: "내리기" })),
       h("div", { class: "muted", style: "font-size:12px", text: "모든 사람 화면 위쪽 띠와 채팅에 보여요." }));
+    body.append(h("div", { class: "sec", text: "🔄 모두 새 버전으로" }), h("div", { class: "row", style: "gap:8px;flex-wrap:wrap" },
+      armBtn("🔄 모두 새로고침 (v" + GAME_VER + " 미만)", "한 번 더 누르면 예전 버전 화면이 모두 새로 받아요", async () => { if (await adminSet("config/minver", { v: GAME_VER, ts: Date.now() })) toast("예전 버전 화면에 새로고침 신호를 보냈어요"); })),
+      h("div", { class: "muted", style: "font-size:12px", text: "v1.99.2 이후 화면부터 따라와요. 그 전 버전 화면은 직접 새로고침하거나 탭을 닫아야 해요." }));
     const ev = S.event && S.event.until > Date.now() ? S.event : null;
     body.append(h("div", { class: "sec", text: "이벤트" + (ev ? " · 진행 중 " + fmtLeft(ev.until - Date.now()) : "") }));
     const dur = h("select", { class: "btn" }, [["1", "1시간"], ["2", "2시간"], ["6", "6시간"], ["24", "하루"]].map(([v, l]) => h("option", { value: v, text: l })));
@@ -13542,6 +13545,15 @@ SHEETS.player = (body, peer) => {
   if (!p) { setHead("자리를 떠났어요", ""); body.append(h("div", { class: "empty-note", text: "그분은 방금 부두를 떠났어요." })); return; }
   const where = p.seat ? (SEAT[p.seat].kind === "pier" ? "낚시 중" : "포차에서 쉬는 중") : p.stall >= 0 ? "낭만포차 " + (p.stall + 1) + "호 운영 중" : "산책 중";
   setHead(p.nick, where + " · " + placeAt(p.x, p.z));
+  if (S.isOwner && S.online) {   // v1.99.2 운영자: 캐릭터를 눌러서 바로 내보내기
+    const sel = h("select", { class: "btn sm", "aria-label": "강퇴 기간" }, [["600000", "10분"], ["3600000", "1시간"], ["86400000", "하루"], ["604800000", "일주일"], ["315360000000", "영구"]].map(([v, l]) => h("option", { value: v, text: l })));
+    body.append(h("div", { class: "listrow", style: "flex-direction:column;align-items:stretch;gap:8px;border-color:#e2402a" },
+      h("b", { text: "🛠 운영자 · " + p.nick + (p.uid === S.uid ? " (내 계정의 다른 탭)" : "") }),
+      h("div", { class: "row", style: "gap:6px;flex-wrap:wrap" },
+        armBtn("⏏ 접속 끊기", "한 번 더 누르면 끊어요", () => { adminKickPeer(peer, p.nick); closeSheet(); }),
+        p.uid && p.uid !== S.uid ? h("span", { class: "row", style: "gap:4px" }, sel, armBtn("🚫 강퇴", "한 번 더 누르면 강퇴해요", async () => { await adminBan(p.uid, p.nick, Number(sel.value), ""); adminKickPeer(peer, p.nick); closeSheet(); })) : null),
+      h("small", { class: "muted", text: "예전 버전 화면은 이 신호를 못 알아들어요 · 안 나가지면 운영자 도구 → 공지 · 이벤트의 「모두 새로고침」을 먼저 눌러 주세요" })));
+  }
   if (!S.online) { body.append(h("div", { class: "empty-note", text: "거래는 온라인에서만 할 수 있어요." })); return; }
   if (!p.uid) { body.append(h("div", { class: "empty-note", text: "이 분은 지금 거래를 받을 수 없어요 (손님 접속)." })); return; }
   if (p.uid === S.uid) { body.append(h("div", { class: "empty-note", text: "다른 탭에 열린 내 캐릭터예요." })); return; }
@@ -14479,6 +14491,7 @@ async function onKickMsg(m) {   // 운영자가 이 연결(탭)을 끊었어요 
   try { S.room && S.room.presence({ home: true, st: "gone" }).catch(() => {}); } catch {}
   setTimeout(() => location.reload(), 3000);
 }
+const verLess = (a, b) => { const x = String(a).split(".").map(Number), y = String(b).split(".").map(Number); for (let i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) < (y[i] || 0); } return false; };
 function adminKickPeer(peer, nick) { if (!S.isOwner || !S.rawRoom || peer === S.myPeer) return; S.rawRoom.emit("kick", { to: peer }).then(() => toast("⏏ " + nick + "님 접속을 끊었어요")).catch(() => toast("접속을 끊지 못했어요")); }
 const banFmt = (ms) => { if (ms > 3e10) return "영구"; const d = Math.floor(ms / 864e5), hh = Math.floor(ms / 36e5) % 24, mm = Math.ceil(ms / 6e4) % 60; return d ? d + "일" + (hh ? " " + hh + "시간" : "") : hh ? hh + "시간" + (mm ? " " + mm + "분" : "") : Math.max(1, Math.ceil(ms / 6e4)) + "분"; };
 const banLeft = (b) => b.until - Date.now() > 3e10 ? "영구" : banFmt(b.until - Date.now()) + " 남음";
@@ -14602,6 +14615,8 @@ async function boot() {
   db.doc("config/event").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.event = EVENTS.some(e => e.id === d.id) ? { id: d.id, until: Number(d.until) || 0 } : null; renderNoticeBar(); }, () => {});
   db.doc("config/tv").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; try { tvSetVideo(ytId(d.vid), Number(d.startAt) || 0); } catch (e) { console.warn("tv", e); } }, () => {});
   db.doc("config/mutes").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.mutes = new Set((Array.isArray(d.uids) ? d.uids : []).filter(isUid)); }, () => {});
+  db.doc("config/minver").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; const need = str(d.v, 12), ts = Number(d.ts) || 0;   // v1.99.2: 운영자가 「모두 새로고침」하면 예전 버전 화면이 새로 받아요
+    if (need && verLess(GAME_VER, need) && lsGet("mn.minverTs", 0) !== ts) { lsSet("mn.minverTs", ts); toast("🔄 새 버전으로 바꿀게요", null, 2000); setTimeout(() => location.reload(), 1500); } }, () => {});
   db.doc("config/bans").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.bans = new Map((Array.isArray(d.list) ? d.list : []).filter(x => x && isUid(x.uid)).map(x => [x.uid, { until: Number(x.until) || 0, nick: str(x.nick, 16), why: str(x.why, 60) }])); banCheck(); if (S.sheet === "admintools") refreshSheet(true); }, () => {});   // v1.97.2 강퇴
   db.doc("config/main").onSnapshot((snap) => {
     const d = snap.exists ? snap.data() : {};
