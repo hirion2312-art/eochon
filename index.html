@@ -1828,7 +1828,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.103.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.104.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -3149,7 +3149,7 @@ const TUTS = {
   sheet_clothes: { icon: "👕", title: "옷가게", steps: ["카드를 눌러 입어 보고, 마음에 들면 아래 계산대에서 한 번에 사요. 입은 옷은 다른 사람에게도 보여요."] },
   sheet_face: { icon: "🎨", title: "얼굴 공방", steps: ["눈썹 · 눈 · 입을 직접 그리거나 도장을 찍어요. 표정 5가지를 그려 두면 상황에 맞게 얼굴이 바뀌어요."] },
   sheet_studio: { icon: "🖌️", title: "방류소", steps: ["물고기를 그리고 이름을 지어 바다에 풀면 모든 사람이 낚을 수 있어요. 누가 낚을 때마다 로열티가 들어와요."] },
-  sheet_boat: { icon: "⛵", title: "멍낚호", steps: ["최대 4명이 함께 타요. 뱃삯이 모이면 5분 동안 깊은 바다로 나가고, 좋은 물고기가 훨씬 잘 나와요. 중간에 내리고 싶으면 「중도하차」로 먼저 돌아올 수 있어요."] },
+  sheet_boat: { icon: "⛵", title: "선착장", steps: ["배는 3척(멍낚호·파도호·갈매기호)이에요. 한 척이 나가 있어도 기다리지 말고 정박 중인 다른 배를 타면 돼요. 척마다 최대 4명이 함께 타고, 뱃삯이 모이면 5분 동안 깊은 바다로 나가요. 중간에 내리고 싶으면 「중도하차」로 먼저 돌아올 수 있어요."] },
   sheet_friends: { icon: "🤝", title: "친구", steps: ["「명함 내밀기」를 하면 내 명함을 받아 간 사람 모두와 친구가 돼요. 친구가 부두에 오면 알려 줘요."] },
   sheet_ach: { icon: "🏆", title: "도전과제", steps: ["달성하면 보상금을 받아요. 노란 칭호가 붙은 도전과제를 깨면 이름표에 칭호를 달 수 있어요."] },
   sheet_quests: { icon: "📜", title: "오늘의 의뢰", steps: ["매일 바뀌는 작은 목표 3개예요. 다 하면 보상금을 받아요."] },
@@ -3365,7 +3365,7 @@ function bgmContext() {
   const per = periodFor(gameHour()).k;
   if (S.title) return ["title", per];
   if (REEL.on) return ["fight", per];
-  if (onBoat() && S.boat.status === "sailing") return ["boat", per];
+  if (onBoat() && myBoat() && myBoat().status === "sailing") return ["boat", per];
   const pl = placeAt(ME.x, ME.z);
   if (pl === "수산시장") return ["market", per];
   if (pl === "낭만포차거리" && (per === "night" || per === "dusk")) return ["pocha", per];
@@ -3393,7 +3393,7 @@ setInterval(() => { updateClock(); bgmUpdate(); }, 500);
 /* ===================== 깊은 바다 (배) ===================== */
 const DEEP = new Set(["b-angler", "b-sangalchi", "b-manta", "b-goraesangeo", "b-whiteshark", "b-mola", "b-hammerhead", "b-swordfish", "b-darangeo", "b-cheongsaechi"]);
 const onBoat = () => !!(ME.seat && SEAT[ME.seat] && SEAT[ME.seat].kind === "boat");
-const atSea = () => onBoat() && boatPose(Date.now()).phase === "sea";
+const atSea = () => { const bi = myBoatIdx(); return bi >= 0 && boatPose(bi, Date.now()).phase === "sea"; };
 
 /* ===================== 오늘의 의뢰 ===================== */
 const QUEST_POOL = [
@@ -3527,7 +3527,7 @@ function startCast(pow, manual) {
   markDirty();
   setPhase("cast", CAST_MS); pushPresence({ cp: Math.round(S.castPow * 100) / 100 });
 }
-function fishingNow() { const s = ME.seat && SEAT[ME.seat]; if (!s) return false; return s.kind === "pier" || (s.kind === "boat" && boatPose(Date.now()).phase === "sea"); }
+function fishingNow() { const s = ME.seat && SEAT[ME.seat]; if (!s) return false; return s.kind === "pier" || (s.kind === "boat" && boatPose(s.boat, Date.now()).phase === "sea"); }
 const autoOn = () => S.auto || S.mung;
 /* 자동 낚시 제한: 영웅 이상은 직접 싸워야 잡혀요 · 15분 동안 손을 안 대면 멈춰요 · 다른 탭에 가 있으면 쉬어요 */
 const AUTO_MAX_TIER = 4, AUTO_IDLE_MS = 15 * 60000;   // 멍 모드는 영웅(4)부터 못 잡아요 (10등급에서도 예전과 같은 위치)
@@ -4091,7 +4091,7 @@ const keys = new Set();
 /* ===================== 이동 ===================== */
 function leaveSpot(silent) {
   if (S.coop) coopEnd("함께 낚시를 그만뒀어요", true);
-  if (onBoat()) { if (S.boat.status === "sailing") { lockedHint(); return; } boatLeave(); return; }
+  if (onBoat()) { if (myBoat() && myBoat().status === "sailing") { lockedHint(); return; } boatLeave(); return; }
   if (ME.seat) {
     ME.seat = null; S.phase = "idle"; $("hookBtn").hidden = true;
     pushPresence({ seat: null, phase: "idle" });
@@ -4182,8 +4182,8 @@ function nearestAction() {
   if (atHome()) { homeActions(consider); return best; }
   if (atRest()) { restActions(consider); return best; }   // 내 포차 안에서는 스테이션만
   if (SEAT.b0) {
-    const b = S.boat;
-    consider(BOAT.board.x, BOAT.board.z, { key: "boat:" + b.status + b.seats.length, label: b.status === "sailing" ? "멍낚호 · 출항 중" : "배 타기 (" + b.seats.length + "/4)", run: () => openSheet("boat") }, 2.6);
+    const docked = S.fleet.filter(b => b.status === "docked"), free = docked.reduce((a, b) => a + (BOAT.max - b.seats.length), 0), sig = S.fleet.map(b => b.status + b.seats.length).join("|");
+    consider(BOAT.board.x, BOAT.board.z, { key: "boat:" + sig, label: docked.length ? "배 타기 (정박 " + docked.length + "척 · 빈자리 " + free + ")" : "배 타기 (전부 출항 중)", run: () => openSheet("boat") }, 2.6);
   }
   for (const s of Object.values(SEAT)) {
     if (s.kind === "boat" || seatTaken(s.id)) continue;
@@ -4229,7 +4229,7 @@ function updateActionUI() {
   const showStand = (!!ME.seat || S.myStall >= 0 || coopGuest || !!S.card) && S.phase !== "bite" && !REEL.on;
   sb.hidden = !showStand;
   sb.classList.toggle("up", showStand && !btn.hidden);
-  if (showStand) sb.textContent = S.card ? "명함 거두기" : coopGuest ? "함께 낚시 그만" : onBoat() ? (S.boat.status === "sailing" ? "중도하차" : "배에서 내리기") : S.myStall >= 0 ? (npcActive(S.stalls[S.myStall]) ? "알바에게 맡기고 자리 뜨기" : "노점 닫기") : "일어나기";
+  if (showStand) sb.textContent = S.card ? "명함 거두기" : coopGuest ? "함께 낚시 그만" : onBoat() ? (myBoat() && myBoat().status === "sailing" ? "중도하차" : "배에서 내리기") : S.myStall >= 0 ? (npcActive(S.stalls[S.myStall]) ? "알바에게 맡기고 자리 뜨기" : "노점 닫기") : "일어나기";
   syncUIState();
 }
 function doAction() { if (curAction) { const a = curAction; curAction = null; a.run(); actKey = "-"; } }   // 다음 프레임에 버튼을 꼭 다시 그려요 (팔고 나서 할 일이 없으면 숨김)
@@ -4237,7 +4237,7 @@ let lockHintAt = 0;
 function lockedHint() {
   if (Date.now() - lockHintAt < 4000) return;
   lockHintAt = Date.now();
-  toast(onBoat() && S.boat.status === "sailing" ? "내리려면 「중도하차」를 눌러 주세요" : S.coop ? "함께 낚시를 그만하려면 「함께 낚시 그만」을 눌러 주세요" : S.myStall >= 0 ? "노점을 떠나려면 「노점 닫기」를 눌러 주세요" : "자리에서 움직이려면 「일어나기」를 눌러 주세요");
+  toast(onBoat() && myBoat() && myBoat().status === "sailing" ? "내리려면 「중도하차」를 눌러 주세요" : S.coop ? "함께 낚시를 그만하려면 「함께 낚시 그만」을 눌러 주세요" : S.myStall >= 0 ? "노점을 떠나려면 「노점 닫기」를 눌러 주세요" : "자리에서 움직이려면 「일어나기」를 눌러 주세요");
 }
 function updateLeaveBtn() { updateActionUI(); }
 
@@ -4245,39 +4245,49 @@ function updateLeaveBtn() { updateActionUI(); }
 /* ===================== 배 (멍낚호): 4인승, 5분 동안 깊은 바다 ===================== */
 const BOAT = { dock: { x: -13.2, z: -8.4 }, dockRy: -Math.PI / 2, sea: { x: -118, z: -6 }, board: { x: -13.2, z: -3.25 }, price: 600, dur: 300000, out: 25000, max: 4 };
 const BOAT_SEATS = [[-0.95, 0.9], [0.95, 0.9], [-0.95, -0.7], [0.95, -0.7]];
-S.boat = { status: "docked", seats: [], paid: {}, tripStart: 0, tripId: "" };
+const BOAT_NAMES = ["멍낚호", "파도호", "갈매기호"];
+const BOAT_BERTH = [{ dx: 0, dz: 0 }, { dx: 0, dz: -7.5 }, { dx: 0, dz: -15 }];   // 정박 위치: 부두에서 바다 쪽으로 나란히
+const BOAT_SEA_OFF = [0, 7, -7];
+const emptyBoat = () => ({ status: "docked", seats: [], paid: {}, tripStart: 0, tripId: "" });
+S.fleet = [emptyBoat(), emptyBoat(), emptyBoat()];
+const myBoatIdx = () => { const st = ME.seat && SEAT[ME.seat]; if (st && st.kind === "boat") return st.boat; return S.fleet.findIndex(b => b.seats.some(x => x.uid === S.uid)); };
+const myBoat = () => { const i = myBoatIdx(); return i >= 0 ? S.fleet[i] : null; };
 const ease = (q) => q < .5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2;
-function boatPose(now) {
-  const st = S.boat, D = BOAT.dock, X = BOAT.sea;
+function boatPose(i, now) {
+  const st = S.fleet[i] || emptyBoat(), D = { x: BOAT.dock.x + BOAT_BERTH[i].dx, z: BOAT.dock.z + BOAT_BERTH[i].dz }, X = { x: BOAT.sea.x, z: BOAT.sea.z + BOAT_SEA_OFF[i] };
   if (!st || st.status !== "sailing") return { x: D.x, z: D.z, ry: BOAT.dockRy, phase: "dock" };
   const e = now - st.tripStart, head = -Math.PI / 2;
   if (e < 0) return { x: D.x, z: D.z, ry: BOAT.dockRy, phase: "out" };
-  if (e < BOAT.out) { const q = ease(e / BOAT.out), p = boatRoute(q); return { x: p.x, z: p.z, ry: lerpAngle(BOAT.dockRy, p.ry, Math.min(1, q * 6)), phase: "out" }; }
+  if (e < BOAT.out) { const q = ease(e / BOAT.out), p = boatRoute(q, i); return { x: p.x, z: p.z, ry: lerpAngle(BOAT.dockRy, p.ry, Math.min(1, q * 6)), phase: "out" }; }
   if (e < BOAT.dur - BOAT.out) return { x: X.x + Math.sin(e / 9000) * 1.5, z: X.z + Math.cos(e / 11000) * 1.5, ry: head + Math.sin(e / 14000) * .4, phase: "sea" };
-  if (e < BOAT.dur) { const q = ease((e - (BOAT.dur - BOAT.out)) / BOAT.out), p = boatRoute(1 - q); return { x: p.x, z: p.z, ry: lerpAngle(p.ry + Math.PI, BOAT.dockRy, Math.max(0, q * 6 - 5)), phase: "back" }; }
+  if (e < BOAT.dur) { const q = ease((e - (BOAT.dur - BOAT.out)) / BOAT.out), p = boatRoute(1 - q, i); return { x: p.x, z: p.z, ry: lerpAngle(p.ry + Math.PI, BOAT.dockRy, Math.max(0, q * 6 - 5)), phase: "back" }; }
   return { x: D.x, z: D.z, ry: BOAT.dockRy, phase: "done" };
 }
 // 선착장 → 항구 안 → 등대 사이 → 먼바다 (q 0~1, 길이에 맞춰 고르게)
-function boatRoute(q) {
-  const P = [[BOAT.dock.x, BOAT.dock.z], ...BOAT_ROUTE.slice(0, -1), [BOAT.sea.x, BOAT.sea.z]], L = []; let tot = 0;
+function boatRoute(q, bi) {
+  const P = [[BOAT.dock.x + BOAT_BERTH[bi].dx, BOAT.dock.z + BOAT_BERTH[bi].dz], ...BOAT_ROUTE.slice(0, -1), [BOAT.sea.x, BOAT.sea.z + BOAT_SEA_OFF[bi]]], L = []; let tot = 0;
   for (let i = 0; i < P.length - 1; i++) { const d = Math.hypot(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]); L.push(d); tot += d; }
   let d = clamp(q, 0, 1) * tot, i = 0; while (i < L.length - 1 && d > L[i]) { d -= L[i]; i++; }
   const k = clamp(d / L[i], 0, 1), [x0, z0] = P[i], [x1, z1] = P[i + 1];
   return { x: x0 + (x1 - x0) * k, z: z0 + (z1 - z0) * k, ry: Math.atan2(x1 - x0, z1 - z0) };
 }
 function registerBoatSeats() {
-  BOAT_SEATS.forEach((_, i) => { SEAT["b" + i] = { id: "b" + i, kind: "boat", boat: true, slot: i, x: BOAT.dock.x, z: BOAT.dock.z, ry: 0, y: .6 }; });
+  for (let bi = 0; bi < 3; bi++) BOAT_SEATS.forEach((_, i) => { SEAT["b" + (bi * 4 + i)] = { id: "b" + (bi * 4 + i), kind: "boat", boat: bi, slot: i, x: BOAT.dock.x, z: BOAT.dock.z, ry: 0, y: .6 }; });
   updateBoatSeats(Date.now());
 }
 function updateBoatSeats(now, t) {
-  const p = boatPose(now), c = Math.cos(p.ry), sn = Math.sin(p.ry);
-  const by = (t !== undefined ? waveY(p.x, p.z, t) : SEA_Y) - .1;
-  BOAT_SEATS.forEach(([lx, lz], i) => {
-    const s = SEAT["b" + i]; if (!s) return;
-    s.x = p.x + lx * c + lz * sn; s.z = p.z - lx * sn + lz * c;
-    s.ry = p.ry + (lx < 0 ? -Math.PI / 2 : Math.PI / 2); s.y = by + .62;
-  });
-  return p;
+  let mine = null;
+  for (let bi = 0; bi < 3; bi++) {
+    const p = boatPose(bi, now), c = Math.cos(p.ry), sn = Math.sin(p.ry);
+    const by = (t !== undefined ? waveY(p.x, p.z, t) : SEA_Y) - .1;
+    BOAT_SEATS.forEach(([lx, lz], i) => {
+      const s = SEAT["b" + (bi * 4 + i)]; if (!s) return;
+      s.x = p.x + lx * c + lz * sn; s.z = p.z - lx * sn + lz * c;
+      s.ry = p.ry + (lx < 0 ? -Math.PI / 2 : Math.PI / 2); s.y = by + .62;
+    });
+    if (ME.seat && SEAT[ME.seat] && SEAT[ME.seat].boat === bi) mine = p;
+  }
+  return mine || boatPose(0, now);
 }
 function normBoat(d) {
   d = d || {};
@@ -4286,8 +4296,13 @@ function normBoat(d) {
     paid: d.paid && typeof d.paid === "object" ? Object.fromEntries(Object.entries(d.paid).filter(([k, v]) => isUid(k)).map(([k, v]) => [k, clamp(Math.round(Number(v) || 0), 0, 100000)])) : {},
     tripStart: Number(d.tripStart) || 0, tripId: str(d.tripId, 40) };
 }
+function normFleet(d) {
+  if (d && Array.isArray(d.boats)) { const arr = d.boats.slice(0, 3).map(x => normBoat(x)); while (arr.length < 3) arr.push(normBoat(null)); return arr; }
+  if (d && (d.status || d.seats)) return [normBoat(d), normBoat(null), normBoat(null)];   // 예전 문서(배 1척)는 1호로 이관
+  return [normBoat(null), normBoat(null), normBoat(null)];
+}
 const paidSum = (b) => Object.values(b.paid).reduce((a, v) => a + v, 0);
-const mySeatOnBoat = () => S.boat.seats.find(x => x.uid === S.uid);
+const mySeatOnBoat = () => { const b = myBoat(); return b ? b.seats.find(x => x.uid === S.uid) : null; };
 async function boatEdit(fn) {
   if (!S.online) { toast("배는 온라인에서만 탈 수 있어요"); return false; }
   const ref = S.db.doc(boatDocId());
@@ -4295,27 +4310,28 @@ async function boatEdit(fn) {
     const r = await ref.acquire({ holder: S.uid, ttlMs: 4000 });
     if (!r.acquired) { toast("다른 분이 배를 정리하는 중이에요. 잠시 후 다시 눌러 주세요"); return false; }
     const snap = await ref.get();
-    const cur = normBoat(snap.exists ? snap.data() : null);
+    const cur = normFleet(snap.exists ? snap.data() : null);
     const next = fn(cur); if (!next) return false;
-    await ref.set(JSON.parse(JSON.stringify(next)));
-    S.boat = normBoat(next); S.boatEditAt = Date.now();   // 서버 소식이 오기 전에도 바로 반영
+    await ref.set({ boats: JSON.parse(JSON.stringify(next)) });
+    S.fleet = normFleet({ boats: next }); S.boatEditAt = Date.now();   // 서버 소식이 오기 전에도 바로 반영
     return true;
   } catch (e) { console.warn("boat", e); toast("배 정보를 바꾸지 못했어요. 다시 시도해 주세요"); return false; }
 }
-async function boatJoin() {
+async function boatJoin(bi) {
   if (S.card) stopCard(true);
   if (S.coop) { toast("함께 낚시 중에는 배를 탈 수 없어요"); return; }
   let slot = -1;
-  const ok = await boatEdit((b) => {
-    if (b.status !== "docked") { toast("배가 이미 나갔어요. 돌아올 때까지 기다려 주세요"); return null; }
-    if (b.seats.some(x => x.uid === S.uid)) { slot = b.seats.find(x => x.uid === S.uid).slot; return b; }
+  const ok = await boatEdit((fl) => {
+    const b = fl[bi];
+    if (b.status !== "docked") { toast("그 배는 이미 나갔어요. 정박 중인 다른 배를 골라 주세요"); return null; }
+    if (fl.some(x => x.seats.some(y => y.uid === S.uid))) { toast("이미 다른 배에 타고 있어요"); return null; }
     if (b.seats.length >= BOAT.max) { toast("배가 꽉 찼어요 (최대 4명)"); return null; }
     for (let i = 0; i < BOAT.max; i++) if (!b.seats.some(x => x.slot === i)) { slot = i; break; }
     b.seats.push({ uid: S.uid, nick: P.nick, slot, ts: Date.now() });
-    return b;
+    return fl;
   });
   if (!ok || slot < 0) return;
-  ME.target = null; ME.seat = "b" + slot; ME.st = "sit"; S.phase = "idle";
+  ME.target = null; ME.seat = "b" + (bi * 4 + slot); ME.st = "sit"; S.phase = "idle";
   pushPresence({ seat: ME.seat, phase: "idle", st: "sit" });
   cam.yawGoal = SEAT[ME.seat].ry + Math.PI;
   updateLeaveBtn(); updateHint(); refreshSheet();
@@ -4323,23 +4339,29 @@ async function boatJoin() {
 async function boatQuit() {
   if (!onBoat()) return;
   if (REEL.on) endReel(false, true);
-  if (S.online) await boatEditQuiet((b) => {
+  const bi = myBoatIdx();
+  if (S.online && bi >= 0) await boatEditQuiet((fl) => {
+    const b = fl[bi];
     if (b.status !== "sailing") return null;
     b.seats = b.seats.filter(x => x.uid !== S.uid);
-    return b.seats.length ? b : { status: "docked", seats: [], paid: {}, tripStart: 0, tripId: "" };
+    if (!b.seats.length) fl[bi] = emptyBoat();
+    return fl;
   });
-  S.boat.seats = S.boat.seats.filter(x => x.uid !== S.uid); S.boatEditAt = Date.now();
+  const mb = myBoat(); if (mb) mb.seats = mb.seats.filter(x => x.uid !== S.uid); S.boatEditAt = Date.now();
   dropAtDock(); toast("구명보트를 타고 부두로 먼저 돌아왔어요");
-  postSys(P.nick + "님이 멍낚호에서 중도하차했어요");
+  postSys(P.nick + "님이 " + BOAT_NAMES[bi >= 0 ? bi : 0] + "에서 중도하차했어요");
 }
 async function boatLeave() {
-  if (S.boat.status === "sailing") { boatQuit(); return; }
+  const bi = myBoatIdx(), mb = myBoat();
+  if (!mb) return;
+  if (mb.status === "sailing") { boatQuit(); return; }
   let refund = 0;
-  const ok = await boatEdit((b) => {
+  const ok = await boatEdit((fl) => {
+    const b = fl[bi];
     if (b.status === "sailing") { toast("배가 돌아올 때까지 기다려 주세요"); return null; }
     refund = b.paid[S.uid] || 0; delete b.paid[S.uid];
     b.seats = b.seats.filter(x => x.uid !== S.uid);
-    return b;
+    return fl;
   });
   if (!ok) return;
   if (refund) { P.gold += refund; markDirty(); toast("낸 뱃삯 " + won(refund) + "을 돌려받았어요"); }
@@ -4351,9 +4373,10 @@ function dropAtDock() {
   pushPresence({ seat: null, phase: "idle", st: "idle" }); presMove(true);
   updateLeaveBtn(); updateHint(); refreshSheet();
 }
-async function boatPay(mode) {
+async function boatPay(bi, mode) {
   let pay = 0, departed = false;
-  const ok = await boatEdit((b) => {
+  const ok = await boatEdit((fl) => {
+    const b = fl[bi];
     if (b.status !== "docked") return null;
     if (!b.seats.some(x => x.uid === S.uid)) { toast("먼저 배에 타 주세요"); return null; }
     const remain = BOAT.price - paidSum(b);
@@ -4363,33 +4386,36 @@ async function boatPay(mode) {
     if (P.gold < pay) { toast(won(pay) + "이 필요해요. 돈이 부족해요"); pay = 0; return null; }
     b.paid[S.uid] = (b.paid[S.uid] || 0) + pay;
     if (paidSum(b) >= BOAT.price) { b.status = "sailing"; b.tripStart = Date.now(); b.tripId = uid4(); departed = true; }
-    return b;
+    return fl;
   });
   if (!ok || !pay) return;
   P.gold -= pay; markDirty(); flushSave();
   toast((mode === "all" ? "뱃삯을 모두 냈어요" : "내 몫 뱃삯을 냈어요") + " · -" + won(pay) + "");
-  if (departed) postSys("멍낚호가 깊은 바다로 출항했어요! (" + S.boat.seats.map(x => x.nick).join(", ") + ")");
+  if (departed) postSys(BOAT_NAMES[bi] + "가 깊은 바다로 출항했어요! (" + S.fleet[bi].seats.map(x => x.nick).join(", ") + ")");
 }
 let lastBoatClean = 0;
 function boatTick() {
   const now = Date.now();
   if (!SEAT.b0) return;
   if (!R) updateBoatSeats(now);
-  const b = S.boat, mine = S.uid && b.seats.some(x => x.uid === S.uid);
+  const mi = myBoatIdx(), mb = mi >= 0 ? S.fleet[mi] : null, mine = !!(mb && S.uid && mb.seats.some(x => x.uid === S.uid));
   // 출항 시작: 의뢰 진행
-  if (b.status === "sailing" && mine && S.myTrip !== b.tripId) { S.myTrip = b.tripId; stat("boats"); questProgress("boat"); toast("출항! 5분 동안 깊은 바다에서 낚시해요. 좋은 물고기가 더 잘 나와요"); }
-  // 서버에서 내 자리가 사라졌으면 내림
-  if (onBoat() && S.online && !mine && b.status !== "sailing" && now - (S.boatEditAt || 0) > 5000) dropAtDock();
-  // 항해 끝: 승객은 내리고, 누구든 배를 정박 상태로 되돌림
-  if (b.status === "sailing" && now > b.tripStart + BOAT.dur) {
-    if (onBoat()) { if (REEL.on) endReel(false, true); dropAtDock(); toast("멍낚호가 부두로 돌아왔어요"); }
-    if (now - lastBoatClean > 4000) { lastBoatClean = now; const tid = b.tripId; boatEditQuiet((cur) => cur.status === "sailing" && cur.tripId === tid ? { status: "docked", seats: [], paid: {}, tripStart: 0, tripId: "" } : null); }
+  if (mb && mb.status === "sailing" && mine && S.myTrip !== mb.tripId) { S.myTrip = mb.tripId; stat("boats"); questProgress("boat"); toast("출항! 5분 동안 깊은 바다에서 낚시해요. 좋은 물고기가 더 잘 나와요"); }
+  // 서버에서 내 자리가 사라졌으면 내림 (항해 중인 배는 중도하차로만 내림)
+  if (onBoat() && S.online && !mine && !(mb && mb.status === "sailing") && now - (S.boatEditAt || 0) > 5000) dropAtDock();
+  // 항해 끝: 그 배 승객은 내리고, 누구든 그 배를 정박 상태로 되돌림 (척별)
+  for (let bi = 0; bi < 3; bi++) {
+    const b = S.fleet[bi];
+    if (b.status === "sailing" && now > b.tripStart + BOAT.dur) {
+      if (bi === mi && onBoat()) { if (REEL.on) endReel(false, true); dropAtDock(); toast(BOAT_NAMES[bi] + "가 부두로 돌아왔어요"); }
+      if (now - lastBoatClean > 4000) { lastBoatClean = now; const tid = b.tripId; boatEditQuiet((fl) => { const c = fl[bi]; if (c.status === "sailing" && c.tripId === tid) { fl[bi] = emptyBoat(); return fl; } return null; }); }
+    }
   }
-  // 정박 중 떠난 사람 자리 정리 (90초 넘게 접속이 없으면)
-  if (b.status === "docked" && b.seats.length && now - lastBoatClean > 10000) {
+  // 정박 중 떠난 사람 자리 정리 (90초 넘게 접속이 없으면, 척별)
+  if (now - lastBoatClean > 10000 && S.fleet.some(b => b.status === "docked" && b.seats.length)) {
     const here = new Set(otherPeers(true).map(p => p.uid).filter(Boolean)); if (S.uid) here.add(S.uid);
-    const gone = b.seats.filter(x => !here.has(x.uid) && now - x.ts > 90000);
-    if (gone.length && S.room) { lastBoatClean = now; boatEditQuiet((cur) => { cur.seats = cur.seats.filter(x => !gone.some(g => g.uid === x.uid)); for (const g of gone) delete cur.paid[g.uid]; return cur; }); }
+    const hasGone = S.fleet.some(b => b.status === "docked" && b.seats.some(x => !here.has(x.uid) && now - x.ts > 90000));
+    if (hasGone && S.room) { lastBoatClean = now; boatEditQuiet((fl) => { let ch = false; for (const b of fl) { if (b.status !== "docked") continue; const gone = b.seats.filter(x => !here.has(x.uid) && now - x.ts > 90000); if (gone.length) { b.seats = b.seats.filter(x => !gone.some(g => g.uid === x.uid)); for (const g of gone) delete b.paid[g.uid]; ch = true; } } return ch ? fl : null; }); }
   }
   updateBoatBar(now);
 }
@@ -4398,15 +4424,15 @@ async function boatEditQuiet(fn) {
   const ref = S.db.doc(boatDocId());
   try {
     const r = await ref.acquire({ holder: S.uid, ttlMs: 3000 }); if (!r.acquired) return;
-    const snap = await ref.get(); const next = fn(normBoat(snap.exists ? snap.data() : null)); if (next) await ref.set(next);
+    const snap = await ref.get(); const next = fn(normFleet(snap.exists ? snap.data() : null)); if (next) await ref.set({ boats: next });
   } catch {}
 }
 function updateBoatBar(now) {
   const bar = $("boatBar"); if (!bar) return;
   if (!onBoat()) { if (!bar.hidden) { bar.hidden = true; syncUIState(); } return; }
-  const b = S.boat, p = boatPose(now);
+  const mi = myBoatIdx(), b = S.fleet[mi >= 0 ? mi : 0], p = boatPose(mi >= 0 ? mi : 0, now);
   let text;
-  if (b.status !== "sailing") text = "멍낚호 탑승 중 · " + b.seats.length + "/4명 · 뱃삯 " + fmt(paidSum(b)) + " / " + won(BOAT.price) + "";
+  if (b.status !== "sailing") text = BOAT_NAMES[mi >= 0 ? mi : 0] + " 탑승 중 · " + b.seats.length + "/4명 · 뱃삯 " + fmt(paidSum(b)) + " / " + won(BOAT.price) + "";
   else {
     const left = Math.max(0, b.tripStart + BOAT.dur - now), mm = Math.floor(left / 60000), ss = Math.floor(left / 1000) % 60;
     text = (p.phase === "out" ? "깊은 바다로 가는 중" : p.phase === "back" ? "부두로 돌아가는 중" : "깊은 바다 · 좋은 물고기 확률↑") + " · " + mm + ":" + String(ss).padStart(2, "0");
@@ -4414,12 +4440,14 @@ function updateBoatBar(now) {
   bar.hidden = false; if (bar.textContent !== text) bar.textContent = text; syncUIState();
 }
 function boatSheet(body) {
-  const b = S.boat, mine = mySeatOnBoat(), paid = paidSum(b), sailing = b.status === "sailing";
-  setHead("멍낚호 선착장", "4명까지 함께 타고 5분 동안 깊은 바다로 · 뱃삯 " + won(BOAT.price) + "은 한 명이 다 내거나 나눠 내요");
-  // 승선권: 왼쪽은 깊은 바다 혜택, 오른쪽 떼는 쪽은 뱃삯
+  const mi = myBoatIdx();
+  if (S.boatSel == null) S.boatSel = mi >= 0 ? mi : Math.max(0, S.fleet.findIndex(b => b.status === "docked"));
+  const bi = S.boatSel, b = S.fleet[bi], name = BOAT_NAMES[bi], mine = b.seats.find(x => x.uid === S.uid), paid = paidSum(b), sailing = b.status === "sailing";
+  setHead("선착장", "배 3척 · 한 척이 나가 있어도 다른 배를 타면 돼요 · 뱃삯 " + won(BOAT.price) + "은 한 명이 다 내거나 나눠 내요");
+  body.append(h("div", { class: "tabs", role: "tablist" }, S.fleet.map((x, i) => h("button", { role: "tab", "aria-selected": String(i === bi), onclick: () => { S.boatSel = i; refreshSheet(true); }, text: BOAT_NAMES[i] + (x.status === "sailing" ? " · 출항 중" : " · " + x.seats.length + "/4") }))));
   body.append(h("div", { class: "bt-ticket" },
     h("div", { class: "bt-main" },
-      h("div", { class: "bt-head" }, h("span", { class: "bt-logo", text: "⛵" }), h("div", null, h("b", { text: "멍낚호 승선권" }), h("small", { text: "부두 선착장 → 깊은 바다 → 부두 · 약 5분" }))),
+      h("div", { class: "bt-head" }, h("span", { class: "bt-logo", text: "⛵" }), h("div", null, h("b", { text: name + " 승선권" }), h("small", { text: "부두 선착장 → 깊은 바다 → 부두 · 약 5분" }))),
       h("ul", { class: "bt-perks" },
         h("li", null, h("b", { text: "+30%p" }), h("span", { text: "희귀 이상 물고기" })),
         h("li", null, h("b", { text: "×1.15" }), h("span", { text: "물고기 크기" })),
@@ -4427,7 +4455,6 @@ function boatSheet(body) {
         h("li", null, h("b", { text: "3배" }), h("span", { text: "아귀 · 산갈치 · 상어류" })))),
     h("div", { class: "bt-stub" }, h("small", { text: "뱃삯" }), h("b", { class: "num", text: won(BOAT.price) }), h("small", { text: "한 명이 다 내도, 나눠 내도 돼요" }))));
   if (!S.online) { body.append(h("div", { class: "empty-note", text: "배는 온라인에서만 탈 수 있어요." })); return; }
-  // 갑판 도면: 자리 4개
   const deck = h("div", { class: "bt-deck" + (sailing ? " sail" : "") }, h("div", { class: "bt-bow", text: sailing ? "🌊 출항 중" : "⚓ 정박 중" }));
   for (let i = 0; i < BOAT.max; i++) {
     const x = b.seats.find(s2 => s2.slot === i), me = x && x.uid === S.uid;
@@ -4439,26 +4466,26 @@ function boatSheet(body) {
   body.append(h("div", { class: "sec", text: sailing ? "지금 배 위" : "탑승 " + b.seats.length + "/" + BOAT.max }), deck);
   if (sailing) {
     const left = Math.max(0, b.tripStart + BOAT.dur - Date.now());
-    body.append(h("div", { class: "bt-note", text: "약 " + Math.ceil(left / 60000) + "분 뒤에 부두로 돌아와요. 배 위에서는 자리에서 그대로 낚시해요." }));
+    body.append(h("div", { class: "bt-note", text: "약 " + Math.ceil(left / 60000) + "분 뒤에 부두로 돌아와요. 배 위에서는 자리에서 그대로 낚시해요." + (mine ? "" : " 이 배를 기다리지 말고, 정박 중인 다른 배를 골라 타세요.") }));
     if (mine) body.append(h("div", { class: "row" }, h("button", { class: "btn", onclick: () => { closeSheet(); boatQuit(); }, text: "중도하차 · 구명보트로 먼저 돌아가기" })),
       h("div", { class: "muted", style: "font-size:12.5px", text: "뱃삯은 돌려받지 못해요. 남은 사람들은 계속 낚시하고, 모두 내리면 배도 바로 돌아와요." }));
     return;
   }
-  // 뱃삯 모으기: 연료 눈금처럼
   const pct = Math.min(100, paid / BOAT.price * 100);
   body.append(h("div", { class: "bt-fuel" }, h("div", { class: "bt-fuelhead" }, h("span", { text: "⛽ 모인 뱃삯" }), h("b", { class: "num", text: won(paid) + " / " + won(BOAT.price) })),
     h("div", { class: "bt-gauge" }, h("i", { style: "width:" + pct + "%" }), [25, 50, 75].map(v => h("u", { style: "left:" + v + "%" }))),
     h("small", { text: pct >= 100 ? "곧 출항해요!" : "다 모이면 바로 출항해요 · 출항 전에 내리면 낸 돈은 돌려받아요" })));
   const acts = h("div", { class: "row bt-acts" });
-  if (!mine) acts.append(h("button", { class: "btn pri", disabled: b.seats.length >= BOAT.max || !!S.coop, onclick: () => boatJoin(), text: b.seats.length >= BOAT.max ? "꽉 찼어요" : "🎫 배에 타기" }));
+  if (mi >= 0 && mi !== bi) acts.append(h("div", { class: "muted", style: "font-size:12.5px", text: "이미 " + BOAT_NAMES[mi] + "에 타고 있어요. 내리면 다른 배를 탈 수 있어요." }));
+  else if (!mine) acts.append(h("button", { class: "btn pri", disabled: b.seats.length >= BOAT.max || !!S.coop, onclick: () => boatJoin(bi), text: b.seats.length >= BOAT.max ? "꽉 찼어요" : "🎫 배에 타기" }));
   else {
     const n = b.seats.length, share = Math.ceil(BOAT.price / n) - (b.paid[S.uid] || 0), remain = BOAT.price - paid;
-    acts.append(h("button", { class: "btn pri", disabled: P.gold < remain, onclick: () => boatPay("all"), text: "내가 다 낼게요 (" + won(remain) + ")" }));
-    if (n > 1) acts.append(h("button", { class: "btn", disabled: share <= 0 || P.gold < share, onclick: () => boatPay("split"), text: share > 0 ? "나눠 내기 · 내 몫 " + won(Math.min(share, remain)) : "내 몫은 냈어요" }));
+    acts.append(h("button", { class: "btn pri", disabled: P.gold < remain, onclick: () => boatPay(bi, "all"), text: "내가 다 낼게요 (" + won(remain) + ")" }));
+    if (n > 1) acts.append(h("button", { class: "btn", disabled: share <= 0 || P.gold < share, onclick: () => boatPay(bi, "split"), text: share > 0 ? "나눠 내기 · 내 몫 " + won(Math.min(share, remain)) : "내 몫은 냈어요" }));
     acts.append(h("button", { class: "btn", onclick: () => { closeSheet(); boatLeave(); }, text: "배에서 내리기" }));
   }
   body.append(acts);
-};
+}
 
 /* ===================== 함께 낚시 =====================
    한 명(주인)이 앉은 낚싯대를 다른 한 명(손님)이 같이 잡음. 판마다 「누가 가져갈까?」를 둘이 고르고, 다르면 취소.
@@ -9258,35 +9285,42 @@ function updateJumps(dt, t) {
 
 
 /* ---------- 멍낚호 (배) ---------- */
-let boatG = null, boatSign = null;
+let boatGs = [], boatSigns = [];
 function buildBoat() {
-  const g = new T3.Group();
-  box(2.9, .8, 6.0, phong(0xf3efe6), 0, .35, 0, g);
-  const bow = new T3.Mesh(new T3.BoxGeometry(2.05, .8, 2.05), phong(0xf3efe6)); bow.rotation.y = Math.PI / 4; bow.position.set(0, .35, 3.0); g.add(bow);
-  box(2.95, .22, 6.05, phong(0x2f6f86), 0, -.02, 0, g);
-  box(2.6, .08, 5.6, phong(0xa5774f), 0, .78, -.1, g);
-  box(1.9, 1.2, 1.7, phong(0xe2522c), 0, 1.4, -1.9, g);
-  box(2.2, .14, 2.0, phong(0x3d3d48), 0, 2.07, -1.9, g);
-  box(1.5, .5, .06, bulbMat(0x9fc3d6, 0xffd89a), 0, 1.5, -1.03, g);
-  cyl(.06, .07, 3.2, 6, phong(0x5a4632), 0, 2.4, 1.1, g);
-  const flag = new T3.Mesh(new T3.PlaneGeometry(1.1, .6), new T3.MeshBasicMaterial({ color: 0xff7a4d, side: T3.DoubleSide })); flag.position.set(.58, 3.65, 1.1); g.add(flag);
-  const hit = new T3.Mesh(new T3.BoxGeometry(3.2, 2.6, 7.6), MAT.hit); hit.position.y = 1; hit.userData.pick = { kind: "boat" }; g.add(hit); pickables.push(hit);
-  boatSign = makeText(); boatSign.position.set(0, 3.4, -1.9); g.add(boatSign);
-  scene.add(g); boatG = g; g.userData.flag = flag;
+  boatGs = []; boatSigns = [];
+  for (let i = 0; i < 3; i++) {
+    const g = new T3.Group();
+    box(2.9, .8, 6.0, phong(0xf3efe6), 0, .35, 0, g);
+    const bow = new T3.Mesh(new T3.BoxGeometry(2.05, .8, 2.05), phong(0xf3efe6)); bow.rotation.y = Math.PI / 4; bow.position.set(0, .35, 3.0); g.add(bow);
+    box(2.95, .22, 6.05, phong(0x2f6f86), 0, -.02, 0, g);
+    box(2.6, .08, 5.6, phong(0xa5774f), 0, .78, -.1, g);
+    box(1.9, 1.2, 1.7, phong(0xe2522c), 0, 1.4, -1.9, g);
+    box(2.2, .14, 2.0, phong(0x3d3d48), 0, 2.07, -1.9, g);
+    box(1.5, .5, .06, bulbMat(0x9fc3d6, 0xffd89a), 0, 1.5, -1.03, g);
+    cyl(.06, .07, 3.2, 6, phong(0x5a4632), 0, 2.4, 1.1, g);
+    const flag = new T3.Mesh(new T3.PlaneGeometry(1.1, .6), new T3.MeshBasicMaterial({ color: 0xff7a4d, side: T3.DoubleSide })); flag.position.set(.58, 3.65, 1.1); g.add(flag);
+    const hit = new T3.Mesh(new T3.BoxGeometry(3.2, 2.6, 7.6), MAT.hit); hit.position.y = 1; hit.userData.pick = { kind: "boat" }; g.add(hit); pickables.push(hit);
+    const sign = makeText(); sign.position.set(0, 3.4, -1.9); g.add(sign);
+    scene.add(g); g.userData.flag = flag;
+    boatGs.push(g); boatSigns.push(sign);
+  }
   // 선착장 표지
   const sign = makeSign(2.9, .95, SIGNS.dock, { cw: 768 });
   sign.position.set(BOAT.board.x, 2.35, -3.95); scene.add(sign);
   cyl(.06, .06, 2, 6, phong(0x3a3a3a), BOAT.board.x - 1.1, 1, -3.95); cyl(.06, .06, 2, 6, phong(0x3a3a3a), BOAT.board.x + 1.1, 1, -3.95);
 }
 function updateBoat3D(t, now) {
-  const p = updateBoatSeats(now, t);
-  if (!boatG) return p;
-  boatG.position.set(p.x, waveY(p.x, p.z, t) - .1, p.z);
-  boatG.rotation.set(Math.sin(t * 1.1) * .03, p.ry, Math.sin(t * .9 + 1) * .04);
-  boatG.userData.flag.rotation.y = Math.sin(t * 3) * .3;
-  const b = S.boat;
-  setText(boatSign, b.status === "sailing" ? "멍낚호 · 출항 중" : "멍낚호 " + b.seats.length + "/4 · 뱃삯 " + won(BOAT.price) + "", "rgba(16,22,26,.72)", "#f6f1e7", .36, true);
-  return p;
+  updateBoatSeats(now, t);
+  if (!boatGs.length) return;
+  for (let i = 0; i < 3; i++) {
+    const g = boatGs[i]; if (!g) continue;
+    const p = boatPose(i, now);
+    g.position.set(p.x, waveY(p.x, p.z, t) - .1, p.z);
+    g.rotation.set(Math.sin(t * 1.1 + i * 2) * .03, p.ry, Math.sin(t * .9 + 1 + i * 2) * .04);
+    g.userData.flag.rotation.y = Math.sin(t * 3 + i * 2) * .3;
+    const b = S.fleet[i];
+    setText(boatSigns[i], b.status === "sailing" ? BOAT_NAMES[i] + " · 출항 중" : BOAT_NAMES[i] + " " + b.seats.length + "/4 · 뱃삯 " + won(BOAT.price) + "", "rgba(16,22,26,.72)", "#f6f1e7", .36, true);
+  }
 }
 
 function updateStallSigns() {
@@ -10617,7 +10651,7 @@ function updateHint() {
   if (!R) return;
   hint.classList.toggle("idle", !(S.coop && S.coop.stage !== "inviting") && !onBoat() && !fishingNow() && !(S.myStall >= 0) && !ME.seat);   // 그냥 걸어 다닐 땐 조작 안내를 띄우지 않아요 (v1.40)
   if (S.coop && S.coop.stage !== "inviting") hint.textContent = "함께 낚시 중 · 「!」가 뜨면 둘 중 누구든 챔질 → 둘 다 손맛을 버텨야 잡혀요";
-  else if (onBoat()) hint.textContent = S.boat.status === "sailing" ? "멍낚호 · 깊은 바다에 도착하면 자동으로 낚시를 시작해요" : "멍낚호 탑승 중 · 뱃삯이 모이면 바로 출항해요";
+  else if (onBoat()) { const mb = myBoat(), nm = BOAT_NAMES[Math.max(0, myBoatIdx())]; hint.textContent = mb && mb.status === "sailing" ? nm + " · 깊은 바다에 도착하면 자동으로 낚시를 시작해요" : nm + " 탑승 중 · 뱃삯이 모이면 바로 출항해요"; }
   else if (fishingNow()) hint.textContent = S.phase === "ready" || S.phase === "charge" ? "꾹 눌렀다가 초록 칸에서 떼면 완벽한 캐스팅! 멀리 던질수록 좋은 물고기" : "「!」가 뜨면 챔질 → 꾹 눌러 감고, 돌진·점프하면 손 떼기 · 과열을 조심해요";
   else if (S.myStall >= 0) hint.textContent = "노점 운영 중 · 주문이 오면 자동으로 팔려요";
   else if (ME.seat) hint.textContent = "포차에 앉았어요 · 채팅으로 수다 떨기";
@@ -14326,7 +14360,7 @@ $("hookBtn").addEventListener("keydown", (e) => { if (e.key === "Enter") hook();
 window.addEventListener("pointerup", () => reelHold(false));
 $("chanBtn").addEventListener("click", () => openSheet("channels"));
 $("menuBtn").addEventListener("click", (e) => { e.stopPropagation(); if (MOBILE()) { closeMeMenu(); if (S.sheet === "mobmenu") closeSheet(); else openSheet("mobmenu"); return; } if (S.meMenu) closeMeMenu(); else { closeSheet(); openMeMenu(); } });   // v1.96: 휴대폰은 큰 격자 메뉴
-$("standBtn").addEventListener("click", () => { if (S.card) stopCard(); else if (onBoat() && S.boat.status === "sailing") openSheet("boat"); else leaveSpot(); });
+$("standBtn").addEventListener("click", () => { if (S.card) stopCard(); else if (onBoat() && myBoat() && myBoat().status === "sailing") openSheet("boat"); else leaveSpot(); });
 $("actBtn").addEventListener("click", doAction);
 $("testGold").addEventListener("click", () => { P.gold += 5000; markDirty(); refreshSheet(); toast("테스트용 50만원을 받았어요"); });
 $("nickChip").addEventListener("click", () => openSheet("profile"));
@@ -14737,7 +14771,7 @@ async function boot() {
   S.watchCh = () => {   // 지금 채널의 배 · 노점 문서를 지켜봐요 (채널을 옮기면 다시)
     if (unBoat) unBoat(); if (unStalls) unStalls();
     unBoat = db.doc(boatDocId()).onSnapshot((snap) => {
-      S.boat = normBoat(snap.exists ? snap.data() : null);
+      S.fleet = normFleet(snap.exists ? snap.data() : null);
       if (S.sheet === "boat") refreshSheet();
       updateLeaveBtn(); updateHint();
     }, (e) => console.warn("boat", e));
