@@ -1691,6 +1691,16 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .mrod-cta .ic{font-size:30px}.mrod-cta .grow{flex:1;min-width:160px}.mrod-cta b{font-size:15.5px}.mrod-cta small{display:block;font-size:12.5px;opacity:.85;line-height:1.45}
 .mrod-cta .btn{min-height:42px}
 .mrod-btn{flex-basis:100%;min-height:44px;font-size:15px}
+/* v1.107 상점 미리보기 */
+.ibig.stage3d{min-height:210px;display:grid;place-items:center;border-radius:16px;background:radial-gradient(circle at 50% 42%,rgba(255,255,255,.75),rgba(255,240,210,.25) 60%,transparent 72%)}
+.istage{width:210px;height:210px;cursor:grab;touch-action:pan-y}.istage:active{cursor:grabbing}
+.ikind{font-size:11.5px;font-weight:800;color:#a8740a;letter-spacing:.02em}
+.iperks{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.iperks li{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.45;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.55)}
+.iperks li span:first-child{flex:none;width:20px;text-align:center}
+.ihow{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;background:rgba(23,138,138,.14);box-shadow:inset 0 0 0 1.5px rgba(23,138,138,.45);font-size:12.5px;line-height:1.5}
+.ishelf.hovering{box-shadow:0 0 0 2px #e2a514,0 8px 0 #c9a46b}
+@media (max-width:820px){.ibig.stage3d{min-height:0;background:none}.istage{width:64px;height:64px}.tshop>.ishelf .ikind{display:none}.tshop>.ishelf .iperks{flex-basis:100%;gap:3px}.tshop>.ishelf .iperks li{padding:3px 6px;font-size:12px}.tshop>.ishelf .iperks li:nth-child(n+4){display:none}.tshop>.ishelf .ihow{flex-basis:100%;font-size:12px;padding:8px 10px}}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 /* 개인정보 안내 · 동의 (v1.96) */
 .consent-ov{position:fixed;inset:0;background:rgba(4,10,14,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:14px}
@@ -1853,7 +1863,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.106.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.107.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -10883,10 +10893,78 @@ function buyGear(cat, it) {
   else toast(it.name + "로 바꿨어요");
   P[cat] = it.id; markDirty(); pushPresence({ rod: P.rod, reel: P.reel }); refreshSheet(true);
 }
+/* v1.107 상점 미리보기: 빙글빙글 도는 확대 모습(낚싯대 · 릴은 3D 모델, 나머지는 그림 카드) · 끌어서 돌려 볼 수 있어요 */
+let ISTAGE = null;
+function itemStageEl(cat, it) {
+  if (!T3) return h("img", { src: itemIcon(cat, it, 160), alt: "" });
+  if (!ISTAGE) {
+    const canvas = document.createElement("canvas"); canvas.className = "istage"; canvas.setAttribute("aria-label", "물건 미리보기 · 끌어서 돌려 보기");
+    let r; try { r = new T3.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { return h("img", { src: itemIcon(cat, it, 160), alt: "" }); }
+    r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    const sc = new T3.Scene(); sc.add(new T3.HemisphereLight(0xfff4e6, 0x6a7a8a, 1.0));
+    const dl = new T3.DirectionalLight(0xffffff, .7); dl.position.set(2, 3, 4); sc.add(dl);
+    const rim = new T3.DirectionalLight(0x9fd8ff, .35); rim.position.set(-3, 1, -2); sc.add(rim);
+    const cam = new T3.PerspectiveCamera(30, 1, .1, 30); cam.position.set(0, .15, 3.3); cam.lookAt(0, 0, 0);
+    const spin = new T3.Group(); sc.add(spin);
+    const glowM = new T3.MeshBasicMaterial({ color: 0xffe2a0, transparent: true, opacity: .22, depthWrite: false });
+    const ring = new T3.Mesh(new T3.RingGeometry(.5, .78, 48), glowM); ring.rotation.x = -Math.PI / 2; ring.position.y = -.82; sc.add(ring);
+    ISTAGE = { canvas, r, sc, cam, spin, ring, key: "", drag: null, yaw: 0, last: 0 };
+    canvas.addEventListener("pointerdown", (e) => { ISTAGE.drag = { x: e.clientX, yaw: ISTAGE.yaw }; try { canvas.setPointerCapture(e.pointerId); } catch {} });
+    canvas.addEventListener("pointermove", (e) => { if (ISTAGE.drag) ISTAGE.yaw = ISTAGE.drag.yaw + (e.clientX - ISTAGE.drag.x) * .015; });
+    for (const ev of ["pointerup", "pointercancel"]) canvas.addEventListener(ev, () => { ISTAGE.drag = null; });
+    const loop = (ms) => {
+      requestAnimationFrame(loop); const S2 = ISTAGE; if (!canvas.isConnected) { S2.last = ms; return; }
+      const w = canvas.clientWidth, hh = canvas.clientHeight; if (!w || !hh) return;
+      if (canvas.width !== Math.round(w * r.getPixelRatio())) { r.setSize(w, hh, false); cam.aspect = w / hh; cam.updateProjectionMatrix(); }
+      const dt = Math.min(.05, (ms - (S2.last || ms)) / 1000); S2.last = ms;
+      if (!S2.drag) S2.yaw += dt * .9;
+      S2.spin.rotation.y = S2.yaw; S2.spin.position.y = Math.sin(ms / 900) * .04; S2.ring.material.opacity = .16 + Math.sin(ms / 500) * .06;
+      r.render(sc, cam);
+    };
+    requestAnimationFrame(loop);
+  }
+  const key = cat + ":" + it.id;
+  if (ISTAGE.key !== key) {
+    ISTAGE.key = key; const sp = ISTAGE.spin;
+    for (const c of sp.children.slice()) { sp.remove(c); c.traverse(o => { if (o.material) [].concat(o.material).forEach(m => { if (m.map && m.map.isTexture && m.userData.own) m.map.dispose(); m.dispose && m.userData.own && m.dispose(); }); }); }
+    let obj = null;
+    if (cat === "rod" && ROD3D.has(it.id)) { const m = ROD3D.get(it.id), mesh = rodMesh(it.id, false), k = 1.75 / m.top; mesh.scale.set(k * 2.2, k, k * 2.2); mesh.position.y = -m.top * k / 2; const tilt = new T3.Group(); tilt.add(mesh); tilt.rotation.z = -.55; obj = tilt; }
+    else if (cat === "reel" && REEL3D.has(it.id)) { const m = REEL3D.get(it.id), mesh = reelMesh(it.id), k = 1.25 / m.size; mesh.scale.setScalar(k); const tilt = new T3.Group(); tilt.add(mesh); tilt.rotation.x = .35; obj = tilt; }
+    if (!obj) {   // 그림 카드: 앞뒤 같은 그림 · 두께 있는 카드처럼
+      const tex = new T3.TextureLoader().load(itemIcon(cat, it, 256)); const mat = new T3.MeshBasicMaterial({ map: tex, side: T3.DoubleSide }); mat.userData.own = true;
+      const g = new T3.Group(); g.add(new T3.Mesh(new T3.PlaneGeometry(1.25, 1.25), mat));
+      const edge = new T3.Mesh(new T3.BoxGeometry(1.31, 1.31, .04), new T3.MeshBasicMaterial({ color: 0xe8d6b0 })); edge.position.z = -.025; g.add(edge); obj = g;
+    }
+    sp.add(obj); ISTAGE.yaw = -.6;
+  }
+  return ISTAGE.canvas;
+}
+// 이 물건을 쓰면 뭐가 좋아지는지 · 쉬운 말로 (v1.107)
+function itemPerks(cat, it) {
+  const out = [], pct = (v) => Math.round(v * 100);
+  if (cat === "bait") { out.push(["🎲", "희귀 이상 물고기가 올 확률 " + rareP(it) + "%" + (it.p[5] ? " · 전설 " + it.p[5] + "%" : "")]); out.push(["🪱", it.id === "worm" ? "지렁이는 써도 안 줄어요 (무한)" : "한 번 던질 때마다 1개씩 써요"]); }
+  if (cat === "rod") {
+    const c0 = curRod();
+    out.push(["🧵", "줄이 버티는 힘 " + pct(it.tens) + (it.tens !== c0.tens ? " (지금 " + pct(c0.tens) + ")" : "") + " · 높을수록 줄이 덜 끊겨요"]);
+    out.push(["🪝", "채비를 " + it.slots + "개까지 달 수 있어요"]);
+    if (it.id !== "bamboo") { out.push(["🐟", "물고기가 뛸 때 바늘 빠짐 " + pct(1 - it.jump) + "% 줄어요"]); if (it.calm) out.push(["💥", "몸부림 충격 " + pct(it.calm) + "% 흡수"]); if (it.tire > 1) out.push(["😮‍💨", "물고기가 " + pct(it.tire - 1) + "% 빨리 지쳐요"]); }
+  }
+  if (cat === "reel") { out.push(["🔥", it.heat >= 1 ? "열이 잘 오르는 기본 릴이에요" : "릴 열이 " + pct(1 - it.heat) + "% 덜 올라요"]); out.push(["🧊", "식는 빠르기 " + pct(it.cool)]); out.push(["🌀", "감는 빠르기 " + it.speed.toFixed(1) + "m/s"]); }
+  if (cat === "line") out.push(["🧵", it.add ? "끊어지기 전까지 " + pct(it.add) + "% 더 버텨요" : "처음 받은 기본 줄이에요"]);
+  if (cat === "tackle") { out.push(["🪝", it.desc]); out.push(["⏳", "파이팅 " + TACKLE_USES + "번 쓰면 닳아요 · 낚싯대 채비 칸에 달아요"]); }
+  if (cat === "tool") out.push(["🧰", it.desc]);
+  return out;
+}
 function shopPreview(cat, it) {
   const st = itemState(cat, it), locked = itemLocked(it);
-  const box = h("div", { class: "ishelf" }, h("div", { class: "ibig" }, h("img", { src: itemIcon(cat, it, 160), alt: "" })),
-    h("h3", { text: it.name }), h("div", { class: "muted", style: "font-size:12.5px;line-height:1.5", text: it.desc || itemStat(cat, it) }));
+  const perks = itemPerks(cat, it), gh = GEAR_HELP[cat] || {};
+  const box = h("div", { class: "ishelf" }, h("div", { class: "ibig stage3d" }, itemStageEl(cat, it)),
+    h("div", { class: "ikind", text: (gh.ico || "") + " " + (gh.name || "") + (st.using ? " · 지금 쓰는 중" : st.own ? " · 가지고 있어요" : locked ? " · Lv." + it.lv + "부터" : "") }),
+    h("h3", { text: it.name }), h("div", { class: "muted", style: "font-size:12.5px;line-height:1.5", text: it.desc || itemStat(cat, it) }),
+    perks.length ? h("ul", { class: "iperks" }, perks.map(([ic, tx]) => h("li", {}, h("span", { text: ic }), h("span", { text: tx })))) : null);
+  if (cat === "rod" && it.id === "merchant") box.append(h("div", { class: "ihow" }, h("b", { text: "🎯 특별 기능 · 지정 낚시" }),
+    h("span", { text: "등급 하나(일반~초월)와 그 등급에서 노릴 물고기 최대 3종을 골라 두면, 그 등급이 떴을 때 고른 물고기만 나와요. 등급이 뜰 확률은 미끼 그대로예요." }),
+    h("span", { class: "muted", text: st.own ? "설정은 이 화면 아래 「🎯 지정 낚시 설정하기」나 가방 → 장비에서 해요 · 이 낚싯대를 들고 있어야 효과가 있어요" : "사고 나면 이 화면 아래와 가방 → 장비에 「🎯 지정 낚시」 버튼이 생겨요" })));
   const cmp = h("div", { class: "cmp" });
   if (cat === "bait") box.append(probBar(it.p), h("div", { class: "plegend" }, it.p.map((v, i) => h("span", { style: "--c:var(" + TIER_VARS[i] + ")", text: TIERS[i].name + " " + v + "%" }))));
   if (cat === "bait") { const mc = APEX_CHANCE[it.id]; box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: mc ? "🌌 태초 " + (Math.round(mc * 10000) / 100) + "% · 심해에선 ×2, 밤엔 ×1.5, 희귀 축제 땐 ×2까지 올라가요" : "🌌 태초 등급은 이 미끼로는 안 나와요 · 황금 루어와 전설의 미끼만 태초를 노릴 수 있어요" }),
@@ -10931,7 +11009,8 @@ SHEETS.shop = (body) => {
     const st = itemState(cat, it), locked = itemLocked(it);
     const right = locked ? "Lv." + it.lv : st.using ? "사용 중" : (cat === "bait" || cat === "tackle") ? (st.count ? "보유 " + st.count : (it.price ? won(it.price) + "" : "무료")) : st.own ? "보유" : (it.price ? won(it.price) + "" : "기본");
     const grade = (cat === "rod" || cat === "reel") && (it.lv || 1) >= 40 ? " g5" : (cat === "rod" || cat === "reel") && (it.lv || 1) >= 20 ? " g4" : cat === "bait" && it.id === "legend" ? " g4" : "";   // 좋은 장비는 빛나요
-    return h("button", { class: "irow" + grade + (it === sel ? " on" : "") + (locked ? " locked" : ""), onclick: () => { S.shopSel = { cat, id: it.id }; sfx("ui-click", .25); refreshSheet(true); } },
+    return h("button", { class: "irow" + grade + (it === sel ? " on" : "") + (locked ? " locked" : ""), onclick: () => { S.shopSel = { cat, id: it.id }; sfx("ui-click", .25); refreshSheet(true); },
+      onmouseenter: () => shopHover(cat, it), onmouseleave: () => shopHover(cat, null), onfocus: () => shopHover(cat, it) },
       h("img", { class: "iic", src: itemIcon(cat, it), alt: "" }), h("span", { class: "inm" }, h("b", { text: it.name }), h("small", { text: itemStat(cat, it) })),
       h("span", { class: "ipr" + (st.using ? " tag on" : ""), text: right }));
   }));
@@ -10962,6 +11041,13 @@ function toggleMrod(id) {
   if (i >= 0) P.mrod.list.splice(i, 1);
   else { if (P.mrod.list.length >= 3) { toast("최대 3종까지만 고를 수 있어요"); return; } P.mrod.list.push(id); }
   markDirty(); sfx("ui-click", .25); refreshSheet(true);
+}
+function shopHover(cat, it) {   // v1.107: 마우스를 올린 물건을 왼쪽에 크게 · 떼면 고른 물건으로
+  if (!matchMedia("(hover: hover)").matches) return;
+  const cur = document.querySelector(".tshop.peg > .ishelf"); if (!cur) return;
+  const target = it || catList(cat).find(x => S.shopSel && x.id === S.shopSel.id); if (!target) return;
+  if (cur.dataset.k === cat + ":" + target.id) return;
+  const nb = shopPreview(cat, target); nb.dataset.k = cat + ":" + target.id; if (it && (!S.shopSel || it.id !== S.shopSel.id)) nb.classList.add("hovering"); cur.replaceWith(nb);
 }
 function buyBait(b, n) {
   if (itemLocked(b)) return;
