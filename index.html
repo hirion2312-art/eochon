@@ -1863,7 +1863,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.108.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.108.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -10978,6 +10978,14 @@ function buyGear(cat, it) {
 }
 /* v1.107 상점 미리보기: 빙글빙글 도는 확대 모습(낚싯대 · 릴은 3D 모델, 나머지는 그림 카드) · 끌어서 돌려 볼 수 있어요 */
 let ISTAGE = null;
+const STAGE_OL = new Map();
+function stageOutlineMat(w) {   // 표면을 법선 방향으로 w만큼 부풀린 검은 뒷면 (상점 미리보기 전용)
+  const key = w.toFixed(4); if (STAGE_OL.has(key)) return STAGE_OL.get(key);
+  const m = new T3.MeshBasicMaterial({ color: 0x0c0a08, side: T3.BackSide });
+  m.onBeforeCompile = (sh) => { sh.vertexShader = sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n  transformed += normalize(normal) * " + w.toFixed(4) + ";"); };
+  m.customProgramCacheKey = () => "stageOL" + key;
+  STAGE_OL.set(key, m); return m;
+}
 function itemStageEl(cat, it) {
   if (!T3) return h("img", { src: itemIcon(cat, it, 160), alt: "" });
   if (!ISTAGE) {
@@ -11011,12 +11019,14 @@ function itemStageEl(cat, it) {
     ISTAGE.key = key; const sp = ISTAGE.spin;
     for (const c of sp.children.slice()) { sp.remove(c); c.traverse(o => { if (o.material) [].concat(o.material).forEach(m => { if (m.map && m.map.isTexture && m.userData.own) m.map.dispose(); m.dispose && m.userData.own && m.dispose(); }); }); }
     let obj = null;
-    if (cat === "rod" && ROD3D.has(it.id)) { const m = ROD3D.get(it.id), mesh = rodMesh(it.id, false), k = 1.75 / m.top; mesh.scale.set(k * 2.2, k, k * 2.2); mesh.position.y = -m.top * k / 2; const tilt = new T3.Group(); tilt.add(mesh); tilt.rotation.z = -.55; obj = tilt; }
-    else if (cat === "reel" && REEL3D.has(it.id)) { const m = REEL3D.get(it.id), mesh = reelMesh(it.id), k = 1.25 / m.size; mesh.scale.setScalar(k); const tilt = new T3.Group(); tilt.add(mesh); tilt.rotation.x = .35; obj = tilt; }
+    // v1.107.2 상점 한정 검은 외곽선: 같은 모델을 뒷면만 검게, 표면에서 살짝 부풀려 겹쳐 그려요 (오라는 선 없이)
+    const outlined = (mesh, w) => { const o = new T3.Mesh(mesh.geometry, stageOutlineMat(w)); o.position.copy(mesh.position); o.scale.copy(mesh.scale); o.rotation.copy(mesh.rotation); o.renderOrder = -1; return o; };
+    if (cat === "rod" && ROD3D.has(it.id)) { const m = ROD3D.get(it.id), mesh = rodMesh(it.id, false), k = 1.75 / m.top; mesh.scale.set(k * 2.2, k, k * 2.2); mesh.position.y = -m.top * k / 2; const tilt = new T3.Group(); tilt.add(outlined(mesh, .011), mesh); tilt.rotation.z = -.55; obj = tilt; }
+    else if (cat === "reel" && REEL3D.has(it.id)) { const m = REEL3D.get(it.id), mesh = reelMesh(it.id), k = 1.25 / m.size; mesh.scale.setScalar(k); const tilt = new T3.Group(); tilt.add(outlined(mesh, .022 * m.size), mesh); tilt.rotation.x = .35; obj = tilt; }
     if (!obj) {   // 그림 카드: 앞뒤 같은 그림 · 두께 있는 카드처럼
       const tex = new T3.TextureLoader().load(itemIcon(cat, it, 256)); const mat = new T3.MeshBasicMaterial({ map: tex, side: T3.DoubleSide }); mat.userData.own = true;
       const g = new T3.Group(); g.add(new T3.Mesh(new T3.PlaneGeometry(1.25, 1.25), mat));
-      const edge = new T3.Mesh(new T3.BoxGeometry(1.31, 1.31, .04), new T3.MeshBasicMaterial({ color: 0xe8d6b0 })); edge.position.z = -.025; g.add(edge); obj = g;
+      const edge = new T3.Mesh(new T3.BoxGeometry(1.33, 1.33, .04), new T3.MeshBasicMaterial({ color: 0x14100c })); edge.position.z = -.025; g.add(edge); obj = g;   // 그림 카드도 검은 테두리
     }
     sp.add(obj); ISTAGE.yaw = -.6;
   }
