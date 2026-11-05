@@ -1392,7 +1392,7 @@ input,select,textarea{background-color:rgba(255,255,255,.07);border-color:var(--
 .qb2-slot{color:var(--hud-ink)}.qb2-slot.empty .qb2-ico{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.5)}.qb2-slot.empty{color:rgba(255,255,255,.5)}
 /* 가게의 종이 · 나무 소품(가격표 · 페그보드 쪽지 · 통장 · 주문 전표)은 밝은 바탕이라 글씨를 진하게 그대로 */
 .passbook,.peg .ishelf,.pegwall .irow,.ishelf.slip,.tbox .gi{--ink:#132f38;--muted:#56717a;--line:#bfd2d0;--bg:#e7efee;--surface:#f7fbfa;color:#132f38}
-.passbook .btn,.peg .ishelf .btn,.pegwall .irow .btn,.ishelf.slip .btn:not(.pri){background:rgba(19,47,56,.06);border-color:rgba(19,47,56,.18);box-shadow:none}
+.passbook .btn:not(.pri),.peg .ishelf .btn:not(.pri),.pegwall .irow .btn:not(.pri),.ishelf.slip .btn:not(.pri){background:rgba(19,47,56,.06);border-color:rgba(19,47,56,.18);box-shadow:none}
 .tier.t4{color:#2e2200}
 /* 메뉴 타일 · 카드도 비치는 유리 조각처럼 */
 .mtile,.card,.listrow{box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
@@ -1767,6 +1767,15 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
   /* 알림(오늘의 생선 등) 작게 */
   .toast.lvup:has(img){display:flex;gap:10px;align-items:center;text-align:left}.toast.lvup img{width:72px;height:44px;object-fit:contain;flex:none}.toast.lvup b{font-size:15px}
 }
+/* ===== 글씨가 안 보이던 버튼 (v1.111.1) =====
+   밝은 종이 · 가격표 위의 주요 버튼(사기 · 구매)이 흰 글씨 + 밝은 배경이 되던 것, 못 누르는 버튼이 흐려져서 안 읽히던 것 */
+.btn.pri{color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.btn.pri:disabled,.btn.pri[disabled]{opacity:1!important;background:#6f767e!important;border-color:#6f767e!important;color:#f3f3f3!important;text-shadow:none;filter:none!important;box-shadow:none!important}
+.btn:disabled:not(.pri){opacity:.75}
+.passbook .btn:not(.pri),.peg .ishelf .btn:not(.pri),.pegwall .irow .btn:not(.pri),.ishelf.slip .btn:not(.pri),.ishelf .btn:not(.pri){color:#1d2a33}
+.passbook .btn:disabled:not(.pri),.peg .ishelf .btn:disabled:not(.pri),.ishelf .btn:disabled:not(.pri){color:#5b5448;opacity:1;background:rgba(19,47,56,.1)}
+.pegwall .irow.locked .ipr{background:#5f686f!important;color:#fff!important}
+.lvchip{background:#23845f}.badge{background:#d8431e}.rm-tg{text-shadow:0 1px 1px rgba(0,0,0,.35);filter:brightness(.82)}
 </style>
 
 <div class="app" id="app">
@@ -1909,7 +1918,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.111.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.111.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
