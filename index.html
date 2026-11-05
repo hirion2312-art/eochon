@@ -155,7 +155,7 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 .sheet h2{margin:0;font-family:var(--f-display);font-weight:400;font-size:21px;text-wrap:balance}
 .sheet .sub{color:var(--muted);font-size:12.5px}
 .close{border:1px solid var(--line);background:transparent;border-radius:8px;padding:4px 10px;white-space:nowrap;flex-shrink:0}
-.sbody{padding:16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;min-height:0}
+.sbody{padding:16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .btn{border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:6px 12px;font-size:13px}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -824,20 +824,6 @@ body.cinema #hint,body.cinema #standBtn,body.cinema #castBtn,body.cinema .toasts
   .tshop>.ishelf .pbar{flex-basis:100%}
   .tshop>.ishelf .acts{flex-basis:100%}
   .tshop>.ishelf .acts .btn{flex:1}
-  /* 낚시 상점 휴대폰 (v1.110): 가격표는 접어서 작게 · 진열대는 3칸 · 탭은 위에 붙여요 */
-  .tshop>.ishelf:not(.open)>*:not(.ibig):not(h3):not(.acts):not(.imore){display:none!important}
-  .tshop>.ishelf.open{max-height:62vh;overflow-y:auto;z-index:6}
-  .tshop>.ishelf .imore{display:inline-flex;order:0;margin-left:auto;background:none;border:1.5px solid #d9c49a;color:#6b4a2a;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700}
-  .tshop>.ishelf .ikind{flex-basis:100%;font-size:11.5px}
-  .tshop>.ishelf .acts{order:9}
-  .peg .racks>.tabs{position:sticky;top:-14px;z-index:4;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.peg .racks>.tabs::-webkit-scrollbar{display:none}
-  .peg .racks>.tabs button{flex:none;padding:8px 12px}
-  .peg .tabhelp{font-size:11.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .pegwall{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:18px 7px;padding:20px 8px 12px;border-width:4px}
-  .pegwall .irow{padding:10px 4px 8px;gap:3px}.pegwall .irow .iic{width:46px;height:46px;margin-top:4px}
-  .pegwall .irow .inm b{font-size:12.5px;line-height:1.25}.pegwall .irow .inm small{font-size:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .pegwall .irow .ipr{font-size:11px;padding:2px 6px}
-  .sbody .srec{padding:9px 11px;gap:9px;margin-bottom:0}.sbody .srec img{width:40px;height:40px}.sbody .srec small{font-size:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .dollcv{height:170px}
 }
 .sbody>*{flex-shrink:0}
@@ -1607,7 +1593,6 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 /* 상점: 추천 · 탭 설명 */
 .srec{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;margin-bottom:10px;background:linear-gradient(135deg,rgba(255,216,77,.18),rgba(255,140,60,.12));box-shadow:inset 0 0 0 1.5px rgba(255,216,77,.55)}
 .srec img{width:52px;height:52px;object-fit:contain;flex:none}.srec .grow{flex:1;min-width:0}.srec small{display:block;font-size:12px;color:var(--muted);line-height:1.45}
-.ishelf .imore{display:none}
 .srec .k{display:block;font-size:11px;font-weight:800;color:#e2a514;letter-spacing:.02em;margin-bottom:2px}
 .tabhelp{font-size:12px;line-height:1.5;padding:7px 10px;margin:6px 0 4px;border-radius:10px;background:rgba(255,255,255,.06);color:var(--muted)}.tabhelp b{color:var(--ink)}
 /* 도움말 센터 */
@@ -1681,41 +1666,6 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .emo-b{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px!important;border-radius:14px;min-height:62px}
 .emo-b .ei{font-size:26px;line-height:1.1}.emo-b small{font-size:11.5px;white-space:nowrap}
 .emo-b:active{transform:scale(.94)}
-/* v1.101 후원 · 방류권 안내 */
-.rs-ban{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;margin-bottom:10px;background:linear-gradient(135deg,rgba(255,120,150,.2),rgba(255,190,90,.15));box-shadow:inset 0 0 0 1.5px rgba(255,140,160,.6)}
-.rs-ban.ok{background:rgba(60,190,110,.16);box-shadow:inset 0 0 0 1.5px rgba(110,230,150,.55)}
-.rs-ban .ic{font-size:28px}.rs-ban .grow{flex:1;min-width:0}.rs-ban small{display:block;font-size:12.5px;line-height:1.45;opacity:.85}
-.rs-paper{position:relative}
-.rs-gate{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px;text-align:center;border-radius:12px;background:rgba(20,28,36,.86);color:#fff}
-.rs-gate small{font-size:12.5px;opacity:.85}
-.dn-steps,.dn-tiers{display:flex;flex-direction:column;gap:8px}
-.dn-step{display:flex;gap:10px;align-items:flex-start;margin-top:12px}.dn-step small{display:block;font-size:12.5px;color:var(--muted);line-height:1.45}
-.dn-n{flex:none;width:26px;height:26px;border-radius:50%;background:#e2522c;color:#fff;font-weight:800;display:grid;place-items:center}
-.dn-tiers{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;margin-top:6px}
-.dn-tier{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:10px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:inherit;font:inherit;cursor:pointer;text-align:left}
-.dn-tier.on{border-color:#e2522c;box-shadow:0 0 0 2px rgba(226,82,44,.35)}.dn-tier small{font-size:11.5px;color:var(--muted)}.dn-tier .num{font-weight:800}
-.dn-pay{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px}
-.dn-qr img{width:200px;height:200px;border-radius:16px;object-fit:cover;display:block;background:#18181b}
-.dn-acct{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);min-width:200px}.dn-acct b{font-size:19px;letter-spacing:.02em}.dn-acct small{color:var(--muted)}
-.dn-code{display:flex;gap:10px;align-items:center;margin-top:8px;padding:12px 14px;border-radius:14px;border:2px dashed #e2522c}.dn-code b{font-size:22px;letter-spacing:.12em}
-.dn-note{margin-top:14px;padding:10px 12px;border-radius:12px;background:rgba(255,200,80,.12);font-size:12.5px;line-height:1.55}
-@media (max-width:820px){.dn-qr img{width:min(240px,70vw);height:min(240px,70vw)}.dn-pay{flex-direction:column;align-items:stretch}.dn-qr{align-self:center}}
-/* v1.106 지정 낚시 카드 */
-.mrod-cta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0 4px;padding:14px;border-radius:16px;background:linear-gradient(135deg,rgba(23,138,138,.22),rgba(224,180,80,.16));box-shadow:inset 0 0 0 2px rgba(80,200,190,.6)}
-.mrod-cta.on{box-shadow:inset 0 0 0 2px #e0b450,0 0 18px rgba(224,180,80,.35)}
-.mrod-cta .ic{font-size:30px}.mrod-cta .grow{flex:1;min-width:160px}.mrod-cta b{font-size:15.5px}.mrod-cta small{display:block;font-size:12.5px;opacity:.85;line-height:1.45}
-.mrod-cta .btn{min-height:42px}
-.mrod-btn{flex-basis:100%;min-height:44px;font-size:15px}
-/* v1.107 상점 미리보기 */
-.ibig.stage3d{min-height:210px;display:grid;place-items:center;border-radius:16px;background:radial-gradient(circle at 50% 42%,rgba(255,255,255,.75),rgba(255,240,210,.25) 60%,transparent 72%)}
-.istage{width:210px;height:210px;cursor:grab;touch-action:pan-y}.istage:active{cursor:grabbing}
-.ikind{font-size:11.5px;font-weight:800;color:#a8740a;letter-spacing:.02em}
-.iperks{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
-.iperks li{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.45;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.55)}
-.iperks li span:first-child{flex:none;width:20px;text-align:center}
-.ihow{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;background:rgba(23,138,138,.14);box-shadow:inset 0 0 0 1.5px rgba(23,138,138,.45);font-size:12.5px;line-height:1.5}
-.ishelf.hovering{box-shadow:0 0 0 2px #e2a514,0 8px 0 #c9a46b}
-@media (max-width:820px){.ibig.stage3d{min-height:0;background:none}.istage{width:64px;height:64px}.tshop>.ishelf .ikind{display:none}.tshop>.ishelf .iperks{flex-basis:100%;gap:3px}.tshop>.ishelf .iperks li{padding:3px 6px;font-size:12px}.tshop>.ishelf .iperks li:nth-child(n+4){display:none}.tshop>.ishelf .ihow{flex-basis:100%;font-size:12px;padding:8px 10px}}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 /* 개인정보 안내 · 동의 (v1.96) */
 .consent-ov{position:fixed;inset:0;background:rgba(4,10,14,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:14px}
@@ -1878,7 +1828,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.110.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.105.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -1894,15 +1844,13 @@ const BAITS = [
   { id: "legend", name: "전설의 미끼", price: 2000, p: [0, 8, 32, 24, 17, 11, 5.4, 2, .6], lv: 16, desc: "전설 그 자체예요. 일반 물고기는 절대 안 물어요." },
 ];
 const APEX_CHANCE = { lure: .001, legend: .004 };   // 태초 등급(최상위) 확률 · 상점 설명에도 이 숫자를 그대로 보여요
-const RELEASE = [   // v1.106.1 후원 방류권: 최대 5만원 · 금액(1 : 5 : 10 : 50)만큼 등급 · 크기를 크게 벌렸어요 · 번호(0~3)는 예전 방류권과 같아요
-  { name: "참돔급",   cost: 1000,  tier: 2, min: 15,  max: 50 },     // 희귀
-  { name: "다랑어급", cost: 5000,  tier: 4, min: 40,  max: 150 },    // 영웅
-  { name: "상어급",   cost: 10000, tier: 5, min: 100, max: 400 },    // 전설
-  { name: "고래급",   cost: 50000, tier: 7, min: 300, max: 1200 },   // 신화 · 최고 후원
-  { name: "고래급",   cost: 100000, tier: 7, min: 300, max: 1200, legacy: true },   // 예전 10만원 방류권 (이미 받은 표가 그대로 쓰이게 · 새로 주지 않아요)
+const RELEASE = [
+  { name: "피라미급", cost: 1000,   tier: 0, min: 5,   max: 30 },
+  { name: "붕어급",   cost: 5000,   tier: 1, min: 20,  max: 60 },
+  { name: "잉어급",   cost: 20000,  tier: 2, min: 50,  max: 120 },
+  { name: "상어급",   cost: 50000,  tier: 3, min: 100, max: 300 },
+  { name: "고래급",   cost: 100000, tier: 4, min: 300, max: 1000 },
 ];
-const RELEASE_SHOW = RELEASE.map((r, i) => [r, i]).filter(([r]) => !r.legacy);
-const OLD_REL_SIZE = [[5, 30], [20, 60], [50, 120], [100, 300], [300, 1000]];   // v1.106 이전에 방류된 물고기 크기 (예전 등급 0~4)
 const BUILTIN = [
   { id: "b-pirami", name: "피라미", tier: 0, min: 8, max: 15, desc: "어디서나 보이는 작은 물고기. 옆구리 줄무늬가 예뻐요.",
     art: { body: "#9db7c2", belly: "#eef3f1", fin: "#7c96a3", pattern: "stripes", pc: "#d98a9a", len: 1, th: .8 } },
@@ -2340,10 +2288,9 @@ function drawShellArt(g, id, w, hh) {
   }
 }
 function normUserFish(id, d) {
-  const tier = clamp(Math.floor(Number(d.tier) || 0), 0, 9), rel = Number.isInteger(d.rel) && RELEASE[d.rel] ? d.rel : -1;
-  const sz = rel >= 0 ? [RELEASE[rel].min, RELEASE[rel].max] : OLD_REL_SIZE[Math.min(tier, 4)];   // 새 물고기는 방류권 번호로, 예전 물고기는 예전 크기 그대로
-  return { id: "u-" + id, docId: id, user: true, name: str(d.name, 12) || "이름 없는 물고기", desc: str(d.desc, 60), tier, rel,
-    min: sz[0], max: sz[1], img: d.img, owner: str(d.owner, 200), nick: str(d.nick, 20) || "누군가",
+  const tier = clamp(Math.floor(Number(d.tier) || 0), 0, 4);
+  return { id: "u-" + id, docId: id, user: true, name: str(d.name, 12) || "이름 없는 물고기", desc: str(d.desc, 60), tier,
+    min: RELEASE[tier].min, max: RELEASE[tier].max, img: d.img, owner: str(d.owner, 200), nick: str(d.nick, 20) || "누군가",
     ts: Number(d.ts) || 0, ticket: str(d.ticket, 40), reports: Array.isArray(d.reports) ? d.reports.filter(x => typeof x === "string").slice(0, 50) : [] };
 }
 
@@ -4299,7 +4246,7 @@ function updateLeaveBtn() { updateActionUI(); }
 const BOAT = { dock: { x: -13.2, z: -8.4 }, dockRy: -Math.PI / 2, sea: { x: -118, z: -6 }, board: { x: -13.2, z: -3.25 }, price: 600, dur: 300000, out: 25000, max: 4 };
 const BOAT_SEATS = [[-0.95, 0.9], [0.95, 0.9], [-0.95, -0.7], [0.95, -0.7]];
 const BOAT_NAMES = ["멍낚호", "파도호", "갈매기호"];
-const BOAT_BERTH = [{ dx: 0, dz: 0 }, { dx: -8.2, dz: 2.2 }, { dx: -16.6, dz: 2.2 }];   // v1.106: 정박 위치를 선착장 서쪽 바다에 나란히 (예전 2 · 3번 자리는 시장 앞 땅 위였어요) · 나가는 배 길과 3칸 떨어지게
+const BOAT_BERTH = [{ dx: 0, dz: 0 }, { dx: 0, dz: -7.5 }, { dx: 0, dz: -15 }];   // 정박 위치: 부두에서 바다 쪽으로 나란히
 const BOAT_SEA_OFF = [0, 7, -7];
 const emptyBoat = () => ({ status: "docked", seats: [], paid: {}, tripStart: 0, tripId: "" });
 S.fleet = [emptyBoat(), emptyBoat(), emptyBoat()];
@@ -4344,7 +4291,6 @@ function updateBoatSeats(now, t) {
 }
 function normBoat(d) {
   d = d || {};
-  if (d.status === "sailing" && (Number(d.tripStart) || 0) + BOAT.dur + 8000 < Date.now()) d = {};   // v1.106.1: 항해가 끝났는데 정리가 안 된 배(이미 출항 중으로 남던 것)는 정박으로 봐요
   return { status: d.status === "sailing" ? "sailing" : "docked",
     seats: (Array.isArray(d.seats) ? d.seats : []).filter(x => x && isUid(x.uid)).slice(0, BOAT.max).map(x => ({ uid: x.uid, nick: str(x.nick, 16) || "손님", slot: clamp(Math.floor(Number(x.slot) || 0), 0, 3), ts: Number(x.ts) || 0 })),
     paid: d.paid && typeof d.paid === "object" ? Object.fromEntries(Object.entries(d.paid).filter(([k, v]) => isUid(k)).map(([k, v]) => [k, clamp(Math.round(Number(v) || 0), 0, 100000)])) : {},
@@ -9078,7 +9024,6 @@ function loadRodModels() {
       geo.setAttribute("position", new T3.BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
       ROD3D.set(id, { geo, parts: m.g, top: m.lo[1] + m.len, reel: m.reel || null });
     }
-    try { const mr = buildMerchantRod(); ROD3D.set("merchant", mr); rodMatCache.delete("merchant"); rodMatCache.delete("merchant|n"); ROD_AXIS.clear(); } catch (e) { console.warn("merchant rod", e); }
     makeRodPics();
     for (const k of [...iconCache.keys()]) if (k.startsWith("rod|")) iconCache.delete(k);
     refreshSheet();
@@ -9098,89 +9043,7 @@ function rodMats(id, noReel) {
   });
   rodMatCache.set(key, arr); return arr;
 }
-function buildMerchantRod() {   // v1.107.1 장사꾼의 낚싯대 (y가 위 · 릴은 +z 쪽)
-  const parts = [
-    { c: "#3b2114", list: [] },            // 0 나무 끝마개
-    { c: "#5c4021", list: [] },            // 1 가죽 손잡이
-    { c: "#c9973f", s: 1, list: [] },      // 2 놋쇠 띠 · 가이드 · 엽전
-    { c: "#0d4042", s: 1, list: [] },      // 3 어두운 청록 대
-    { c: "#eb4c1a", e: "#611a04", list: [] },  // 4 포차 등롱
-    { c: "#1a120d", list: [] },            // 5 등롱 끝 · 끈
-    { c: "#c9973f", s: 1, reel: 1, list: [] },  // 6 기본 릴 (다른 릴을 달면 숨겨요)
-    { c: "#0d4042", s: 1, reel: 1, list: [] },  // 7 기본 릴 몸통
-  ];
-  const add = (pi, geo, x, y, z, rx, rz) => { if (rx) geo.rotateX(rx); if (rz) geo.rotateZ(rz); geo.translate(x || 0, y || 0, z || 0); parts[pi].list.push(geo); };
-  const cyl = (r0, r1, hh, seg) => new T3.CylinderGeometry(r0, r1, hh, seg || 14);
-  const TOP = 2.06;
-  add(0, cyl(.03, .032, .07), 0, -.035, 0); add(0, new T3.SphereGeometry(.03, 12, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), 0, -.07, 0);
-  add(1, cyl(.027, .03, .36), 0, .18, 0);
-  for (let k = 0; k < 7; k++) add(2, new T3.TorusGeometry(.03, .004, 6, 18), 0, .03 + k * .05, 0, Math.PI / 2);   // 가죽 감은 자국 · 놋쇠 실
-  add(2, cyl(.024, .024, .09), 0, .405, 0);   // 릴 시트
-  add(2, new T3.TorusGeometry(.026, .006, 8, 20), 0, .36, 0, Math.PI / 2); add(2, new T3.TorusGeometry(.026, .006, 8, 20), 0, .45, 0, Math.PI / 2);
-  add(1, cyl(.021, .025, .16), 0, .53, 0);   // 앞 손잡이
-  add(2, new T3.TorusGeometry(.022, .005, 8, 18), 0, .61, 0, Math.PI / 2);
-  add(3, cyl(.0045, .018, TOP - .6, 16), 0, .6 + (TOP - .6) / 2, 0);   // 대 (끝으로 가늘게)
-  const rAt = (y) => .018 + (.0045 - .018) * (y - .6) / (TOP - .6);
-  for (const [y, rr] of [[.86, .021], [1.12, .018], [1.37, .015], [1.6, .012], [1.82, .01], [2.0, .008]]) {   // 가이드: 대에 붙은 다리 + 고리
-    const rb = rAt(y), ring = rr, zc = rb + ring + .012;
-    add(2, cyl(.0025, .0025, zc - rb, 6), 0, y, rb + (zc - rb) / 2, Math.PI / 2);
-    add(2, new T3.TorusGeometry(ring, .0028, 6, 16), 0, y, zc, Math.PI / 2);
-  }
-  add(2, new T3.TorusGeometry(.006, .0025, 6, 12), 0, TOP + .004, 0);   // 끝 고리
-  for (const y of [.72, .98]) add(2, new T3.TorusGeometry(rAt(y) + .002, .003, 6, 16), 0, y, 0, Math.PI / 2);   // 대의 놋쇠 띠
-  // 손잡이 끝 장식: 끈 → 엽전 → 포차 등롱
-  add(5, cyl(.0025, .0025, .1, 5), 0, -.12, 0);
-  add(2, cyl(.024, .024, .005, 18), 0, -.165, 0, Math.PI / 2);   // 엽전
-  add(5, new T3.BoxGeometry(.012, .012, .008), 0, -.165, 0);       // 엽전 네모 구멍처럼
-  add(5, cyl(.0025, .0025, .05, 5), 0, -.2, 0);
-  { const lan = new T3.SphereGeometry(.034, 14, 10); lan.scale(1, 1.35, 1); add(4, lan, 0, -.27, 0); }
-  add(5, cyl(.02, .022, .012), 0, -.227, 0); add(5, cyl(.022, .02, .012), 0, -.313, 0);
-  // 기본 릴 (+z 쪽)
-  add(7, cyl(.04, .04, .03, 20), 0, .405, .075, 0, Math.PI / 2); add(6, cyl(.012, .012, .06, 8), 0, .405, .045, Math.PI / 2); add(6, new T3.TorusGeometry(.04, .005, 6, 20), .016, .405, .075, 0, Math.PI / 2);
-  // 합치기 (부품마다 그룹 하나)
-  const pos = [], nor = [], groups = []; let start = 0;
-  parts.forEach((pt, gi) => { let n = 0; for (const g0 of pt.list) { const g = g0.index ? g0.toNonIndexed() : g0; g.computeVertexNormals(); const a = g.attributes.position.array, b = g.attributes.normal.array; for (let i = 0; i < a.length; i++) { pos.push(a[i]); nor.push(b[i]); } n += a.length / 3; } groups.push([start, n, gi]); start += n; });
-  const geo = new T3.BufferGeometry(); geo.setAttribute("position", new T3.Float32BufferAttribute(pos, 3)); geo.setAttribute("normal", new T3.Float32BufferAttribute(nor, 3));
-  for (const [st, n, gi] of groups) geo.addGroup(st, n, gi);
-  geo.computeBoundingBox();
-  return { geo, parts: parts.map(({ list, ...rest }) => rest), top: TOP, reel: [0, .405, .075] };
-}
-/* v1.107.1 전설급 이상 낚싯대의 오라: 대를 타고 빙글빙글 올라가는 빛 알갱이 + 은은한 빛 껍질 (손에 든 것 · 상점 미리보기 모두) */
-const ROD_AURA = { legend: [0xffcf4a, 0xfff2b0], merchant: [0x3fe0c8, 0xffd27a], abyss: [0x40ebd9, 0x6a8cff], palace: [0x2ed199, 0xffe08a], myth: [0xff9ad8, 0xfff0ff] };
-const ROD_AXIS = new Map();
-function rodAxis(id) {   // 대 아래(25~40%) · 위(75~92%) 높이의 실제 중심 → 오라를 대의 기울기까지 맞춰요
-  if (ROD_AXIS.has(id)) return ROD_AXIS.get(id);
-  const m = ROD3D.get(id), band = (a0, a1) => { let sx = 0, sz = 0, n = 0; if (!m) return null; const a = m.geo.attributes.position.array, lo = m.top * a0, hi = m.top * a1; for (let i = 0; i < a.length; i += 3) if (a[i + 1] > lo && a[i + 1] < hi) { sx += a[i]; sz += a[i + 2]; n++; } return n ? [sx / n, sz / n, (lo + hi) / 2] : null; };
-  const b = band(.25, .4), t = band(.75, .92);
-  let r = { x: 0, z: 0, rx: 0, rz: 0 };
-  if (b && t) { const dy = t[2] - b[2], sx = (t[0] - b[0]) / dy, sz = (t[1] - b[1]) / dy; r = { x: b[0] - sx * b[2], z: b[1] - sz * b[2], rx: Math.atan(sz), rz: -Math.atan(sx) }; }
-  ROD_AXIS.set(id, r); return r;
-}
-function rodAura(id, top) {
-  const cols = ROD_AURA[id]; if (!cols) return null;
-  const g = new T3.Group(), ax = rodAxis(id); g.position.set(ax.x, 0, ax.z); g.rotation.set(ax.rx, 0, ax.rz); const N = id === "myth" ? 46 : id === "palace" ? 40 : 32;
-  const pos = new Float32Array(N * 3), col = new Float32Array(N * 3), c1 = new T3.Color(cols[0]), c2 = new T3.Color(cols[1]);
-  const geo = new T3.BufferGeometry(); geo.setAttribute("position", new T3.BufferAttribute(pos, 3)); geo.setAttribute("color", new T3.BufferAttribute(col, 3));
-  const pts = new T3.Points(geo, new T3.PointsMaterial({ size: .13, map: sparkTex(), vertexColors: true, transparent: true, depthWrite: false, blending: T3.AdditiveBlending }));
-  pts.frustumCulled = false;
-  pts.onBeforeRender = () => {
-    const t = performance.now() / 1000;
-    for (let i = 0; i < N; i++) {
-      const ph = (t * .32 + i / N) % 1, y = .1 + ph * (top - .1), a = i * 2.39 + t * 2.2, rad = .045 * (1 - ph * .6) + .012 * Math.sin(t * 3 + i);
-      pos[i * 3] = Math.cos(a) * rad; pos[i * 3 + 1] = y; pos[i * 3 + 2] = Math.sin(a) * rad;
-      const fade = Math.sin(ph * Math.PI), c = (i % 3 === 0 ? c2 : c1);
-      col[i * 3] = c.r * fade; col[i * 3 + 1] = c.g * fade; col[i * 3 + 2] = c.b * fade;
-    }
-    geo.attributes.position.needsUpdate = true; geo.attributes.color.needsUpdate = true;
-  };
-  g.add(pts);
-  const shellM = new T3.MeshBasicMaterial({ color: cols[0], transparent: true, opacity: .14, depthWrite: false, blending: T3.AdditiveBlending, side: T3.DoubleSide });
-  const shell = new T3.Mesh(new T3.CylinderGeometry(.012, .05, top * .9, 14, 1, true), shellM); shell.position.y = top * .5;
-  shell.onBeforeRender = () => { shellM.opacity = .1 + Math.sin(performance.now() / 380) * .05; };
-  g.add(shell);
-  return g;
-}
-function rodMesh(id, noReel) { const m = ROD3D.get(id); if (!m) return null; const mesh = new T3.Mesh(m.geo, rodMats(id, noReel)); const au = rodAura(id, m.top); if (au) mesh.add(au); return mesh; }
+function rodMesh(id, noReel) { const m = ROD3D.get(id); return m ? new T3.Mesh(m.geo, rodMats(id, noReel)) : null; }
 // 상점 · 가방 그림: 낚싯대를 비스듬히 눕혀 한 장씩 찍어요 (가는 낚싯대가 잘 보이게 굵기는 2.4배)
 function makeRodPics() {
   try {
@@ -10418,7 +10281,7 @@ function updateChar(F, f, t, dt, now) {
 /* ---------- 프레임 ---------- */
 function applyPeriod(P2) {
   if (curPeriod === P2.key) return;
-  curPeriod = P2.key; FW.hAdd = 0;   // 불꽃놀이로 더했던 밝기도 새로 시작
+  curPeriod = P2.key;
   skyMat.uniforms.top.value.setHex(P2.top); skyMat.uniforms.bot.value.setHex(P2.bot);
   scene.fog.color.setHex(P2.bot);
   const sc = new T3.Color(P2.sea);
@@ -10526,7 +10389,7 @@ function loop3D(ms) {
   seaMat.uniforms.sunDir.value.copy(_v2); skyMat.uniforms.sunDir.value.copy(_v2);
   for (const b of buoys) { b.position.y = waveY(b.position.x, b.position.z, t) - .1; b.rotation.z = Math.sin(t + b.position.x) * .12; }
   for (const s of SWING) s.g.rotation.x = Math.sin(t * 1.4 + s.ph) * .07;
-  updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); pochaExtTick(t); npcShopTick(t, dt); townTick(t, dt); ambTick(t, dt); updateFx(t, dt); for (const fa of FACADE_ANIM) fa(t); breachTick(t, dt); tvTick(t); fwTick(t, dt); marketRoofTick(t);
+  updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); pochaExtTick(t); npcShopTick(t, dt); townTick(t, dt); ambTick(t, dt); updateFx(t, dt); for (const fa of FACADE_ANIM) fa(t); breachTick(t, dt); tvTick(t); marketRoofTick(t);
   SWIM_T.value = t; updateJumps(dt, t); updateTide3D(dt); updateDust(dt);
   updateBoat3D(t, now);
   if (onBoat()) { const bs = SEAT[ME.seat]; ME.x = bs.x; ME.z = bs.z; ME.ry = bs.ry; }
@@ -10814,7 +10677,7 @@ function openSheet(name, arg, opt) {
   S.sheet = name; S.sheetArg = arg;
   S.sheetStack = S.sheetStack.slice(-8); $("sheetBack").hidden = !S.sheetStack.length;
   $("overlay").hidden = false; $("sheetHelp").hidden = !TUTS["sheet_" + name];
-  SB.opening = true; refreshSheet(true); SB.opening = false;
+  refreshSheet(true);
   $("sheetClose").focus();
   syncUIState();
 }
@@ -10864,23 +10727,10 @@ function refreshSheet(force) {
   if (S.sheet === "lotto" && !force) return;
   if (S.sheet === "bank" && !force && document.activeElement && document.activeElement.closest && document.activeElement.closest("#sheetBody input")) return;
   const body = $("sheetBody"); const st = body.scrollTop;
-  // 휴대폰 (v1.111): 손가락이 닿아 있거나 막 스크롤하는 중에는 저절로 다시 그리지 않아요.
-  // 다시 그리면 손가락 밑의 칸이 사라져서 아이폰에서 스크롤이 뚝 멈춰요 → 손을 뗀 뒤에 그려요.
-  if (!force && sheetBusy()) { if (!SB.wait) SB.wait = setTimeout(() => { SB.wait = 0; refreshSheet(); }, 450); return; }
-  const tabs = sheetTabsKey(body);
   body.replaceChildren();
   (SHEETS[S.sheet] || (() => {}))(body, S.sheetArg);
-  // 무언가를 눌러 다시 그려도 보던 자리 그대로 · 탭을 바꿨거나 새 화면을 열 때만 맨 위로
-  body.scrollTop = SB.opening || (force && sheetTabsKey(body) !== tabs) ? 0 : st;
+  if (!force) body.scrollTop = st;
 }
-const SB = { touch: 0, scrollAt: 0, wait: 0, opening: false };
-const sheetBusy = () => SB.touch > 0 || performance.now() - SB.scrollAt < 450;
-const sheetTabsKey = (body) => [...body.querySelectorAll('[role="tab"][aria-selected="true"]')].map(t => t.textContent.replace(/[0-9,/ ]+/g, "")).join("|");
-{ const body = document.getElementById("sheetBody");
-  body.addEventListener("touchstart", (e) => { SB.touch = e.touches.length; }, { passive: true });
-  body.addEventListener("touchend", (e) => { SB.touch = e.touches.length; SB.scrollAt = performance.now(); }, { passive: true });
-  body.addEventListener("touchcancel", () => { SB.touch = 0; }, { passive: true });
-  body.addEventListener("scroll", () => { SB.scrollAt = performance.now(); }, { passive: true }); }
 function setHead(title, sub) { $("sheetTitle").textContent = title; $("sheetSub").textContent = sub || ""; }
 function fishImg(fishId) { const f = findFish(fishId); return f ? h("img", { src: fishArt(f).src, alt: "" }) : h("span", { class: "muted", style: "width:64px;font-size:11px", text: "사라진 물고기" }); }
 function armBtn(label, armedLabel, fn, cls) {
@@ -11004,88 +10854,10 @@ function buyGear(cat, it) {
   else toast(it.name + "로 바꿨어요");
   P[cat] = it.id; markDirty(); pushPresence({ rod: P.rod, reel: P.reel }); refreshSheet(true);
 }
-/* v1.107 상점 미리보기: 빙글빙글 도는 확대 모습(낚싯대 · 릴은 3D 모델, 나머지는 그림 카드) · 끌어서 돌려 볼 수 있어요 */
-let ISTAGE = null;
-const STAGE_OL = new Map();
-function stageOutlineMat(w) {   // 표면을 법선 방향으로 w만큼 부풀린 검은 뒷면 (상점 미리보기 전용)
-  const key = w.toFixed(4); if (STAGE_OL.has(key)) return STAGE_OL.get(key);
-  const m = new T3.MeshBasicMaterial({ color: 0x0c0a08, side: T3.BackSide });
-  m.onBeforeCompile = (sh) => { sh.vertexShader = sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n  transformed += normalize(normal) * " + w.toFixed(4) + ";"); };
-  m.customProgramCacheKey = () => "stageOL" + key;
-  STAGE_OL.set(key, m); return m;
-}
-function itemStageEl(cat, it) {
-  if (!T3) return h("img", { src: itemIcon(cat, it, 160), alt: "" });
-  if (!ISTAGE) {
-    const canvas = document.createElement("canvas"); canvas.className = "istage"; canvas.setAttribute("aria-label", "물건 미리보기 · 끌어서 돌려 보기");
-    let r; try { r = new T3.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { return h("img", { src: itemIcon(cat, it, 160), alt: "" }); }
-    r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-    const sc = new T3.Scene(); sc.add(new T3.HemisphereLight(0xfff4e6, 0x6a7a8a, 1.0));
-    const dl = new T3.DirectionalLight(0xffffff, .7); dl.position.set(2, 3, 4); sc.add(dl);
-    const rim = new T3.DirectionalLight(0x9fd8ff, .35); rim.position.set(-3, 1, -2); sc.add(rim);
-    const cam = new T3.PerspectiveCamera(30, 1, .1, 30); cam.position.set(0, .15, 3.3); cam.lookAt(0, 0, 0);
-    const spin = new T3.Group(); sc.add(spin);
-    const glowM = new T3.MeshBasicMaterial({ color: 0xffe2a0, transparent: true, opacity: .22, depthWrite: false });
-    const ring = new T3.Mesh(new T3.RingGeometry(.5, .78, 48), glowM); ring.rotation.x = -Math.PI / 2; ring.position.y = -.82; sc.add(ring);
-    ISTAGE = { canvas, r, sc, cam, spin, ring, key: "", drag: null, yaw: 0, last: 0 };
-    canvas.addEventListener("pointerdown", (e) => { ISTAGE.drag = { x: e.clientX, yaw: ISTAGE.yaw }; try { canvas.setPointerCapture(e.pointerId); } catch {} });
-    canvas.addEventListener("pointermove", (e) => { if (ISTAGE.drag) ISTAGE.yaw = ISTAGE.drag.yaw + (e.clientX - ISTAGE.drag.x) * .015; });
-    for (const ev of ["pointerup", "pointercancel"]) canvas.addEventListener(ev, () => { ISTAGE.drag = null; });
-    const loop = (ms) => {
-      requestAnimationFrame(loop); const S2 = ISTAGE; if (!canvas.isConnected) { S2.last = ms; return; }
-      const w = canvas.clientWidth, hh = canvas.clientHeight; if (!w || !hh) return;
-      if (canvas.width !== Math.round(w * r.getPixelRatio())) { r.setSize(w, hh, false); cam.aspect = w / hh; cam.updateProjectionMatrix(); }
-      const dt = Math.min(.05, (ms - (S2.last || ms)) / 1000); S2.last = ms;
-      if (!S2.drag) S2.yaw += dt * .9;
-      S2.spin.rotation.y = S2.yaw; S2.spin.position.y = Math.sin(ms / 900) * .04; S2.ring.material.opacity = .16 + Math.sin(ms / 500) * .06;
-      r.render(sc, cam);
-    };
-    requestAnimationFrame(loop);
-  }
-  const key = cat + ":" + it.id;
-  if (ISTAGE.key !== key) {
-    ISTAGE.key = key; const sp = ISTAGE.spin;
-    for (const c of sp.children.slice()) { sp.remove(c); c.traverse(o => { if (o.material) [].concat(o.material).forEach(m => { if (m.map && m.map.isTexture && m.userData.own) m.map.dispose(); m.dispose && m.userData.own && m.dispose(); }); }); }
-    let obj = null;
-    // v1.107.2 상점 한정 검은 외곽선: 같은 모델을 뒷면만 검게, 표면에서 살짝 부풀려 겹쳐 그려요 (오라는 선 없이)
-    const outlined = (mesh, w) => { const o = new T3.Mesh(mesh.geometry, stageOutlineMat(w)); o.position.copy(mesh.position); o.scale.copy(mesh.scale); o.rotation.copy(mesh.rotation); o.renderOrder = -1; return o; };
-    if (cat === "rod" && ROD3D.has(it.id)) { const m = ROD3D.get(it.id), mesh = rodMesh(it.id, false), k = 1.75 / m.top; mesh.scale.set(k * 2.2, k, k * 2.2); mesh.position.y = -m.top * k / 2; const tilt = new T3.Group(); tilt.add(outlined(mesh, .011), mesh); tilt.rotation.z = -.55; obj = tilt; }
-    else if (cat === "reel" && REEL3D.has(it.id)) { const m = REEL3D.get(it.id), mesh = reelMesh(it.id), k = 1.25 / m.size; mesh.scale.setScalar(k); const tilt = new T3.Group(); tilt.add(outlined(mesh, .022 * m.size), mesh); tilt.rotation.x = .35; obj = tilt; }
-    if (!obj) {   // 그림 카드: 앞뒤 같은 그림 · 두께 있는 카드처럼
-      const tex = new T3.TextureLoader().load(itemIcon(cat, it, 256)); const mat = new T3.MeshBasicMaterial({ map: tex, side: T3.DoubleSide }); mat.userData.own = true;
-      const g = new T3.Group(); g.add(new T3.Mesh(new T3.PlaneGeometry(1.25, 1.25), mat));
-      const edge = new T3.Mesh(new T3.BoxGeometry(1.33, 1.33, .04), new T3.MeshBasicMaterial({ color: 0x14100c })); edge.position.z = -.025; g.add(edge); obj = g;   // 그림 카드도 검은 테두리
-    }
-    sp.add(obj); ISTAGE.yaw = -.6;
-  }
-  return ISTAGE.canvas;
-}
-// 이 물건을 쓰면 뭐가 좋아지는지 · 쉬운 말로 (v1.107)
-function itemPerks(cat, it) {
-  const out = [], pct = (v) => Math.round(v * 100);
-  if (cat === "bait") { out.push(["🎲", "희귀 이상 물고기가 올 확률 " + rareP(it) + "%" + (it.p[5] ? " · 전설 " + it.p[5] + "%" : "")]); out.push(["🪱", it.id === "worm" ? "지렁이는 써도 안 줄어요 (무한)" : "한 번 던질 때마다 1개씩 써요"]); }
-  if (cat === "rod") {
-    const c0 = curRod();
-    out.push(["🧵", "줄이 버티는 힘 " + pct(it.tens) + (it.tens !== c0.tens ? " (지금 " + pct(c0.tens) + ")" : "") + " · 높을수록 줄이 덜 끊겨요"]);
-    out.push(["🪝", "채비를 " + it.slots + "개까지 달 수 있어요"]);
-    if (it.id !== "bamboo") { out.push(["🐟", "물고기가 뛸 때 바늘 빠짐 " + pct(1 - it.jump) + "% 줄어요"]); if (it.calm) out.push(["💥", "몸부림 충격 " + pct(it.calm) + "% 흡수"]); if (it.tire > 1) out.push(["😮‍💨", "물고기가 " + pct(it.tire - 1) + "% 빨리 지쳐요"]); }
-  }
-  if (cat === "reel") { out.push(["🔥", it.heat >= 1 ? "열이 잘 오르는 기본 릴이에요" : "릴 열이 " + pct(1 - it.heat) + "% 덜 올라요"]); out.push(["🧊", "식는 빠르기 " + pct(it.cool)]); out.push(["🌀", "감는 빠르기 " + it.speed.toFixed(1) + "m/s"]); }
-  if (cat === "line") out.push(["🧵", it.add ? "끊어지기 전까지 " + pct(it.add) + "% 더 버텨요" : "처음 받은 기본 줄이에요"]);
-  if (cat === "tackle") { out.push(["🪝", it.desc]); out.push(["⏳", "파이팅 " + TACKLE_USES + "번 쓰면 닳아요 · 낚싯대 채비 칸에 달아요"]); }
-  if (cat === "tool") out.push(["🧰", it.desc]);
-  return out;
-}
 function shopPreview(cat, it) {
   const st = itemState(cat, it), locked = itemLocked(it);
-  const perks = itemPerks(cat, it), gh = GEAR_HELP[cat] || {};
-  const box = h("div", { class: "ishelf" }, h("div", { class: "ibig stage3d" }, itemStageEl(cat, it)),
-    h("div", { class: "ikind", text: (gh.ico || "") + " " + (gh.name || "") + (st.using ? " · 지금 쓰는 중" : st.own ? " · 가지고 있어요" : locked ? " · Lv." + it.lv + "부터" : "") }),
-    h("h3", { text: it.name }), h("div", { class: "muted", style: "font-size:12.5px;line-height:1.5", text: it.desc || itemStat(cat, it) }),
-    perks.length ? h("ul", { class: "iperks" }, perks.map(([ic, tx]) => h("li", {}, h("span", { text: ic }), h("span", { text: tx })))) : null);
-  if (cat === "rod" && it.id === "merchant") box.append(h("div", { class: "ihow" }, h("b", { text: "🎯 특별 기능 · 지정 낚시" }),
-    h("span", { text: "등급 하나(일반~초월)와 그 등급에서 노릴 물고기 최대 3종을 골라 두면, 그 등급이 떴을 때 고른 물고기만 나와요. 등급이 뜰 확률은 미끼 그대로예요." }),
-    h("span", { class: "muted", text: st.own ? "설정은 이 화면 아래 「🎯 지정 낚시 설정하기」나 가방 → 장비에서 해요 · 이 낚싯대를 들고 있어야 효과가 있어요" : "사고 나면 이 화면 아래와 가방 → 장비에 「🎯 지정 낚시」 버튼이 생겨요" })));
+  const box = h("div", { class: "ishelf" }, h("div", { class: "ibig" }, h("img", { src: itemIcon(cat, it, 160), alt: "" })),
+    h("h3", { text: it.name }), h("div", { class: "muted", style: "font-size:12.5px;line-height:1.5", text: it.desc || itemStat(cat, it) }));
   const cmp = h("div", { class: "cmp" });
   if (cat === "bait") box.append(probBar(it.p), h("div", { class: "plegend" }, it.p.map((v, i) => h("span", { style: "--c:var(" + TIER_VARS[i] + ")", text: TIERS[i].name + " " + v + "%" }))));
   if (cat === "bait") { const mc = APEX_CHANCE[it.id]; box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: mc ? "🌌 태초 " + (Math.round(mc * 10000) / 100) + "% · 심해에선 ×2, 밤엔 ×1.5, 희귀 축제 땐 ×2까지 올라가요" : "🌌 태초 등급은 이 미끼로는 안 나와요 · 황금 루어와 전설의 미끼만 태초를 노릴 수 있어요" }),
@@ -11104,7 +10876,7 @@ function shopPreview(cat, it) {
     acts.append(h("button", { class: "btn sm", disabled: !st.own || st.using, onclick: () => { P.bait = it.id; markDirty(); refreshSheet(true); toast(it.name + "를 쓸게요"); }, text: st.using ? "사용 중" : "사용하기" }));
   } else if (cat === "rod" || cat === "reel" || cat === "line") {
     acts.append(h("button", { class: "btn pri", disabled: st.using || (!st.own && P.gold < it.price), onclick: () => buyGear(cat, it), text: st.using ? "사용 중" : st.own ? "이걸로 바꾸기" : P.gold < it.price ? won(it.price - P.gold) + " 부족" : "사서 쓰기 · " + won(it.price) + "" }));
-    if (cat === "rod" && it.id === "merchant" && st.own) acts.append(h("button", { class: "btn pri mrod-btn", onclick: () => openSheet("mrod"), text: "🎯 지정 낚시 설정하기" + (P.mrod ? " · " + TIERS[P.mrod.tier].name + " " + P.mrod.list.length + "종" : "") }));
+    if (cat === "rod" && it.id === "merchant" && st.own) acts.append(h("button", { class: "btn sm", onclick: () => openSheet("mrod"), text: "🎯 지정 설정" + (P.mrod ? " · " + TIERS[P.mrod.tier].name + " " + P.mrod.list.length + "종" : "") }));
   } else if (cat === "tackle") {
     const rod = curRod(), eq = equipped(), full = eq.length >= rod.slots, mine = P.gear.filter(g => g.id === it.id), on = mine.find(g => eq.some(e => e.uid === g.uid)), spare = mine.find(g => !eq.some(e => e.uid === g.uid));
     acts.append(h("button", { class: "btn sm pri", disabled: P.gold < it.price, onclick: () => { if (P.gold < it.price) return; P.gold -= it.price; P.gear.push({ uid: uid4(), id: it.id, left: TACKLE_USES }); markDirty(); sfx("ui-confirmation", .45); refreshSheet(true); toast(it.name + "를 샀어요"); }, text: "사기 " + won(it.price) + "" }));
@@ -11115,9 +10887,6 @@ function shopPreview(cat, it) {
     acts.append(h("button", { class: "btn pri", disabled: st.own || P.gold < it.price, onclick: () => { if (P.gold < it.price) return; P.gold -= it.price; P.tools[it.id] = true; markDirty(); sfx("ui-confirmation", .45); refreshSheet(true); toast(it.name + "를 샀어요" + (it.id === "boots" ? " · 썰물 때 갯벌에 들어가 보세요" : it.id === "hoe" ? " · 갯벌의 숨구멍을 찾아 캐 보세요" : it.id === "license" ? " · 이제 낭만포차에서 가게를 열 수 있어요" : "")); }, text: st.own ? "가지고 있어요" : "사기 · " + won(it.price) + "" }));
   }
   box.append(acts);
-  // 휴대폰: 아래 가격표는 그림 · 이름 · 사기 버튼만 · 나머지는 「자세히」로 펼쳐요 (v1.110)
-  if (S.shopMore) box.classList.add("open");
-  box.append(h("button", { class: "imore", "aria-expanded": String(!!S.shopMore), onclick: () => { S.shopMore = !S.shopMore; box.classList.toggle("open", S.shopMore); box.querySelector(".imore").textContent = S.shopMore ? "접기 ▴" : "자세히 ▾"; }, text: S.shopMore ? "접기 ▴" : "자세히 ▾" }));
   return box;
 }
 SHEETS.shop = (body) => {
@@ -11133,8 +10902,7 @@ SHEETS.shop = (body) => {
     const st = itemState(cat, it), locked = itemLocked(it);
     const right = locked ? "Lv." + it.lv : st.using ? "사용 중" : (cat === "bait" || cat === "tackle") ? (st.count ? "보유 " + st.count : (it.price ? won(it.price) + "" : "무료")) : st.own ? "보유" : (it.price ? won(it.price) + "" : "기본");
     const grade = (cat === "rod" || cat === "reel") && (it.lv || 1) >= 40 ? " g5" : (cat === "rod" || cat === "reel") && (it.lv || 1) >= 20 ? " g4" : cat === "bait" && it.id === "legend" ? " g4" : "";   // 좋은 장비는 빛나요
-    return h("button", { class: "irow" + grade + (it === sel ? " on" : "") + (locked ? " locked" : ""), onclick: () => { S.shopSel = { cat, id: it.id }; sfx("ui-click", .25); refreshSheet(true); },
-      onmouseenter: () => shopHover(cat, it), onmouseleave: () => shopHover(cat, null), onfocus: () => shopHover(cat, it) },
+    return h("button", { class: "irow" + grade + (it === sel ? " on" : "") + (locked ? " locked" : ""), onclick: () => { S.shopSel = { cat, id: it.id }; sfx("ui-click", .25); refreshSheet(true); } },
       h("img", { class: "iic", src: itemIcon(cat, it), alt: "" }), h("span", { class: "inm" }, h("b", { text: it.name }), h("small", { text: itemStat(cat, it) })),
       h("span", { class: "ipr" + (st.using ? " tag on" : ""), text: right }));
   }));
@@ -11165,13 +10933,6 @@ function toggleMrod(id) {
   if (i >= 0) P.mrod.list.splice(i, 1);
   else { if (P.mrod.list.length >= 3) { toast("최대 3종까지만 고를 수 있어요"); return; } P.mrod.list.push(id); }
   markDirty(); sfx("ui-click", .25); refreshSheet(true);
-}
-function shopHover(cat, it) {   // v1.107: 마우스를 올린 물건을 왼쪽에 크게 · 떼면 고른 물건으로
-  if (!matchMedia("(hover: hover)").matches) return;
-  const cur = document.querySelector(".tshop.peg > .ishelf"); if (!cur) return;
-  const target = it || catList(cat).find(x => S.shopSel && x.id === S.shopSel.id); if (!target) return;
-  if (cur.dataset.k === cat + ":" + target.id) return;
-  const nb = shopPreview(cat, target); nb.dataset.k = cat + ":" + target.id; if (it && (!S.shopSel || it.id !== S.shopSel.id)) nb.classList.add("hovering"); cur.replaceWith(nb);
 }
 function buyBait(b, n) {
   if (itemLocked(b)) return;
@@ -11351,14 +11112,6 @@ SHEETS.bag = (body) => {
       body.append(h("div", { class: "sec", text: label }), h("div", { class: "ilist" }, all.filter(x => own.includes(x.id)).map(x => h("div", { class: "irow static" + (x.id === cur ? " on" : "") },
         h("img", { class: "iic", src: itemIcon(cat, x, 96), alt: "" }), h("span", { class: "inm" }, h("b", { text: x.name }), h("small", { text: itemStat(cat, x) })),
         x.id === cur ? h("span", { class: "tag on", text: "쓰는 중" }) : h("button", { class: "btn sm pri", onclick: () => { P[cat] = x.id; markDirty(); pushPresence({ rod: P.rod, reel: P.reel }); refreshSheet(true); toast(x.name + "로 바꿨어요"); }, text: "바꾸기" })))));
-    }
-    if (P.rods.includes("merchant")) {   // v1.106: 장사꾼의 낚싯대 「지정 낚시」를 가방에서도 바로 (눈에 띄게)
-      const holding = P.rod === "merchant", m = P.mrod;
-      body.append(h("div", { class: "mrod-cta" + (holding ? " on" : "") }, h("span", { class: "ic", text: "🎯" }),
-        h("div", { class: "grow" }, h("b", { text: "지정 낚시" + (m ? " · " + TIERS[m.tier].name + " " + m.list.length + "종" : " · 아직 안 골랐어요") }),
-          h("small", { text: holding ? "장사꾼의 낚싯대를 들고 있어요 · 고른 등급이 뜨면 고른 물고기만 나와요" : "장사꾼의 낚싯대를 들어야 효과가 있어요" })),
-        h("div", { class: "row", style: "gap:6px" }, !holding ? h("button", { class: "btn", onclick: () => { P.rod = "merchant"; markDirty(); pushPresence({ rod: P.rod, reel: P.reel }); refreshSheet(true); toast("장사꾼의 낚싯대를 들었어요"); }, text: "낚싯대 들기" }) : null,
-          h("button", { class: "btn pri", onclick: () => openSheet("mrod"), text: "🎯 지정 설정" }))));
     }
     const tools = TOOLS.filter(t => P.tools[t.id]);
     body.append(h("div", { class: "sec", text: "도구 · 채비" }), h("div", { class: "muted", style: "font-size:13px", text: (tools.length ? "도구: " + tools.map(t => t.name).join(" · ") : "도구 없음") + " · 채비 " + P.equip.length + "개 장착 (낚시 상점에서 달고 빼요)" }));
@@ -11781,165 +11534,6 @@ function lotto645Sheet(body) {
    항구 앞 잔디밭의 대형 전광판. 운영자가 유튜브 링크를 넣으면 모든 채널에서 같은 영상이 같은 시각으로 나와요(config/tv).
    매일 밤 9시 ~ 9시 10분은 영상 대신 로또 6/45 추첨 방송으로 바뀌어요.
    소리: 유튜브 소리는 거리에 따라 커지고 작아져요(가까울수록 크게). 추첨 방송은 마을 확성기처럼 — 딩동댕 차임 · 확성기 웅웅 소리 · 메아리 · 아나운서 목소리 */
-/* ===================== 자정 불꽃놀이 (v1.104) =====================
-   매일 밤 12시(한국 시간) 정각부터 5분 동안 서쪽 바다 위에서 불꽃이 터져요.
-   발사 일정은 날짜 + 초로 정해지는 난수라서, 같은 채널이 아니어도 모두가 같은 순간에 같은 불꽃을 봐요.
-   입자는 한 덩어리(Points)로 그리고 더하기 혼합으로 빛나게 해요. 터질 때 마을이 잠깐 환해져요. */
-const FW = { x: -185, z: 4, dur: 300000, testDur: 75000, N: 14000, pts: null, geo: null, mat: null, light: null, flash: 0,
-  head: 0, slot: -1, queue: [], rockets: [], test: null, live: false, warned: -1, began: -1 };
-const FW_COLS = [[1, .22, .28], [1, .62, .12], [.3, .72, 1], [.62, .38, 1], [.3, 1, .5], [1, .95, .8], [1, .4, .8], [.25, .95, .95], [1, .86, .3]];
-const FW_GOLD = [1, .72, .32], FW_WHITE = [1, .97, .9];
-const fwRng = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
-function fwNow(now) {   // { n: 몇 번째 밤, since: 시작 후 ms, dur }
-  // 운영자가 「모두에게 불꽃놀이」를 누르면 config/fireworks의 시작 시각으로 모든 사람 화면에서 같은 공연이 열려요 (v1.109)
-  const sh = FW.shared; if (sh && sh.t0) { const since = now - sh.t0; if (since >= -3000 && since < sh.dur + 6000) return { n: 800000 + (sh.t0 % 99991), since, dur: sh.dur, test: true }; }
-  const day = 864e5, k = Math.floor((now + 9 * 3600e3) / day);
-  return { n: k, since: now - (k * day - 9 * 3600e3), dur: FW.dur, test: false };
-}
-function fwInit() {
-  const N = FW.N, g = new T3.BufferGeometry();
-  FW.p = new Float32Array(N * 3); FW.v = new Float32Array(N * 3); FW.c = new Float32Array(N * 3); FW.base = new Float32Array(N * 3);
-  FW.s = new Float32Array(N); FW.a = new Float32Array(N); FW.life = new Float32Array(N); FW.max = new Float32Array(N);
-  FW.sz = new Float32Array(N); FW.drag = new Float32Array(N); FW.grav = new Float32Array(N); FW.fl = new Uint8Array(N); FW.tr = new Float32Array(N);
-  g.setAttribute("position", new T3.BufferAttribute(FW.p, 3)); g.setAttribute("color", new T3.BufferAttribute(FW.c, 3));
-  g.setAttribute("size", new T3.BufferAttribute(FW.s, 1)); g.setAttribute("alpha", new T3.BufferAttribute(FW.a, 1));
-  for (const k of ["position", "color", "size", "alpha"]) g.attributes[k].setUsage(T3.DynamicDrawUsage);
-  FW.mat = new T3.ShaderMaterial({
-    uniforms: { scale: { value: 600 } }, vertexColors: true, transparent: true, depthWrite: false, blending: T3.AdditiveBlending, fog: false,
-    vertexShader: "attribute float size; attribute float alpha; uniform float scale; varying vec3 vC; varying float vA;\n" +
-      "void main(){ vC = color; vA = alpha; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = clamp(size * scale / -mv.z, 0.0, 72.0); gl_Position = projectionMatrix * mv; }",
-    fragmentShader: "varying vec3 vC; varying float vA;\n" +
-      "void main(){ float r = length(gl_PointCoord - 0.5) * 2.0; if (r > 1.0) discard; float glow = pow(1.0 - r, 2.2); float core = smoothstep(0.35, 0.0, r);\n" +
-      "  gl_FragColor = vec4(vC * (glow * 1.7 + core * 0.9) + vec3(core * 0.25), vA * (glow + core * 0.6)); }",
-  });
-  FW.geo = g; FW.pts = new T3.Points(g, FW.mat); FW.pts.frustumCulled = false; FW.pts.renderOrder = 5; scene.add(FW.pts);
-}
-function fwSpark(x, y, z, vx, vy, vz, col, life, size, drag, grav, flags, trail) {   // 빈 칸(가장 오래된 칸)에 입자 하나
-  const i = FW.head; FW.head = (FW.head + 1) % FW.N; const j = i * 3;
-  FW.p[j] = x; FW.p[j + 1] = y; FW.p[j + 2] = z; FW.v[j] = vx; FW.v[j + 1] = vy; FW.v[j + 2] = vz;
-  FW.base[j] = col[0]; FW.base[j + 1] = col[1]; FW.base[j + 2] = col[2];
-  FW.life[i] = life; FW.max[i] = life; FW.sz[i] = size; FW.drag[i] = drag; FW.grav[i] = grav; FW.fl[i] = flags || 0; FW.tr[i] = trail || 0;
-  return i;
-}
-const fwDir = (r) => { const u = r() * 2 - 1, a = r() * Math.PI * 2, s = Math.sqrt(1 - u * u); return [s * Math.cos(a), u, s * Math.sin(a)]; };
-const fwMix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-/* 터짐: 종류마다 모양이 달라요 (모란 · 국화 · 버들 · 고리 · 야자 · 분열 · 하트 · 반짝이 · 이중) */
-function fwBurst(sh, r) {
-  const { x, y, z, col, col2, type, big } = sh, k = (big ? 1.35 : 1) * 1.7;   // 멀리서 터지니 크게
-  const ball = (n, sp, c, life, size, drag, grav, flags, trail) => { for (let i = 0; i < n; i++) { const d = fwDir(r), s = sp * (.88 + r() * .12); fwSpark(x, y, z, d[0] * s, d[1] * s, d[2] * s, c, life * (.85 + r() * .3), size, drag, grav, flags, trail); } };
-  if (type === "peony") ball(150 * k | 0, 17 * k, col, 2.1, 1.1, 1.5, 3.5, 2);
-  else if (type === "double") { ball(120 * k | 0, 18 * k, col, 2.2, 1.05, 1.5, 3.4, 2); ball(60, 9 * k, col2, 1.9, 1.0, 1.5, 3.4, 2); }
-  else if (type === "chrys") ball(110 * k | 0, 16 * k, col, 2.3, .95, 1.6, 3.6, 2, .045);
-  else if (type === "willow") ball(130 * k | 0, 12.5 * k, FW_GOLD, 4.6, 1.0, 2.1, 2.4, 0, .07);
-  else if (type === "ring" || type === "saturn") {
-    const ax = fwDir(r), t1 = Math.abs(ax[1]) < .9 ? [0, 1, 0] : [1, 0, 0], u = new T3.Vector3(...ax).cross(new T3.Vector3(...t1)).normalize(), v = new T3.Vector3(...ax).cross(u).normalize();
-    const n = 90 * k | 0; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2, s = 18 * k; fwSpark(x, y, z, (u.x * Math.cos(a) + v.x * Math.sin(a)) * s, (u.y * Math.cos(a) + v.y * Math.sin(a)) * s, (u.z * Math.cos(a) + v.z * Math.sin(a)) * s, col, 2.1, 1.1, 1.5, 3, 2); }
-    ball(type === "saturn" ? 60 : 30, 7, col2, 1.8, 1.0, 1.5, 3, 2);
-  } else if (type === "palm") {
-    const arms = 7 + (r() * 3 | 0); for (let i = 0; i < arms; i++) { const a = i / arms * Math.PI * 2 + r() * .3, up = .35 + r() * .45, s = 15 * k; fwSpark(x, y, z, Math.cos(a) * s * (1 - up * .5), up * s, Math.sin(a) * s * (1 - up * .5), FW_GOLD, 2.6, 2.3, 1.3, 4.2, 0, .02); }
-    ball(40, 5, col, 1.4, 1.0, 1.5, 3, 2);
-  } else if (type === "crossette") {
-    for (let i = 0; i < 14; i++) { const d = fwDir(r), s = 15 * k; fwSpark(x, y, z, d[0] * s, d[1] * s, d[2] * s, col, .85 + r() * .15, 1.6, 1.2, 3, 8, .03); }
-  } else if (type === "heart") {   // 마을 쪽(동쪽)에서 잘 보이게 남북 · 위아래 평면에
-    const n = 110; for (let i = 0; i < n; i++) { const t = i / n * Math.PI * 2, hx = 16 * Math.pow(Math.sin(t), 3), hy = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t), s = 1.05 * k; fwSpark(x, y, z, (r() - .5) * .8, hy * s, hx * s, col, 2.2, 1.15, 1.7, 1.6, 2); }
-  }
-  if (type === "glitter" || r() < .3) for (let i = 0; i < 70; i++) { const d = fwDir(r), s = (6 + r() * 12) * k; fwSpark(x, y, z, d[0] * s, d[1] * s, d[2] * s, FW_WHITE, 1.4 + r() * 1.4, .55, 1.8, 3, 16); }   // 반짝반짝 (늦게 켜지는 점멸)
-  // 빛 · 소리
-  FW.flash = Math.min(3.2, FW.flash + (big ? 2.6 : 1.7)); 
-  fwBoom(x, y, z, big, type === "glitter" || type === "crossette" || type === "willow");
-}
-/* 소리: 쿵 (거리만큼 늦게) · 휘익 · 타다닥 */
-function fwVol(x, y, z) { const d = Math.hypot(ME.x - x, ME.z - z, y); return { d, v: S.sound && AC && !atHome() && !atRest() ? clamp(1.25 - d / 380, 0, 1) : 0 }; }
-let FW_NOISE = null;
-function fwNoise() { if (FW_NOISE) return FW_NOISE; const len = AC.sampleRate * 1.5 | 0, b = AC.createBuffer(1, len, AC.sampleRate), d = b.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; return (FW_NOISE = b); }
-function fwBoom(x, y, z, big, crackle) {
-  const { d, v } = fwVol(x, y, z); if (!v) return; const out = master || AC.destination, t0 = AC.currentTime + Math.min(1.2, d / 343);
-  const src = AC.createBufferSource(); src.buffer = fwNoise(); const lp = AC.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.setValueAtTime(big ? 900 : 1400, t0); lp.frequency.exponentialRampToValueAtTime(120, t0 + 1.1);
-  const g = AC.createGain(); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v * (big ? .9 : .6), t0 + .01); g.gain.exponentialRampToValueAtTime(.001, t0 + 1.4);
-  src.connect(lp).connect(g).connect(out); src.start(t0, Math.random() * .3); src.stop(t0 + 1.5);
-  const o = AC.createOscillator(), og = AC.createGain(); o.type = "sine"; o.frequency.setValueAtTime(big ? 70 : 95, t0); o.frequency.exponentialRampToValueAtTime(32, t0 + .6);
-  og.gain.setValueAtTime(v * .7, t0); og.gain.exponentialRampToValueAtTime(.001, t0 + .7); o.connect(og).connect(out); o.start(t0); o.stop(t0 + .75);
-  if (crackle) for (let i = 0; i < 26; i++) {   // 타다닥
-    const c = AC.createBufferSource(); c.buffer = fwNoise(); const hp = AC.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 2500 + Math.random() * 3000;
-    const cg = AC.createGain(), tc = t0 + .9 + Math.random() * 1.6; cg.gain.setValueAtTime(v * (.12 + Math.random() * .18), tc); cg.gain.exponentialRampToValueAtTime(.001, tc + .03);
-    c.connect(hp).connect(cg).connect(out); c.start(tc, Math.random()); c.stop(tc + .04);
-  }
-}
-function fwWhistle(x, z, dur) {
-  const { v } = fwVol(x, 20, z); if (!v) return; const out = master || AC.destination, t0 = AC.currentTime;
-  const o = AC.createOscillator(), g = AC.createGain(); o.type = "sine"; o.frequency.setValueAtTime(900, t0); o.frequency.exponentialRampToValueAtTime(2100, t0 + dur);
-  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v * .05, t0 + .1); g.gain.linearRampToValueAtTime(0, t0 + dur); o.connect(g).connect(out); o.start(t0); o.stop(t0 + dur + .05);
-}
-/* 발사 일정: 1초마다 그 초의 난수로 몇 발 · 어떤 불꽃인지 정해요. 마지막 25초는 피날레 */
-const FW_TYPES = ["peony", "peony", "double", "chrys", "chrys", "willow", "ring", "palm", "crossette", "saturn", "glitter", "heart"];
-function fwPlan(n, slot, dur) {
-  const r = fwRng(n * 100003 + slot * 7919), secs = dur / 1000, fin = slot >= secs - 25, open = slot < 12;
-  let cnt = open ? (r() < .6 ? 1 : 0) : fin ? 3 + (r() * 4 | 0) : r() < .25 ? 0 : r() < .7 ? 1 : r() < .92 ? 2 : 3;
-  if (slot % 40 === 20) cnt = 7;   // 40초마다 한 번 일제 사격
-  if (slot >= secs - 2) cnt = 10;  // 마지막 대폭발
-  const out = [], salvo = cnt >= 7 && !fin, sc = FW_COLS[r() * FW_COLS.length | 0];
-  for (let i = 0; i < cnt; i++) {
-    const type = salvo ? (i % 2 ? "ring" : "peony") : fin && r() < .35 ? "willow" : FW_TYPES[r() * FW_TYPES.length | 0];
-    const col = salvo ? sc : FW_COLS[r() * FW_COLS.length | 0], col2 = FW_COLS[r() * FW_COLS.length | 0];
-    const zz = salvo ? (i - (cnt - 1) / 2) * 11 : (r() - .5) * 70;
-    out.push({ at: slot * 1000 + (salvo ? i * 90 : r() * 950), x: FW.x + (r() - .5) * 40, z: FW.z + zz * 1.6, y: 30 + r() * 20, type, col, col2, big: fin || r() < .18, rise: 1.3 + r() * .6, whistle: r() < .3 });
-  }
-  return out;
-}
-function fwTick(t, dt) {
-  if (!T3 || !scene) return;
-  const now = Date.now(), F = fwNow(now), live = F.since >= 0 && F.since < F.dur;
-  // 미리 알림: 30초 전
-  if (!F.test && F.since > 864e5 - 30000 && FW.warned !== F.n && !S.title) { FW.warned = F.n; toast("🎆 30초 뒤 자정 불꽃놀이가 시작돼요! 서쪽 바다 하늘을 보세요"); }
-  if (live && FW.began !== F.n && !S.title) { FW.began = F.n; toast(F.test ? "🎆 깜짝 불꽃놀이 시작! 서쪽 바다 하늘을 보세요" : "🎆 자정 불꽃놀이 시작! 서쪽 바다 하늘을 보세요 (5분)"); }
-  if (!live && !FW.pts) return;
-  if (!FW.pts) fwInit();
-  dt = Math.min(dt || .016, .05);
-  if (live) {
-    const slot = Math.floor(F.since / 1000);
-    if (FW.slot > slot || FW.slot < slot - 3 || FW.n !== F.n) { FW.slot = slot - 1; FW.n = F.n; FW.queue = []; }   // 처음 · 건너뜀: 지금부터
-    while (FW.slot < slot) { FW.slot++; FW.queue.push(...fwPlan(F.n, FW.slot, F.dur)); }
-    for (let i = FW.queue.length - 1; i >= 0; i--) {
-      const s = FW.queue[i]; if (s.at > F.since) continue; FW.queue.splice(i, 1);
-      if (F.since - s.at > 2500) continue;
-      s.t = 0; s.r = fwRng((s.at * 31 + F.n) | 0); FW.rockets.push(s); if (s.whistle) fwWhistle(s.x, s.z, s.rise);
-    }
-  } else FW.queue.length = 0;
-  // 올라가는 불씨
-  for (let i = FW.rockets.length - 1; i >= 0; i--) {
-    const s = FW.rockets[i]; s.t += dt; const k = Math.min(1, s.t / s.rise), e = 1 - Math.pow(1 - k, 2), wob = Math.sin(s.t * 18) * .25 * (1 - k);
-    const yy = s.y * e, px = s.x + wob;
-    fwSpark(px, yy, s.z, (Math.random() - .5) * 1.2, -2 - Math.random() * 2, (Math.random() - .5) * 1.2, fwMix(FW_GOLD, FW_WHITE, .5), .5 + Math.random() * .3, .7, 2, 2, 0);
-    if (k >= 1) { FW.rockets.splice(i, 1); fwBurst(s, s.r); }
-  }
-  // 입자 움직임
-  const N = FW.N, P = FW.p, V = FW.v, C = FW.c, B = FW.base, A = FW.a, Sz = FW.s;
-  for (let i = 0; i < N; i++) {
-    let L = FW.life[i]; if (L <= 0) { if (A[i]) { A[i] = 0; Sz[i] = 0; } continue; }
-    L -= dt; FW.life[i] = L; const j = i * 3, f = FW.fl[i];
-    if (L <= 0) {
-      if (f & 8) { const r = Math.random; for (let q = 0; q < 4; q++) { const a = q * Math.PI / 2 + r() * .4; fwSpark(P[j], P[j + 1], P[j + 2], Math.cos(a) * 13, (r() - .3) * 8, Math.sin(a) * 13, [B[j], B[j + 1], B[j + 2]], 1.1, .9, 1.5, 3, 2); } }   // 분열
-      A[i] = 0; Sz[i] = 0; continue;
-    }
-    const dr = Math.exp(-FW.drag[i] * dt);
-    V[j] *= dr; V[j + 1] = V[j + 1] * dr - FW.grav[i] * dt; V[j + 2] *= dr;
-    P[j] += V[j] * dt; P[j + 1] += V[j + 1] * dt; P[j + 2] += V[j + 2] * dt;
-    const age = 1 - L / FW.max[i];
-    let a = age < .05 ? 1 : Math.pow(1 - (age - .05) / .95, 1.3);
-    if (f & 2 && age > .7) a *= .55 + .45 * Math.sin(L * 60 + i);              // 끝에서 깜빡
-    if (f & 16) a = age < .35 ? 0 : (Math.sin(L * 45 + i * 1.7) > .55 ? 1 : .05); // 반짝이
-    const hot = age < .06 ? 1 - age / .06 : 0;                                  // 막 터졌을 땐 하얗게
-    C[j] = B[j] + (1 - B[j]) * hot; C[j + 1] = B[j + 1] + (1 - B[j + 1]) * hot; C[j + 2] = B[j + 2] + (1 - B[j + 2]) * hot;
-    A[i] = a; Sz[i] = FW.sz[i] * (f & 16 ? 1 : .6 + .4 * (1 - age));
-    if (FW.tr[i] && Math.random() < FW.tr[i] * 60 * dt * 3) fwSpark(P[j], P[j + 1], P[j + 2], V[j] * .1, V[j + 1] * .1 - .5, V[j + 2] * .1, fwMix([B[j], B[j + 1], B[j + 2]], FW_GOLD, .6), .45 + Math.random() * .5, .55, 2.5, 1.5, 0);   // 꼬리
-  }
-  for (const k of ["position", "color", "size", "alpha"]) FW.geo.attributes[k].needsUpdate = true;
-  FW.mat.uniforms.scale.value = (R ? R.domElement.height : 800) * 2.6;
-  FW.flash = Math.max(0, FW.flash - dt * 6);
-
-  if (hemi) { const add = FW.pts.visible ? Math.min(.22, FW.flash * .07) : 0; hemi.intensity += add - (FW.hAdd || 0); FW.hAdd = add; }   // 터질 때 마을이 잠깐 환해져요 (빛을 새로 안 만들어서 멈춤 없음)
-  FW.pts.visible = !atHome() && !atRest();
-}
 const TV = { x: -27.2, z: -20.5, w: 6.4, hgt: 3.6, y0: 1.6, mesh: null, tex: null, cv: null, frame: null, ifr: null, vid: "", startAt: 0, lastDraw: 0, said: -1, chimed: 0, hum: null, test: null };
 function ytId(u) { u = String(u || "").trim(); const m = u.match(/(?:youtu\.be\/|v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/) || u.match(/^([A-Za-z0-9_-]{11})$/); return m ? m[1] : ""; }
 function buildTV() {
@@ -13577,7 +13171,6 @@ SHEETS.admintools = (body) => {
     const ta = h("textarea", { class: "fbtext", rows: "3", placeholder: "가져올 세이브 JSON을 붙여넣어요" });
     body.append(h("div", { class: "sec", text: "🎰 로또 테스트 방송 (이 기기에서만 · 서버 영향 없음)" }), h("div", { class: "row" },
       h("button", { class: "btn sm", onclick: () => { TV.test = { t0: Date.now() }; TV.chimed = 0; TV.said = -1; closeSheet(); toast("🧪 테스트 방송 시작 · 항구 어촌 TV 앞으로 가 보세요 (첫 공 4초 뒤 · 6초 간격 · 실제 추첨과 무관해요)"); }, text: "▶ 테스트 방송 시작" }),
-      ...[[75000, "🎆 모두에게 불꽃놀이 (75초)"], [300000, "🎆 모두에게 불꽃놀이 (5분)"], [0, "■ 불꽃놀이 멈추기"]].map(([dur, label]) => h("button", { class: "btn sm", onclick: async () => { try { await S.db.doc("config/fireworks").set({ t0: dur ? Date.now() + 3000 : 0, dur, by: S.uid }); closeSheet(); toast(dur ? "🎆 3초 뒤 모든 채널에서 불꽃놀이가 시작돼요" : "불꽃놀이를 멈췄어요"); } catch (e) { toast("저장하지 못했어요"); } }, text: label })),
       h("button", { class: "btn sm", onclick: () => { TV.test = null; tvHum(0); toast("테스트 방송을 껐어요"); }, text: "⏹ 끄기" })),
       h("div", { class: "muted", style: "font-size:12px;line-height:1.5", text: "밤 9시 본방과 다른 테스트 전용 방송이에요. 내 화면과 스피커에서만 나오고, 다른 사람 · 서버 · 당첨금에는 영향이 전혀 없어요. 화면에도 「테스트 방송」이라고 표시돼요." }));
     body.append(h("div", { class: "sec", text: "🍳 내 가게 테스트 (내 가게에만 적용 · 저장돼요)" }), h("div", { class: "row" },
@@ -14434,7 +14027,7 @@ function myCode(uid) {
   uid = uid || S.uid; if (!uid) return "------";
   return (hashStr(uid).toString(36) + hashStr(uid + "#mn").toString(36)).toUpperCase().replace(/[^0-9A-Z]/g, "").slice(0, 6).padEnd(6, "0");
 }
-function tierForAmount(a) { let t = -1; RELEASE_SHOW.forEach(([r, i]) => { if (a >= r.cost) t = i; }); return t; }   // 5만원 넘게 보내도 고래급
+function tierForAmount(a) { let t = -1; RELEASE.forEach((r, i) => { if (a >= r.cost) t = i; }); return t; }
 function normGrant(d) {
   const tickets = (Array.isArray(d && d.tickets) ? d.tickets : []).filter(t => t && isUid(t.id)).map(t => ({ id: t.id, tier: clamp(Math.floor(Number(t.tier) || 0), 0, 4), ts: Number(t.ts) || 0 }));
   return { tickets };
@@ -14446,7 +14039,7 @@ function validateFish() {
     if (!S.online || (owner && f.owner === owner)) { ok.push(f); continue; }
     const g = S.grants.get(f.owner);
     const t = g && g.tickets.find(x => x.id === f.ticket);
-    if (t && t.tier === (f.rel >= 0 ? f.rel : f.tier) && !used.has(t.id)) { used.set(t.id, f); ok.push(f); }   // v1.106.1: 방류권 번호와 물고기 등급이 달라져서 번호(rel)로 맞춰요
+    if (t && t.tier === f.tier && !used.has(t.id)) { used.set(t.id, f); ok.push(f); }
   }
   S.usedTickets = used;
   S.userFish = ok.sort((a, b) => b.ts - a.ts);
@@ -14538,7 +14131,7 @@ function renderGrantForm() {
   const m = S.members.find(x => x.uid === adminSel.uid);
   if (!m) { box.replaceChildren(h("div", { class: "muted", style: "font-size:13px", text: "위 목록에서 후원해 준 분을 골라 주세요." })); return; }
   const amt = h("input", { type: "number", id: "grantAmt", min: "0", step: "1000", value: "5000", style: "width:120px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 8px" });
-  const sel = h("select", { id: "grantTier", class: "btn" }, RELEASE_SHOW.map(([r, i]) => h("option", { value: String(i), text: r.name + " (" + fmt(r.cost) + "원~ · " + TIERS[r.tier].name + ")" })));
+  const sel = h("select", { id: "grantTier", class: "btn" }, RELEASE.map((r, i) => h("option", { value: String(i), text: r.name + " (" + fmt(r.cost) + "원~)" })));
   const cnt = h("input", { type: "number", id: "grantCnt", min: "1", max: "10", value: "1", style: "width:64px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 8px" });
   const memo = h("input", { id: "grantMemo", maxlength: "60", placeholder: "메모 (나만 보여요)", style: "flex:1;min-width:120px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 8px" });
   const sync = () => { const t = tierForAmount(Number(amt.value) || 0); if (t >= 0) sel.value = String(t); };
@@ -14619,35 +14212,12 @@ function exportDrawing() {
   return out.toDataURL("image/png");
 }
 function updateStudioGold() { renderReleaseBox(); }
-/* v1.101 후원 안내: 토스뱅크 계좌 · 금액별 QR · 후원 코드 · 운영자 확인 후 방류권 지급 (자동 아님) */
-const DONATE = { bank: "토스뱅크", acct: "1000-4556-8598", holder: "이재헌", qr: { 1000: "a/donate/qr-1000.png", 5000: "a/donate/qr-5000.png", 10000: "a/donate/qr-10000.png", 50000: "a/donate/qr-50000.png" } };
-SHEETS.donate = (body) => {
-  setHead("💝 후원하고 방류권 받기", "후원해 주시면 금액에 맞는 방류권을 드려요 · 방류권이 있어야 그린 물고기를 바다에 풀 수 있어요");
-  S.donPick = S.donPick == null || !RELEASE[S.donPick] || RELEASE[S.donPick].legacy ? 1 : S.donPick;
-  const r = RELEASE[S.donPick], qr = DONATE.qr[r.cost];
-  body.append(h("div", { class: "dn-steps" },
-    h("div", { class: "dn-step" }, h("span", { class: "dn-n", text: "1" }), h("div", { class: "grow" }, h("b", { text: "방류권 고르기" }), h("small", { text: "클수록 바다에서 크고 귀한 물고기가 돼요" }))),
-    h("div", { class: "dn-tiers" }, RELEASE_SHOW.map(([x, i]) => h("button", { class: "dn-tier" + (i === S.donPick ? " on" : ""), onclick: () => { S.donPick = i; refreshSheet(true); } },
-      tierChip(x.tier), h("b", { text: x.name + (x.cost >= 50000 ? " · 최고" : "") }), h("span", { class: "num", text: fmt(x.cost) + "원" }), h("small", { text: "크기 " + fmtSize(x.min) + "~" + fmtSize(x.max) }))))));
-  body.append(h("div", { class: "dn-step" }, h("span", { class: "dn-n", text: "2" }), h("div", { class: "grow" }, h("b", { text: fmt(r.cost) + "원 보내기" }), h("small", { text: qr ? "휴대폰 카메라나 토스 앱으로 QR을 찍거나, 아래 계좌로 보내요" : "이 금액은 QR이 없어요 · 아래 계좌로 보내 주세요" }))),
-    h("div", { class: "dn-pay" },
-      qr ? h("div", { class: "dn-qr" }, h("img", { src: qr, alt: fmt(r.cost) + "원 송금 QR코드" })) : null,
-      h("div", { class: "dn-acct" }, h("small", { text: DONATE.bank + " · 예금주 " + DONATE.holder }), h("b", { class: "num", text: DONATE.acct }),
-        h("button", { class: "btn sm", onclick: () => copyText(DONATE.bank + " " + DONATE.acct + " " + DONATE.holder, "계좌번호를 복사했어요"), text: "📋 계좌 복사" }))));
-  const code = S.uid ? myCode() : "로그인 필요";
-  body.append(h("div", { class: "dn-step" }, h("span", { class: "dn-n", text: "3" }), h("div", { class: "grow" }, h("b", { text: "보낼 때 「내 후원 코드」를 꼭 적어요" }), h("small", { text: "토스 · 은행의 「받는 분에게 표시」나 메모 칸에 적어 주세요. 코드가 없으면 누가 보냈는지 알 수 없어요." }))),
-    h("div", { class: "dn-code" }, h("b", { class: "num", text: code }), S.uid ? h("button", { class: "btn sm pri", onclick: () => copyText(code, "후원 코드 " + code + "를 복사했어요"), text: "📋 코드 복사" }) : null));
-  body.append(h("div", { class: "dn-step" }, h("span", { class: "dn-n", text: "4" }), h("div", { class: "grow" }, h("b", { text: "운영자가 입금을 확인하면 방류권이 들어와요" }), h("small", { text: "자동이 아니라 운영자가 직접 확인해요. 보통 하루 안에 들어오고, 들어오면 마을 소식과 방류소에 떠요." }))));
-  body.append(h("div", { class: "dn-note" }, "⚠️ 후원은 운영자에게 보내는 자발적인 선물이에요. 보낸 뒤에는 돌려받기 어려워요. 미성년자는 꼭 보호자와 함께 해 주세요. 방류권이 들어오기 전에는 그림을 미리 그려 둘 수만 있고, 바다에 풀 수는 없어요."));
-  const c = S.config || {};
-  if (c.donateText) body.append(h("div", { class: "muted", style: "font-size:12.5px;margin-top:6px", text: "운영자 안내: " + c.donateText }));
-};
 function renderReleaseBox() {
   const box = document.getElementById("releaseBox"); if (!box) return;
   const kids = [];
   if (canReleaseFree()) {
     kids.push(h("div", { class: "field" }, h("label", { text: S.online ? "방류 등급 · 운영자는 자유롭게" : "방류 등급 · 혼자 모드 연습" }),
-      h("div", { class: "rgrades" }, RELEASE_SHOW.map(([r, i]) => h("button", { class: "rgrade", "aria-pressed": String(studio.grade === i), onclick: () => { studio.grade = i; renderReleaseBox(); } },
+      h("div", { class: "rgrades" }, RELEASE.map((r, i) => h("button", { class: "rgrade", "aria-pressed": String(studio.grade === i), onclick: () => { studio.grade = i; renderReleaseBox(); } },
         tierChip(r.tier), h("span", null, h("b", { text: r.name }), h("br"), h("span", { class: "muted num", text: "기준 " + fmtSize(Math.sqrt(r.min * r.max)) })), h("span", { class: "muted", style: "font-size:11px", text: "" }))))));
   } else {
     const tix = myTickets();
@@ -14659,13 +14229,12 @@ function renderReleaseBox() {
     } else {
       const c = S.config || {};
       kids.push(h("div", { class: "listrow", style: "flex-direction:column;align-items:stretch;gap:8px;line-height:1.55" },
-        h("b", { text: "🎟 방류권이 없어요 · 방류는 후원자 전용이에요" }),
-        h("button", { class: "btn pri", onclick: () => openSheet("donate"), text: "💝 후원하고 방류권 받기" }),
+        h("b", { text: "물고기 방류는 후원자 전용이에요" }),
         h("span", { class: "muted", style: "font-size:13px", text: c.donateText || "운영자를 후원해 주시면 후원 금액에 맞는 방류권을 드려요. 그림은 미리 그려 둘 수 있어요." }),
         /^https:\/\//.test(c.donateUrl || "") ? h("a", { href: c.donateUrl, target: "_blank", rel: "noopener", class: "btn", style: "text-align:center;text-decoration:none", text: "후원하러 가기" }) : null,
         h("span", { style: "font-size:13px" }, "내 후원 코드 ", h("b", { class: "num", style: "font-size:16px;letter-spacing:.08em", text: myCode() })),
         h("span", { class: "muted", style: "font-size:12px", text: "후원할 때 이 코드를 함께 남겨 주세요. 운영자가 확인하면 방류권이 바로 들어와요." }),
-        h("div", { class: "muted", style: "font-size:12px" }, RELEASE_SHOW.map(([r]) => r.name + " " + fmt(r.cost) + "원 (" + TIERS[r.tier].name + ")").join(" · "))));
+        h("div", { class: "muted", style: "font-size:12px" }, RELEASE.map(r => r.name + " " + fmt(r.cost) + "원").join(" · "))));
     }
   }
   box.replaceChildren(...kids);
@@ -14743,13 +14312,7 @@ function renderStudio(body) {
       h("span", { class: "rs-ph" }, h("img", { src: f.img, alt: "" })), h("b", { text: f.name }), tierChip(f.tier),
       h("small", { text: new Date(f.ts).toLocaleDateString("ko-KR") + (f.reports && f.reports.length ? " · 신고 " + f.reports.length : "") }))))
       : h("div", { class: "empty-note", text: "아직 방류한 물고기가 없어요. 첫 물고기를 그려 바다에 풀어 보세요!" }));
-  const free = canReleaseFree(), tixN = free ? 0 : myTickets().length;   // v1.101: 그리기 전에 「방류권이 있어야 풀 수 있다」를 먼저 알려요
-  const banner = free ? null : tixN ? h("div", { class: "rs-ban ok" }, h("span", { class: "ic", text: "🎟" }), h("div", { class: "grow" }, h("b", { text: "방류권 " + tixN + "장 있어요" }), h("small", { text: "그리고 이름을 지으면 바로 바다에 풀 수 있어요" })), h("button", { class: "btn sm", onclick: () => openSheet("donate"), text: "더 받기" }))
-    : h("div", { class: "rs-ban" }, h("span", { class: "ic", text: "💝" }), h("div", { class: "grow" }, h("b", { text: "물고기 방류는 후원자 전용이에요" }), h("small", { text: "운영자를 후원하면 금액에 맞는 방류권(1,000원부터)을 받아요. 방류권이 없으면 그림은 그려 둘 수 있지만 바다에 풀 수는 없어요." })),
-      h("button", { class: "btn pri", onclick: () => openSheet("donate"), text: "후원 안내 보기" }));
-  if (!free && !tixN && !studio.practiceOk) paper.append(h("div", { class: "rs-gate" }, h("b", { text: "🎟 방류권이 있어야 바다에 풀 수 있어요" }), h("small", { text: "방류권은 후원 보상이에요 · 먼저 확인해 주세요" }),
-    h("button", { class: "btn pri", onclick: () => openSheet("donate"), text: "💝 후원 안내 보기" }), h("button", { class: "btn sm", onclick: () => { studio.practiceOk = true; refreshSheet(true); }, text: "알겠어요, 미리 그려 둘게요" })));
-  body.append(h("div", { class: "rs" }, banner, tank, h("div", { class: "rs-cols" }, easel, form), shelf));
+  body.append(h("div", { class: "rs" }, tank, h("div", { class: "rs-cols" }, easel, form), shelf));
   renderReleaseBox();
 }
 let releasing = false;
@@ -14764,7 +14327,7 @@ async function doRelease() {
   if (!img) { err.textContent = "그림이 너무 작아요. 물고기를 조금 더 크게 그려 주세요."; return; }
   if (releasing) return;
   releasing = true; $("releaseBtn").disabled = true; err.textContent = "";
-  const doc = { name, desc, tier: r.tier, rel: ticket ? ticket.tier : studio.grade, img, owner: S.uid || "local", nick: P.nick, ts: Date.now(), reports: [], ticket: ticket ? ticket.id : "" };
+  const doc = { name, desc, tier: r.tier, img, owner: S.uid || "local", nick: P.nick, ts: Date.now(), reports: [], ticket: ticket ? ticket.id : "" };
   try {
     if (S.online) await S.db.collection("fish").add(doc);
     else { S.userFish.push(normUserFish(uid4(), doc)); saveLocalFish(); }
@@ -15180,7 +14743,6 @@ async function boot() {
   }, (e) => { clearTimeout(chatTimer); console.warn("chat", e); });
   db.doc("config/notice").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; const prev = S.notice && S.notice.ts; S.notice = { text: str(d.text, 80), ts: Number(d.ts) || 0, until: Number(d.until) || 0 }; renderNoticeBar(); if (prev && S.notice.ts !== prev && S.notice.text) toast("📢 " + S.notice.text, null, 7000); }, () => {});
   db.doc("config/event").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.event = EVENTS.some(e => e.id === d.id) ? { id: d.id, until: Number(d.until) || 0 } : null; renderNoticeBar(); }, () => {});
-  db.doc("config/fireworks").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; FW.shared = { t0: Number(d.t0) || 0, dur: clamp(Number(d.dur) || 75000, 10000, 300000) }; FW.slot = -1; if (!FW.shared.t0) { FW.queue.length = 0; FW.rockets.length = 0; } }, () => {});
   db.doc("config/tv").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; try { tvSetVideo(ytId(d.vid), Number(d.startAt) || 0); } catch (e) { console.warn("tv", e); } }, () => {});
   db.doc("config/mutes").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.mutes = new Set((Array.isArray(d.uids) ? d.uids : []).filter(isUid)); }, () => {});
   db.doc("config/minver").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; const need = str(d.v, 12), ts = Number(d.ts) || 0;   // v1.99.2: 운영자가 「모두 새로고침」하면 예전 버전 화면이 새로 받아요
