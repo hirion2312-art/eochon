@@ -1828,7 +1828,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.101.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.101.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2613,7 +2613,7 @@ function normRest(r) {
   const hand = k.hand && k.hand.dish ? (RECIPE[k.hand.dish] ? { dish: k.hand.dish, q: k.hand.q === "perfect" ? "perfect" : "normal", items: Array.isArray(k.hand.items) ? k.hand.items.map(normRestItem).filter(Boolean) : [] } : null) : normRestItem(k.hand);
   const pl = k.plate && typeof k.plate === "object" ? k.plate : {};
   return {
-    lv: clamp(Math.floor(Number(r.lv) || 0), 0, REST_LV.length - 1), start: /^\d{4}-\d{2}-\d{2}$/.test(r.start || "") ? r.start : kstDay(), lvAt: /^\d{4}-\d{2}-\d{2}$/.test(r.lvAt || "") ? r.lvAt : (/^\d{4}-\d{2}-\d{2}$/.test(r.start || "") ? r.start : kstDay()), mig: r.mig ? 1 : 0,
+    lv: clamp(Math.floor(Number(r.lv) || 0), 0, REST_LV.length - 1), start: /^\d{4}-\d{2}-\d{2}$/.test(r.start || "") ? r.start : new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10), lvAt: /^\d{4}-\d{2}-\d{2}$/.test(r.lvAt || "") ? r.lvAt : (/^\d{4}-\d{2}-\d{2}$/.test(r.start || "") ? r.start : new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10)), mig: r.mig ? 1 : 0,
     booth: r.booth && typeof r.booth === "object" && ["hs", "uni", "pro", "chef"].includes(r.booth.g) ? { g: r.booth.g, paid: str(r.booth.paid, 10) } : null,   // v1.87 부스 알바
     off: (Array.isArray(r.off) ? r.off : []).filter(id => RECIPE[id]),
     regs: Object.fromEntries(Object.entries(r.regs && typeof r.regs === "object" ? r.regs : {}).filter(([id]) => REST_REG[id]).map(([id, n]) => [id, clamp(Math.floor(Number(n) || 0), 0, 1e6)])), vips: clamp(Math.floor(Number(r.vips) || 0), 0, 1e8),
