@@ -1863,7 +1863,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.107.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.107.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -9063,6 +9063,7 @@ function loadRodModels() {
       geo.setAttribute("position", new T3.BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
       ROD3D.set(id, { geo, parts: m.g, top: m.lo[1] + m.len, reel: m.reel || null });
     }
+    try { const mr = buildMerchantRod(); ROD3D.set("merchant", mr); rodMatCache.delete("merchant"); rodMatCache.delete("merchant|n"); ROD_AXIS.clear(); } catch (e) { console.warn("merchant rod", e); }
     makeRodPics();
     for (const k of [...iconCache.keys()]) if (k.startsWith("rod|")) iconCache.delete(k);
     refreshSheet();
@@ -9082,7 +9083,89 @@ function rodMats(id, noReel) {
   });
   rodMatCache.set(key, arr); return arr;
 }
-function rodMesh(id, noReel) { const m = ROD3D.get(id); return m ? new T3.Mesh(m.geo, rodMats(id, noReel)) : null; }
+function buildMerchantRod() {   // v1.107.1 장사꾼의 낚싯대 (y가 위 · 릴은 +z 쪽)
+  const parts = [
+    { c: "#3b2114", list: [] },            // 0 나무 끝마개
+    { c: "#5c4021", list: [] },            // 1 가죽 손잡이
+    { c: "#c9973f", s: 1, list: [] },      // 2 놋쇠 띠 · 가이드 · 엽전
+    { c: "#0d4042", s: 1, list: [] },      // 3 어두운 청록 대
+    { c: "#eb4c1a", e: "#611a04", list: [] },  // 4 포차 등롱
+    { c: "#1a120d", list: [] },            // 5 등롱 끝 · 끈
+    { c: "#c9973f", s: 1, reel: 1, list: [] },  // 6 기본 릴 (다른 릴을 달면 숨겨요)
+    { c: "#0d4042", s: 1, reel: 1, list: [] },  // 7 기본 릴 몸통
+  ];
+  const add = (pi, geo, x, y, z, rx, rz) => { if (rx) geo.rotateX(rx); if (rz) geo.rotateZ(rz); geo.translate(x || 0, y || 0, z || 0); parts[pi].list.push(geo); };
+  const cyl = (r0, r1, hh, seg) => new T3.CylinderGeometry(r0, r1, hh, seg || 14);
+  const TOP = 2.06;
+  add(0, cyl(.03, .032, .07), 0, -.035, 0); add(0, new T3.SphereGeometry(.03, 12, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), 0, -.07, 0);
+  add(1, cyl(.027, .03, .36), 0, .18, 0);
+  for (let k = 0; k < 7; k++) add(2, new T3.TorusGeometry(.03, .004, 6, 18), 0, .03 + k * .05, 0, Math.PI / 2);   // 가죽 감은 자국 · 놋쇠 실
+  add(2, cyl(.024, .024, .09), 0, .405, 0);   // 릴 시트
+  add(2, new T3.TorusGeometry(.026, .006, 8, 20), 0, .36, 0, Math.PI / 2); add(2, new T3.TorusGeometry(.026, .006, 8, 20), 0, .45, 0, Math.PI / 2);
+  add(1, cyl(.021, .025, .16), 0, .53, 0);   // 앞 손잡이
+  add(2, new T3.TorusGeometry(.022, .005, 8, 18), 0, .61, 0, Math.PI / 2);
+  add(3, cyl(.0045, .018, TOP - .6, 16), 0, .6 + (TOP - .6) / 2, 0);   // 대 (끝으로 가늘게)
+  const rAt = (y) => .018 + (.0045 - .018) * (y - .6) / (TOP - .6);
+  for (const [y, rr] of [[.86, .021], [1.12, .018], [1.37, .015], [1.6, .012], [1.82, .01], [2.0, .008]]) {   // 가이드: 대에 붙은 다리 + 고리
+    const rb = rAt(y), ring = rr, zc = rb + ring + .012;
+    add(2, cyl(.0025, .0025, zc - rb, 6), 0, y, rb + (zc - rb) / 2, Math.PI / 2);
+    add(2, new T3.TorusGeometry(ring, .0028, 6, 16), 0, y, zc, Math.PI / 2);
+  }
+  add(2, new T3.TorusGeometry(.006, .0025, 6, 12), 0, TOP + .004, 0);   // 끝 고리
+  for (const y of [.72, .98]) add(2, new T3.TorusGeometry(rAt(y) + .002, .003, 6, 16), 0, y, 0, Math.PI / 2);   // 대의 놋쇠 띠
+  // 손잡이 끝 장식: 끈 → 엽전 → 포차 등롱
+  add(5, cyl(.0025, .0025, .1, 5), 0, -.12, 0);
+  add(2, cyl(.024, .024, .005, 18), 0, -.165, 0, Math.PI / 2);   // 엽전
+  add(5, new T3.BoxGeometry(.012, .012, .008), 0, -.165, 0);       // 엽전 네모 구멍처럼
+  add(5, cyl(.0025, .0025, .05, 5), 0, -.2, 0);
+  { const lan = new T3.SphereGeometry(.034, 14, 10); lan.scale(1, 1.35, 1); add(4, lan, 0, -.27, 0); }
+  add(5, cyl(.02, .022, .012), 0, -.227, 0); add(5, cyl(.022, .02, .012), 0, -.313, 0);
+  // 기본 릴 (+z 쪽)
+  add(7, cyl(.04, .04, .03, 20), 0, .405, .075, 0, Math.PI / 2); add(6, cyl(.012, .012, .06, 8), 0, .405, .045, Math.PI / 2); add(6, new T3.TorusGeometry(.04, .005, 6, 20), .016, .405, .075, 0, Math.PI / 2);
+  // 합치기 (부품마다 그룹 하나)
+  const pos = [], nor = [], groups = []; let start = 0;
+  parts.forEach((pt, gi) => { let n = 0; for (const g0 of pt.list) { const g = g0.index ? g0.toNonIndexed() : g0; g.computeVertexNormals(); const a = g.attributes.position.array, b = g.attributes.normal.array; for (let i = 0; i < a.length; i++) { pos.push(a[i]); nor.push(b[i]); } n += a.length / 3; } groups.push([start, n, gi]); start += n; });
+  const geo = new T3.BufferGeometry(); geo.setAttribute("position", new T3.Float32BufferAttribute(pos, 3)); geo.setAttribute("normal", new T3.Float32BufferAttribute(nor, 3));
+  for (const [st, n, gi] of groups) geo.addGroup(st, n, gi);
+  geo.computeBoundingBox();
+  return { geo, parts: parts.map(({ list, ...rest }) => rest), top: TOP, reel: [0, .405, .075] };
+}
+/* v1.107.1 전설급 이상 낚싯대의 오라: 대를 타고 빙글빙글 올라가는 빛 알갱이 + 은은한 빛 껍질 (손에 든 것 · 상점 미리보기 모두) */
+const ROD_AURA = { legend: [0xffcf4a, 0xfff2b0], merchant: [0x3fe0c8, 0xffd27a], abyss: [0x40ebd9, 0x6a8cff], palace: [0x2ed199, 0xffe08a], myth: [0xff9ad8, 0xfff0ff] };
+const ROD_AXIS = new Map();
+function rodAxis(id) {   // 대 아래(25~40%) · 위(75~92%) 높이의 실제 중심 → 오라를 대의 기울기까지 맞춰요
+  if (ROD_AXIS.has(id)) return ROD_AXIS.get(id);
+  const m = ROD3D.get(id), band = (a0, a1) => { let sx = 0, sz = 0, n = 0; if (!m) return null; const a = m.geo.attributes.position.array, lo = m.top * a0, hi = m.top * a1; for (let i = 0; i < a.length; i += 3) if (a[i + 1] > lo && a[i + 1] < hi) { sx += a[i]; sz += a[i + 2]; n++; } return n ? [sx / n, sz / n, (lo + hi) / 2] : null; };
+  const b = band(.25, .4), t = band(.75, .92);
+  let r = { x: 0, z: 0, rx: 0, rz: 0 };
+  if (b && t) { const dy = t[2] - b[2], sx = (t[0] - b[0]) / dy, sz = (t[1] - b[1]) / dy; r = { x: b[0] - sx * b[2], z: b[1] - sz * b[2], rx: Math.atan(sz), rz: -Math.atan(sx) }; }
+  ROD_AXIS.set(id, r); return r;
+}
+function rodAura(id, top) {
+  const cols = ROD_AURA[id]; if (!cols) return null;
+  const g = new T3.Group(), ax = rodAxis(id); g.position.set(ax.x, 0, ax.z); g.rotation.set(ax.rx, 0, ax.rz); const N = id === "myth" ? 46 : id === "palace" ? 40 : 32;
+  const pos = new Float32Array(N * 3), col = new Float32Array(N * 3), c1 = new T3.Color(cols[0]), c2 = new T3.Color(cols[1]);
+  const geo = new T3.BufferGeometry(); geo.setAttribute("position", new T3.BufferAttribute(pos, 3)); geo.setAttribute("color", new T3.BufferAttribute(col, 3));
+  const pts = new T3.Points(geo, new T3.PointsMaterial({ size: .13, map: sparkTex(), vertexColors: true, transparent: true, depthWrite: false, blending: T3.AdditiveBlending }));
+  pts.frustumCulled = false;
+  pts.onBeforeRender = () => {
+    const t = performance.now() / 1000;
+    for (let i = 0; i < N; i++) {
+      const ph = (t * .32 + i / N) % 1, y = .1 + ph * (top - .1), a = i * 2.39 + t * 2.2, rad = .045 * (1 - ph * .6) + .012 * Math.sin(t * 3 + i);
+      pos[i * 3] = Math.cos(a) * rad; pos[i * 3 + 1] = y; pos[i * 3 + 2] = Math.sin(a) * rad;
+      const fade = Math.sin(ph * Math.PI), c = (i % 3 === 0 ? c2 : c1);
+      col[i * 3] = c.r * fade; col[i * 3 + 1] = c.g * fade; col[i * 3 + 2] = c.b * fade;
+    }
+    geo.attributes.position.needsUpdate = true; geo.attributes.color.needsUpdate = true;
+  };
+  g.add(pts);
+  const shellM = new T3.MeshBasicMaterial({ color: cols[0], transparent: true, opacity: .14, depthWrite: false, blending: T3.AdditiveBlending, side: T3.DoubleSide });
+  const shell = new T3.Mesh(new T3.CylinderGeometry(.012, .05, top * .9, 14, 1, true), shellM); shell.position.y = top * .5;
+  shell.onBeforeRender = () => { shellM.opacity = .1 + Math.sin(performance.now() / 380) * .05; };
+  g.add(shell);
+  return g;
+}
+function rodMesh(id, noReel) { const m = ROD3D.get(id); if (!m) return null; const mesh = new T3.Mesh(m.geo, rodMats(id, noReel)); const au = rodAura(id, m.top); if (au) mesh.add(au); return mesh; }
 // 상점 · 가방 그림: 낚싯대를 비스듬히 눕혀 한 장씩 찍어요 (가는 낚싯대가 잘 보이게 굵기는 2.4배)
 function makeRodPics() {
   try {
