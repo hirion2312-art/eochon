@@ -1828,7 +1828,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.100.2";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.100.3";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -9774,6 +9774,8 @@ function loadOutfitModels() {
     }))).then(() => { OUTFIT_REV++; });   // 준비되면 키가 바뀌어 모두가 새 옷으로 다시 입어요
   }).catch((e) => console.warn("outfits.json", e));
 }
+// 3D 모자 맞춤 (v1.100.3): 눈 · 코 · 입을 덮던 모자를 위로 올리고 살짝 키워요 → [올림, 크기, 뒤로]
+const HAT_FIT = { "h-haenyeo": [.3, 1.08, -.03], "h-rain": [.3, 1.08, -.03], "h-winter": [.2, 1.05, -.02], "h-captain": [.1, 1.03], "h-sailor": [.08, 1.02] };
 function outfitClone(name, parent) {
   const t = OUTFIT3D.get(name); if (!t) return null;
   const c = t.clone(); c.userData.glb = true; parent.add(c); return c;
@@ -9806,7 +9808,7 @@ function applyOutfit(B, wear, color) {
     if (sh && sh.glb) { const t = OUTFIT3D.get(sh.glb); if (t) { const w = new T3.Group(); w.scale.set(1, 1.333, .8); w.userData.glb = true; w.add(t.clone()); f.add(w); B.out.push(w); } }
     else if (sh && sh.tall) { const b = mk(new T3.CylinderGeometry(.115, .12, .24, 12), B.shoeM, 0, .16, -.02, f); b.scale.set(1, 1.33, .8); B.out.push(b); }
   }
-  for (const slot of ["hat", "face", "top", "back"]) { const c = CLOTH[wear[slot]]; if (!c) continue; if (c.glb) { if (slot === "hat") { const m = outfitClone(c.glb, B.head); if (m) B.out.push(m); } continue; } B.out.push(...buildCloth(c, B)); }
+  for (const slot of ["hat", "face", "top", "back"]) { const c = CLOTH[wear[slot]]; if (!c) continue; if (c.glb) { if (slot === "hat") { const m = outfitClone(c.glb, B.head); if (m) { const f = HAT_FIT[c.id]; if (f) { m.position.y += f[0]; m.position.z += f[2] || 0; m.scale.multiplyScalar(f[1]); } B.out.push(m); } } continue; } B.out.push(...buildCloth(c, B)); }
 }
 /* 옷가게 미리보기용 인형 (별도 작은 렌더러) */
 function makeBody() {
