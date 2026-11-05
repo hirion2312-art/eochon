@@ -1828,7 +1828,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.100.3";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.101.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2543,8 +2543,8 @@ function normFriends(f) {
 /* ---------- 식당 상수표 · 저장 형식 (v1.45 · 저장을 읽기 전에 있어야 해서 여기 둬요 · 나머지는 「식당」 블록) ---------- */
 const REST_CFG = {
   O: { x: 600, z: 300 },                 // 실내 공간 원점 (마을과 멀리 떨어진 곳)
-  tierMul: { 1: 1.6, 2: 2.0, 3: 2.5 },   // 레시피 티어 배율
-  tier3Plates: 50,                       // 티어3 해금 평판 조건: 누적 판매 접시 수
+  tierMul: { 1: 1.3, 2: 1.45, 3: 1.65 },   // 레시피 티어 배율 (v1.101 경제 개편: 확정 마진 축소)
+  tier3Plates: 200,                      // 티어3 해금 조건: 누적 판매 접시 수 (+ 개업 5일차부터)
   perfectTip: .15,                       // 완벽 구간에 꺼낸 요리 팁 (+15%)
   cookSec: { boil: 9, fry: 6, grill: 7 },
   perfectWin: .35,                       // 다 익은 뒤 「익힘 시간 × 이 비율」 동안이 완벽 구간 (지나도 실패 없이 보통)
@@ -2574,10 +2574,10 @@ const regTipRate = (visits) => Math.min(REST_CFG.regular.tipMax, REST_CFG.regula
 const REST_STAFF_KEYS = ["hs", "uni", "pro", "chef"];
 const REST_LV = [   // 가게 단계: 비용 · 알바 상한 · 동시 티켓 · 완벽 팁 가산 · 판매가 가산 · 하루 운영비 · 손님 자리 (외관은 다음 단계)
   { name: "포장마차", cost: 0, hire: 0, tickets: 2, tip: 0, price: 0, opex: 0, seats: 4 },
-  { name: "작은 횟집", cost: 5000, hire: 1, tickets: 3, tip: .05, price: 0, opex: 50, seats: 6 },
-  { name: "동네 맛집", cost: 20000, hire: 2, tickets: 4, tip: .05, price: 0, opex: 150, seats: 6 },
-  { name: "2층 레스토랑", cost: 60000, hire: 3, tickets: 5, tip: .05, price: 0, opex: 400, seats: 6 },
-  { name: "어촌의 명소", cost: 150000, hire: 4, tickets: 6, tip: .05, price: .1, opex: 800, seats: 6 },
+  { name: "작은 횟집", cost: 5000, hire: 1, tickets: 3, tip: .05, price: 0, opex: 100, seats: 6 },
+  { name: "동네 맛집", cost: 20000, hire: 2, tickets: 4, tip: .05, price: 0, opex: 300, seats: 6 },
+  { name: "2층 레스토랑", cost: 60000, hire: 3, tickets: 5, tip: .05, price: 0, opex: 1200, seats: 6 },
+  { name: "어촌의 명소", cost: 150000, hire: 4, tickets: 6, tip: .05, price: .1, opex: 5000, seats: 6 },
 ];
 // 레시피: ing = [어종 id, 개수] · chop = 썰기 필요 · cook = 조리 스테이션 (없으면 회) · cost = 해금비(안쪽 단위, 0 = 기본 제공) · dish = 접시 모양
 const RECIPES = [
@@ -2594,7 +2594,7 @@ const RECIPES = [
 ];
 const RECIPE = Object.fromEntries(RECIPES.map(r => [r.id, r]));
 const COOK_KO = { boil: "끓이기", fry: "튀기기", grill: "굽기" };
-const recipeBase = (r) => r.ing.reduce((a, [id, n]) => { const f = findFish(id); return a + (f ? TIERS[f.tier].base * n : 0); }, 0);   // 재료 고정 기준가 (시세 · 크기와 무관)
+const recipeBase = (r) => r.ing.reduce((a, [id, n]) => { const f = findFish(id); return a + (f ? TIERS[f.tier].base * fishMul(id) * n : 0); }, 0);   // 재료 기준가 = 등급 기준가 × 오늘 시세 (v1.101 시세 연동 · 크기와 무관)
 const recipePrice = (r) => Math.round(recipeBase(r) * REST_CFG.tierMul[r.t]);
 // 마진 보장 자동 검산: 판매가가 재료 기준가보다 낮은 레시피 = 0건이어야 해요 (테스트 훅 restVerify)
 function restVerify() { return RECIPES.filter(r => !(recipePrice(r) > recipeBase(r)) || RECIPES.some(x => x !== r && x.id === r.id)).map(r => r.id); }
@@ -2604,7 +2604,7 @@ const chopHitsFor = (fishId) => { const f = findFish(fishId); const cm = f ? bas
 function normRestItem(it) {
   if (!it || typeof it !== "object" || !findFish(it.fish)) return null;
   return { id: str(it.id, 16) || uid4(), fish: it.fish, chopped: !!it.chopped, hits: clamp(Math.floor(Number(it.hits) || 0), 0, 99), cook: COOK_KO[it.cook] ? it.cook : null,
-    q: it.q === "perfect" ? "perfect" : it.q === "normal" ? "normal" : null, src: it.src && typeof it.src === "object" && it.src.fishId === it.fish ? it.src : null };
+    q: it.q === "perfect" ? "perfect" : it.q === "normal" ? "normal" : null, src: it.src && typeof it.src === "object" && it.src.fishId === it.fish ? it.src : null, paid: it.paid ? clamp(Math.round(Number(it.paid) || 0), 0, 50000000) : 0, bought: !!it.bought };
 }
 function normRest(r) {
   r = r && typeof r === "object" ? r : {};
@@ -2613,7 +2613,7 @@ function normRest(r) {
   const hand = k.hand && k.hand.dish ? (RECIPE[k.hand.dish] ? { dish: k.hand.dish, q: k.hand.q === "perfect" ? "perfect" : "normal", items: Array.isArray(k.hand.items) ? k.hand.items.map(normRestItem).filter(Boolean) : [] } : null) : normRestItem(k.hand);
   const pl = k.plate && typeof k.plate === "object" ? k.plate : {};
   return {
-    lv: clamp(Math.floor(Number(r.lv) || 0), 0, REST_LV.length - 1), mig: r.mig ? 1 : 0,
+    lv: clamp(Math.floor(Number(r.lv) || 0), 0, REST_LV.length - 1), start: /^\d{4}-\d{2}-\d{2}$/.test(r.start || "") ? r.start : kstDay(), lvAt: /^\d{4}-\d{2}-\d{2}$/.test(r.lvAt || "") ? r.lvAt : (/^\d{4}-\d{2}-\d{2}$/.test(r.start || "") ? r.start : kstDay()), mig: r.mig ? 1 : 0,
     booth: r.booth && typeof r.booth === "object" && ["hs", "uni", "pro", "chef"].includes(r.booth.g) ? { g: r.booth.g, paid: str(r.booth.paid, 10) } : null,   // v1.87 부스 알바
     off: (Array.isArray(r.off) ? r.off : []).filter(id => RECIPE[id]),
     regs: Object.fromEntries(Object.entries(r.regs && typeof r.regs === "object" ? r.regs : {}).filter(([id]) => REST_REG[id]).map(([id, n]) => [id, clamp(Math.floor(Number(n) || 0), 0, 1e6)])), vips: clamp(Math.floor(Number(r.vips) || 0), 0, 1e8),
@@ -2629,6 +2629,8 @@ function normRest(r) {
 }
 const restUnlocked = (r) => r.cost === 0 || P.rest.unlocked.includes(r.id);
 const restOnMenu = (r) => restUnlocked(r) && !(P.rest.off || []).includes(r.id);
+const restAgeDays = () => Math.max(0, Math.round((Date.parse(kstDay()) - Date.parse(P.rest.start || kstDay())) / 864e5));   // 개업 며칠째인지 (0 = 오늘 개업)
+const restLvAgeDays = () => Math.max(0, Math.round((Date.parse(kstDay()) - Date.parse(P.rest.lvAt || P.rest.start || kstDay())) / 864e5));   // 마지막 승급 뒤 며칠
 function restDay() { const d = kstDay(); if (!P.rest.day || P.rest.day.d !== d) { if (P.rest.day) restSettle({ ...P.rest.day, open: P.rest.day.tickets > 0 }); P.rest.day = { d, sales: 0, plates: 0, tips: 0, tickets: 0, perfect: 0 }; } return P.rest.day; }
 
 function normProfile(p) {
@@ -2660,7 +2662,7 @@ function normProfile(p) {
   o.ach = {}; if (p.ach && typeof p.ach === "object") for (const [k, v] of Object.entries(p.ach)) if (v && typeof v === "object") o.ach[k] = { t: Number(v.t) || 0, c: !!v.c };
   o.title = str(p.title, 16);
   o.tut = {}; if (p.tut && typeof p.tut === "object") for (const [k, v] of Object.entries(p.tut)) if (/^[_a-z]{1,20}$/.test(k) && v) o.tut[k] = true;
-  o.stocks = {}; if (p.stocks && typeof p.stocks === "object") for (const [k, v] of Object.entries(p.stocks)) if (/^[a-z]{2,8}$/.test(k) && v && Number(v.n) > 0) o.stocks[k] = { n: clamp(Math.floor(Number(v.n)), 0, 1e6), cost: Math.max(0, Number(v.cost) || 0) };
+  o.stocks = {}; if (p.stocks && typeof p.stocks === "object") for (const [k, v] of Object.entries(p.stocks)) if (/^[a-z]{2,8}$/.test(k) && v && Number(v.n) > 0) o.stocks[k] = { n: clamp(Math.floor(Number(v.n)), 0, 1e6), cost: Math.max(0, Number(v.cost) || 0), bd: Math.floor(Number(v.bd) || 0), bn: clamp(Math.floor(Number(v.bn) || 0), 0, 1e6) };
   o.bank = { amt: clamp(Math.floor(Number(p.bank && p.bank.amt) || 0), 0, 1e9), ts: Number(p.bank && p.bank.ts) || Date.now() };
   o.gear = (Array.isArray(p.gear) ? p.gear : []).filter(g => g && TACKLES.some(t => t.id === g.id) && isUid(g.uid)).map(g => ({ uid: g.uid, id: g.id, left: clamp(Math.round(Number(g.left) || 0), 0, 20) })).filter(g => g.left > 0).slice(0, 40);
   o.equip = (Array.isArray(p.equip) ? p.equip : []).filter(u => o.gear.some(g => g.uid === u)).slice(0, 2);
@@ -2888,16 +2890,16 @@ function setTitle(t) { P.title = ACH_TITLES.includes(t) ? t : ""; markDirty(); p
 /* ===================== 낭만 은행: 실시간 주식 · 뉴스 · 예금 =====================
    시세는 서버 없이 「시간」만으로 계산(여러 주기의 물결 + 그 분의 흔들림 + 최근 뉴스 효과) → 모두가 같은 순간 같은 가격.
    1분마다 한 번 바뀌고, 6분마다 뉴스가 나와서 해당 종목을 끌어올리거나 내림. 매매 소식은 db(trades)로 모두에게 공유 */
-const MKT_T0 = Date.UTC(2026, 10, 1), MKT_TICK = 60000, NEWS_EVERY = 6, STOCK_FEE = .002;
+const MKT_T0 = Date.UTC(2026, 10, 1), MKT_TICK = 60000, NEWS_EVERY = 6, STOCK_FEE = .015;   // 수수료 1.5% (v1.101 경제 개편)
 const STOCKS = [
-  { id: "mnf", name: "멍낚수산", sec: "수산", base: 320, vol: .012 },
-  { id: "ship", name: "낭만조선", sec: "조선", base: 980, vol: .01 },
-  { id: "bio", name: "갯벌바이오", sec: "바이오", base: 140, vol: .022 },
-  { id: "elec", name: "부두전자", sec: "전자", base: 1850, vol: .009 },
-  { id: "food", name: "회센터푸드", sec: "식품", base: 230, vol: .008 },
-  { id: "air", name: "갈매기항공", sec: "항공", base: 410, vol: .014 },
-  { id: "snack", name: "호떡제과", sec: "과자", base: 85, vol: .011 },
-  { id: "coin", name: "바다코인", sec: "가상자산", base: 25, vol: .035 },
+  { id: "mnf", name: "멍낚수산", sec: "수산", base: 320, vol: .0084 },
+  { id: "ship", name: "낭만조선", sec: "조선", base: 980, vol: .007 },
+  { id: "bio", name: "갯벌바이오", sec: "바이오", base: 140, vol: .0154 },
+  { id: "elec", name: "부두전자", sec: "전자", base: 1850, vol: .0063 },
+  { id: "food", name: "회센터푸드", sec: "식품", base: 230, vol: .0056 },
+  { id: "air", name: "갈매기항공", sec: "항공", base: 410, vol: .0098 },
+  { id: "snack", name: "호떡제과", sec: "과자", base: 85, vol: .0077 },
+  { id: "coin", name: "바다코인", sec: "가상자산", base: 25, vol: .0245 },
 ];
 const NEWS_T = {
   mnf: [["멍낚수산, 참다랑어 대풍년… 어획량 30% 늘어", "멍낚수산 신형 어선 진수, 원양 진출 기대", "부두 낚시 열풍에 멍낚수산 실적 '서프라이즈'"], ["멍낚수산, 어장 고갈 우려에 주가 출렁", "태풍 북상… 멍낚수산 조업 중단", "멍낚수산 냉동창고 정전 사고"]],
@@ -2925,7 +2927,7 @@ const priceCache = new Map();
 function priceAt(i, t) {
   const key = i * 1e7 + t; if (priceCache.has(key)) return priceCache.get(key);
   const st = STOCKS[i]; let lp = Math.log(st.base);
-  PERIODS.forEach((T, k) => { lp += st.vol * Math.sqrt(T) * (k < 3 ? .22 : .4) * Math.sin(2 * Math.PI * t / T + PHASE[i][k]); });
+  PERIODS.forEach((T, k) => { lp += st.vol * Math.sqrt(T) * (k < 3 ? .22 : .22) * Math.sin(2 * Math.PI * t / T + PHASE[i][k]); });
   lp += st.vol * .3 * sgauss(t * 97 + i * 7919 + 1);
   for (let n = t - (t % NEWS_EVERY); n > t - 60; n -= NEWS_EVERY) {
     const nw = newsAt(n); if (!nw || (!nw.all && nw.idx !== i)) continue;
@@ -2954,10 +2956,15 @@ function tradeStock(i, side, n) {
   if (side === "buy") {
     const cost = Math.ceil(px * n * (1 + STOCK_FEE)); if (cost > P.gold) { sfx("ui-error", .4); toast("돈이 부족해요"); return; }
     if (hld.n + n > 100000) { toast("한 종목은 10만 주까지 가질 수 있어요"); return; }
-    P.gold -= cost; hld.n += n; hld.cost += cost; P.stocks[st.id] = hld; stat("stockBuys");
+    if ((hld.n + n) * px > (P.gold + stockValue() + bankBal()) * .25) { toast("한 종목은 전체 자산의 25%까지만 가질 수 있어요"); return; }   // v1.101 포지션 한도
+    P.gold -= cost; hld.n += n; hld.cost += cost;
+    if (hld.bd === kDay()) hld.bn = (hld.bn || 0) + n; else { hld.bd = kDay(); hld.bn = n; }   // T+1: 오늘 산 수량
+    P.stocks[st.id] = hld; stat("stockBuys");
     toast(st.name + " " + fmt(n) + "주를 샀어요 · -" + won(cost) + "");
   } else {
     if (hld.n < n) { toast("가진 주식보다 많이 팔 수 없어요"); return; }
+    const locked = hld.bd === kDay() ? Math.min(hld.bn || 0, hld.n) : 0;
+    if (n > hld.n - locked) { toast("오늘 산 주식은 내일부터 팔 수 있어요 (T+1)" + (locked ? " · 오늘 산 " + fmt(locked) + "주는 잠겨 있어요" : "")); return; }
     const got = Math.floor(px * n * (1 - STOCK_FEE)), basis = hld.cost * n / hld.n, gain = Math.round(got - basis);
     P.gold += got; hld.n -= n; hld.cost -= basis; if (hld.n <= 0) delete P.stocks[st.id]; else P.stocks[st.id] = hld;
     if (gain > 0) stat("stockProfit", gain);
@@ -6024,10 +6031,17 @@ function restChop(it, ln) {
 function serveDish(hand, byStaff) {
   const tk = (S.restTickets || []).filter(t => t.r === hand.dish && !t.served).sort((a, b) => a.t0 - b.t0)[0];
   if (!tk) { if (!byStaff) toast("이 요리를 시킨 손님이 없어요 · 손에 들고 있다가 주문이 오면 올려요"); return; }
-  const r = RECIPE[hand.dish], LV = REST_LV[P.rest.lv], gq = tk.guest || {}, base = Math.round(recipePrice(r) * (1 + LV.price));
+  const r = RECIPE[hand.dish], LV = REST_LV[P.rest.lv], gq = tk.guest || {};
+  let base = Math.round(recipePrice(r) * (1 + LV.price));
+  { // 산 재료 차익 캡 (v1.101): 산 재료가 섞인 요리는 그 재료 구매가의 1.2배까지만 받아요 (직접 잡은 재료 몫은 그대로)
+    let cap = 0, anyPaid = false;
+    for (const it of hand.items || []) { const pd = Number(it.paid || (it.src && it.src.paid) || 0), f2 = findFish(it.fish); if (pd > 0) { anyPaid = true; cap += pd * 1.2; } else if (f2) cap += TIERS[f2.tier].base * fishMul(it.fish) * REST_CFG.tierMul[r.t]; }
+    if (anyPaid) base = Math.min(base, Math.round(cap * (1 + LV.price)));
+  }
   let tip = hand.q === "perfect" ? Math.round(base * (REST_CFG.perfectTip + LV.tip) * (gq.vip ? REST_CFG.vip.perfectMul : 1)) : 0;
   const extra = gq.vip ? Math.round(base * REST_CFG.vip.pay) : gq.reg ? Math.round(base * regTipRate(P.rest.regs[gq.reg] || 0)) : 0;   // VIP 웃돈 · 단골 팁 (팁으로 쳐요)
-  tip += extra; const sum = base + tip;
+  tip += extra; if ((restDay().plates || 0) >= 150) tip = Math.round(tip * .5);   // 수요 체감 (v1.101): 많이 판 날은 팁이 식어요
+  const sum = base + tip;
   P.gold += sum; P.rest.plates++; P.rest.sales += base; P.rest.tips += tip;
   const d = restDay(); d.sales += base; d.tips += tip; d.plates++; if (tip) d.perfect++;
   if (!byStaff) restK().hand = null; tk.served = Date.now();
@@ -6129,7 +6143,7 @@ function restTick(t, dt) {
       S.restGuests.push(gu); d.tickets++;
       if (gu.vip) { restSnd("fanfare_1", .35); toast("👑 VIP 미식가가 왔어요! 「" + r.name + "」을 시킬 거예요 · 크게 내요"); }
       else if (gu.reg && (P.rest.regs[gu.reg] || 0) > 0) toast(REST_REG[gu.reg].ico + " 단골 " + REST_REG[gu.reg].name + " 님이 또 왔어요 (" + (P.rest.regs[gu.reg] + 1) + "번째)");
-      S.restNextGuest = now + rnd(REST_CFG.guestGap[0], REST_CFG.guestGap[1]) * 1000;
+      S.restNextGuest = now + rnd(REST_CFG.guestGap[0], REST_CFG.guestGap[1]) * 1000 * (d.plates >= 200 ? 2.5 : d.plates >= 100 ? 1.5 : 1);   // 수요 체감 (v1.101): 하루 접시가 쌓일수록 손님이 뜸해져요
     } else { S.restNextGuest = now + 5000; restNoGuest("menu"); }
   }
   for (const gu of S.restGuests.slice()) {
@@ -6257,23 +6271,25 @@ function restBookSheet(body) {
     h("div", null, h("small", { text: "오늘 매출" }), h("b", { class: "num", text: won(d.sales) })), h("div", null, h("small", { text: "완벽 팁" }), h("b", { class: "num", text: won(d.tips) })),
     h("div", null, h("small", { text: "오늘 접시" }), h("b", { class: "num", text: d.plates + " · 완벽 " + d.perfect })), h("div", null, h("small", { text: "누적 판매" }), h("b", { class: "num", text: P.rest.plates + "접시" }))));
   for (const t of [1, 2, 3]) {
-    body.append(h("div", { class: "sec", text: "티어 " + t + " · ×" + REST_CFG.tierMul[t] + (t === 3 ? " · 누적 " + REST_CFG.tier3Plates + "접시 이상 판매해야 열 수 있어요" : "") }));
+    body.append(h("div", { class: "sec", text: "티어 " + t + " · ×" + REST_CFG.tierMul[t] + (t === 3 ? " · 누적 " + REST_CFG.tier3Plates + "접시 판매 + 개업 5일차부터 열 수 있어요" : t === 2 ? " · 개업 2일차부터 열 수 있어요" : "") }));
     const list = h("div", { class: "rb-list" });
     for (const r of RECIPES.filter(x => x.t === t)) {
-      const open = restUnlocked(r), repOk = t < 3 || P.rest.plates >= REST_CFG.tier3Plates, money = P.gold >= r.cost;
+      const open = restUnlocked(r), dayOk = t < 2 || (t === 2 ? restAgeDays() >= 1 : restAgeDays() >= 4), repOk = dayOk && (t < 3 || P.rest.plates >= REST_CFG.tier3Plates), money = P.gold >= r.cost;
       list.append(h("div", { class: "rb-row" + (open ? " open" : "") },
         h("span", { class: "rb-i", text: r.ico }),
         h("div", { class: "grow" }, h("b", { text: r.name }),
           h("small", { text: r.ing.map(([id, n]) => (findFish(id) || {}).name + (n > 1 ? " ×" + n : "")).join(" + ") + " · " + [r.chop ? "썰기" : null, r.cook ? COOK_KO[r.cook] : null, "담기"].filter(Boolean).join(" → ") }),
           h("small", { class: "num", text: "판매가 " + won(recipePrice(r)) + " (재료 기준가 " + won(recipeBase(r)) + ")" })),
         open ? h("span", { class: "rb-tag", text: r.cost ? "열림" : "기본" })
-          : h("button", { class: "btn sm pri", disabled: !repOk || !money, onclick: () => unlockRecipe(r), text: !repOk ? "평판 " + P.rest.plates + "/" + REST_CFG.tier3Plates : won(r.cost) + " 열기" })));
+          : h("button", { class: "btn sm pri", disabled: !repOk || !money, onclick: () => unlockRecipe(r), text: !dayOk ? "개업 " + (t === 2 ? 2 : 5) + "일차부터" : (t >= 3 && P.rest.plates < REST_CFG.tier3Plates) ? "평판 " + P.rest.plates + "/" + REST_CFG.tier3Plates : won(r.cost) + " 열기" })));
     }
     body.append(list);
   }
 }
 function unlockRecipe(r) {
   if (restUnlocked(r)) return;
+  if (r.t === 2 && restAgeDays() < 1) { toast("티어 2 레시피는 개업 2일차부터 열 수 있어요"); return; }
+  if (r.t === 3 && restAgeDays() < 4) { toast("티어 3 레시피는 개업 5일차부터 열 수 있어요"); return; }
   if (r.t === 3 && P.rest.plates < REST_CFG.tier3Plates) { toast("누적 " + REST_CFG.tier3Plates + "접시를 판매하면 열 수 있어요"); return; }
   if (P.gold < r.cost) { toast("돈이 모자라요"); return; }
   P.gold -= r.cost; P.rest.unlocked.push(r.id); markDirty(); sfx("coins", .5); restSnd("fanfare_1", .4);
@@ -6301,8 +6317,8 @@ const REST_STAFF = {
   // v1.57: 모든 알바가 혼자 요리를 다 만들 수 있어요 · 등급마다 속도가 크게 달라요 (셰프는 고등학생의 8배)
   hs: { name: "동네 고등학생", ico: "🧒", hire: 300, wage: 100, speed: .3, can: ["all", "prep", "run", "cook"], perfect: .15, up: 0 },
   uni: { name: "대학생 알바", ico: "🎒", hire: 800, wage: 250, speed: .65, can: ["all", "prep", "run", "cook"], perfect: .4, up: 0 },
-  pro: { name: "경력 조리 알바", ico: "👨‍🍳", hire: 2500, wage: 600, speed: 1.25, can: ["all", "prep", "run", "cook"], perfect: .75, up: 0 },
-  chef: { name: "전문 셰프", ico: "⭐", hire: 8000, wage: 1500, speed: 2.4, can: ["all", "prep", "run", "cook"], perfect: .95, up: .25 },
+  pro: { name: "경력 조리 알바", ico: "👨‍🍳", hire: 2500, wage: 600, speed: 1.25, can: ["all", "prep", "run", "cook"], perfect: .6, up: 0 },
+  chef: { name: "전문 셰프", ico: "⭐", hire: 8000, wage: 6000, speed: 2.4, can: ["all", "prep", "run", "cook"], perfect: .6, up: .15 },
 };
 const STAFF_POST = { all: { name: "혼자 다", ico: "🧑‍🍳", stand: "board" }, prep: { name: "손질", ico: "🔪", stand: "board" }, run: { name: "운반 · 서빙", ico: "🛎", stand: "pass" }, cook: { name: "조리", ico: "🔥", stand: "grill" } };
 const STAFF_NAMES = ["민지", "준호", "서연", "도윤", "하은", "지호", "수아", "건우", "예린", "태민", "다은", "현우"];
@@ -6322,7 +6338,8 @@ function setPost(id, post) { const s = P.rest.staff.find(x => x.id === id); if (
 function upgradeRest() {
   const nx = REST_LV[P.rest.lv + 1]; if (!nx) return;
   if (P.gold < nx.cost) { toast("돈이 모자라요 (" + won(nx.cost) + ")"); return; }
-  P.gold -= nx.cost; P.rest.lv++; markDirty(); sfx("coins", .5); restSnd("fanfare_1", .5);
+  if (restLvAgeDays() < 2) { toast("가게를 키우는 데 시간이 걸려요 · 다음 단계는 " + (2 - restLvAgeDays()) + "일 뒤에 열 수 있어요"); return; }   // v1.101 승급 간격
+  P.gold -= nx.cost; P.rest.lv++; P.rest.lvAt = kstDay(); markDirty(); sfx("coins", .5); restSnd("fanfare_1", .5);
   toast("🏮 「" + nx.name + "」이 됐어요! 알바 " + nx.hire + "명 · 동시 주문 " + nx.tickets + "장" + (nx.tip ? " · 완벽 팁 +" + Math.round(nx.tip * 100) + "%p" : "") + (nx.price ? " · 판매가 +" + Math.round(nx.price * 100) + "%" : ""));
   buildRestScene(true); updateRestBar(); refreshSheet(true);
   { const lv = P.rest.lv, msg = ["", "지붕 위 나무 간판 · 펜던트 등 · 화분이 생겼어요", "벽돌 외벽 · 줄무늬 어닝 · 입구 수족관 · 도마 2 (2라인 시작)", "2층이 올라갔어요! 테라스 · 샹들리에 · 네온 · 주방 2라인", "옥상 대형 간판 · 등대 정원 · 서치라이트 · 레드 카펫"][lv];
@@ -6433,12 +6450,12 @@ function staffStep(s, sb) {   // 할 일 하나를 골라요 · 역할은 "먼�
   else if (s.post === "run") { if (stepServe()) return; if (cookTake(true)) return; stepPrep(); }
   else { if (stepPrep()) return; if (stepServe()) return; cookTake(true); }   // 손질 담당도 남은 일(꺼내기 · 담기 · 서빙)은 끝까지 해요
 }
-const canAutoBuy = (id) => { const f = findFish(id); return !!(P.rest.autoBuy && f && P.rest.fund >= mktBuyPrice(f)); };
+const canAutoBuy = (id) => { const f = findFish(id); return !!(P.rest.autoBuy && f && f.tier <= 2 && P.rest.fund >= mktBuyPrice(f)); };   // 자동 구매도 시장에서 파는 어종만 (v1.101)
 function staffTake(id) {   // 알바가 재료를 가져와요: 내 가방 먼저, 없으면 자동 구매(가게 금고)
   const it = takeFromBag(id); if (it) return it;
   if (!canAutoBuy(id)) return null;
   const f = findFish(id), price = mktBuyPrice(f); P.rest.fund -= price; const d = restDay(); d.buy = (d.buy || 0) + price; markDirty();
-  return { id: uid4(), fish: id, chopped: false, hits: 0, cook: null, q: null, src: null, bought: true };
+  return { id: uid4(), fish: id, chopped: false, hits: 0, cook: null, q: null, src: null, bought: true, paid: price };
 }
 function tryPlateDry(it) { const pl = restK().plate; return !pl.dish && plateCompatible(pl.items.concat(it)); }
 function restStaffTick(t, dt) {
@@ -8457,6 +8474,7 @@ const WH_TALK = [
 const MKT_BUY_MUL = 1.3;
 const mktBuyPrice = (f) => Math.max(1, Math.round(priceFor(f, 1) * Math.max(1, fishMul(f.id)) * MKT_BUY_MUL));
 function buyMarketFish(f) {
+  if (f.tier > 2) { toast("정예 이상 물고기는 시장에서 팔지 않아요 · 직접 낚거나 플레이어 노점에서 구하세요"); return; }   // v1.101 경제 개편
   const price = mktBuyPrice(f);
   if (P.bag.length >= BAG_MAX) { sfx("ui-error", .4); toast("가방이 가득 찼어요 (" + BAG_MAX + "마리)"); return; }
   if (P.gold < price) { sfx("ui-error", .4); toast("돈이 부족해요"); return; }
@@ -8478,13 +8496,13 @@ function wholesaleSheet(body) {
   if (tab === "buy") {
     const tf = S.wsTier == null ? -1 : S.wsTier;
     body.append(h("div", { class: "chips ws-chips" }, [[-1, "전체"], ...TIERS.map((t, k) => [k, t.name])].map(([v, l]) => h("button", { "aria-pressed": String(tf === v), onclick: () => { S.wsTier = v; refreshSheet(true); }, text: l }))));
-    body.append(h("div", { class: "muted", style: "font-size:12px;margin:2px 0 8px", text: "오늘 시세 기준 보통 크기 1마리 값 × " + MKT_BUY_MUL + " · 산 물고기는 되팔면 산 값의 85%까지만 받아요 · 도감에는 안 올라가요" }));
+    body.append(h("div", { class: "muted", style: "font-size:12px;margin:2px 0 8px", text: "오늘 시세 기준 보통 크기 1마리 값 × " + MKT_BUY_MUL + " · 산 물고기는 되팔면 산 값의 85%까지만 받아요 · 정예 이상은 팔지 않아요 · 도감에는 안 올라가요" }));
     const list = BUILTIN.filter(f => tf < 0 || f.tier === tf).sort((a, b) => a.tier - b.tier || mktBuyPrice(a) - mktBuyPrice(b));
     body.append(h("div", { class: "ws-list" }, list.map(f => { const pr = mktBuyPrice(f), seen = !!(P.dex[f.id] && P.dex[f.id].n);
       return h("div", { class: "ws-row" }, h("img", { src: fishArt(f).src, alt: "" }),
         h("span", { class: "grow" }, h("b", null, tierChip(f.tier), " " + f.name), h("small", { text: mulTag(f.id) + (seen ? "" : " · 아직 못 낚아 봤어요") })),
         h("b", { class: "num", text: won(pr) }),
-        h("button", { class: "btn sm pri", disabled: P.gold < pr || P.bag.length >= BAG_MAX, onclick: () => buyMarketFish(f), text: "사기" })); })));
+        f.tier > 2 ? h("span", { class: "muted", style: "font-size:11px", text: "시장 미취급 · 직접 낚기" }) : h("button", { class: "btn sm pri", disabled: P.gold < pr || P.bag.length >= BAG_MAX, onclick: () => buyMarketFish(f), text: "사기" })); })));
     return;
   }
   if (!fish.length) { body.append(h("div", { class: "empty-note", text: "팔 물고기가 없어요. 「🛒 사기」에서 물고기를 살 수도 있어요." })); return; }
@@ -11689,7 +11707,7 @@ SHEETS.bank = (body) => {
       h("div", { class: "acts" }, h("button", { class: "btn pri", style: "background:#e2402a;border-color:#e2402a", onclick: () => tradeStock(i, "buy", qty.value), text: "사기" }),
         h("button", { class: "btn pri", style: "background:#2a6fd6;border-color:#2a6fd6", disabled: !hld, onclick: () => tradeStock(i, "sell", qty.value), text: "팔기" }),
         hld ? h("button", { class: "btn sm", onclick: () => tradeStock(i, "sell", hld.n), text: "전부 팔기" }) : null),
-      h("div", { class: "muted", style: "font-size:11px", text: "수수료 0.2% · 최대 " + fmt(maxBuy) + "주 살 수 있어요" }),
+      h("div", { class: "muted", style: "font-size:11px", text: "수수료 1.5% · 오늘 산 주식은 내일부터 팔 수 있어요 · 한 종목은 자산의 25%까지 · 최대 " + fmt(maxBuy) + "주 살 수 있어요" }),
       lastNews.length ? h("div", { style: "display:flex;flex-direction:column;gap:4px" }, lastNews.map(nw => h("small", { class: nw.up ? "up" : "down", text: "📰 " + nw.text }))) : null);
     const rows = h("div", { class: "ilist" }, STOCKS.map((s2, k) => {
       const p2 = priceAt(k, t), c2 = pct(p2, priceAt(k, t - 60)), sp = document.createElement("canvas"); sp.width = 140; sp.height = 52; sp.className = "spark";
