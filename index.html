@@ -1853,7 +1853,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.106.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.106.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -1869,13 +1869,15 @@ const BAITS = [
   { id: "legend", name: "전설의 미끼", price: 2000, p: [0, 8, 32, 24, 17, 11, 5.4, 2, .6], lv: 16, desc: "전설 그 자체예요. 일반 물고기는 절대 안 물어요." },
 ];
 const APEX_CHANCE = { lure: .001, legend: .004 };   // 태초 등급(최상위) 확률 · 상점 설명에도 이 숫자를 그대로 보여요
-const RELEASE = [
-  { name: "피라미급", cost: 1000,   tier: 0, min: 5,   max: 30 },
-  { name: "붕어급",   cost: 5000,   tier: 1, min: 20,  max: 60 },
-  { name: "잉어급",   cost: 10000,  tier: 2, min: 50,  max: 120 },   // v1.101: 후원 QR 금액(1만원)에 맞춤
-  { name: "상어급",   cost: 50000,  tier: 3, min: 100, max: 300 },
-  { name: "고래급",   cost: 100000, tier: 4, min: 300, max: 1000 },
+const RELEASE = [   // v1.106.1 후원 방류권: 최대 5만원 · 금액(1 : 5 : 10 : 50)만큼 등급 · 크기를 크게 벌렸어요 · 번호(0~3)는 예전 방류권과 같아요
+  { name: "참돔급",   cost: 1000,  tier: 2, min: 15,  max: 50 },     // 희귀
+  { name: "다랑어급", cost: 5000,  tier: 4, min: 40,  max: 150 },    // 영웅
+  { name: "상어급",   cost: 10000, tier: 5, min: 100, max: 400 },    // 전설
+  { name: "고래급",   cost: 50000, tier: 7, min: 300, max: 1200 },   // 신화 · 최고 후원
+  { name: "고래급",   cost: 100000, tier: 7, min: 300, max: 1200, legacy: true },   // 예전 10만원 방류권 (이미 받은 표가 그대로 쓰이게 · 새로 주지 않아요)
 ];
+const RELEASE_SHOW = RELEASE.map((r, i) => [r, i]).filter(([r]) => !r.legacy);
+const OLD_REL_SIZE = [[5, 30], [20, 60], [50, 120], [100, 300], [300, 1000]];   // v1.106 이전에 방류된 물고기 크기 (예전 등급 0~4)
 const BUILTIN = [
   { id: "b-pirami", name: "피라미", tier: 0, min: 8, max: 15, desc: "어디서나 보이는 작은 물고기. 옆구리 줄무늬가 예뻐요.",
     art: { body: "#9db7c2", belly: "#eef3f1", fin: "#7c96a3", pattern: "stripes", pc: "#d98a9a", len: 1, th: .8 } },
@@ -2313,9 +2315,10 @@ function drawShellArt(g, id, w, hh) {
   }
 }
 function normUserFish(id, d) {
-  const tier = clamp(Math.floor(Number(d.tier) || 0), 0, 4);
-  return { id: "u-" + id, docId: id, user: true, name: str(d.name, 12) || "이름 없는 물고기", desc: str(d.desc, 60), tier,
-    min: RELEASE[tier].min, max: RELEASE[tier].max, img: d.img, owner: str(d.owner, 200), nick: str(d.nick, 20) || "누군가",
+  const tier = clamp(Math.floor(Number(d.tier) || 0), 0, 9), rel = Number.isInteger(d.rel) && RELEASE[d.rel] ? d.rel : -1;
+  const sz = rel >= 0 ? [RELEASE[rel].min, RELEASE[rel].max] : OLD_REL_SIZE[Math.min(tier, 4)];   // 새 물고기는 방류권 번호로, 예전 물고기는 예전 크기 그대로
+  return { id: "u-" + id, docId: id, user: true, name: str(d.name, 12) || "이름 없는 물고기", desc: str(d.desc, 60), tier, rel,
+    min: sz[0], max: sz[1], img: d.img, owner: str(d.owner, 200), nick: str(d.nick, 20) || "누군가",
     ts: Number(d.ts) || 0, ticket: str(d.ticket, 40), reports: Array.isArray(d.reports) ? d.reports.filter(x => typeof x === "string").slice(0, 50) : [] };
 }
 
@@ -4316,6 +4319,7 @@ function updateBoatSeats(now, t) {
 }
 function normBoat(d) {
   d = d || {};
+  if (d.status === "sailing" && (Number(d.tripStart) || 0) + BOAT.dur + 8000 < Date.now()) d = {};   // v1.106.1: 항해가 끝났는데 정리가 안 된 배(이미 출항 중으로 남던 것)는 정박으로 봐요
   return { status: d.status === "sailing" ? "sailing" : "docked",
     seats: (Array.isArray(d.seats) ? d.seats : []).filter(x => x && isUid(x.uid)).slice(0, BOAT.max).map(x => ({ uid: x.uid, nick: str(x.nick, 16) || "손님", slot: clamp(Math.floor(Number(x.slot) || 0), 0, 3), ts: Number(x.ts) || 0 })),
     paid: d.paid && typeof d.paid === "object" ? Object.fromEntries(Object.entries(d.paid).filter(([k, v]) => isUid(k)).map(([k, v]) => [k, clamp(Math.round(Number(v) || 0), 0, 100000)])) : {},
@@ -14060,7 +14064,7 @@ function myCode(uid) {
   uid = uid || S.uid; if (!uid) return "------";
   return (hashStr(uid).toString(36) + hashStr(uid + "#mn").toString(36)).toUpperCase().replace(/[^0-9A-Z]/g, "").slice(0, 6).padEnd(6, "0");
 }
-function tierForAmount(a) { let t = -1; RELEASE.forEach((r, i) => { if (a >= r.cost) t = i; }); return t; }
+function tierForAmount(a) { let t = -1; RELEASE_SHOW.forEach(([r, i]) => { if (a >= r.cost) t = i; }); return t; }   // 5만원 넘게 보내도 고래급
 function normGrant(d) {
   const tickets = (Array.isArray(d && d.tickets) ? d.tickets : []).filter(t => t && isUid(t.id)).map(t => ({ id: t.id, tier: clamp(Math.floor(Number(t.tier) || 0), 0, 4), ts: Number(t.ts) || 0 }));
   return { tickets };
@@ -14072,7 +14076,7 @@ function validateFish() {
     if (!S.online || (owner && f.owner === owner)) { ok.push(f); continue; }
     const g = S.grants.get(f.owner);
     const t = g && g.tickets.find(x => x.id === f.ticket);
-    if (t && t.tier === f.tier && !used.has(t.id)) { used.set(t.id, f); ok.push(f); }
+    if (t && t.tier === (f.rel >= 0 ? f.rel : f.tier) && !used.has(t.id)) { used.set(t.id, f); ok.push(f); }   // v1.106.1: 방류권 번호와 물고기 등급이 달라져서 번호(rel)로 맞춰요
   }
   S.usedTickets = used;
   S.userFish = ok.sort((a, b) => b.ts - a.ts);
@@ -14164,7 +14168,7 @@ function renderGrantForm() {
   const m = S.members.find(x => x.uid === adminSel.uid);
   if (!m) { box.replaceChildren(h("div", { class: "muted", style: "font-size:13px", text: "위 목록에서 후원해 준 분을 골라 주세요." })); return; }
   const amt = h("input", { type: "number", id: "grantAmt", min: "0", step: "1000", value: "5000", style: "width:120px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 8px" });
-  const sel = h("select", { id: "grantTier", class: "btn" }, RELEASE.map((r, i) => h("option", { value: String(i), text: r.name + " (" + fmt(r.cost) + "원~)" })));
+  const sel = h("select", { id: "grantTier", class: "btn" }, RELEASE_SHOW.map(([r, i]) => h("option", { value: String(i), text: r.name + " (" + fmt(r.cost) + "원~ · " + TIERS[r.tier].name + ")" })));
   const cnt = h("input", { type: "number", id: "grantCnt", min: "1", max: "10", value: "1", style: "width:64px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 8px" });
   const memo = h("input", { id: "grantMemo", maxlength: "60", placeholder: "메모 (나만 보여요)", style: "flex:1;min-width:120px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 8px" });
   const sync = () => { const t = tierForAmount(Number(amt.value) || 0); if (t >= 0) sel.value = String(t); };
@@ -14249,12 +14253,12 @@ function updateStudioGold() { renderReleaseBox(); }
 const DONATE = { bank: "토스뱅크", acct: "1000-4556-8598", holder: "이재헌", qr: { 1000: "a/donate/qr-1000.png", 5000: "a/donate/qr-5000.png", 10000: "a/donate/qr-10000.png", 50000: "a/donate/qr-50000.png" } };
 SHEETS.donate = (body) => {
   setHead("💝 후원하고 방류권 받기", "후원해 주시면 금액에 맞는 방류권을 드려요 · 방류권이 있어야 그린 물고기를 바다에 풀 수 있어요");
-  S.donPick = S.donPick == null ? 1 : S.donPick;
+  S.donPick = S.donPick == null || !RELEASE[S.donPick] || RELEASE[S.donPick].legacy ? 1 : S.donPick;
   const r = RELEASE[S.donPick], qr = DONATE.qr[r.cost];
   body.append(h("div", { class: "dn-steps" },
     h("div", { class: "dn-step" }, h("span", { class: "dn-n", text: "1" }), h("div", { class: "grow" }, h("b", { text: "방류권 고르기" }), h("small", { text: "클수록 바다에서 크고 귀한 물고기가 돼요" }))),
-    h("div", { class: "dn-tiers" }, RELEASE.map((x, i) => h("button", { class: "dn-tier" + (i === S.donPick ? " on" : ""), onclick: () => { S.donPick = i; refreshSheet(true); } },
-      tierChip(x.tier), h("b", { text: x.name }), h("span", { class: "num", text: fmt(x.cost) + "원" }), h("small", { text: "크기 " + fmtSize(x.min) + "~" + fmtSize(x.max) }))))));
+    h("div", { class: "dn-tiers" }, RELEASE_SHOW.map(([x, i]) => h("button", { class: "dn-tier" + (i === S.donPick ? " on" : ""), onclick: () => { S.donPick = i; refreshSheet(true); } },
+      tierChip(x.tier), h("b", { text: x.name + (x.cost >= 50000 ? " · 최고" : "") }), h("span", { class: "num", text: fmt(x.cost) + "원" }), h("small", { text: "크기 " + fmtSize(x.min) + "~" + fmtSize(x.max) }))))));
   body.append(h("div", { class: "dn-step" }, h("span", { class: "dn-n", text: "2" }), h("div", { class: "grow" }, h("b", { text: fmt(r.cost) + "원 보내기" }), h("small", { text: qr ? "휴대폰 카메라나 토스 앱으로 QR을 찍거나, 아래 계좌로 보내요" : "이 금액은 QR이 없어요 · 아래 계좌로 보내 주세요" }))),
     h("div", { class: "dn-pay" },
       qr ? h("div", { class: "dn-qr" }, h("img", { src: qr, alt: fmt(r.cost) + "원 송금 QR코드" })) : null,
@@ -14273,7 +14277,7 @@ function renderReleaseBox() {
   const kids = [];
   if (canReleaseFree()) {
     kids.push(h("div", { class: "field" }, h("label", { text: S.online ? "방류 등급 · 운영자는 자유롭게" : "방류 등급 · 혼자 모드 연습" }),
-      h("div", { class: "rgrades" }, RELEASE.map((r, i) => h("button", { class: "rgrade", "aria-pressed": String(studio.grade === i), onclick: () => { studio.grade = i; renderReleaseBox(); } },
+      h("div", { class: "rgrades" }, RELEASE_SHOW.map(([r, i]) => h("button", { class: "rgrade", "aria-pressed": String(studio.grade === i), onclick: () => { studio.grade = i; renderReleaseBox(); } },
         tierChip(r.tier), h("span", null, h("b", { text: r.name }), h("br"), h("span", { class: "muted num", text: "기준 " + fmtSize(Math.sqrt(r.min * r.max)) })), h("span", { class: "muted", style: "font-size:11px", text: "" }))))));
   } else {
     const tix = myTickets();
@@ -14291,7 +14295,7 @@ function renderReleaseBox() {
         /^https:\/\//.test(c.donateUrl || "") ? h("a", { href: c.donateUrl, target: "_blank", rel: "noopener", class: "btn", style: "text-align:center;text-decoration:none", text: "후원하러 가기" }) : null,
         h("span", { style: "font-size:13px" }, "내 후원 코드 ", h("b", { class: "num", style: "font-size:16px;letter-spacing:.08em", text: myCode() })),
         h("span", { class: "muted", style: "font-size:12px", text: "후원할 때 이 코드를 함께 남겨 주세요. 운영자가 확인하면 방류권이 바로 들어와요." }),
-        h("div", { class: "muted", style: "font-size:12px" }, RELEASE.map(r => r.name + " " + fmt(r.cost) + "원").join(" · "))));
+        h("div", { class: "muted", style: "font-size:12px" }, RELEASE_SHOW.map(([r]) => r.name + " " + fmt(r.cost) + "원 (" + TIERS[r.tier].name + ")").join(" · "))));
     }
   }
   box.replaceChildren(...kids);
@@ -14390,7 +14394,7 @@ async function doRelease() {
   if (!img) { err.textContent = "그림이 너무 작아요. 물고기를 조금 더 크게 그려 주세요."; return; }
   if (releasing) return;
   releasing = true; $("releaseBtn").disabled = true; err.textContent = "";
-  const doc = { name, desc, tier: r.tier, img, owner: S.uid || "local", nick: P.nick, ts: Date.now(), reports: [], ticket: ticket ? ticket.id : "" };
+  const doc = { name, desc, tier: r.tier, rel: ticket ? ticket.tier : studio.grade, img, owner: S.uid || "local", nick: P.nick, ts: Date.now(), reports: [], ticket: ticket ? ticket.id : "" };
   try {
     if (S.online) await S.db.collection("fish").add(doc);
     else { S.userFish.push(normUserFish(uid4(), doc)); saveLocalFish(); }

@@ -29,7 +29,7 @@
         tx.set(lock, { holder, exp: t + ttl });
         return { acquired: true, holder, expiresAt: new Date(t + ttl).toISOString() };
       });
-    } catch (e) { console.warn("lock", e); return { acquired: false }; }
+    } catch (e) { console.warn("lock (잠금 없이 진행)", e); return { acquired: true, holder, noLock: true }; }   // v1.106.1: 서버 오류(권한 등)로 잠금을 못 잡으면 막지 말고 진행 — 배 · 우편 · 거래 · 노점이 「바빠요」에서 멈추던 것
   }
   const wrapDoc = (ref) => ({
     id: ref.id, path: ref.path,
