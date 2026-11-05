@@ -155,7 +155,7 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 .sheet h2{margin:0;font-family:var(--f-display);font-weight:400;font-size:21px;text-wrap:balance}
 .sheet .sub{color:var(--muted);font-size:12.5px}
 .close{border:1px solid var(--line);background:transparent;border-radius:8px;padding:4px 10px;white-space:nowrap;flex-shrink:0}
-.sbody{padding:16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.sbody{padding:16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;min-height:0}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .btn{border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:6px 12px;font-size:13px}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -1878,7 +1878,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.110.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.110.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -10814,7 +10814,7 @@ function openSheet(name, arg, opt) {
   S.sheet = name; S.sheetArg = arg;
   S.sheetStack = S.sheetStack.slice(-8); $("sheetBack").hidden = !S.sheetStack.length;
   $("overlay").hidden = false; $("sheetHelp").hidden = !TUTS["sheet_" + name];
-  refreshSheet(true);
+  SB.opening = true; refreshSheet(true); SB.opening = false;
   $("sheetClose").focus();
   syncUIState();
 }
@@ -10864,10 +10864,23 @@ function refreshSheet(force) {
   if (S.sheet === "lotto" && !force) return;
   if (S.sheet === "bank" && !force && document.activeElement && document.activeElement.closest && document.activeElement.closest("#sheetBody input")) return;
   const body = $("sheetBody"); const st = body.scrollTop;
+  // 휴대폰 (v1.111): 손가락이 닿아 있거나 막 스크롤하는 중에는 저절로 다시 그리지 않아요.
+  // 다시 그리면 손가락 밑의 칸이 사라져서 아이폰에서 스크롤이 뚝 멈춰요 → 손을 뗀 뒤에 그려요.
+  if (!force && sheetBusy()) { if (!SB.wait) SB.wait = setTimeout(() => { SB.wait = 0; refreshSheet(); }, 450); return; }
+  const tabs = sheetTabsKey(body);
   body.replaceChildren();
   (SHEETS[S.sheet] || (() => {}))(body, S.sheetArg);
-  if (!force) body.scrollTop = st;
+  // 무언가를 눌러 다시 그려도 보던 자리 그대로 · 탭을 바꿨거나 새 화면을 열 때만 맨 위로
+  body.scrollTop = SB.opening || (force && sheetTabsKey(body) !== tabs) ? 0 : st;
 }
+const SB = { touch: 0, scrollAt: 0, wait: 0, opening: false };
+const sheetBusy = () => SB.touch > 0 || performance.now() - SB.scrollAt < 450;
+const sheetTabsKey = (body) => [...body.querySelectorAll('[role="tab"][aria-selected="true"]')].map(t => t.textContent.replace(/[0-9,/ ]+/g, "")).join("|");
+{ const body = document.getElementById("sheetBody");
+  body.addEventListener("touchstart", (e) => { SB.touch = e.touches.length; }, { passive: true });
+  body.addEventListener("touchend", (e) => { SB.touch = e.touches.length; SB.scrollAt = performance.now(); }, { passive: true });
+  body.addEventListener("touchcancel", () => { SB.touch = 0; }, { passive: true });
+  body.addEventListener("scroll", () => { SB.scrollAt = performance.now(); }, { passive: true }); }
 function setHead(title, sub) { $("sheetTitle").textContent = title; $("sheetSub").textContent = sub || ""; }
 function fishImg(fishId) { const f = findFish(fishId); return f ? h("img", { src: fishArt(f).src, alt: "" }) : h("span", { class: "muted", style: "width:64px;font-size:11px", text: "사라진 물고기" }); }
 function armBtn(label, armedLabel, fn, cls) {
