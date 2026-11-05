@@ -1828,7 +1828,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.102.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.103.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2324,12 +2324,13 @@ const RODS = [
   { id: "abyss", name: "심해의 낚싯대", price: 50000, lv: 32, tens: 1.42, slots: 3, color: 0x23356e, desc: "심해의 거물과 겨루는 낚싯대예요. 채비 3칸." },
   { id: "palace", name: "용궁 낚싯대", price: 90000, lv: 40, tens: 1.46, slots: 3, color: 0x3fd6cc, desc: "용궁에서 내려왔다는 옥빛 낚싯대예요. 채비 3칸." },
   { id: "myth", name: "신화의 낚싯대", price: 150000, lv: 48, tens: 1.5, slots: 3, color: 0xe57aa8, desc: "신화 속 물고기도 버텨 내는 마지막 낚싯대예요. 채비 3칸." },
+  { id: "merchant", name: "장사꾼의 낚싯대", price: 60000, lv: 24, tens: 1.32, slots: 2, color: 0x0d4042, desc: "포차 사장님들의 비장의 낚싯대예요. 등급 하나와 원하는 물고기 세 종을 골라 두면, 그 등급이 뜰 땐 골라 둔 물고기만 노려요. 태초급 같은 큰 욕심은 안 부려요 — 장사는 확실한 것만 잡는 거예요." },
 ].sort((a, b) => a.lv - b.lv);
 /* 낚싯대 특성 (v1.27): 비쌀수록 확실히 좋아져요
    jump = 점프할 때 감고 있으면 바늘이 빠질 확률 배율(1 = 40%) · calm = 몸부림 때 줄에 걸리는 장력 줄이기(충격 흡수) · tire = 물고기가 지치는 속도 */
 const ROD_PERK = {
   bamboo: [1, 0, 1], lure: [.85, 0, 1.03], fiber: [.8, .04, 1.05], rock: [.7, .07, 1.07], carbon: [.65, .08, 1.1], surf: [.6, .1, 1.12], boat: [.55, .12, 1.14],
-  iridium: [.5, .14, 1.16], titan: [.45, .16, 1.19], obsidian: [.4, .18, 1.22], legend: [.32, .21, 1.26], abyss: [.26, .24, 1.3], palace: [.2, .27, 1.34], myth: [.12, .3, 1.4],
+  iridium: [.5, .14, 1.16], titan: [.45, .16, 1.19], obsidian: [.4, .18, 1.22], legend: [.32, .21, 1.26], abyss: [.26, .24, 1.3], palace: [.2, .27, 1.34], myth: [.12, .3, 1.4], merchant: [.42, .17, 1.21],
 };
 for (const r of RODS) { const [jump, calm, tire] = ROD_PERK[r.id] || [1, 0, 1]; Object.assign(r, { jump, calm, tire }); }
 const rodPerkText = (r) => r.id === "bamboo" ? "특별한 효과 없음" : "점프 때 바늘 빠짐 -" + Math.round((1 - r.jump) * 100) + "% · 몸부림 충격 -" + Math.round(r.calm * 100) + "% · 물고기가 " + Math.round((r.tire - 1) * 100) + "% 빨리 지쳐요";
@@ -2518,7 +2519,7 @@ function parseWear(s) {
 function newProfile() {
   return { nick: pick(NICK_A) + " " + pick(NICK_B), color: pick(COLORS), skin: "#f6d2b4", gold: 300,
     baits: { shrimp: 5, paste: 0, lure: 0, legend: 0 }, bait: "worm", bag: [], dex: {}, autoSell: 0, caught: 0,
-    dishes: [], buffs: [], listing: {}, pendingTrades: {}, pendingOrders: {}, rod: "bamboo", rods: ["bamboo"], gear: [], equip: [], quests: null, closet: [], wear: {}, friends: {}, reels: ["basic"], reel: "basic", lines: ["nylon"], line: "nylon", tools: {}, xp: 0, stats: {}, ach: {}, title: "", stocks: {}, bank: { amt: 0, ts: 0 }, tut: {}, attend: { n: 0, last: "" }, ref: null, invited: {}, job: { id: "", xp: {}, changedAt: 0 }, resident: 0, home: newHome(), npcSales: { day: "", n: 0 }, shop: newShop(), made: false, v: 7 };
+    dishes: [], buffs: [], listing: {}, pendingTrades: {}, pendingOrders: {}, rod: "bamboo", rods: ["bamboo"], mrod: null, gear: [], equip: [], quests: null, closet: [], wear: {}, friends: {}, reels: ["basic"], reel: "basic", lines: ["nylon"], line: "nylon", tools: {}, xp: 0, stats: {}, ach: {}, title: "", stocks: {}, bank: { amt: 0, ts: 0 }, tut: {}, attend: { n: 0, last: "" }, ref: null, invited: {}, job: { id: "", xp: {}, changedAt: 0 }, resident: 0, home: newHome(), npcSales: { day: "", n: 0 }, shop: newShop(), made: false, v: 7 };
 }
 function normItem(it) {
   if (!it || typeof it !== "object") return null;
@@ -2664,6 +2665,7 @@ function normProfile(p) {
   o.title = str(p.title, 16);
   o.tut = {}; if (p.tut && typeof p.tut === "object") for (const [k, v] of Object.entries(p.tut)) if (/^[_a-z]{1,20}$/.test(k) && v) o.tut[k] = true;
   o.stocks = {}; if (p.stocks && typeof p.stocks === "object") for (const [k, v] of Object.entries(p.stocks)) if (/^[a-z]{2,8}$/.test(k) && v && Number(v.n) > 0) o.stocks[k] = { n: clamp(Math.floor(Number(v.n)), 0, 1e6), cost: Math.max(0, Number(v.cost) || 0), bd: Math.floor(Number(v.bd) || 0), bn: clamp(Math.floor(Number(v.bn) || 0), 0, 1e6) };
+  o.mrod = (p.mrod && typeof p.mrod === "object" && Number.isInteger(p.mrod.tier)) ? { tier: clamp(p.mrod.tier, 0, 8), list: (Array.isArray(p.mrod.list) ? p.mrod.list.filter(id => typeof id === "string" && id.length <= 40).slice(0, 3) : []) } : null;   // 장사꾼의 지정 (v1.103)
   o.bank = { amt: clamp(Math.floor(Number(p.bank && p.bank.amt) || 0), 0, 1e9), ts: Number(p.bank && p.bank.ts) || Date.now() };
   o.gear = (Array.isArray(p.gear) ? p.gear : []).filter(g => g && TACKLES.some(t => t.id === g.id) && isUid(g.uid)).map(g => ({ uid: g.uid, id: g.id, left: clamp(Math.round(Number(g.left) || 0), 0, 20) })).filter(g => g.left > 0).slice(0, 40);
   o.equip = (Array.isArray(p.equip) ? p.equip : []).filter(u => o.gear.some(g => g.uid === u)).slice(0, 2);
@@ -3651,19 +3653,21 @@ function rollFish(baitId, opts) {
   const bait = BAITS.find(b => b.id === baitId) || BAITS[0];
   if (S.isOwner && LAB.fishId) { const want = allFish().find(f => f.id === LAB.fishId); if (want) { let kk = rollSizeK() * (1 + buffVal("size") / 100) * (deep ? 1.15 : 1); if (opts.coop) kk = 1.5 * Math.max(1, kk); return { f: want, k: Math.min(kk, SIZE_MAX), bait: baitId }; } }   // 실험실: 물고기 지정 (서식지·등급 무시, 끄기 전까지 계속)
   let tier = weighted(luckProbs(bait.p, (deep ? 30 : 0) + (S.castPow || 0) * 6 + (S.castPerfect ? 8 : 0) + (eventOn("rare") ? 15 : 0)));
-  { const mc = (APEX_CHANCE[baitId] || 0) * (deep ? 2 : 1) * (isNight() ? 1.5 : 1) * (eventOn("rare") ? 2 : 1); if (Math.random() < mc) tier = 9; }   // 태초 롤
+  { const mc = (APEX_CHANCE[baitId] || 0) * (deep ? 2 : 1) * (isNight() ? 1.5 : 1) * (eventOn("rare") ? 2 : 1); if (P.rod !== "merchant" && Math.random() < mc) tier = 9; }   // 태초 롤 · 장사꾼의 낚싯대는 태초를 노리지 않아요 (v1.103)
   if (S.isOwner && LAB.tier >= 0) { tier = LAB.tier; labSet("tier", -1); }   // 실험실: 등급 고정 (한 번 쓰면 꺼져요)
   const pool = allFish().filter(f => habitatW(f) > 0);
   let cands = pool.filter(f => f.tier === tier);
   while (!cands.length && tier > 0) { tier--; cands = pool.filter(f => f.tier === tier); }
   if (!cands.length) cands = BUILTIN;
+  let mrodHit = false;
+  if (P.rod === "merchant" && P.mrod && tier === P.mrod.tier && P.mrod.list && P.mrod.list.length) { const wish = cands.filter(f => P.mrod.list.includes(f.id)); if (wish.length) { cands = wish; mrodHit = true; } }   // 장사꾼의 지정 (v1.103): 등급 확률은 그대로, 종만 지정
   // 깊은 바다 물고기는 배 위에서 3배 잘 나오고, 부두에서는 절반
   const w = cands.map(f => (DEEP.has(f.id) ? (deep ? 3 : 0.5) : 1) * habitatW(f));
   let rr = Math.random() * w.reduce((a, b) => a + b, 0), f = cands[0];
   for (let i = 0; i < cands.length; i++) { if ((rr -= w[i]) < 0) { f = cands[i]; break; } }
   let k = rollSizeK() * (1 + buffVal("size") / 100) * (deep ? 1.15 : 1);
   if (opts.coop) k = 1.5 * Math.max(1, k);   // 함께 낚시: 기준 크기의 1.5배 이상부터
-  return { f, k: Math.min(k, SIZE_MAX), bait: baitId };
+  return { f, k: Math.min(k, SIZE_MAX), bait: baitId, mrod: mrodHit };
 }
 function landFish(r, perfect, auto) {
   const f = r.f;
@@ -3695,7 +3699,7 @@ function landFish(r, perfect, auto) {
   toast([h("img", { src: art.src, alt: "" }),
     h("div", null, h("div", null, tierBadge(f.tier, 74), " ", h("b", { text: f.name }), " ", h("span", { class: "num", text: fmtSize(size) })),
       h("div", { class: "muted", style: "font-size:12px" },
-        sizeLabel(k) + " 개체 ×" + k.toFixed(2) + " · " + (perfect ? "퍼펙트! · " : auto ? "멍 모드 · " : "") + (sold ? "자동 판매 +" + won(sv) + "" : "가방에 넣었어요 · 지금 팔면 " + won(sv) + "") + (firstTime ? " · 도감 신규!" : "")),
+        sizeLabel(k) + " 개체 ×" + k.toFixed(2) + " · " + (perfect ? "퍼펙트! · " : auto ? "멍 모드 · " : "") + (sold ? "자동 판매 +" + won(sv) + "" : "가방에 넣었어요 · 지금 팔면 " + won(sv) + "") + (firstTime ? " · 도감 신규!" : "") + (r.mrod ? " · 🎯 지정한 물고기예요!" : "")),
       h("div", { class: isToday ? "todaytag2" : "muted", style: "font-size:11.5px", text: mulTag(f.id) + (isToday ? " · 팔면 1.5배!" : "") }))],
     f.tier >= 3 ? "lvup" : "catch", f.tier >= 3 ? 5600 : 4600);
   if (f.user && S.online && isUid(f.owner) && f.owner !== S.uid) {
@@ -10558,7 +10562,7 @@ function updateHud() {
   { const sg = $("sheetGold"); if (sg && !sg.hidden) sg.textContent = won(P.gold) + ""; }
   if (S.title) renderTitle();
   const b = BAITS.find(x => x.id === P.bait) || BAITS[0];
-  $("baitName").textContent = b.name + (b.id === "worm" ? "" : " ×" + (P.baits[b.id] || 0));
+  $("baitName").textContent = b.name + (b.id === "worm" ? "" : " ×" + (P.baits[b.id] || 0)) + (P.rod === "merchant" && P.mrod ? " · 🎯" + TIERS[P.mrod.tier].name : "");
   $("bagCount").textContent = P.bag.length + "/" + BAG_MAX; $("bagLine").textContent = P.bag.length + "/" + BAG_MAX;
   $("caughtCount").textContent = fmt(P.caught || 0);
   drawAvatar();
@@ -10826,7 +10830,7 @@ function shopPreview(cat, it) {
     h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: "위 확률은 기본값이에요. 캐스트를 잘 던지거나 심해 · 이벤트에선 낮은 등급 확률이 위쪽으로 올라가고, 뽑힌 등급의 물고기가 지금 장소 · 시간에 없으면 아래 등급이 나와요." })); }
   if (cat === "rod") { const c0 = curRod(); cmp.append(...cmpRow("🧵 줄 버팀", c0.tens, it.tens, 1.5, v => Math.round(v * 100)), ...cmpRow("채비 칸", c0.slots, it.slots, 3, v => v + "칸"),
     ...cmpRow("점프 버티기", 1 - c0.jump, 1 - it.jump, .9, v => Math.round(v * 100) + "%"), ...cmpRow("몸부림 충격 흡수", c0.calm, it.calm, .3, v => Math.round(v * 100) + "%"), ...cmpRow("빨리 지치게", c0.tire - 1, it.tire - 1, .4, v => "+" + Math.round(v * 100) + "%"));
-    box.append(h("div", { class: "muted", style: "font-size:12px", text: rodPerkText(it) })); }
+    box.append(h("div", { class: "muted", style: "font-size:12px", text: rodPerkText(it) })); if (it.id === "merchant") box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: "🎯 지정 낚시 — 등급이 뜰 확률은 미끼 그대로고, 그 등급 안에서는 골라 둔 물고기(최대 3종)만 나와요. 태초 등급은 노리지 않아요." })); }
   if (cat === "reel") { const c0 = curReel(); cmp.append(...cmpRow("🔥 열 덜 오름", 1 / c0.heat, 1 / it.heat, 1.7, v => Math.round(v * 100)), ...cmpRow("🧊 잘 식음", c0.cool, it.cool, .24, v => Math.round(v * 100)), ...cmpRow("감는 속도", c0.speed, it.speed, 3.4, v => v.toFixed(1))); box.append(h("div", { class: "muted", style: "font-size:12px", text: "과열 속도는 낮을수록, 식는 속도와 감는 속도는 높을수록 좋아요" })); }
   if (cat === "line") { const c0 = curLine(); cmp.append(...cmpRow("🧵 줄 버팀", 1 + c0.add, 1 + it.add, 1.2, v => Math.round(v * 100))); }
   if (cmp.children.length) box.append(cmp, h("div", { class: "muted", style: "font-size:11px", text: "검은 선 = 지금 쓰는 것" }));
@@ -10838,6 +10842,7 @@ function shopPreview(cat, it) {
     acts.append(h("button", { class: "btn sm", disabled: !st.own || st.using, onclick: () => { P.bait = it.id; markDirty(); refreshSheet(true); toast(it.name + "를 쓸게요"); }, text: st.using ? "사용 중" : "사용하기" }));
   } else if (cat === "rod" || cat === "reel" || cat === "line") {
     acts.append(h("button", { class: "btn pri", disabled: st.using || (!st.own && P.gold < it.price), onclick: () => buyGear(cat, it), text: st.using ? "사용 중" : st.own ? "이걸로 바꾸기" : P.gold < it.price ? won(it.price - P.gold) + " 부족" : "사서 쓰기 · " + won(it.price) + "" }));
+    if (cat === "rod" && it.id === "merchant" && st.own) acts.append(h("button", { class: "btn sm", onclick: () => openSheet("mrod"), text: "🎯 지정 설정" + (P.mrod ? " · " + TIERS[P.mrod.tier].name + " " + P.mrod.list.length + "종" : "") }));
   } else if (cat === "tackle") {
     const rod = curRod(), eq = equipped(), full = eq.length >= rod.slots, mine = P.gear.filter(g => g.id === it.id), on = mine.find(g => eq.some(e => e.uid === g.uid)), spare = mine.find(g => !eq.some(e => e.uid === g.uid));
     acts.append(h("button", { class: "btn sm pri", disabled: P.gold < it.price, onclick: () => { if (P.gold < it.price) return; P.gold -= it.price; P.gear.push({ uid: uid4(), id: it.id, left: TACKLE_USES }); markDirty(); sfx("ui-confirmation", .45); refreshSheet(true); toast(it.name + "를 샀어요"); }, text: "사기 " + won(it.price) + "" }));
@@ -10872,6 +10877,29 @@ SHEETS.shop = (body) => {
     h("div", { class: "tabs", role: "tablist" }, SHOP_CATS.map(([id, l]) => h("button", { role: "tab", "aria-selected": String(cat === id), onclick: () => { S.shopTab = id; refreshSheet(true); }, text: l }))),
     h("div", { class: "tabhelp" }, h("b", { text: GEAR_HELP[cat].ico + " " + GEAR_HELP[cat].name + "는요? " }), GEAR_HELP[cat].what), rows)));
 };
+SHEETS.mrod = (body) => {
+  setHead("🎯 장사꾼의 지정", "등급 하나와 그 등급에서 노릴 물고기를 골라요 · 등급이 뜰 확률은 미끼 그대로예요");
+  if (S.mrodTier == null) S.mrodTier = P.mrod ? P.mrod.tier : 7;
+  const t = S.mrodTier, sel = P.mrod && P.mrod.tier === t ? P.mrod.list : [];
+  if (P.rod !== "merchant") body.append(h("div", { class: "muted", style: "font-size:12.5px", text: "지금은 다른 낚싯대를 들고 있어요. 장사꾼의 낚싯대를 들면 아래 지정이 적용돼요." }));
+  body.append(h("div", { class: "tabs", role: "tablist" }, TIERS.slice(0, 9).map((T, i) => h("button", { role: "tab", "aria-selected": String(i === t), onclick: () => { S.mrodTier = i; if (!P.mrod || P.mrod.tier !== i) { P.mrod = { tier: i, list: [] }; markDirty(); } refreshSheet(true); }, text: T.name }))));
+  body.append(h("div", { class: "muted", style: "font-size:12.5px", text: "노릴 물고기 " + sel.length + "/3 · 골라 둔 물고기가 지금 있는 곳에 살지 않으면 평소대로 나와요 · 태초 등급은 노리지 않아요" }));
+  body.append(h("div", { class: "ilist" }, allFish().filter(f => f.tier === t).map(f => {
+    const on = sel.includes(f.id), art = fishArt(f), dx = P.dex[f.id];
+    return h("button", { class: "irow" + (on ? " on" : ""), onclick: () => toggleMrod(f.id) },
+      h("img", { class: "iic", src: art.src, alt: "" }), h("span", { class: "inm" }, h("b", { text: f.name }), h("small", { text: dx ? "도감 " + dx.n + "마리 · 최대 " + fmtSize(dx.best) : "아직 못 잡았어요" })),
+      h("span", { class: "ipr" + (on ? " tag on" : ""), text: on ? "🎯 지정 중" : "지정하기" }));
+  })));
+  body.append(h("div", { class: "acts" }, h("button", { class: "btn sm", disabled: !P.mrod, onclick: () => { P.mrod = null; markDirty(); refreshSheet(true); toast("지정을 껐어요"); }, text: "지정 끄기" }),
+    h("button", { class: "btn sm", onclick: () => { S.shopTab = "rod"; S.shopSel = { cat: "rod", id: "merchant" }; openSheet("shop"); }, text: "상점으로" })));
+};
+function toggleMrod(id) {
+  if (!P.mrod || P.mrod.tier !== S.mrodTier) P.mrod = { tier: S.mrodTier, list: [] };
+  const i = P.mrod.list.indexOf(id);
+  if (i >= 0) P.mrod.list.splice(i, 1);
+  else { if (P.mrod.list.length >= 3) { toast("최대 3종까지만 고를 수 있어요"); return; } P.mrod.list.push(id); }
+  markDirty(); sfx("ui-click", .25); refreshSheet(true);
+}
 function buyBait(b, n) {
   if (itemLocked(b)) return;
   const cost = b.price * n;
