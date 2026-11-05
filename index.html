@@ -1863,7 +1863,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.107.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.108.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -10403,7 +10403,7 @@ function updateChar(F, f, t, dt, now) {
 /* ---------- 프레임 ---------- */
 function applyPeriod(P2) {
   if (curPeriod === P2.key) return;
-  curPeriod = P2.key;
+  curPeriod = P2.key; FW.hAdd = 0;   // 불꽃놀이로 더했던 밝기도 새로 시작
   skyMat.uniforms.top.value.setHex(P2.top); skyMat.uniforms.bot.value.setHex(P2.bot);
   scene.fog.color.setHex(P2.bot);
   const sc = new T3.Color(P2.sea);
@@ -10511,7 +10511,7 @@ function loop3D(ms) {
   seaMat.uniforms.sunDir.value.copy(_v2); skyMat.uniforms.sunDir.value.copy(_v2);
   for (const b of buoys) { b.position.y = waveY(b.position.x, b.position.z, t) - .1; b.rotation.z = Math.sin(t + b.position.x) * .12; }
   for (const s of SWING) s.g.rotation.x = Math.sin(t * 1.4 + s.ph) * .07;
-  updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); pochaExtTick(t); npcShopTick(t, dt); townTick(t, dt); ambTick(t, dt); updateFx(t, dt); for (const fa of FACADE_ANIM) fa(t); breachTick(t, dt); tvTick(t); marketRoofTick(t);
+  updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); pochaExtTick(t); npcShopTick(t, dt); townTick(t, dt); ambTick(t, dt); updateFx(t, dt); for (const fa of FACADE_ANIM) fa(t); breachTick(t, dt); tvTick(t); fwTick(t, dt); marketRoofTick(t);
   SWIM_T.value = t; updateJumps(dt, t); updateTide3D(dt); updateDust(dt);
   updateBoat3D(t, now);
   if (onBoat()) { const bs = SEAT[ME.seat]; ME.x = bs.x; ME.z = bs.z; ME.ry = bs.ry; }
@@ -11740,6 +11740,164 @@ function lotto645Sheet(body) {
    항구 앞 잔디밭의 대형 전광판. 운영자가 유튜브 링크를 넣으면 모든 채널에서 같은 영상이 같은 시각으로 나와요(config/tv).
    매일 밤 9시 ~ 9시 10분은 영상 대신 로또 6/45 추첨 방송으로 바뀌어요.
    소리: 유튜브 소리는 거리에 따라 커지고 작아져요(가까울수록 크게). 추첨 방송은 마을 확성기처럼 — 딩동댕 차임 · 확성기 웅웅 소리 · 메아리 · 아나운서 목소리 */
+/* ===================== 자정 불꽃놀이 (v1.104) =====================
+   매일 밤 12시(한국 시간) 정각부터 5분 동안 서쪽 바다 위에서 불꽃이 터져요.
+   발사 일정은 날짜 + 초로 정해지는 난수라서, 같은 채널이 아니어도 모두가 같은 순간에 같은 불꽃을 봐요.
+   입자는 한 덩어리(Points)로 그리고 더하기 혼합으로 빛나게 해요. 터질 때 마을이 잠깐 환해져요. */
+const FW = { x: -185, z: 4, dur: 300000, testDur: 75000, N: 14000, pts: null, geo: null, mat: null, light: null, flash: 0,
+  head: 0, slot: -1, queue: [], rockets: [], test: null, live: false, warned: -1, began: -1 };
+const FW_COLS = [[1, .22, .28], [1, .62, .12], [.3, .72, 1], [.62, .38, 1], [.3, 1, .5], [1, .95, .8], [1, .4, .8], [.25, .95, .95], [1, .86, .3]];
+const FW_GOLD = [1, .72, .32], FW_WHITE = [1, .97, .9];
+const fwRng = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+function fwNow(now) {   // { n: 몇 번째 밤, since: 시작 후 ms, dur }
+  if (FW.test) { const since = now - FW.test.t0; if (since > FW.testDur + 6000) FW.test = null; else return { n: 900000 + (FW.test.t0 % 9973), since, dur: FW.testDur, test: true }; }
+  const day = 864e5, k = Math.floor((now + 9 * 3600e3) / day);
+  return { n: k, since: now - (k * day - 9 * 3600e3), dur: FW.dur, test: false };
+}
+function fwInit() {
+  const N = FW.N, g = new T3.BufferGeometry();
+  FW.p = new Float32Array(N * 3); FW.v = new Float32Array(N * 3); FW.c = new Float32Array(N * 3); FW.base = new Float32Array(N * 3);
+  FW.s = new Float32Array(N); FW.a = new Float32Array(N); FW.life = new Float32Array(N); FW.max = new Float32Array(N);
+  FW.sz = new Float32Array(N); FW.drag = new Float32Array(N); FW.grav = new Float32Array(N); FW.fl = new Uint8Array(N); FW.tr = new Float32Array(N);
+  g.setAttribute("position", new T3.BufferAttribute(FW.p, 3)); g.setAttribute("color", new T3.BufferAttribute(FW.c, 3));
+  g.setAttribute("size", new T3.BufferAttribute(FW.s, 1)); g.setAttribute("alpha", new T3.BufferAttribute(FW.a, 1));
+  for (const k of ["position", "color", "size", "alpha"]) g.attributes[k].setUsage(T3.DynamicDrawUsage);
+  FW.mat = new T3.ShaderMaterial({
+    uniforms: { scale: { value: 600 } }, vertexColors: true, transparent: true, depthWrite: false, blending: T3.AdditiveBlending, fog: false,
+    vertexShader: "attribute float size; attribute float alpha; uniform float scale; varying vec3 vC; varying float vA;\n" +
+      "void main(){ vC = color; vA = alpha; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = clamp(size * scale / -mv.z, 0.0, 72.0); gl_Position = projectionMatrix * mv; }",
+    fragmentShader: "varying vec3 vC; varying float vA;\n" +
+      "void main(){ float r = length(gl_PointCoord - 0.5) * 2.0; if (r > 1.0) discard; float glow = pow(1.0 - r, 2.2); float core = smoothstep(0.35, 0.0, r);\n" +
+      "  gl_FragColor = vec4(vC * (glow * 1.7 + core * 0.9) + vec3(core * 0.25), vA * (glow + core * 0.6)); }",
+  });
+  FW.geo = g; FW.pts = new T3.Points(g, FW.mat); FW.pts.frustumCulled = false; FW.pts.renderOrder = 5; scene.add(FW.pts);
+}
+function fwSpark(x, y, z, vx, vy, vz, col, life, size, drag, grav, flags, trail) {   // 빈 칸(가장 오래된 칸)에 입자 하나
+  const i = FW.head; FW.head = (FW.head + 1) % FW.N; const j = i * 3;
+  FW.p[j] = x; FW.p[j + 1] = y; FW.p[j + 2] = z; FW.v[j] = vx; FW.v[j + 1] = vy; FW.v[j + 2] = vz;
+  FW.base[j] = col[0]; FW.base[j + 1] = col[1]; FW.base[j + 2] = col[2];
+  FW.life[i] = life; FW.max[i] = life; FW.sz[i] = size; FW.drag[i] = drag; FW.grav[i] = grav; FW.fl[i] = flags || 0; FW.tr[i] = trail || 0;
+  return i;
+}
+const fwDir = (r) => { const u = r() * 2 - 1, a = r() * Math.PI * 2, s = Math.sqrt(1 - u * u); return [s * Math.cos(a), u, s * Math.sin(a)]; };
+const fwMix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+/* 터짐: 종류마다 모양이 달라요 (모란 · 국화 · 버들 · 고리 · 야자 · 분열 · 하트 · 반짝이 · 이중) */
+function fwBurst(sh, r) {
+  const { x, y, z, col, col2, type, big } = sh, k = (big ? 1.35 : 1) * 1.7;   // 멀리서 터지니 크게
+  const ball = (n, sp, c, life, size, drag, grav, flags, trail) => { for (let i = 0; i < n; i++) { const d = fwDir(r), s = sp * (.88 + r() * .12); fwSpark(x, y, z, d[0] * s, d[1] * s, d[2] * s, c, life * (.85 + r() * .3), size, drag, grav, flags, trail); } };
+  if (type === "peony") ball(150 * k | 0, 17 * k, col, 2.1, 1.1, 1.5, 3.5, 2);
+  else if (type === "double") { ball(120 * k | 0, 18 * k, col, 2.2, 1.05, 1.5, 3.4, 2); ball(60, 9 * k, col2, 1.9, 1.0, 1.5, 3.4, 2); }
+  else if (type === "chrys") ball(110 * k | 0, 16 * k, col, 2.3, .95, 1.6, 3.6, 2, .045);
+  else if (type === "willow") ball(130 * k | 0, 12.5 * k, FW_GOLD, 4.6, 1.0, 2.1, 2.4, 0, .07);
+  else if (type === "ring" || type === "saturn") {
+    const ax = fwDir(r), t1 = Math.abs(ax[1]) < .9 ? [0, 1, 0] : [1, 0, 0], u = new T3.Vector3(...ax).cross(new T3.Vector3(...t1)).normalize(), v = new T3.Vector3(...ax).cross(u).normalize();
+    const n = 90 * k | 0; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2, s = 18 * k; fwSpark(x, y, z, (u.x * Math.cos(a) + v.x * Math.sin(a)) * s, (u.y * Math.cos(a) + v.y * Math.sin(a)) * s, (u.z * Math.cos(a) + v.z * Math.sin(a)) * s, col, 2.1, 1.1, 1.5, 3, 2); }
+    ball(type === "saturn" ? 60 : 30, 7, col2, 1.8, 1.0, 1.5, 3, 2);
+  } else if (type === "palm") {
+    const arms = 7 + (r() * 3 | 0); for (let i = 0; i < arms; i++) { const a = i / arms * Math.PI * 2 + r() * .3, up = .35 + r() * .45, s = 15 * k; fwSpark(x, y, z, Math.cos(a) * s * (1 - up * .5), up * s, Math.sin(a) * s * (1 - up * .5), FW_GOLD, 2.6, 2.3, 1.3, 4.2, 0, .02); }
+    ball(40, 5, col, 1.4, 1.0, 1.5, 3, 2);
+  } else if (type === "crossette") {
+    for (let i = 0; i < 14; i++) { const d = fwDir(r), s = 15 * k; fwSpark(x, y, z, d[0] * s, d[1] * s, d[2] * s, col, .85 + r() * .15, 1.6, 1.2, 3, 8, .03); }
+  } else if (type === "heart") {   // 마을 쪽(동쪽)에서 잘 보이게 남북 · 위아래 평면에
+    const n = 110; for (let i = 0; i < n; i++) { const t = i / n * Math.PI * 2, hx = 16 * Math.pow(Math.sin(t), 3), hy = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t), s = 1.05 * k; fwSpark(x, y, z, (r() - .5) * .8, hy * s, hx * s, col, 2.2, 1.15, 1.7, 1.6, 2); }
+  }
+  if (type === "glitter" || r() < .3) for (let i = 0; i < 70; i++) { const d = fwDir(r), s = (6 + r() * 12) * k; fwSpark(x, y, z, d[0] * s, d[1] * s, d[2] * s, FW_WHITE, 1.4 + r() * 1.4, .55, 1.8, 3, 16); }   // 반짝반짝 (늦게 켜지는 점멸)
+  // 빛 · 소리
+  FW.flash = Math.min(3.2, FW.flash + (big ? 2.6 : 1.7)); 
+  fwBoom(x, y, z, big, type === "glitter" || type === "crossette" || type === "willow");
+}
+/* 소리: 쿵 (거리만큼 늦게) · 휘익 · 타다닥 */
+function fwVol(x, y, z) { const d = Math.hypot(ME.x - x, ME.z - z, y); return { d, v: S.sound && AC && !atHome() && !atRest() ? clamp(1.25 - d / 380, 0, 1) : 0 }; }
+let FW_NOISE = null;
+function fwNoise() { if (FW_NOISE) return FW_NOISE; const len = AC.sampleRate * 1.5 | 0, b = AC.createBuffer(1, len, AC.sampleRate), d = b.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; return (FW_NOISE = b); }
+function fwBoom(x, y, z, big, crackle) {
+  const { d, v } = fwVol(x, y, z); if (!v) return; const out = master || AC.destination, t0 = AC.currentTime + Math.min(1.2, d / 343);
+  const src = AC.createBufferSource(); src.buffer = fwNoise(); const lp = AC.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.setValueAtTime(big ? 900 : 1400, t0); lp.frequency.exponentialRampToValueAtTime(120, t0 + 1.1);
+  const g = AC.createGain(); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v * (big ? .9 : .6), t0 + .01); g.gain.exponentialRampToValueAtTime(.001, t0 + 1.4);
+  src.connect(lp).connect(g).connect(out); src.start(t0, Math.random() * .3); src.stop(t0 + 1.5);
+  const o = AC.createOscillator(), og = AC.createGain(); o.type = "sine"; o.frequency.setValueAtTime(big ? 70 : 95, t0); o.frequency.exponentialRampToValueAtTime(32, t0 + .6);
+  og.gain.setValueAtTime(v * .7, t0); og.gain.exponentialRampToValueAtTime(.001, t0 + .7); o.connect(og).connect(out); o.start(t0); o.stop(t0 + .75);
+  if (crackle) for (let i = 0; i < 26; i++) {   // 타다닥
+    const c = AC.createBufferSource(); c.buffer = fwNoise(); const hp = AC.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 2500 + Math.random() * 3000;
+    const cg = AC.createGain(), tc = t0 + .9 + Math.random() * 1.6; cg.gain.setValueAtTime(v * (.12 + Math.random() * .18), tc); cg.gain.exponentialRampToValueAtTime(.001, tc + .03);
+    c.connect(hp).connect(cg).connect(out); c.start(tc, Math.random()); c.stop(tc + .04);
+  }
+}
+function fwWhistle(x, z, dur) {
+  const { v } = fwVol(x, 20, z); if (!v) return; const out = master || AC.destination, t0 = AC.currentTime;
+  const o = AC.createOscillator(), g = AC.createGain(); o.type = "sine"; o.frequency.setValueAtTime(900, t0); o.frequency.exponentialRampToValueAtTime(2100, t0 + dur);
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v * .05, t0 + .1); g.gain.linearRampToValueAtTime(0, t0 + dur); o.connect(g).connect(out); o.start(t0); o.stop(t0 + dur + .05);
+}
+/* 발사 일정: 1초마다 그 초의 난수로 몇 발 · 어떤 불꽃인지 정해요. 마지막 25초는 피날레 */
+const FW_TYPES = ["peony", "peony", "double", "chrys", "chrys", "willow", "ring", "palm", "crossette", "saturn", "glitter", "heart"];
+function fwPlan(n, slot, dur) {
+  const r = fwRng(n * 100003 + slot * 7919), secs = dur / 1000, fin = slot >= secs - 25, open = slot < 12;
+  let cnt = open ? (r() < .6 ? 1 : 0) : fin ? 3 + (r() * 4 | 0) : r() < .25 ? 0 : r() < .7 ? 1 : r() < .92 ? 2 : 3;
+  if (slot % 40 === 20) cnt = 7;   // 40초마다 한 번 일제 사격
+  if (slot >= secs - 2) cnt = 10;  // 마지막 대폭발
+  const out = [], salvo = cnt >= 7 && !fin, sc = FW_COLS[r() * FW_COLS.length | 0];
+  for (let i = 0; i < cnt; i++) {
+    const type = salvo ? (i % 2 ? "ring" : "peony") : fin && r() < .35 ? "willow" : FW_TYPES[r() * FW_TYPES.length | 0];
+    const col = salvo ? sc : FW_COLS[r() * FW_COLS.length | 0], col2 = FW_COLS[r() * FW_COLS.length | 0];
+    const zz = salvo ? (i - (cnt - 1) / 2) * 11 : (r() - .5) * 70;
+    out.push({ at: slot * 1000 + (salvo ? i * 90 : r() * 950), x: FW.x + (r() - .5) * 40, z: FW.z + zz * 1.6, y: 30 + r() * 20, type, col, col2, big: fin || r() < .18, rise: 1.3 + r() * .6, whistle: r() < .3 });
+  }
+  return out;
+}
+function fwTick(t, dt) {
+  if (!T3 || !scene) return;
+  const now = Date.now(), F = fwNow(now), live = F.since >= 0 && F.since < F.dur;
+  // 미리 알림: 30초 전
+  if (!F.test && F.since > 864e5 - 30000 && FW.warned !== F.n && !S.title) { FW.warned = F.n; toast("🎆 30초 뒤 자정 불꽃놀이가 시작돼요! 서쪽 바다 하늘을 보세요"); }
+  if (live && FW.began !== F.n && !S.title) { FW.began = F.n; toast(F.test ? "🧪 불꽃놀이 테스트 시작 · 서쪽 바다 하늘을 보세요" : "🎆 자정 불꽃놀이 시작! 서쪽 바다 하늘을 보세요 (5분)"); }
+  if (!live && !FW.pts) return;
+  if (!FW.pts) fwInit();
+  dt = Math.min(dt || .016, .05);
+  if (live) {
+    const slot = Math.floor(F.since / 1000);
+    if (FW.slot > slot || FW.slot < slot - 3 || FW.n !== F.n) { FW.slot = slot - 1; FW.n = F.n; FW.queue = []; }   // 처음 · 건너뜀: 지금부터
+    while (FW.slot < slot) { FW.slot++; FW.queue.push(...fwPlan(F.n, FW.slot, F.dur)); }
+    for (let i = FW.queue.length - 1; i >= 0; i--) {
+      const s = FW.queue[i]; if (s.at > F.since) continue; FW.queue.splice(i, 1);
+      if (F.since - s.at > 2500) continue;
+      s.t = 0; s.r = fwRng((s.at * 31 + F.n) | 0); FW.rockets.push(s); if (s.whistle) fwWhistle(s.x, s.z, s.rise);
+    }
+  } else FW.queue.length = 0;
+  // 올라가는 불씨
+  for (let i = FW.rockets.length - 1; i >= 0; i--) {
+    const s = FW.rockets[i]; s.t += dt; const k = Math.min(1, s.t / s.rise), e = 1 - Math.pow(1 - k, 2), wob = Math.sin(s.t * 18) * .25 * (1 - k);
+    const yy = s.y * e, px = s.x + wob;
+    fwSpark(px, yy, s.z, (Math.random() - .5) * 1.2, -2 - Math.random() * 2, (Math.random() - .5) * 1.2, fwMix(FW_GOLD, FW_WHITE, .5), .5 + Math.random() * .3, .7, 2, 2, 0);
+    if (k >= 1) { FW.rockets.splice(i, 1); fwBurst(s, s.r); }
+  }
+  // 입자 움직임
+  const N = FW.N, P = FW.p, V = FW.v, C = FW.c, B = FW.base, A = FW.a, Sz = FW.s;
+  for (let i = 0; i < N; i++) {
+    let L = FW.life[i]; if (L <= 0) { if (A[i]) { A[i] = 0; Sz[i] = 0; } continue; }
+    L -= dt; FW.life[i] = L; const j = i * 3, f = FW.fl[i];
+    if (L <= 0) {
+      if (f & 8) { const r = Math.random; for (let q = 0; q < 4; q++) { const a = q * Math.PI / 2 + r() * .4; fwSpark(P[j], P[j + 1], P[j + 2], Math.cos(a) * 13, (r() - .3) * 8, Math.sin(a) * 13, [B[j], B[j + 1], B[j + 2]], 1.1, .9, 1.5, 3, 2); } }   // 분열
+      A[i] = 0; Sz[i] = 0; continue;
+    }
+    const dr = Math.exp(-FW.drag[i] * dt);
+    V[j] *= dr; V[j + 1] = V[j + 1] * dr - FW.grav[i] * dt; V[j + 2] *= dr;
+    P[j] += V[j] * dt; P[j + 1] += V[j + 1] * dt; P[j + 2] += V[j + 2] * dt;
+    const age = 1 - L / FW.max[i];
+    let a = age < .05 ? 1 : Math.pow(1 - (age - .05) / .95, 1.3);
+    if (f & 2 && age > .7) a *= .55 + .45 * Math.sin(L * 60 + i);              // 끝에서 깜빡
+    if (f & 16) a = age < .35 ? 0 : (Math.sin(L * 45 + i * 1.7) > .55 ? 1 : .05); // 반짝이
+    const hot = age < .06 ? 1 - age / .06 : 0;                                  // 막 터졌을 땐 하얗게
+    C[j] = B[j] + (1 - B[j]) * hot; C[j + 1] = B[j + 1] + (1 - B[j + 1]) * hot; C[j + 2] = B[j + 2] + (1 - B[j + 2]) * hot;
+    A[i] = a; Sz[i] = FW.sz[i] * (f & 16 ? 1 : .6 + .4 * (1 - age));
+    if (FW.tr[i] && Math.random() < FW.tr[i] * 60 * dt * 3) fwSpark(P[j], P[j + 1], P[j + 2], V[j] * .1, V[j + 1] * .1 - .5, V[j + 2] * .1, fwMix([B[j], B[j + 1], B[j + 2]], FW_GOLD, .6), .45 + Math.random() * .5, .55, 2.5, 1.5, 0);   // 꼬리
+  }
+  for (const k of ["position", "color", "size", "alpha"]) FW.geo.attributes[k].needsUpdate = true;
+  FW.mat.uniforms.scale.value = (R ? R.domElement.height : 800) * 2.6;
+  FW.flash = Math.max(0, FW.flash - dt * 6);
+
+  if (hemi) { const add = FW.pts.visible ? Math.min(.22, FW.flash * .07) : 0; hemi.intensity += add - (FW.hAdd || 0); FW.hAdd = add; }   // 터질 때 마을이 잠깐 환해져요 (빛을 새로 안 만들어서 멈춤 없음)
+  FW.pts.visible = !atHome() && !atRest();
+}
 const TV = { x: -27.2, z: -20.5, w: 6.4, hgt: 3.6, y0: 1.6, mesh: null, tex: null, cv: null, frame: null, ifr: null, vid: "", startAt: 0, lastDraw: 0, said: -1, chimed: 0, hum: null, test: null };
 function ytId(u) { u = String(u || "").trim(); const m = u.match(/(?:youtu\.be\/|v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/) || u.match(/^([A-Za-z0-9_-]{11})$/); return m ? m[1] : ""; }
 function buildTV() {
@@ -13377,6 +13535,7 @@ SHEETS.admintools = (body) => {
     const ta = h("textarea", { class: "fbtext", rows: "3", placeholder: "가져올 세이브 JSON을 붙여넣어요" });
     body.append(h("div", { class: "sec", text: "🎰 로또 테스트 방송 (이 기기에서만 · 서버 영향 없음)" }), h("div", { class: "row" },
       h("button", { class: "btn sm", onclick: () => { TV.test = { t0: Date.now() }; TV.chimed = 0; TV.said = -1; closeSheet(); toast("🧪 테스트 방송 시작 · 항구 어촌 TV 앞으로 가 보세요 (첫 공 4초 뒤 · 6초 간격 · 실제 추첨과 무관해요)"); }, text: "▶ 테스트 방송 시작" }),
+      h("button", { class: "btn sm", onclick: () => { FW.test = { t0: Date.now() }; FW.slot = -1; closeSheet(); }, text: "🎆 불꽃놀이 테스트 (75초)" }),
       h("button", { class: "btn sm", onclick: () => { TV.test = null; tvHum(0); toast("테스트 방송을 껐어요"); }, text: "⏹ 끄기" })),
       h("div", { class: "muted", style: "font-size:12px;line-height:1.5", text: "밤 9시 본방과 다른 테스트 전용 방송이에요. 내 화면과 스피커에서만 나오고, 다른 사람 · 서버 · 당첨금에는 영향이 전혀 없어요. 화면에도 「테스트 방송」이라고 표시돼요." }));
     body.append(h("div", { class: "sec", text: "🍳 내 가게 테스트 (내 가게에만 적용 · 저장돼요)" }), h("div", { class: "row" },
