@@ -1776,6 +1776,95 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .passbook .btn:disabled:not(.pri),.peg .ishelf .btn:disabled:not(.pri),.ishelf .btn:disabled:not(.pri){color:#5b5448;opacity:1;background:rgba(19,47,56,.1)}
 .pegwall .irow.locked .ipr{background:#5f686f!important;color:#fff!important}
 .lvchip{background:#23845f}.badge{background:#d8431e}.rm-tg{text-shadow:0 1px 1px rgba(0,0,0,.35);filter:brightness(.82)}
+/* ===================== 타이틀 화면 (v1.112 전면 개편 · 낭만 섬행 승선권) ===================== */
+.title{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 1fr auto;grid-template-areas:"live live" "logo pass" "foot foot";align-items:center;gap:18px 6vw;
+  padding:calc(var(--st) + 22px) clamp(16px,6vw,96px) calc(var(--sb) + 18px);background:none;isolation:isolate}
+.title>*{position:relative;z-index:1}
+.tsky{position:absolute!important;inset:0;z-index:0!important;pointer-events:none;overflow:hidden}
+.tsky i{position:absolute;inset:0;display:block}
+.tglow{background:radial-gradient(120% 70% at 18% 8%,rgba(255,170,110,.38),rgba(255,120,80,.10) 38%,transparent 62%),radial-gradient(90% 60% at 100% 100%,rgba(20,70,110,.55),transparent 70%)}
+.tvig{background:linear-gradient(180deg,rgba(6,16,24,.55) 0%,rgba(6,16,24,0) 30%,rgba(6,16,24,0) 55%,rgba(6,16,24,.78) 100%),radial-gradient(140% 100% at 50% 40%,transparent 55%,rgba(4,10,16,.55) 100%)}
+.tspark{background-image:radial-gradient(1.6px 1.6px at 12% 22%,#fff8,transparent),radial-gradient(1.4px 1.4px at 38% 12%,#fff6,transparent),radial-gradient(2px 2px at 72% 18%,#ffe9b0aa,transparent),radial-gradient(1.4px 1.4px at 86% 34%,#fff7,transparent),radial-gradient(1.8px 1.8px at 56% 30%,#fff5,transparent),radial-gradient(1.4px 1.4px at 24% 40%,#fff5,transparent);animation:ttwinkle 5s ease-in-out infinite alternate}
+.tgrain{opacity:.09;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+@keyframes ttwinkle{from{opacity:.35}to{opacity:1}}
+/* 위 · 실시간 칩 */
+.tlive{grid-area:live;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;min-height:30px;animation:tfade .9s .5s both}
+.tlive span{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:600;color:#f6f1e7;background:rgba(10,24,34,.55);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);white-space:nowrap}
+.tlive span b{color:#ffd27a;font-weight:800}
+.tlive .dot{width:7px;height:7px;border-radius:50%;background:#55d58a;box-shadow:0 0 0 3px rgba(85,213,138,.25);animation:blink 1.2s ease-in-out infinite alternate}
+/* 로고 */
+.tlogo{grid-area:logo;align-items:flex-start;text-align:left;gap:10px;animation:tup .9s cubic-bezier(.2,.8,.2,1) both}
+.teye{display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:12px;letter-spacing:.28em;color:#ffd9b0;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.teye i{display:block;width:28px;height:1.5px;background:linear-gradient(90deg,transparent,#ffd9b0)}.teye i:last-child{background:linear-gradient(90deg,#ffd9b0,transparent)}
+.tlogo .tl{font-size:clamp(64px,9.4vw,138px);filter:drop-shadow(0 10px 0 rgba(10,26,34,.55)) drop-shadow(0 18px 30px rgba(0,0,0,.45))}
+.tsub{font-size:clamp(17px,2vw,24px);color:#fff7ea;letter-spacing:.02em;text-shadow:0 2px 10px rgba(0,0,0,.65)}
+.twave{width:min(240px,60%);height:14px;color:#ff9a6a;opacity:.9;animation:twave 3s ease-in-out infinite}
+@keyframes twave{50%{transform:translateX(6px)}}
+/* 승선권 */
+.tpass{grid-area:pass;--paper:#fbf4e4;--ink:#13303a;--muted:#6d6252;--stub:154px;width:min(410px,100%);justify-self:end;color:var(--ink);background:var(--paper);border-radius:22px;overflow:hidden;
+  box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 26px 60px rgba(0,0,0,.45),0 6px 16px rgba(0,0,0,.25);
+  -webkit-mask:radial-gradient(circle 12px at 0 calc(100% - var(--stub)),#0000 97%,#000) left/51% 100% no-repeat,radial-gradient(circle 12px at 100% calc(100% - var(--stub)),#0000 97%,#000) right/51% 100% no-repeat;
+  mask:radial-gradient(circle 12px at 0 calc(100% - var(--stub)),#0000 97%,#000) left/51% 100% no-repeat,radial-gradient(circle 12px at 100% calc(100% - var(--stub)),#0000 97%,#000) right/51% 100% no-repeat;
+  animation:tpass .9s .15s cubic-bezier(.2,.8,.2,1) both}
+@keyframes tpass{from{opacity:0;transform:translateY(40px) rotate(2.5deg)}to{opacity:1;transform:none}}
+@keyframes tup{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes tfade{from{opacity:0}to{opacity:1}}
+.tp-head{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#13303a;color:#fbf4e4;font-size:13px}
+.tp-brand{font-family:var(--f-display);font-size:16px;letter-spacing:.02em}.tp-brand b{color:#ffb27a;font-weight:400}
+.tp-no{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;color:#c9d6d8}
+.tp-route{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:14px 18px 6px}
+.tp-route small{display:block;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.14em;color:var(--muted)}
+.tp-route b{font-family:var(--f-display);font-weight:400;font-size:19px;white-space:nowrap}
+.tp-route .r{text-align:right}
+.tp-ship{display:flex;align-items:center;gap:4px;color:#e2522c}.tp-ship i{display:block;width:22px;border-top:2px dashed #c9b99c}.tp-ship span{font-size:18px;animation:bob 2.4s ease-in-out infinite}
+.tp-body{display:flex;flex-direction:column;gap:11px;padding:10px 18px 16px}
+.tpass .tme{display:flex;gap:14px;align-items:center;padding:10px;border-radius:16px;background:#fff;border:1.5px solid #ece0c8}
+.tpass .tme canvas{width:60px;height:60px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 3px #fff,0 0 0 5px #e2522c33}
+.tpass .tinfo{min-width:0;flex:1}
+.tpass .tnick b{color:var(--ink);font-size:20px}
+.tpass .tnick button{border:1.5px solid #d8c9ac;background:#fff8ea;color:#5a4630;font-weight:700}
+.tpass .tnick button:hover{background:#ffefd2}
+.tpass .tstat{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}
+.tpass .nickedit input{background:#fff;border:1.5px solid #d8c9ac;color:var(--ink)}
+.tpass .nickedit button{border:1.5px solid #d8c9ac;background:#fff8ea;color:#5a4630}
+.tpass .nerr{color:#c0392b}
+.tpass .tacct{background:rgba(19,48,58,.06);color:var(--ink);font-size:12px}
+.tpass .tcolors::before{content:"옷 색";color:var(--muted);font-weight:700}
+.tpass .tcolors button{width:28px;height:28px;border:2px solid #fff;box-shadow:0 0 0 1.5px #d8c9ac}
+.tpass .tcolors button[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--ink);transform:scale(1.08)}
+.tpass .tsound{color:var(--muted);font-size:12.5px}.tpass .tsound input{accent-color:#e2522c;width:16px;height:16px}
+.tp-tear{height:0;margin:0 18px;border-top:2px dashed #d8c9ac}
+.tp-stub{height:var(--stub);box-sizing:border-box;display:flex;flex-direction:column;gap:10px;padding:12px 18px 12px;background:linear-gradient(180deg,#f6ecd6,#f1e4c8)}
+.tp-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tp-meta small{display:block;font-family:var(--f-mono);font-size:9px;letter-spacing:.16em;color:var(--muted)}
+.tp-meta b{font-size:13px;font-weight:800;white-space:nowrap}
+.tpass .tstart{position:relative;overflow:hidden;border-radius:14px;padding:13px;font-size:20px;background:linear-gradient(180deg,#ff7a4d,#e2522c);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);box-shadow:0 4px 0 #a8361a,0 10px 20px rgba(226,82,44,.35)}
+.tpass .tstart::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-18deg);animation:tshine 3.2s 1.2s ease-in-out infinite}
+.tpass .tstart:active{transform:translateY(3px);box-shadow:0 1px 0 #a8361a,0 6px 14px rgba(226,82,44,.3)}
+.tpass .tstart:disabled{background:#8a8f96;box-shadow:0 4px 0 #62676d;opacity:1}.tpass .tstart:disabled::after{display:none}
+@keyframes tshine{0%{left:-60%}55%,100%{left:130%}}
+.tp-bar{height:16px;border-radius:2px;opacity:.75;background:repeating-linear-gradient(90deg,#13303a 0 2px,transparent 2px 4px,#13303a 4px 7px,transparent 7px 8px,#13303a 8px 9px,transparent 9px 12px,#13303a 12px 15px,transparent 15px 17px)}
+/* 아래 */
+.tbottom{grid-area:foot;display:flex;flex-direction:column;align-items:center;gap:8px;animation:tfade .9s .7s both}
+.title .tlinks button{background:rgba(10,24,34,.5);border-color:rgba(255,255,255,.16);color:#f6f1e7;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.title .tfoot{color:rgba(246,241,231,.7)}
+/* 휴대폰 · 좁은 화면: 위에 로고, 아래 승선권 */
+@media (max-width:900px){
+  .title{grid-template-columns:1fr;grid-template-rows:auto auto 1fr auto auto;grid-template-areas:"live" "logo" "." "pass" "foot";gap:12px;padding:calc(var(--st) + 12px) 14px calc(var(--sb) + 12px)}
+  .tlive{justify-content:center}.tlive span{font-size:11.5px;padding:5px 10px}
+  .tlogo{align-items:center;text-align:center;gap:6px}
+  .teye{font-size:10px;letter-spacing:.2em}.teye i{width:18px}
+  .tlogo .tl{font-size:clamp(54px,15vw,86px)}
+  .tsub{font-size:15px}.twave{width:150px}
+  .tpass{justify-self:center;--stub:140px}
+  .tp-head{padding:10px 14px}.tp-route{padding:10px 14px 4px}.tp-route b{font-size:16px}.tp-body{padding:8px 14px 12px;gap:9px}
+  .tpass .tme{padding:8px}.tpass .tme canvas{width:52px;height:52px}.tpass .tnick b{font-size:18px}
+  .tp-stub{padding:10px 14px}.tpass .tstart{padding:12px;font-size:19px}
+  .tlinks button{font-size:11.5px;padding:5px 10px}
+}
+@media (max-height:760px) and (max-width:900px){.tp-meta{display:none}.tpass{--stub:94px}.tlive span:nth-child(n+3){display:none}.teye{display:none}}
+@media (max-height:620px) and (max-width:900px){.tp-route,.tlive{display:none}}
+@media (prefers-reduced-motion:reduce){.tpass,.tlogo,.tlive,.tbottom,.tspark,.twave,.tp-ship span,.tpass .tstart::after{animation:none!important}}
 </style>
 
 <div class="app" id="app">
@@ -1879,17 +1968,32 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 </div>
 
 <div class="title" id="title">
+  <div class="tsky" aria-hidden="true"><i class="tglow"></i><i class="tvig"></i><i class="tspark"></i><i class="tgrain"></i></div>
+  <div class="tlive" id="tLive" aria-live="polite"></div>
   <div class="tlogo">
+    <div class="teye"><i></i>EOCHON LIFE · 바닷가 마을 온라인<i></i></div>
     <div class="tl"><span class="a">어촌</span><svg class="bob" viewBox="0 0 20 34" aria-hidden="true"><path d="M10 0v11" stroke="#fff" stroke-width="1.6"/><path d="M3 18a7 7 0 0 1 14 0z" fill="#e2402a" stroke="#132f38" stroke-width="2"/><path d="M3 18a7 7 0 0 0 14 0z" fill="#fff" stroke="#132f38" stroke-width="2"/></svg><span class="b">생활</span></div>
     <div class="tsub">멍 때리며 함께 낚시하는 바닷가 마을</div>
+    <svg class="twave" viewBox="0 0 240 14" aria-hidden="true"><path d="M2 7c15-8 25 8 40 0s25-8 40 0 25 8 40 0 25-8 40 0 25 8 40 0 25-8 36 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
   </div>
-  <div class="tcard" role="dialog" aria-label="어촌생활 입장">
+  <div class="tpass" role="dialog" aria-label="어촌생활 입장 · 낭만 섬행 승선권">
+    <div class="tp-head"><span class="tp-brand"><b>⛴</b> 낭만 섬행 승선권</span><span class="tp-no" id="tPassNo">No. ——</span></div>
+    <div class="tp-route"><div><small>FROM · 출발</small><b>육지 선착장</b></div><div class="tp-ship" aria-hidden="true"><i></i><span>⛴</span><i></i></div><div class="r"><small>TO · 도착</small><b>낭만섬 부두</b></div></div>
+    <div class="tp-body">
     <div class="tme"><canvas id="tAvatar" width="128" height="128" aria-label="내 캐릭터 얼굴"></canvas>
       <div class="tinfo"><div class="tnick"><b id="tNick">불러오는 중</b><button id="tReroll" type="button">이름 바꾸기</button></div><div class="nickedit" id="tNickEdit" hidden><input id="tNickIn" maxlength="12" placeholder="2~12자 · 한글·영문·숫자" aria-label="닉네임"><button id="tNickRand" type="button">무작위</button><button id="tNickOk" type="button">확인</button></div><div class="nerr" id="tNickErr" hidden></div><div class="tstat" id="tStat">진행을 불러오는 중이에요</div></div></div>
     <div class="tacct wait" id="tAcct"><i></i><span>계정 확인 중…</span></div>
     <div class="tcolors" id="tColors"></div>
     <label class="tsound"><input type="checkbox" id="tSound" checked> 물소리·효과음 켜고 시작</label>
-    <button class="tstart" id="tStart" type="button" disabled>불러오는 중…</button>
+    </div>
+    <div class="tp-tear" aria-hidden="true"></div>
+    <div class="tp-stub">
+      <div class="tp-meta"><span><small>DATE</small><b id="tPassDate">—</b></span><span><small>SEAT</small><b>자유석</b></span><span><small>GATE</small><b>A1</b></span><span><small>CLASS</small><b>어부</b></span></div>
+      <button class="tstart" id="tStart" type="button" disabled>불러오는 중…</button>
+      <div class="tp-bar" aria-hidden="true"></div>
+    </div>
+  </div>
+  <div class="tbottom">
     <div class="tlinks"><button type="button" id="tBug">🐞 오류 제보</button><button type="button" id="tIdea">💡 건의하기</button><button type="button" id="tInvite">🤝 초대 코드</button><button type="button" id="tPrivacy">🛡️ 개인정보 안내</button></div>
     <div class="tfoot"><span id="tVer">v1.21.0</span> · Enter 키로도 들어갈 수 있어요</div>
   </div>
@@ -1918,7 +2022,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.111.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.112.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -15053,8 +15157,26 @@ function renderTitle() {
     : "처음 오셨네요! 3만원과 새우 미끼 5개로 시작해요";
   const b = $("tStart"); b.disabled = !ready; b.textContent = !ready ? "불러오는 중…" : back ? "이어서 낚시하기" : "부두로 입장";
   $("tReroll").disabled = !S.profileReady;
+  titleLive();
   for (const sw of $("tColors").children) { sw.setAttribute("aria-pressed", String(sw.dataset.c === P.color)); sw.disabled = !S.profileReady; }
 }
+/* 타이틀 승선권 · 실시간 칩 (v1.112) */
+function titleLive() {
+  if (!S.title) return;
+  const id = String(S.uid || P.nick || "guest"); let hs = 7; for (const ch of id) hs = (hs * 31 + ch.charCodeAt(0)) >>> 0;
+  $("tPassNo").textContent = "No. " + "ABCDEFGHJK"[hs % 10] + "-" + String(hs % 10000).padStart(4, "0");
+  const k = new Date(Date.now() + 9 * 3600e3); $("tPassDate").textContent = (k.getUTCMonth() + 1) + "." + String(k.getUTCDate()).padStart(2, "0");
+  const chips = [];
+  let n = 0; try { n = (S.allPeers || []).filter(p => !p.sameTab && inWorld(p)).length; } catch {}
+  chips.push(n ? h("span", {}, h("i", { class: "dot" }), "지금 ", h("b", { text: n + "명" }), "이 마을에") : h("span", {}, "🌙 조용한 부두 · ", h("b", { text: "첫 손님이 되어 보세요" })));
+  try { const tf = findFish(todayFish()); if (tf) chips.push(h("span", {}, "⭐ 오늘의 생선 ", h("b", { text: tf.name }))); } catch {}
+  const hr = (Date.now() / 3600e3 + 9) % 24, left = (to) => { const m = Math.round(((to - hr + 24) % 24) * 60); return m >= 60 ? Math.floor(m / 60) + "시간 " + (m % 60) + "분" : m + "분"; };
+  if (hr >= 21 && hr < 21 + 10 / 60) chips.push(h("span", {}, "🎱 ", h("b", { text: "로또 추첨 생방송 중" })));
+  else if (hr < 1 / 12) chips.push(h("span", {}, "🎆 ", h("b", { text: "불꽃놀이 하는 중" })));
+  else chips.push(hr < 21 ? h("span", {}, "🎱 로또 추첨까지 ", h("b", { text: left(21) })) : h("span", {}, "🎆 불꽃놀이까지 ", h("b", { text: left(24) })));
+  $("tLive").replaceChildren(...chips);
+}
+setInterval(() => { if (S.title) titleLive(); }, 20000);
 function setupTitle() {
   document.body.classList.add("titling");
   $("tColors").replaceChildren(...COLORS.map(c => h("button", { type: "button", style: "background:" + c, "aria-label": "옷 색 " + c, "data-c": c,
