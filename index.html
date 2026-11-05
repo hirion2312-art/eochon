@@ -1828,7 +1828,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.101.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.102.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2579,6 +2579,7 @@ const REST_LV = [   // 가게 단계: 비용 · 알바 상한 · 동시 티켓 �
   { name: "2층 레스토랑", cost: 60000, hire: 3, tickets: 5, tip: .05, price: 0, opex: 1200, seats: 6 },
   { name: "어촌의 명소", cost: 150000, hire: 4, tickets: 6, tip: .05, price: .1, opex: 5000, seats: 6 },
 ];
+const REST_CAP = [60, 100, 140, 190, 250];   // 단계별 하루 판매 상한 (안전판, v1.102): 보통 플레이는 닿지 않는 선 — 마라톤성 플레이만 막아요
 // 레시피: ing = [어종 id, 개수] · chop = 썰기 필요 · cook = 조리 스테이션 (없으면 회) · cost = 해금비(안쪽 단위, 0 = 기본 제공) · dish = 접시 모양
 const RECIPES = [
   { id: "gwangeo-hoe", t: 1, name: "광어회", ico: "🍣", ing: [["b-gwangeo", 1]], chop: true, cook: null, cost: 0, dish: "sashimi" },
@@ -6127,7 +6128,8 @@ function restTick(t, dt) {
   // 손님 오기 (v1.67: 주인이 멀리 있어도 영업해요 · 단, 15분 무입력 자동 종료는 돈 복사 방지라 그대로예요)
   const cap = REST_LV[P.rest.lv].tickets, busy = S.restGuests.length;
   const freeSeats = REST_SEATS.map((s, i) => i).filter(i => !S.restGuests.some(gu => gu.si === i)).slice(0, REST_LV[P.rest.lv].seats);
-  if (S.restOpen && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length) {
+  if (S.restOpen && d.plates >= REST_CAP[P.rest.lv] && S.restCapDay !== d.d) { S.restCapDay = d.d; toast([h("b", { text: "🌙 오늘 장사는 여기까지예요" }), h("div", { class: "muted", style: "font-size:12px", text: "오늘 판매 상한 " + REST_CAP[P.rest.lv] + "접시에 닿았어요 · 자정이 지나면 다시 열려요 (가게 단계가 오르면 상한도 늘어요)" })], null, 8000); }
+  if (S.restOpen && d.plates < REST_CAP[P.rest.lv] && now > (S.restNextGuest || 0) && busy < cap && freeSeats.length) {
     const spc = S.isOwner && LAB.forceGuest ? labPickSpecial() : restPickSpecial(), r = spc ? spc.r : pickTicketRecipe();
     if (r) {
       const si = pick(freeSeats), seat = REST_SEATS[si];
@@ -6206,7 +6208,7 @@ function updateRestBar() {
   if (!on) { bar.hidden = true; $("restTix").hidden = true; $("restHand").hidden = true; syncUIState(); return; }
   const d = restDay();
   bar.hidden = false;
-  bar.replaceChildren(h("b", { text: "🏮 " + P.nick + "네 포차 · " + REST_LV[P.rest.lv].name }), h("span", { class: "num", text: "오늘 " + won(d.sales + d.tips) + " · " + d.plates + "접시" }),
+  bar.replaceChildren(h("b", { text: "🏮 " + P.nick + "네 포차 · " + REST_LV[P.rest.lv].name }), h("span", { class: "num", text: "오늘 " + won(d.sales + d.tips) + " · " + d.plates + "/" + REST_CAP[P.rest.lv] + "접시" }),
     h("button", { class: "rb-open" + (S.restOpen ? " on" : ""), onclick: () => setRestOpen(!S.restOpen), text: S.restOpen ? "🌙 장사 종료" : "🏮 장사 시작" }),
     h("button", { onclick: () => openSheet("restbook"), text: "📖 레시피" }), h("button", { onclick: () => openSheet("restmanage"), text: "🧑‍🍳 가게" + (S.restSettleNew ? " 🔴" : "") }), ...(atRest() ? [] : [h("button", { onclick: walkInRest, text: "안으로" })]));
   syncUIState(); renderRestHud();
@@ -6269,7 +6271,7 @@ function restBookSheet(body) {
   setHead("📖 레시피북", "골드로 레시피를 하나씩 열어요 · 판매가 = 재료 기준가 × 티어 배율 (시세와 무관)");
   body.append(h("div", { class: "rb-ledger" },
     h("div", null, h("small", { text: "오늘 매출" }), h("b", { class: "num", text: won(d.sales) })), h("div", null, h("small", { text: "완벽 팁" }), h("b", { class: "num", text: won(d.tips) })),
-    h("div", null, h("small", { text: "오늘 접시" }), h("b", { class: "num", text: d.plates + " · 완벽 " + d.perfect })), h("div", null, h("small", { text: "누적 판매" }), h("b", { class: "num", text: P.rest.plates + "접시" }))));
+    h("div", null, h("small", { text: "오늘 접시" }), h("b", { class: "num", text: d.plates + "/" + REST_CAP[P.rest.lv] + " · 완벽 " + d.perfect })), h("div", null, h("small", { text: "누적 판매" }), h("b", { class: "num", text: P.rest.plates + "접시" }))));
   for (const t of [1, 2, 3]) {
     body.append(h("div", { class: "sec", text: "티어 " + t + " · ×" + REST_CFG.tierMul[t] + (t === 3 ? " · 누적 " + REST_CFG.tier3Plates + "접시 판매 + 개업 5일차부터 열 수 있어요" : t === 2 ? " · 개업 2일차부터 열 수 있어요" : "") }));
     const list = h("div", { class: "rb-list" });
