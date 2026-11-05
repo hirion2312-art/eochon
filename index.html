@@ -1863,7 +1863,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.108.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.109.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -11760,7 +11760,8 @@ const FW_COLS = [[1, .22, .28], [1, .62, .12], [.3, .72, 1], [.62, .38, 1], [.3,
 const FW_GOLD = [1, .72, .32], FW_WHITE = [1, .97, .9];
 const fwRng = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 function fwNow(now) {   // { n: 몇 번째 밤, since: 시작 후 ms, dur }
-  if (FW.test) { const since = now - FW.test.t0; if (since > FW.testDur + 6000) FW.test = null; else return { n: 900000 + (FW.test.t0 % 9973), since, dur: FW.testDur, test: true }; }
+  // 운영자가 「모두에게 불꽃놀이」를 누르면 config/fireworks의 시작 시각으로 모든 사람 화면에서 같은 공연이 열려요 (v1.109)
+  const sh = FW.shared; if (sh && sh.t0) { const since = now - sh.t0; if (since >= -3000 && since < sh.dur + 6000) return { n: 800000 + (sh.t0 % 99991), since, dur: sh.dur, test: true }; }
   const day = 864e5, k = Math.floor((now + 9 * 3600e3) / day);
   return { n: k, since: now - (k * day - 9 * 3600e3), dur: FW.dur, test: false };
 }
@@ -11859,7 +11860,7 @@ function fwTick(t, dt) {
   const now = Date.now(), F = fwNow(now), live = F.since >= 0 && F.since < F.dur;
   // 미리 알림: 30초 전
   if (!F.test && F.since > 864e5 - 30000 && FW.warned !== F.n && !S.title) { FW.warned = F.n; toast("🎆 30초 뒤 자정 불꽃놀이가 시작돼요! 서쪽 바다 하늘을 보세요"); }
-  if (live && FW.began !== F.n && !S.title) { FW.began = F.n; toast(F.test ? "🧪 불꽃놀이 테스트 시작 · 서쪽 바다 하늘을 보세요" : "🎆 자정 불꽃놀이 시작! 서쪽 바다 하늘을 보세요 (5분)"); }
+  if (live && FW.began !== F.n && !S.title) { FW.began = F.n; toast(F.test ? "🎆 깜짝 불꽃놀이 시작! 서쪽 바다 하늘을 보세요" : "🎆 자정 불꽃놀이 시작! 서쪽 바다 하늘을 보세요 (5분)"); }
   if (!live && !FW.pts) return;
   if (!FW.pts) fwInit();
   dt = Math.min(dt || .016, .05);
@@ -13545,7 +13546,7 @@ SHEETS.admintools = (body) => {
     const ta = h("textarea", { class: "fbtext", rows: "3", placeholder: "가져올 세이브 JSON을 붙여넣어요" });
     body.append(h("div", { class: "sec", text: "🎰 로또 테스트 방송 (이 기기에서만 · 서버 영향 없음)" }), h("div", { class: "row" },
       h("button", { class: "btn sm", onclick: () => { TV.test = { t0: Date.now() }; TV.chimed = 0; TV.said = -1; closeSheet(); toast("🧪 테스트 방송 시작 · 항구 어촌 TV 앞으로 가 보세요 (첫 공 4초 뒤 · 6초 간격 · 실제 추첨과 무관해요)"); }, text: "▶ 테스트 방송 시작" }),
-      h("button", { class: "btn sm", onclick: () => { FW.test = { t0: Date.now() }; FW.slot = -1; closeSheet(); }, text: "🎆 불꽃놀이 테스트 (75초)" }),
+      ...[[75000, "🎆 모두에게 불꽃놀이 (75초)"], [300000, "🎆 모두에게 불꽃놀이 (5분)"], [0, "■ 불꽃놀이 멈추기"]].map(([dur, label]) => h("button", { class: "btn sm", onclick: async () => { try { await S.db.doc("config/fireworks").set({ t0: dur ? Date.now() + 3000 : 0, dur, by: S.uid }); closeSheet(); toast(dur ? "🎆 3초 뒤 모든 채널에서 불꽃놀이가 시작돼요" : "불꽃놀이를 멈췄어요"); } catch (e) { toast("저장하지 못했어요"); } }, text: label })),
       h("button", { class: "btn sm", onclick: () => { TV.test = null; tvHum(0); toast("테스트 방송을 껐어요"); }, text: "⏹ 끄기" })),
       h("div", { class: "muted", style: "font-size:12px;line-height:1.5", text: "밤 9시 본방과 다른 테스트 전용 방송이에요. 내 화면과 스피커에서만 나오고, 다른 사람 · 서버 · 당첨금에는 영향이 전혀 없어요. 화면에도 「테스트 방송」이라고 표시돼요." }));
     body.append(h("div", { class: "sec", text: "🍳 내 가게 테스트 (내 가게에만 적용 · 저장돼요)" }), h("div", { class: "row" },
@@ -15148,6 +15149,7 @@ async function boot() {
   }, (e) => { clearTimeout(chatTimer); console.warn("chat", e); });
   db.doc("config/notice").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; const prev = S.notice && S.notice.ts; S.notice = { text: str(d.text, 80), ts: Number(d.ts) || 0, until: Number(d.until) || 0 }; renderNoticeBar(); if (prev && S.notice.ts !== prev && S.notice.text) toast("📢 " + S.notice.text, null, 7000); }, () => {});
   db.doc("config/event").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.event = EVENTS.some(e => e.id === d.id) ? { id: d.id, until: Number(d.until) || 0 } : null; renderNoticeBar(); }, () => {});
+  db.doc("config/fireworks").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; FW.shared = { t0: Number(d.t0) || 0, dur: clamp(Number(d.dur) || 75000, 10000, 300000) }; FW.slot = -1; if (!FW.shared.t0) { FW.queue.length = 0; FW.rockets.length = 0; } }, () => {});
   db.doc("config/tv").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; try { tvSetVideo(ytId(d.vid), Number(d.startAt) || 0); } catch (e) { console.warn("tv", e); } }, () => {});
   db.doc("config/mutes").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; S.mutes = new Set((Array.isArray(d.uids) ? d.uids : []).filter(isUid)); }, () => {});
   db.doc("config/minver").onSnapshot((snap) => { const d = snap.exists ? snap.data() || {} : {}; const need = str(d.v, 12), ts = Number(d.ts) || 0;   // v1.99.2: 운영자가 「모두 새로고침」하면 예전 버전 화면이 새로 받아요
