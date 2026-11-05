@@ -1736,6 +1736,37 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .consent-card>.row .btn.pri{flex:1 1 100%}
 .consent-card>.nerr{margin:0 0 14px}
 @media (max-width:820px){.consent-ov{padding:10px!important;align-items:flex-end!important}.consent-card{max-height:92vh!important;border-radius:20px 20px 16px 16px;padding:16px 16px 0!important}.consent-card>.row{margin:12px -16px 0!important;padding-left:16px;padding-right:16px}.consent-card>.row .btn{min-height:46px;flex:1}}
+/* ===== 휴대폰 전면 정리 (v1.111) ===== */
+@media (max-width:820px){
+  /* 창은 화면 위까지 꽉 · 큰 가게 창은 항상 꽉 찬 높이 */
+  .sheet,.sheet.wide{max-height:calc(100% - env(safe-area-inset-top,0px) - 6px)}
+  .sheet.wide{height:calc(100% - env(safe-area-inset-top,0px) - 6px)}
+  /* 머리줄 얇게: 설명은 한 줄 · 간판 그림 작게 */
+  .sheet>header{padding:8px 10px 8px 12px;gap:8px}
+  .sheet h2{font-size:18px}
+  #sheetSub{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;font-size:11.5px}
+  .shopban{height:30px;margin:0 0 2px -2px}
+  .sheet>header .help{width:32px;height:32px;margin-right:2px}
+  .sheet>header .back{width:36px;height:36px}
+  .sbody{gap:12px}
+  /* 손가락으로 누르기 쉽게 */
+  .btn.sm{min-height:36px}
+  .tabs button,.seg-tabs button{min-height:36px}
+  input,select,textarea{font-size:16px}
+  /* 도감: 등급 진행 칸을 4줄 → 작게 */
+  .dx-tiers{grid-template-columns:repeat(5,1fr);gap:4px}
+  .dx-tiers>*{padding:5px 4px!important;font-size:10.5px}
+  /* 도매상: 얼굴 작게 · 말풍선 옆으로 */
+  .ws-stage{flex-direction:row!important;align-items:center!important;padding:10px;gap:10px}
+  .ws-portrait{width:72px;height:72px;border-width:3px}
+  .ws-bubble::before{display:none}
+  /* 랭킹 내 기록: 버튼은 아래 줄로 */
+  .rme{flex-wrap:wrap}.rme .grow{flex:1 1 150px}
+  /* 옷가게: 인형 작게 · 입은 옷 3칸 */
+  .dollcv{height:150px!important}
+  /* 알림(오늘의 생선 등) 작게 */
+  .toast.lvup:has(img){display:flex;gap:10px;align-items:center;text-align:left}.toast.lvup img{width:72px;height:44px;object-fit:contain;flex:none}.toast.lvup b{font-size:15px}
+}
 </style>
 
 <div class="app" id="app">
@@ -1878,7 +1909,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.110.2";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.111.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -6986,7 +7017,7 @@ function townTag(F, text, talk) {
 function townOwners() {
   const ids = [S.uid || "solo"];
   for (const p of otherPeers(true)) if (!p.home) ids.push(p.uid || p.peer);
-  return [...new Set(ids)].sort().slice(0, 8);   // 최대 24명
+  return [...new Set(ids)].sort().slice(0, MOBILE() ? 4 : 8);   // 최대 24명 · 휴대폰은 12명 (v1.111 가볍게)
 }
 function townTick(t, dt) {
   if (!T3 || !scene || !GEO.body) return;
@@ -7947,6 +7978,23 @@ function initPost() {
     const sc = new T3.Scene(); sc.add(new T3.Mesh(new T3.PlaneGeometry(2, 2), mat));
     POST = { rt, mat, scene: sc, cam: new T3.OrthographicCamera(-1, 1, 1, -1, 0, 1) };
   } catch (e) { console.warn("post", e); POST = null; }
+}
+/* 휴대폰 성능 (v1.111): 느리면 화면 해상도를 한 단계씩 낮추고, 넉넉해지면 다시 올려요 */
+const PERF = { lastDraw: 0, cover: false, acc: 0, n: 0, t0: 0, good: 0, pr: 0, base: 0 };
+function perfTick(ms, dt) {
+  if (!MOBILE() || !R) return;
+  if (!PERF.base) { PERF.base = R.getPixelRatio(); PERF.pr = PERF.base; PERF.t0 = ms; }
+  PERF.acc += dt; PERF.n++;
+  if (ms - PERF.t0 < 2500) return;
+  const fps = PERF.n / Math.max(.001, PERF.acc); PERF.acc = 0; PERF.n = 0; PERF.t0 = ms;
+  let pr = PERF.pr;
+  if (fps < 32 && pr > .7) { pr = Math.max(.7, pr - .2); PERF.good = 0; }
+  else if (fps > 55) { if (++PERF.good >= 4 && pr < PERF.base) { pr = Math.min(PERF.base, pr + .2); PERF.good = 0; } }
+  else PERF.good = 0;
+  if (pr !== PERF.pr) { PERF.pr = pr; R.setPixelRatio(pr); resize3D(); }
+}
+function perfCover() {   // 열린 창이 화면 대부분을 덮는지
+  const sh = document.querySelector(".sheet"); PERF.cover = !!(S.sheet && MOBILE() && sh && sh.getBoundingClientRect().height > innerHeight * .8);
 }
 function resize3D() {
   const r = cv.getBoundingClientRect(); if (!r.width || !r.height) return;
@@ -10586,8 +10634,12 @@ function loop3D(ms) {
   if (S.shake > .002) { camera.position.x += (Math.random() - .5) * S.shake; camera.position.y += (Math.random() - .5) * S.shake; camera.position.z += (Math.random() - .5) * S.shake; S.shake *= Math.pow(.015, dt); }
   camera.lookAt(cam.t);
   }
-  if (POST) { R.setRenderTarget(POST.rt); R.render(scene, camera); R.setRenderTarget(null); R.render(POST.scene, POST.cam); }
-  else R.render(scene, camera);
+  // 휴대폰 최적화 (v1.111): 화면을 거의 다 덮는 창이 열려 있으면 뒤 3D는 1초에 8번만 그려요 (배터리 · 발열 · 스크롤 부드럽게)
+  const covered = S.sheet && PERF.cover && !S.title;
+  if (!covered || ms - PERF.lastDraw > 120) { PERF.lastDraw = ms;
+    if (POST) { R.setRenderTarget(POST.rt); R.render(scene, camera); R.setRenderTarget(null); R.render(POST.scene, POST.cam); }
+    else R.render(scene, camera); }
+  if (!covered) perfTick(ms, dt);
   if (S.meMenu) positionRing();
   // 장소 이름
   const pl = placeAt(ME.x, ME.z);
@@ -10814,11 +10866,11 @@ function openSheet(name, arg, opt) {
   S.sheet = name; S.sheetArg = arg;
   S.sheetStack = S.sheetStack.slice(-8); $("sheetBack").hidden = !S.sheetStack.length;
   $("overlay").hidden = false; $("sheetHelp").hidden = !TUTS["sheet_" + name];
-  SB.opening = true; refreshSheet(true); SB.opening = false;
+  SB.opening = true; refreshSheet(true); SB.opening = false; requestAnimationFrame(perfCover);
   $("sheetClose").focus();
   syncUIState();
 }
-function closeSheet() { if (S.sheet) sfx("ui-close", .35); S.tryWear = null; S.sheet = null; S.sheetStack = []; $("overlay").hidden = true; syncUIState(); if (!S.coach && coachQ.length) nextCoach(); }
+function closeSheet() { PERF.cover = false; if (S.sheet) sfx("ui-close", .35); S.tryWear = null; S.sheet = null; S.sheetStack = []; $("overlay").hidden = true; syncUIState(); if (!S.coach && coachQ.length) nextCoach(); }
 function sheetBack() { const prev = S.sheetStack.pop(); if (!prev) { closeSheet(); return; } openSheet(prev[0], prev[1], { back: true }); }
 /* 가게 화면 머리: 그 가게 간판 그림 + 가게 색 + 보유 골드 */
 function shopTheme(name, arg) {
