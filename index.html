@@ -2054,7 +2054,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.113.2";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.114.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -4270,6 +4270,7 @@ const PLACES = [
   { name: "부두 끝 정자", x: -63.5, z: 72, d: "바다가 가장 넓게 보이는 T자 끝 · 정자 쉼터" },
   { name: "낭만포차거리", x: -15, z: 30, d: "바닷가 포차 8동 · 내 가게를 열고 손님을 받는 곳" },
   { name: "어촌 수산시장", x: -12.5, z: -33, d: "아담한 아치 지붕 시장 · 도매상 왕눈이 사장에게 물고기를 넘겨요" },
+  { name: "부두 구멍가게", x: 12.6, z: -82, d: "해변 가는 길의 민트색 가게 · 불꽃 스틱 · 새우깡 · 풍선 · 풍등" },
   { name: "상점가", x: 5, z: 6, d: "미끼 가게 · 방류소 · 얼굴 공방 · 회 센터" },
   { name: "거리 입구", x: 0, z: 34, d: "처음 도착한 곳" },
   { name: "어촌역", x: 26, z: 53, d: "접속하면 여기서 나와요 · 기차가 서는 작은 시골 역" },
@@ -4452,6 +4453,7 @@ function nearestAction() {
     for (const sp of STATUE_SPOTS) { const c = RANK_CATS[sp.i]; consider(sp.x, sp.z + sp.face * 1.5, { key: "hall:" + c.id, label: c.ico + " " + c.name + " 랭킹 보기", run: () => openSheet("rank", c.id) }, 1.4); }
     consider(HALL.x1 - 3, HALL.cz, { key: "hall:board", label: "🏆 명예의 전당 랭킹판 보기", run: () => openSheet("rank") }, 2.2);
   }
+  consider(TOYSHOP.door.x, TOYSHOP.door.z, { key: "toyshop", label: "🎈 부두 구멍가게 들어가기", run: () => { ME.ry = -Math.PI / 2; presMove(true); openSheet("toys"); } }, 2.4);
   for (const b of BUILDINGS) consider(5.6, b.z, { key: "bld:" + b.id, label: b.sheet ? b.name + " 들어가기" : b.name + " (준비 중)", run: () => { ME.ry = Math.PI / 2; presMove(true); if (b.sheet) openSheet(b.sheet); else toast("「" + b.name + "」은 아직 준비 중이에요"); } }, 2.8);
   return best;
 }
@@ -8058,6 +8060,7 @@ function init3D() {
   buildFishMarket();
   buildBoat();
   buildShops();
+  buildToyShop();
   buildBeach();
   buildHall();
   buildStation();
@@ -9953,6 +9956,153 @@ const FACADE = {
 };
 const FACADE_ANIM = [];
 function winMat(day, night) { const m = new T3.MeshBasicMaterial({ color: 0xffffff, map: winTex() }); glow.push({ m, day: 0xffffff, night }); return m; }   // 낮엔 유리 질감, 밤엔 불빛 (v1.79)
+/* ===================== 부두 구멍가게 건물 (v1.114) =====================
+   명예의 전당 북쪽 · 해변 가는 길가의 빈 들판. 민트색 사이딩 벽 · 빨강/하양 줄무늬 차양 · 큰 진열창(풍선 · 장난감 · 과자)
+   · 앞마당(타일 바닥 · 뽑기 기계 · 아이스크림 냉동고 · 파라솔 · 벤치 · 바람개비 · 풍선 다발 · 꼬마전구 · 칠판 · 화단 · 가로등)
+   앞(문)은 도로가 있는 서쪽을 봐요. 안 x(왼쪽→오른쪽)는 북→남, 안 z(+)는 앞(서쪽)이에요. */
+const TOYSHOP = { x: 19.5, z: -82, door: { x: 13.6, z: -82 } };
+function buildToyShop() {
+  const g = new T3.Group(); g.position.set(TOYSHOP.x, 0, TOYSHOP.z); g.rotation.y = -Math.PI / 2; scene.add(g);
+  const W = 8.4, D = 6.4, H = 3.7, FZ = 3.0;   // 가로 · 깊이 · 벽 높이 · 앞벽 위치(안 z)
+  const shopGlass = new T3.MeshPhongMaterial({ color: 0xffffff, map: winTex(), transparent: true, opacity: .38, shininess: 120, specular: 0xffffff, depthWrite: false });   // 안이 비치는 맑은 유리
+  const white = cmat(0xfffbf2), trim = cmat(0xf4efe4), mint = phong(0xbfe8d8, { map: (() => { const t = wallTex("siding").clone(); t.needsUpdate = true; t.repeat.set(W / 2.6, H / 2.6); return t; })() });
+  // 바닥 · 기단
+  box(W + .6, .3, D + .6, cmat(0xc9bfae), 0, .15, FZ - D / 2, g);
+  box(W + .3, .06, .5, cmat(0xb3a894), 0, .33, FZ + .32, g);
+  // 벽 (뒤 · 옆) — 질감 사이딩
+  box(W, H, .25, mint, 0, .3 + H / 2, FZ - D, g);
+  for (const sx of [-1, 1]) box(.25, H, D, mint, sx * (W / 2 - .12), .3 + H / 2, FZ - D / 2, g);
+  // 옆벽 동그란 창
+  for (const sx of [-1, 1]) { const w = new T3.Mesh(GEOD.tsRound || (GEOD.tsRound = new T3.CircleGeometry(.55, 20)), winMat(0xcfe8f0, 0xffe2a8)); w.position.set(sx * (W / 2 + .01), 2.3, FZ - D / 2); w.rotation.y = sx * Math.PI / 2; g.add(w);
+    const ring = new T3.Mesh(GEOD.tsRing || (GEOD.tsRing = new T3.TorusGeometry(.58, .08, 8, 24)), white); ring.position.copy(w.position); ring.rotation.y = sx * Math.PI / 2; g.add(ring); }
+  // 앞벽: 가운데 문 + 양쪽 큰 진열창, 위는 간판 벽
+  const front = (x, w, y, h) => box(w, h, .25, mint, x, y, FZ, g);
+  front(0, W, .3 + H - .45, .9);                     // 창 위 띠
+  front(-W / 2 + .35, .7, .3 + 1.4, 2.8); front(W / 2 - .35, .7, .3 + 1.4, 2.8);   // 양쪽 기둥
+  for (const sx of [-1, 1]) front(sx * 1.05, .3, .3 + 1.4, 2.8);                  // 문 옆 기둥
+  for (const sx of [-1, 1]) {   // 진열창 (창틀 · 아래 판 · 유리)
+    const cx = sx * 2.45;
+    box(2.4, .7, .3, white, cx, .3 + .35, FZ + .02, g);
+    const gl = box(2.4, 2.0, .06, shopGlass, cx, .3 + 1.7, FZ + .04, g);
+    box(2.55, .1, .34, white, cx, .3 + .72, FZ + .05, g); box(2.55, .1, .34, white, cx, .3 + 2.72, FZ + .05, g);
+    for (const dx of [-1.25, 0, 1.25]) box(.08, 2.0, .3, white, cx + dx, .3 + 1.7, FZ + .05, g);
+    // 꽃 상자
+    box(2.3, .35, .45, cmat(0x8a5a32), cx, .3 + .5, FZ + .35, g);
+    for (let i = 0; i < 6; i++) { const fl = new T3.Mesh(GEOD.tsFl || (GEOD.tsFl = new T3.SphereGeometry(.13, 8, 6)), cmat([0xff6a8a, 0xffd84d, 0xffffff, 0xff9a3c][i % 4])); fl.position.set(cx - .95 + i * .38, .3 + .78, FZ + .37); g.add(fl);
+      const lf = new T3.Mesh(GEOD.tsLf || (GEOD.tsLf = new T3.SphereGeometry(.12, 6, 5)), cmat(0x4f9a4a)); lf.position.set(cx - .78 + i * .38, .3 + .7, FZ + .42); g.add(lf); }
+    // 진열창 안: 매달린 풍선 · 과자 상자 더미 · 장난감 로켓
+    for (let i = 0; i < 3; i++) { const bc = [0xff5a6e, 0x4fb6ff, 0xffd84d][(i + (sx > 0 ? 1 : 0)) % 3];
+      const bl = new T3.Mesh(GEOD.tsBal || (GEOD.tsBal = new T3.SphereGeometry(.24, 14, 10)), cmat(bc, { emissive: new T3.Color(bc).multiplyScalar(.25), shininess: 80 })); bl.scale.y = 1.15; bl.position.set(cx - .7 + i * .7, .3 + 2.35 - (i % 2) * .2, FZ - .5); g.add(bl); }
+    for (let i = 0; i < 4; i++) box(.42, .5, .3, cmat([0xf0a24a, 0xe2522c, 0x4fa36a, 0xffd84d][i]), cx - .75 + i * .5, .3 + .95, FZ - .5, g);
+    if (sx > 0) { const rk = new T3.Group(); rk.position.set(cx + .6, .3 + 1.55, FZ - .45); g.add(rk); plain(new T3.CylinderGeometry(.13, .13, .55, 10), cmat(0xffffff), 0, 0, 0, rk); plain(new T3.ConeGeometry(.13, .25, 10), cmat(0xe2402a), 0, .4, 0, rk); }
+    else { const pw = plain(new T3.TorusGeometry(.25, .07, 8, 18), cmat(0xff7ad9), cx + .6, .3 + 1.5, FZ - .45, g); pw.rotation.y = .3; }
+  }
+  // 가게 안 벽 · 진열 선반 (밤에는 따뜻한 불빛)
+  box(W - .6, H - .2, .1, bulbMat(0xf6eedc, 0xffd99a), 0, .3 + (H - .2) / 2, FZ - 1.6, g);
+  for (const y of [1.2, 2.0, 2.8]) box(W - .8, .08, .45, cmat(0xa8723c), 0, .3 + y, FZ - 1.38, g);
+  for (let i = 0; i < 18; i++) box(.3, .34, .26, cmat([0xff5a6e, 0xffd84d, 0x4fb6ff, 0x5fd38a, 0xff9a3c, 0x9a7bff][i % 6]), -3.4 + (i % 9) * .85, .3 + (i < 9 ? 1.42 : 2.22), FZ - 1.4, g);
+  // 문: 유리 + 문틀 + 손잡이 + 「영업 중」 팻말
+  box(1.8, 2.5, .06, shopGlass, 0, .3 + 1.25, FZ + .03, g);
+  box(1.95, .12, .3, white, 0, .3 + 2.56, FZ + .04, g); box(.08, 2.5, .3, white, 0, .3 + 1.25, FZ + .04, g);
+  box(.06, .5, .1, cmat(0xd4a64a), -.18, .3 + 1.25, FZ + .12, g); box(.06, .5, .1, cmat(0xd4a64a), .18, .3 + 1.25, FZ + .12, g);
+  facePlane(txtTex(256, 128, "#fff8df", [["영업 중", 54, "#d33a2c", .42], ["OPEN · 어서 와요", 22, "#5a3a1c", .8, "700 "]]), .7, .35, 0, .3 + 1.9, FZ + .1, g, 0);
+  // 지붕: 낮은 박공 · 붉은 기와 질감
+  { const tileT = canvasTex(128, 128, (c, w, hh) => { c.fillStyle = "#d8553e"; c.fillRect(0, 0, w, hh); for (let y = 0; y < hh; y += 16) { c.fillStyle = "rgba(0,0,0,.18)"; c.fillRect(0, y + 13, w, 3); for (let x = (y / 16 % 2) * 16; x < w; x += 32) { c.fillStyle = "rgba(255,255,255,.08)"; c.fillRect(x, y, 14, 12); } } }, 1, 1);
+    tileT.wrapS = tileT.wrapT = T3.RepeatWrapping; tileT.repeat.set(4, 3);
+    const rm = phong(0xffffff, { map: tileT, side: T3.DoubleSide });
+    for (const s of [-1, 1]) { const r = box(W + .8, .14, D / 2 + .7, rm, 0, .3 + H + .55, FZ - D / 2 + s * (D / 4 + .2), g); r.rotation.x = s * .32; }
+    const gab = new T3.Shape(); gab.moveTo(-D / 2 - .1, 0); gab.lineTo(D / 2 + .1, 0); gab.lineTo(0, 1.15); gab.closePath();
+    for (const sx of [-1, 1]) { const m = new T3.Mesh(new T3.ShapeGeometry(gab), mint); m.position.set(sx * (W / 2 - .02), .3 + H, FZ - D / 2); m.rotation.y = sx * Math.PI / 2; g.add(m); }
+    box(.6, .9, .6, cmat(0xb84a3a), 2.4, .3 + H + 1.2, FZ - D / 2 - .8, g);   // 굴뚝
+  }
+  // 차양: 빨강/하양 줄무늬 · 아래 물결 가장자리
+  { const aw = canvasTex(256, 128, (c, w, hh) => { for (let i = 0; i < 16; i++) { c.fillStyle = i % 2 ? "#fff6e8" : "#e8473a"; c.fillRect(i * 16, 0, 16, hh * .78); c.beginPath(); c.arc(i * 16 + 8, hh * .78, 8, 0, Math.PI); c.fill(); } c.fillStyle = "rgba(0,0,0,.08)"; c.fillRect(0, 0, w, 6); }, 1, 1);
+    const am = new T3.MeshLambertMaterial({ map: aw, transparent: true, side: T3.DoubleSide, alphaTest: .4 });
+    const a = new T3.Mesh(new T3.PlaneGeometry(W + .3, 1.5), am); a.position.set(0, .3 + H - .55, FZ + .62); a.rotation.x = -.62; g.add(a);
+    for (const sx of [-1, 1]) box(.06, .06, 1.25, cmat(0x5a3a1c), sx * (W / 2 - .2), .3 + H - .58, FZ + .55, g).rotation.x = .65;
+  }
+  // 간판: 지붕 위 나무 판 + 큰 글씨 + 풍선 그림
+  { const sg = canvasTex(512, 160, (c, w, hh) => { c.fillStyle = "#6e4524"; c.fillRect(0, 0, w, hh); for (let y = 0; y < hh; y += 22) { c.fillStyle = "rgba(0,0,0,.12)"; c.fillRect(0, y, w, 2); }
+      c.fillStyle = "#fff8df"; c.beginPath(); c.roundRect ? c.roundRect(10, 10, w - 20, hh - 20, 18) : c.rect(10, 10, w - 20, hh - 20); c.fill();
+      c.fillStyle = "#d33a2c"; c.font = "900 68px 'Black Han Sans','IBM Plex Sans KR',sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("부두 구멍가게", w / 2 + 44, hh * .46);
+      c.fillStyle = "#5a3a1c"; c.font = "700 22px 'IBM Plex Sans KR',sans-serif"; c.fillText("놀거리 · 군것질 · 소원 풍등", w / 2 + 44, hh * .82);
+      c.fillStyle = "#ff5a6e"; c.beginPath(); c.ellipse(40, 56, 18, 22, 0, 0, 7); c.fill(); c.fillStyle = "#4fb6ff"; c.beginPath(); c.ellipse(62, 70, 15, 19, 0, 0, 7); c.fill(); c.fillStyle = "#ffd84d"; c.beginPath(); c.ellipse(34, 92, 12, 15, 0, 0, 7); c.fill(); c.strokeStyle = "#5a3a1c"; c.lineWidth = 2; c.beginPath(); c.moveTo(40, 78); c.lineTo(50, 140); c.moveTo(62, 89); c.lineTo(52, 140); c.moveTo(34, 107); c.lineTo(48, 140); c.stroke(); }, 1, 1);
+    const wood = cmat(0x5a3518), sy = .3 + H + 1.35, sz = FZ + .75;
+    const board = new T3.Mesh(new T3.BoxGeometry(5.2, 1.62, .16), [wood, wood, wood, wood, new T3.MeshBasicMaterial({ map: sg }), wood]); board.position.set(0, sy, sz); g.add(board);
+    for (const sx of [-1, 1]) box(.12, 1.5, .12, wood, sx * 2.2, sy - 1.3, sz - .05, g);
+  }
+  // 꼬마전구: 차양 아래 줄 (밤에 켜져요)
+  for (let i = 0; i < 15; i++) { const x = -W / 2 + .3 + i * ((W - .6) / 14), sag = Math.sin(i / 14 * Math.PI) * .18;
+    plain(GEOD.tsBulb || (GEOD.tsBulb = new T3.SphereGeometry(.07, 8, 6)), bulbMat([0xffe7a0, 0xffb3c6, 0xb8e4ff][i % 3], [0xffd060, 0xff7aa8, 0x7acbff][i % 3]), x, .3 + H - 1.25 - sag, FZ + 1.12, g); }
+  // ── 앞마당 ──
+  { const pv = canvasTex(256, 256, (c, w, hh) => { c.fillStyle = "#cbbca4"; c.fillRect(0, 0, w, hh); for (let y = 0; y < hh; y += 32) for (let x = (y / 32 % 2) * 16; x < w + 32; x += 32) { const v = 226 + ((x / 32 + y / 32) % 3) * 8 + Math.floor(Math.random() * 8); c.fillStyle = "rgb(" + v + "," + (v - 12) + "," + (v - 30) + ")"; c.fillRect(x + 1.5, y + 1.5, 29, 29); } }, 1, 1);
+    pv.wrapS = pv.wrapT = T3.RepeatWrapping; pv.repeat.set(3, 2);
+    const yard = new T3.Mesh(new T3.BoxGeometry(W + 3, .6, 6.2), phong(0xffffff, { map: pv })); yard.position.set(0, .36, FZ + 3.4); g.add(yard);
+    box(W + 3.2, .62, .2, cmat(0xb3a894), 0, .1, FZ + 6.5, g); for (const sx of [-1, 1]) box(.2, .62, 6.2, cmat(0xb3a894), sx * (W / 2 + 1.6), .1, FZ + 3.4, g); }
+  // 뽑기(캡슐) 기계 2대
+  for (const [x, c] of [[-W / 2 + .9, 0xe2402a], [-W / 2 + 1.75, 0x2f7fd8]]) {
+    const m = new T3.Group(); m.position.set(x, .36, FZ + 1.0); g.add(m);
+    plain(new T3.BoxGeometry(.62, .9, .55), cmat(c), 0, .45, 0, m); plain(new T3.BoxGeometry(.3, .18, .08), cmat(0x2a2a30), 0, .45, .29, m);
+    plain(new T3.CylinderGeometry(.08, .08, .06, 12), cmat(0xd4a64a), 0, .7, .29, m).rotation.x = Math.PI / 2;
+    const dome = plain(new T3.SphereGeometry(.34, 16, 12), new T3.MeshPhongMaterial({ color: 0xffffff, transparent: true, opacity: .35, shininess: 140, specular: 0xffffff }), 0, 1.22, 0, m);
+    for (let i = 0; i < 14; i++) plain(GEOD.tsCap || (GEOD.tsCap = new T3.SphereGeometry(.075, 8, 6)), cmat([0xff5a6e, 0xffd84d, 0x5fd38a, 0x4fb6ff, 0xffffff][i % 5]), (Math.random() - .5) * .38, 1.05 + Math.random() * .22, (Math.random() - .5) * .38, m);
+    plain(new T3.CylinderGeometry(.22, .3, .1, 14), cmat(c), 0, 1.55, 0, m);
+  }
+  // 아이스크림 냉동고
+  { const f = new T3.Group(); f.position.set(W / 2 - 1.2, .36, FZ + 1.0); g.add(f);
+    plain(new T3.BoxGeometry(1.4, .8, .7), cmat(0xffffff), 0, .4, 0, f); plain(new T3.BoxGeometry(1.42, .08, .72), cmat(0x3a8fd8), 0, .84, 0, f);
+    facePlane(txtTex(256, 96, "#3a8fd8", [["🍦 아이스크림", 40, "#ffffff", .52]]), 1.2, .42, 0, .42, .36, f, 0); }
+  // 파라솔 테이블 + 동그란 의자
+  { const t = new T3.Group(); t.position.set(-2.4, .36, FZ + 4.1); g.add(t);
+    plain(new T3.CylinderGeometry(.55, .55, .06, 18), white, 0, .75, 0, t); plain(new T3.CylinderGeometry(.05, .05, .75, 8), cmat(0x888888), 0, .38, 0, t);
+    plain(new T3.CylinderGeometry(.04, .04, 2.4, 6), cmat(0xdddddd), 0, 1.4, 0, t);
+    const um = canvasTex(128, 32, (c, w, hh) => { for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? "#fff6e8" : "#ff8a3c"; c.fillRect(i * 16, 0, 16, hh); } }, 1, 1);
+    plain(new T3.ConeGeometry(1.5, .55, 16, 1, true), new T3.MeshLambertMaterial({ map: um, side: T3.DoubleSide }), 0, 2.5, 0, t);
+    for (const a of [0, 2.1, 4.2]) plain(new T3.CylinderGeometry(.22, .2, .45, 12), cmat([0xff5a6e, 0x4fb6ff, 0xffd84d][Math.round(a / 2.1)]), Math.cos(a) * .95, .23, Math.sin(a) * .95, t); }
+  // 벤치 (가게 앞 왼쪽 · 창 아래)
+  { const b = new T3.Group(); b.position.set(2.4, .36, FZ + 4.4); g.add(b); const wd = cmat(0xa8723c);
+    box(1.8, .08, .45, wd, 0, .45, 0, b); box(1.8, .5, .07, wd, 0, .75, -.2, b); for (const sx of [-1, 1]) box(.08, .45, .4, cmat(0x3a3a40), sx * .78, .22, 0, b); }
+  // 칠판 입간판
+  { const c = new T3.Group(); c.position.set(.0, .36, FZ + 2.4); c.rotation.y = .25; g.add(c);
+    const bt = canvasTex(160, 224, (cx, w, hh) => { cx.fillStyle = "#2f4a3f"; cx.fillRect(0, 0, w, hh); cx.strokeStyle = "#8a5a32"; cx.lineWidth = 10; cx.strokeRect(0, 0, w, hh);
+      cx.fillStyle = "#fff6e0"; cx.textAlign = "center"; cx.font = "900 26px 'Black Han Sans',sans-serif"; cx.fillText("오늘의 추천", w / 2, 44);
+      cx.font = "700 19px 'IBM Plex Sans KR',sans-serif"; ["🎇 불꽃 스틱", "🍤 새우깡", "🏮 소원 풍등", "🎈 헬륨 풍선"].forEach((t, i) => cx.fillText(t, w / 2, 86 + i * 34)); }, 1, 1);
+    const bd = new T3.Mesh(new T3.PlaneGeometry(.62, .86), new T3.MeshLambertMaterial({ map: bt })); bd.position.set(0, .62, .14); bd.rotation.x = -.2; c.add(bd);
+    box(.66, .9, .04, cmat(0x8a5a32), 0, .6, .1, c).rotation.x = -.2; box(.66, .9, .04, cmat(0x8a5a32), 0, .6, -.14, c).rotation.x = .2; }
+  // 풍선 다발 (흔들흔들) · 바람개비 (빙글빙글)
+  { const bunch = new T3.Group(); bunch.position.set(W / 2 + .9, .36, FZ + 2.2); g.add(bunch);
+    plain(new T3.CylinderGeometry(.05, .07, 1.0, 8), cmat(0x5a3a1c), 0, .5, 0, bunch);
+    const bs = [];
+    for (let i = 0; i < 6; i++) { const bc = [0xff5a6e, 0xffb347, 0xffd84d, 0x5fd38a, 0x4fb6ff, 0xff7ad9][i], a = i / 6 * 6.28, y = 2.5 + (i % 3) * .35;
+      const piv = new T3.Group(); piv.position.y = 1.0; bunch.add(piv);
+      const bl = plain(GEOD.tsBal2 || (GEOD.tsBal2 = new T3.SphereGeometry(.3, 14, 10)), cmat(bc, { emissive: new T3.Color(bc).multiplyScalar(.3), shininess: 90 }), Math.cos(a) * .35, y - 1, Math.sin(a) * .35, piv); bl.scale.y = 1.15;
+      piv.add(new T3.Line(new T3.BufferGeometry().setFromPoints([new T3.Vector3(0, 0, 0), new T3.Vector3(Math.cos(a) * .35, y - 1.35, Math.sin(a) * .35)]), new T3.LineBasicMaterial({ color: 0xffffff })));
+      bs.push({ piv, ph: i * 1.1 }); }
+    const wheels = [];
+    for (const [x, z] of [[-W / 2 - .9, FZ + 2.0], [-W / 2 - .9, FZ + 4.6], [W / 2 + .9, FZ + 4.6]]) {
+      const p = new T3.Group(); p.position.set(x, .36, z); g.add(p); plain(new T3.CylinderGeometry(.03, .03, 1.3, 6), cmat(0xffffff), 0, .65, 0, p);
+      const wh = new T3.Group(); wh.position.set(0, 1.3, .06); p.add(wh);
+      for (let k = 0; k < 4; k++) { const bl = plain(new T3.ConeGeometry(.16, .34, 3), cmat([0xff5a6e, 0xffd84d, 0x4fb6ff, 0x5fd38a][k], { side: T3.DoubleSide }), 0, 0, 0, wh); bl.rotation.z = k * Math.PI / 2; bl.position.set(Math.cos(k * Math.PI / 2 + .8) * .16, Math.sin(k * Math.PI / 2 + .8) * .16, 0); bl.scale.z = .2; }
+      wheels.push(wh); }
+    FACADE_ANIM.push((t) => { for (const b of bs) { b.piv.rotation.z = Math.sin(t * 1.3 + b.ph) * .08; b.piv.rotation.x = Math.cos(t * 1.1 + b.ph) * .06; } for (const w of wheels) w.rotation.z = t * 3.2; });
+  }
+  // 가로등 + 화분 나무
+  { const lp = new T3.Group(); lp.position.set(-W / 2 - 1.1, .36, FZ + 6.0); g.add(lp);
+    plain(new T3.CylinderGeometry(.07, .1, 3.2, 10), cmat(0x2f4a3f), 0, 1.6, 0, lp);
+    plain(new T3.SphereGeometry(.26, 14, 10), bulbMat(0xfff4d8, 0xffd27a), 0, 3.35, 0, lp); plain(new T3.ConeGeometry(.32, .22, 12), cmat(0x2f4a3f), 0, 3.6, 0, lp); }
+  for (const [x, z] of [[W / 2 + 1.0, FZ - .6], [-W / 2 - 1.0, FZ - .6]]) {
+    const t = new T3.Group(); t.position.set(x, .36, z); g.add(t);
+    plain(new T3.CylinderGeometry(.42, .32, .55, 12), cmat(0xc96a3a), 0, .28, 0, t);
+    plain(new T3.CylinderGeometry(.06, .08, .9, 6), cmat(0x6b4a2a), 0, 1.0, 0, t);
+    plain(new T3.IcosahedronGeometry(.62, 0), cmat(0x5aa35a), 0, 1.75, 0, t); plain(new T3.IcosahedronGeometry(.42, 0), cmat(0x6dbb63), .25, 2.15, .1, t);
+  }
+  // 걸어 다닐 때 막히는 곳 (건물 · 앞마당 소품)
+  const toW = (lx, lz) => [TOYSHOP.x - lz, TOYSHOP.z + lx];
+  const blockL = (x0, x1, z0, z1) => { const a = toW(x0, z0), b = toW(x1, z1); BLOCKS.push([Math.min(a[0], b[0]), Math.max(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[1], b[1])]); };
+  blockL(-W / 2 - .3, W / 2 + .3, FZ - D - .3, FZ + .2);
+  blockL(-W / 2 + .5, -W / 2 + 2.1, FZ + .7, FZ + 1.35); blockL(W / 2 - 1.95, W / 2 - .45, FZ + .6, FZ + 1.4);
+  blockL(-3.1, -1.7, FZ + 3.4, FZ + 4.8);
+}
 function buildShops() {
   for (const b of BUILDINGS) {
     const L = SHOP_LOOK[b.id] || { col: b.color, h: 5 + (hashStr(b.id) % 3) }, hgt = L.h;
