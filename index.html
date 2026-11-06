@@ -2100,7 +2100,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.118.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.118.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2176,7 +2176,7 @@ const BUILTIN = [
   { id: "b-dageumbari", name: "다금바리", tier: 5, min: 60, max: 120, where: "night", desc: "제주 바다의 귀한 손님. 맛으로는 따라올 자가 없어요.", art: { body: "#7a5a46", belly: "#d8c0a8", fin: "#5a3e2e", pattern: "spots", pc: "#4a2e20", len: 1.05, th: 1.1, dense: true } },
   { id: "b-geumdom", name: "황금 참돔", tier: 7, min: 60, max: 110, desc: "백 년에 한 번 나타난다는 금빛 참돔. 보면 행운이 온대요.", art: { body: "#f2c230", belly: "#fff2b0", fin: "#e8a21a", pattern: "spots", pc: "#fff6d0", len: 1, th: 1.15, shimmer: true, glow: "rgba(255,216,77,.55)" } },
   { id: "b-byeolgaori", name: "별빛 가오리", tier: 7, min: 150, max: 300, where: "night", desc: "밤하늘을 등에 업은 가오리. 별빛이 반짝여요.", art: { shape: "ray", body: "#1a2450", belly: "#3a4a8a", fin: "#1a2450", pattern: "spots", pc: "#fff6c0", dense: true, glow: "rgba(120,140,255,.45)" } },
-  { id: "b-haeryong", name: "바다의 용", tier: 9, min: 300, max: 800, where: "sea", desc: "깊은 바다를 지키는 전설 속 해룡. 비늘이 옥빛으로 빛나요.", model: "fish/b-haeryong.glb", pack: 5, art: { shape: "dragon", body: "#2f9a86", belly: "#bff2e0", fin: "#e8c13a", pc: "#f2e08a", th: 1.25, glow: "rgba(63,214,204,.5)" } },
+  { id: "b-haeryong", name: "바다의 용", tier: 9, min: 300, max: 800, where: "sea", desc: "깊은 바다를 지키는 전설 속 해룡. 비늘이 옥빛으로 빛나요.", model: "fish/b-haeryong.glb", pack: 6, art: { shape: "dragon", body: "#2f9a86", belly: "#bff2e0", fin: "#e8c13a", pc: "#f2e08a", th: 1.25, glow: "rgba(63,214,204,.5)" } },
   // 3D 모델 물고기 (fish/*.glb)
   ...[
     ["b-clown", "흰동가리", 0, 6, 11, "말미잘 사이에 숨어 사는 주황 줄무늬 꼬마.", "01_Clownfish", "#f07a2a", "stripes", "#ffffff"],
@@ -2338,16 +2338,16 @@ BUILTIN.push(
   { id: "b-baekgeum", name: "백금 잉어", tier: 7, min: 40, max: 80, where: "dawn", desc: "백금으로 빚은 듯한 잉어.", model: "fish/b-baekgeum.glb", pack: 5, art: { body: "#e8e6df", belly: "#fbfaf6", fin: "#d8d4c8", len: 1, th: 1.0 } },
   { id: "b-unicorn", name: "유니콘 상어", tier: 7, min: 200, max: 350, where: "night", desc: "이마에 뿔이 돋은 전설의 상어.", model: "fish/b-unicorn.glb", pack: 5, art: { body: "#8f7fb8", belly: "#e6e0f2", fin: "#726096", len: 1, th: 1.0 } },
   { id: "b-nalgaehaema", name: "날개 해마", tier: 7, min: 10, max: 25, where: "night", desc: "하늘을 나는 날개가 달린 해마.", model: "fish/b-nalgaehaema.glb", pack: 5, art: { shape: "dragon", body: "#d8a83a", belly: "#fbeec2", fin: "#e8c13a", len: 1, th: 1.0 } },
-  { id: "b-kraken", name: "심연의 크라켄", tier: 8, min: 800, max: 2000, where: "night", desc: "심연에서 배를 끌어당기는 전설의 괴수.", model: "fish/b-kraken.glb", pack: 5, art: { shape: "octo", body: "#5e2f4a", belly: "#8a5570", fin: "#472238", len: 1, th: 1.0 } },
-  { id: "b-yongingeo", name: "용이 된 잉어", tier: 8, min: 300, max: 700, where: "dawn", desc: "천 년을 수행해 용이 된 잉어.", model: "fish/b-yongingeo.glb", pack: 5, art: { shape: "dragon", body: "#d8b13a", belly: "#f8ecc2", fin: "#c23c2e", len: 1, th: 1.0 } },
-  { id: "b-siganjangeo", name: "시간을 삼킨 장어", tier: 8, min: 200, max: 500, where: "night", desc: "나이를 먹지 않는 장어. 눈이 시계처럼 돌아요.", model: "fish/b-siganjangeo.glb", pack: 5, art: { shape: "eel", body: "#4a4460", belly: "#7a7294", fin: "#38334a", len: 1, th: 1.0 } },
-  { id: "b-jormungandr", name: "요르문간드", tier: 8, min: 1000, max: 3000, where: "sea", desc: "세계를 한 바퀴 감는다는 바다뱀.", model: "fish/b-jormungandr.glb", pack: 5, art: { shape: "eel", body: "#3f6d5a", belly: "#a8ccb4", fin: "#2f5747", len: 1, th: 1.3 } },
-  { id: "b-leviathan", name: "공허 리바이어던", tier: 8, min: 900, max: 2500, where: "night", desc: "빛조차 닿지 않는 곳의 군주.", model: "fish/b-leviathan.glb", pack: 5, art: { body: "#2e2a3e", belly: "#55506e", fin: "#232030", len: 1, th: 1.2 } },
-  { id: "b-chawon", name: "차원의 상어", tier: 8, min: 300, max: 600, where: "sea", desc: "물결이 갈라질 때만 보이는 상어.", model: "fish/b-chawon.glb", pack: 5, art: { body: "#6d5a9c", belly: "#d8cff0", fin: "#54467c", len: 1, th: 1.0 } },
-  { id: "b-jungnyeok", name: "중력을 거스르는 고래", tier: 8, min: 800, max: 1800, where: "sea", desc: "하늘과 바다의 경계에서 헤엄치는 고래.", model: "fish/b-jungnyeok.glb", pack: 5, art: { body: "#5a7d9c", belly: "#dcebf4", fin: "#47687e", len: 1, th: 1.5 } },
-  { id: "b-coelacanth", name: "태초의 실러캔스", tier: 9, min: 150, max: 200, where: "night", desc: "4억 년 전 바다에서 그대로 온 물고기.", model: "fish/b-coelacanth.glb", pack: 5, art: { body: "#4a5a78", belly: "#9aa8bc", fin: "#3a4a63", pattern: "spots", pc: "#c8d2de", len: 1, th: 1.0 } },
-  { id: "b-ammonite", name: "태초의 암모나이트", tier: 9, min: 60, max: 150, where: "sea", desc: "소용돌이 껍데기의 고대 두족류.", model: "fish/b-ammonite.glb", pack: 5, art: { shape: "clam", body: "#b08d57", belly: "#e8dcc0", fin: "#8f713f", len: 1, th: 1.0 } },
-  { id: "b-megalodon", name: "태초의 메갈로돈", tier: 9, min: 1200, max: 1800, where: "sea", desc: "고대 바다의 절대 포식자.", model: "fish/b-megalodon.glb", pack: 5, art: { body: "#7d8894", belly: "#eef0f2", fin: "#626c76", len: 1, th: 1.0 } }
+  { id: "b-kraken", name: "심연의 크라켄", tier: 8, min: 800, max: 2000, where: "night", desc: "심연에서 배를 끌어당기는 전설의 괴수.", model: "fish/b-kraken.glb", pack: 6, art: { shape: "octo", body: "#5e2f4a", belly: "#8a5570", fin: "#472238", len: 1, th: 1.0 } },
+  { id: "b-yongingeo", name: "용이 된 잉어", tier: 8, min: 300, max: 700, where: "dawn", desc: "천 년을 수행해 용이 된 잉어.", model: "fish/b-yongingeo.glb", pack: 6, art: { shape: "dragon", body: "#d8b13a", belly: "#f8ecc2", fin: "#c23c2e", len: 1, th: 1.0 } },
+  { id: "b-siganjangeo", name: "시간을 삼킨 장어", tier: 8, min: 200, max: 500, where: "night", desc: "나이를 먹지 않는 장어. 눈이 시계처럼 돌아요.", model: "fish/b-siganjangeo.glb", pack: 6, art: { shape: "eel", body: "#4a4460", belly: "#7a7294", fin: "#38334a", len: 1, th: 1.0 } },
+  { id: "b-jormungandr", name: "요르문간드", tier: 8, min: 1000, max: 3000, where: "sea", desc: "세계를 한 바퀴 감는다는 바다뱀.", model: "fish/b-jormungandr.glb", pack: 6, art: { shape: "eel", body: "#3f6d5a", belly: "#a8ccb4", fin: "#2f5747", len: 1, th: 1.3 } },
+  { id: "b-leviathan", name: "공허 리바이어던", tier: 8, min: 900, max: 2500, where: "night", desc: "빛조차 닿지 않는 곳의 군주.", model: "fish/b-leviathan.glb", pack: 6, art: { body: "#2e2a3e", belly: "#55506e", fin: "#232030", len: 1, th: 1.2 } },
+  { id: "b-chawon", name: "차원의 상어", tier: 8, min: 300, max: 600, where: "sea", desc: "물결이 갈라질 때만 보이는 상어.", model: "fish/b-chawon.glb", pack: 6, art: { body: "#6d5a9c", belly: "#d8cff0", fin: "#54467c", len: 1, th: 1.0 } },
+  { id: "b-jungnyeok", name: "중력을 거스르는 고래", tier: 8, min: 800, max: 1800, where: "sea", desc: "하늘과 바다의 경계에서 헤엄치는 고래.", model: "fish/b-jungnyeok.glb", pack: 6, art: { body: "#5a7d9c", belly: "#dcebf4", fin: "#47687e", len: 1, th: 1.5 } },
+  { id: "b-coelacanth", name: "태초의 실러캔스", tier: 9, min: 150, max: 200, where: "night", desc: "4억 년 전 바다에서 그대로 온 물고기.", model: "fish/b-coelacanth.glb", pack: 6, art: { body: "#4a5a78", belly: "#9aa8bc", fin: "#3a4a63", pattern: "spots", pc: "#c8d2de", len: 1, th: 1.0 } },
+  { id: "b-ammonite", name: "태초의 암모나이트", tier: 9, min: 60, max: 150, where: "sea", desc: "소용돌이 껍데기의 고대 두족류.", model: "fish/b-ammonite.glb", pack: 6, art: { shape: "clam", body: "#b08d57", belly: "#e8dcc0", fin: "#8f713f", len: 1, th: 1.0 } },
+  { id: "b-megalodon", name: "태초의 메갈로돈", tier: 9, min: 1200, max: 1800, where: "sea", desc: "고대 바다의 절대 포식자.", model: "fish/b-megalodon.glb", pack: 6, art: { body: "#7d8894", belly: "#eef0f2", fin: "#626c76", len: 1, th: 1.0 } }
 );
 
 // v1.73 (이재헌님 지시): 오프라인 제작 모델은 v1.72에서 새로 등록한 어종에만 적용. 기존 어종은 원래 표시(에셋 팩 모델·절차 생성)로 되돌림 — 이 지정 블록을 되살리지 말 것.
@@ -9573,7 +9573,8 @@ function loadFishModels() {
     .then(() => loadPack("fish/models2.json", withModel.filter(f => f.pack === 2))).then(onModelsReady)
     .then(() => loadPack("fish/models3.json", withModel.filter(f => f.pack === 3))).then(onModelsReady)
     .then(() => loadPack("fish/models4.json", withModel.filter(f => f.pack === 4))).then(onModelsReady)
-    .then(() => loadPack("fish/models5.json", withModel.filter(f => f.pack === 5))).then(onModelsReady);
+    .then(() => loadPack("fish/models5.json", withModel.filter(f => f.pack === 5))).then(onModelsReady)
+    .then(() => loadPack("fish/models6.json", withModel.filter(f => f.pack === 6))).then(onModelsReady);
 }
 function onModelsReady() { makeThumbs(); }
 function makeThumbs() {
