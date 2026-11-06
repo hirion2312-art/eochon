@@ -2050,7 +2050,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.113.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.113.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -14220,7 +14220,7 @@ function showConsent(next) {
 /* ===================== 퀵바 꾸미기 (v1.32) =====================
    화면 아래 막대에 자주 쓰는 메뉴를 최대 6개까지 골라 넣고 순서를 바꿔요. 「메뉴」 칸은 항상 맨 끝에 있어요.
    P.quick에 저장해서 다른 기기에서도 같아요 */
-const QUICK_MAX = 7, QUICK_DEF = ["bag", "dex", "travel", "emote", "community", "achieve", "settings"];   // v1.43: 고정 (퀵바 꾸미기 없앰)
+const QUICK_MAX = 8, QUICK_DEF = ["bag", "dex", "travel", "emote", "toys", "community", "achieve", "settings"];   // v1.43: 고정 (퀵바 꾸미기 없앰)
 const QSVG = {
   toys: '<path d="M12 3a5 5 0 0 1 5 5.2c0 3.3-2.6 6.3-5 6.8-2.4-.5-5-3.5-5-6.8A5 5 0 0 1 12 3z"/><path d="M12 15l-1 2h2l-1-2M12 17c0 2-2 2.5-1 4"/>',
   quests: '<path d="M7 3h10v18l-5-3-5 3z"/><path d="M10 8h4M10 12h4"/>',
