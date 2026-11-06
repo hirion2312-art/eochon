@@ -1628,7 +1628,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 /* ===== v1.95 모바일 우선 개편 ===== */
 @media (max-width:820px){
   /* 퀵바: 큰 칸 5개 (가방 · 도감 · 지도 · 채팅 · 메뉴) — 나머지(커뮤니티 · 업적 · 인사 · 설정)는 메뉴 안에 */
-  .dock .chatonly,.dock button[data-q="toys"],.dock button[data-q="community"],.dock button[data-q="achieve"],.dock button[data-q="settings"],.dock button[data-q="quests"],.dock button[data-q="ach"],.dock button[data-q="attend"],.dock button[data-q="guide"],.dock button[data-q="rank"],.dock button[data-q="profile"],.dock button[data-q="card"],.dock button[data-q="offers"],.dock button[data-q="shop"],.dock button[data-q="sashimi"]{display:none!important}
+  .dock button[data-q="community"],.dock button[data-q="achieve"],.dock button[data-q="emote"],.dock button[data-q="settings"],.dock button[data-q="quests"],.dock button[data-q="ach"],.dock button[data-q="attend"],.dock button[data-q="guide"],.dock button[data-q="rank"],.dock button[data-q="profile"],.dock button[data-q="card"],.dock button[data-q="offers"],.dock button[data-q="shop"],.dock button[data-q="sashimi"]{display:none!important}
   .dock{gap:4px!important}.dock>button:not([hidden]){flex:1 1 0;min-width:0;min-height:54px}
   .dock>button span:not(.cnt):not(.badge):not(.qbadge){font-size:11.5px}
   /* 손맛 싸움: 퀵바를 숨기고, 정보는 꽉 차게 · 아래 한 줄에 드랙(가로) + 큰 감기 버튼 */
@@ -1716,15 +1716,6 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .ihow{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;background:rgba(23,138,138,.14);box-shadow:inset 0 0 0 1.5px rgba(23,138,138,.45);font-size:12.5px;line-height:1.5}
 .ishelf.hovering{box-shadow:0 0 0 2px #e2a514,0 8px 0 #c9a46b}
 @media (max-width:820px){.ibig.stage3d{min-height:0;background:none}.istage{width:64px;height:64px}.tshop>.ishelf .ikind{display:none}.tshop>.ishelf .iperks{flex-basis:100%;gap:3px}.tshop>.ishelf .iperks li{padding:3px 6px;font-size:12px}.tshop>.ishelf .iperks li:nth-child(n+4){display:none}.tshop>.ishelf .ihow{flex-basis:100%;font-size:12px;padding:8px 10px}}
-/* v1.110 휴대폰 소식 띠 */
-.newstick{display:none}
-@media (max-width:820px){
-  .newstick{display:block;position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 92px);z-index:6;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:6px 12px;border:0;border-radius:999px;background:rgba(10,18,26,.72);color:#fff;font:700 12.5px/1.2 inherit;box-shadow:0 2px 10px rgba(0,0,0,.25)}
-  .newstick[hidden]{display:none}
-  .newstick.pop{animation:ntpop .5s ease}
-  body.chat-open .newstick,body.sheet-open .newstick,body.fighting .newstick{display:none}
-}
-@keyframes ntpop{0%{transform:translateX(-50%) translateY(-8px);opacity:0}100%{transform:translateX(-50%) translateY(0);opacity:1}}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 /* 개인정보 안내 · 동의 (v1.96) */
 .consent-ov{position:fixed;inset:0;background:rgba(4,10,14,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:14px}
@@ -1978,7 +1969,6 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
   <div class="pop emopop glass" id="emotePop" hidden></div>
   <div class="mering" id="meRing" hidden></div>
 
-  <button class="newstick" id="newsTick" type="button" hidden aria-label="부두 소식 보기"></button>
   <aside class="hud chat glass" id="chatBox">
     <div class="chat-head"><span>📜 부두 소식</span><button id="chatToggle" aria-expanded="true">접기</button></div>
     <ol id="chatList"><li class="empty">소식을 불러오는 중이에요.</li></ol>
@@ -2064,7 +2054,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.114.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.115.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -4398,7 +4388,7 @@ function stepMove(dt) {
     else { ME.target = null; ME.onArrive = null; }
     ME.ry = lerpAngle(ME.ry, Math.atan2(dx, dz), Math.min(1, dt * 12));
     ME.moving = true; ME.st = running ? "run" : "walk";
-  } else { const was = ME.moving; if (was) ME.stopAt = Date.now(); ME.moving = false; if (ME.st === "walk" || ME.st === "run") ME.st = "idle"; if (was) presMove(true); }   // v1.110: 멈추는 순간 마지막 위치 · 서 있음을 꼭 보내요 (남의 화면에서 제자리 걸음 · 엉뚱한 자리)
+  } else { if (ME.moving) ME.stopAt = Date.now(); ME.moving = false; if (ME.st === "walk" || ME.st === "run") ME.st = "idle"; }
   if (ME.moving) presMove(false); else if (was) presMove(true);
 }
 function lerpAngle(a, b, t) { let d = ((b - a + Math.PI) % (Math.PI * 2)); if (d < 0) d += Math.PI * 2; return a + (d - Math.PI) * t; }
@@ -5184,15 +5174,7 @@ function onPeers(ch) {
 
 /* ===================== 채팅 ===================== */
 let lastSend = 0;
-function updateNewsTick() {   // v1.110 휴대폰: 위쪽 한 줄 소식 띠 (누르면 소식 창)
-  const el = document.getElementById("newsTick"); if (!el) return;
-  const last = (S.chat || []).slice(-1)[0];
-  if (!last || !MOBILE()) { el.hidden = true; return; }
-  const tx = last.kind === "brag" ? "🎣 " + last.nick + "님이 " + last.text + " " + fmtSize(last.size) + "!" : "📜 " + last.text;
-  if (el.dataset.id !== last.id) { el.dataset.id = last.id; el.textContent = tx; el.hidden = false; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }
-}
 function renderChat() {
-  try { updateNewsTick(); } catch {}
   const ttlOf = new Map(); for (const p of otherPeers(true)) if (p.uid && p.ttl) ttlOf.set(p.uid, p.ttl);   // 옛 메시지 보완용: 지금 접속 중인 사람의 칭호
   const list = $("chatList");
   const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 60;
@@ -9570,8 +9552,21 @@ const AURA_SPEC = {
   5: { n: 26, col: "#ffd76a", size: 3.2, r: .68, rings: [] },
   6: { n: 40, col: "#54f0dc", size: 3.6, r: .74, rings: [["#54f0dc", .84, .5]] },
   7: { n: 55, col: "#ff8ae0", size: 4.0, r: .8, rainbow: 1, rings: [["#ff8ae0", .92, -.65]] },
-  8: { n: 78, col: "#b07aff", size: 4.4, r: .86, rings: [["#b07aff", .97, .8], ["#7a4ae0", 1.08, -.55]] },
-  9: { n: 105, col: "#fff2b0", size: 4.8, r: .92, rings: [["#ffd76a", 1.04, .9], ["#ffffff", 1.16, -.7]] } };
+  8: { n: 90, col: "#b07aff", size: 4.4, r: .86, rings: [["#b07aff", .97, .8], ["#7a4ae0", 1.08, -.55]], rise: { n: 36, col: "#c9a2ff", spd: .15 }, disc: [["#b07aff", .3]] },
+  9: { n: 120, col: "#fff2b0", size: 4.8, r: .92, rings: [["#ffd76a", 1.04, .9], ["#ffffff", 1.16, -.7]], rise: { n: 52, col: "#ffe9a8", spd: .11 }, disc: [["#ffd76a", .38], ["#ffffff", -.26]] } };
+let _discTex = null;
+function auraDiscTex() {   // 오러 마법진 문양 (한 번만 그려요)
+  if (_discTex) return _discTex;
+  const cv = document.createElement("canvas"); cv.width = cv.height = 256;
+  const x = cv.getContext("2d"); x.translate(128, 128);
+  const grd = x.createRadialGradient(0, 0, 0, 0, 0, 120); grd.addColorStop(0, "rgba(255,255,255,.20)"); grd.addColorStop(.7, "rgba(255,255,255,.05)"); grd.addColorStop(1, "rgba(255,255,255,0)");
+  x.fillStyle = grd; x.beginPath(); x.arc(0, 0, 120, 0, Math.PI * 2); x.fill();
+  const ring = (r, dash, w) => { x.beginPath(); x.setLineDash(dash); x.lineWidth = w; x.strokeStyle = "rgba(255,255,255,.9)"; x.arc(0, 0, r, 0, Math.PI * 2); x.stroke(); };
+  ring(118, [26, 14], 5); ring(96, [4, 10], 4); ring(70, [40, 20], 3);
+  x.setLineDash([]); x.fillStyle = "rgba(255,255,255,.85)";
+  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; x.beginPath(); x.arc(Math.cos(a) * 84, Math.sin(a) * 84, 3.4, 0, Math.PI * 2); x.fill(); }
+  _discTex = new T3.CanvasTexture(cv); return _discTex;
+}
 function makeFishAura(tier) {
   const S = AURA_SPEC[tier]; if (!S || !T3) return null;
   const g = new T3.Group();
@@ -9601,6 +9596,33 @@ function makeFishAura(tier) {
     rmat.onBeforeCompile = (sh) => { sh.uniforms.swimT = SWIM_T; sh.uniforms.uSpd = { value: spd };
       sh.vertexShader = "uniform float swimT;\nuniform float uSpd;\n" + sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n float ra_ = swimT * uSpd; float rc_ = cos(ra_), rs_ = sin(ra_); transformed.xz = mat2(rc_, -rs_, rs_, rc_) * transformed.xz;"); };
     const ring = new T3.Mesh(rgeo, rmat); ring.frustumCulled = false; g.add(ring);
+  }
+  if (S.rise) {   // 초월·태초 전용: 아래에서 위로 솟구치는 빛기둥
+    const R = S.rise, rn = R.n, rp = new Float32Array(rn * 3), rph = new Float32Array(rn), rps = new Float32Array(rn), rang = new Float32Array(rn), rrad = new Float32Array(rn);
+    for (let i = 0; i < rn; i++) { rph[i] = Math.random(); rps[i] = 0.7 + Math.random() * 0.7; rang[i] = Math.random() * Math.PI * 2; rrad[i] = 0.18 + Math.random() * 0.5; }
+    const rgeo = new T3.BufferGeometry();
+    rgeo.setAttribute("position", new T3.BufferAttribute(rp, 3));
+    rgeo.setAttribute("phase", new T3.BufferAttribute(rph, 1));
+    rgeo.setAttribute("ps", new T3.BufferAttribute(rps, 1));
+    rgeo.setAttribute("ang", new T3.BufferAttribute(rang, 1));
+    rgeo.setAttribute("rad", new T3.BufferAttribute(rrad, 1));
+    const rmat = new T3.ShaderMaterial({
+      uniforms: { uT: SWIM_T, uCol: { value: new T3.Color(R.col) }, uSpd: { value: R.spd } },
+      vertexShader: "attribute float phase; attribute float ps; attribute float ang; attribute float rad; uniform float uT; uniform float uSpd; varying float vA;" +
+        "void main(){ float cyc = fract(phase + uT * uSpd * ps); float a = ang + cyc * 1.4 + uT * 0.12; float rr = rad * (1.0 - 0.38 * cyc);" +
+        " vec3 p = vec3(cos(a) * rr, mix(-0.66, 0.98, cyc), sin(a) * rr);" +
+        " vec4 mv = modelViewMatrix * vec4(p, 1.0); vA = smoothstep(0.0, 0.16, cyc) * (1.0 - smoothstep(0.55, 1.0, cyc));" +
+        " gl_PointSize = (3.4 + 2.2 * ps) * (0.55 + 0.45 * (1.0 - cyc)) * (14.0 / max(0.1, -mv.z)); gl_Position = projectionMatrix * mv; }",
+      fragmentShader: "uniform vec3 uCol; varying float vA; void main(){ float d = length(gl_PointCoord - 0.5); float al = smoothstep(0.5, 0.05, d) * vA; gl_FragColor = vec4(uCol, al * 0.9); }",
+      transparent: true, depthWrite: false, blending: T3.AdditiveBlending });
+    const rpts = new T3.Points(rgeo, rmat); rpts.frustumCulled = false; g.add(rpts);
+  }
+  if (S.disc) for (const [dc, dspd] of S.disc) {   // 초월·태초 전용: 발밑에서 도는 마법진
+    const dgeo = new T3.PlaneGeometry(2.5, 2.5); dgeo.rotateX(-Math.PI / 2);
+    const dmat = new T3.MeshBasicMaterial({ map: auraDiscTex(), color: new T3.Color(dc), transparent: true, opacity: .5, side: T3.DoubleSide, depthWrite: false, blending: T3.AdditiveBlending });
+    dmat.onBeforeCompile = (sh) => { sh.uniforms.swimT = SWIM_T; sh.uniforms.uSpd = { value: dspd };
+      sh.vertexShader = "uniform float swimT;\nuniform float uSpd;\n" + sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n float da_ = swimT * uSpd; float dc_ = cos(da_), ds_ = sin(da_); transformed.xz = mat2(dc_, -ds_, ds_, dc_) * transformed.xz;"); };
+    const disc = new T3.Mesh(dgeo, dmat); disc.position.y = -0.68; disc.frustumCulled = false; g.add(disc);
   }
   return g;
 }
@@ -10557,8 +10579,7 @@ function updateChar(F, f, t, dt, now) {
   const ox = F.px, oz = F.pz;
   F.px += (f.x - F.px) * k; F.pz += (f.z - F.pz) * k;
   F.ry = f.me || onB ? f.ry : lerpAngle(F.ry, f.ry, Math.min(1, dt * 8));
-  if (!f.me && Math.hypot(F.px - ox, F.pz - oz) > 0.004) F.movedAt = performance.now();
-  const moving = f.me ? ME.moving : performance.now() - (F.movedAt || 0) < 200;   // v1.110: 다른 사람은 실제로 위치가 바뀔 때만 걸어요 (예전엔 「걷는 중」 신호만 남아도 제자리 걸음)
+  const moving = f.me ? ME.moving : Math.hypot(F.px - ox, F.pz - oz) > 0.004 || f.st === "walk" || f.st === "run";
   const seat = f.seat ? SEAT[f.seat] : null;
   const stool = f.st === "stall", sitting = !!seat || stool;
   const fishing = seat && (seat.kind === "pier" || seat.kind === "boat");
@@ -14427,7 +14448,7 @@ const QUICK_ITEMS = [
   { id: "rank", name: "랭킹", d: "명예의 전당 분야별 순위", open: "rank" },
   { id: "attend", name: "출석", d: "7일 출석 선물", open: "attend" },
   { id: "offers", name: "거래", d: "받은 거래 · 주문 제안", open: "offers" },
-  { id: "emote", name: "감정표현", short: "인사", d: "손 흔들기 · 박수 · 축하 · 꾸벅", run: () => $("emoteBtn").click() },
+  { id: "emote", name: "감정표현", short: "감정", d: "손 흔들기 · 박수 · 축하 · 꾸벅", run: () => $("emoteBtn").click() },
   { id: "card", name: "명함", d: "명함을 내밀어 친구 만들기", run: () => { S.card ? stopCard() : startCard(); } },
   { id: "profile", name: "내 정보", short: "내 정보", d: "레벨 · 기록 · 닉네임", open: "profile" },
   { id: "settings", name: "설정", d: "소리 · 그림자 · 계정", open: "settings" },
@@ -15448,7 +15469,6 @@ $("codeBtn").addEventListener("click", () => {
 $("setBtn").addEventListener("click", (e) => { e.stopPropagation(); if (S.sheet === "settings") closeSheet(); else openSheet("settings"); });
 document.addEventListener("pointerdown", (e) => { if (!e.target.closest("#settingsPop,#setBtn")) closePop(); });
 $("chatToggle").addEventListener("click", () => { const c = $("chatBox"); const min = c.classList.toggle("min"); c.classList.remove("big"); $("chatToggle").textContent = min ? "펼치기" : "접기"; $("chatToggle").setAttribute("aria-expanded", String(!min)); syncUIState(); });
-$("newsTick").addEventListener("click", () => $("chatDockBtn").click());   // v1.110 소식 띠를 누르면 소식 창
 $("chatDockBtn").addEventListener("click", () => {
   const c = $("chatBox");
   if (MOBILE()) { const open = c.classList.toggle("min") === false; if (open) closeFloatingUI("chat"); c.classList.toggle("big", open); S.chatUnread = 0; drawChatBadge(); syncUIState(); if (open) { const l = $("chatList"); l.scrollTop = l.scrollHeight; } return; }
