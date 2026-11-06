@@ -105,7 +105,8 @@
 
   /* ---------- 로그인 화면 (메인 화면 카드 안) ---------- */
   const css = document.createElement("style");
-  css.textContent = `.tlogin{display:flex;flex-direction:column;gap:8px}.tlogin .tl-t{font-family:var(--f-display);font-size:17px}
+  css.textContent = `.tpass .tlogin .tl-t{color:#13303a}.tpass .tlogin .g{border:1.5px solid #d8c9ac}.tpass .tlogin .a{background:#fff8ea;color:#5a4630;border:1.5px solid #d8c9ac}.tpass .tlogin .tl-n{color:#6d6252}.tpass .tlogin .tl-e{color:#c0392b}
+  .tlogin{display:flex;flex-direction:column;gap:8px}.tlogin .tl-t{font-family:var(--f-display);font-size:17px}
   .tlogin button{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:14px;padding:12px;font-size:15px;font-weight:700;cursor:pointer}
   .tlogin .g{background:#fff;color:#1f1f1f}.tlogin .k{background:#fee500;color:#191600}.tlogin .a{background:rgba(255,255,255,.12);color:var(--hud-ink);border:1px solid var(--glass-line)}
   .tlogin button:disabled{opacity:.6}.tlogin .tl-n{font-size:11.5px;color:var(--hud-muted);line-height:1.5}.tlogin .tl-e{font-size:12px;color:#ff8a6a}`;
@@ -119,14 +120,15 @@
     catch (e) { if (e && (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment")) return auth.signInWithRedirect(prov); throw e; }
   }
   function showLogin() {
-    const card = document.querySelector(".tcard"); if (!card || document.getElementById("tLogin")) return;
+    // v1.112 타이틀 개편 뒤에는 승선권(.tpass) 안 · 예전 화면(.tcard)도 그대로 지원
+    const acct = document.getElementById("tAcct"), card = (acct && acct.parentElement) || document.querySelector(".tpass .tp-body, .tcard"); if (!card || document.getElementById("tLogin")) return;
     const box = document.createElement("div"); box.id = "tLogin"; box.className = "tlogin";
     box.innerHTML = '<div class="tl-t">로그인하고 시작해요</div>' +
       '<button class="g" data-p="google">' + G_ICON + '구글로 시작</button>' +
       (cfg.kakao ? '<button class="k" data-p="kakao"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#191600" d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7l-1 3.7c-.1.3.3.6.6.4l4.4-2.9c.4 0 .9.1 1.3.1 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>카카오로 시작</button>' : "") +
       '<button class="a" data-p="guest">게스트로 둘러보기</button>' +
       '<div class="tl-n">구글·카카오로 시작하면 어느 기기에서든 진행이 이어져요. 게스트는 이 브라우저에만 남고, 나중에 ⚙ 설정에서 구글 계정에 연결할 수 있어요.</div><div class="tl-e" hidden></div>';
-    card.insertBefore(box, card.querySelector("#tAcct") || card.firstChild);
+    card.insertBefore(box, acct && acct.parentElement === card ? acct : card.firstChild);
     box.addEventListener("click", async (e) => {
       const b = e.target.closest("button[data-p]"); if (!b) return;
       box.querySelectorAll("button").forEach((x) => { x.disabled = true; });
