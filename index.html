@@ -825,11 +825,15 @@ body.cinema #hint,body.cinema #standBtn,body.cinema #castBtn,body.cinema .toasts
   .tshop>.ishelf .acts{flex-basis:100%}
   .tshop>.ishelf .acts .btn{flex:1}
   /* 낚시 상점 휴대폰 (v1.110): 가격표는 접어서 작게 · 진열대는 3칸 · 탭은 위에 붙여요 */
-  .tshop>.ishelf:not(.open)>*:not(.ibig):not(h3):not(.acts):not(.imore){display:none!important}
+  .tshop.peg>.ishelf:not(.open)>*:not(.ibig):not(h3):not(.acts):not(.imore){display:none!important}
   .tshop>.ishelf.open{max-height:62vh;overflow-y:auto;z-index:6}
   .tshop>.ishelf .imore{display:inline-flex;order:0;margin-left:auto;background:none;border:1.5px solid #d9c49a;color:#6b4a2a;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700}
   .tshop>.ishelf .ikind{flex-basis:100%;font-size:11.5px}
   .tshop>.ishelf .acts{order:9}
+  /* 은행 전표 · 예금 선반은 접지 않고 원래 모양 그대로 — 금액이 안 보인다는 제보 (v1.119) */
+  .tshop.bankx>.ishelf{order:0;position:static;margin:0;flex-direction:column;flex-wrap:nowrap;align-items:stretch;box-shadow:none}
+  .tshop.bankx>.ishelf h3{flex:none}
+  .tshop.bankx>.ishelf>.muted{display:block;flex-basis:auto;overflow:visible}
   .peg .racks>.tabs{position:sticky;top:-14px;z-index:4;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.peg .racks>.tabs::-webkit-scrollbar{display:none}
   .peg .racks>.tabs button{flex:none;padding:8px 12px}
   .peg .tabhelp{font-size:11.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -2100,7 +2104,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.118.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.119.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -12906,7 +12910,7 @@ SHEETS.bank = (body) => {
         h("span", { class: "muted num", style: "margin-left:auto", text: won(x.px) + " · " + Math.max(0, Math.round((Date.now() - x.ts) / 60000)) + "분 전" })); })));
   } else {
     const inp = h("input", { type: "number", min: "100", step: "10000", value: "100000", "aria-label": "금액 (원)", style: "width:120px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 8px" });
-    body.append(h("div", { class: "tshop" }, h("div", { class: "ishelf" }, h("div", { class: "ibig" }, h("img", { src: (() => { const c = document.createElement("canvas"); c.width = c.height = 160; const g = c.getContext("2d"); g.fillStyle = "#e2f0f8"; g.fillRect(0, 0, 160, 160); SICON.bank(g, 80, 80, 120); return c.toDataURL(); })(), alt: "" })),
+    body.append(h("div", { class: "tshop bankx" }, h("div", { class: "ishelf" }, h("div", { class: "ibig" }, h("img", { src: (() => { const c = document.createElement("canvas"); c.width = c.height = 160; const g = c.getContext("2d"); g.fillStyle = "#e2f0f8"; g.fillRect(0, 0, 160, 160); SICON.bank(g, 80, 80, 120); return c.toDataURL(); })(), alt: "" })),
         h("h3", { text: "낭만 예금" }), h("div", { class: "muted", style: "font-size:12.5px;line-height:1.5", text: "30분마다 0.2%씩 이자가 붙어요. 300만원까지 이자가 붙고, 은행에 들르지 않으면 하루치까지만 쌓여요. 언제든 넣고 뺄 수 있어요." }),
         h("div", { class: "stockhead" }, h("b", { text: won(bal) + "" }), h("span", { class: "muted", text: "지금 예금" }))),
       h("div", { style: "display:flex;flex-direction:column;gap:10px" }, h("div", { class: "qp" }, inp, ...[1000, 5000, 10000].map(v => h("button", { class: "btn sm", onclick: () => { inp.value = String(v * WON); }, text: won(v) }))),
