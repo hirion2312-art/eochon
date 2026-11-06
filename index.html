@@ -1628,7 +1628,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 /* ===== v1.95 모바일 우선 개편 ===== */
 @media (max-width:820px){
   /* 퀵바: 큰 칸 5개 (가방 · 도감 · 지도 · 채팅 · 메뉴) — 나머지(커뮤니티 · 업적 · 인사 · 설정)는 메뉴 안에 */
-  .dock button[data-q="community"],.dock button[data-q="achieve"],.dock button[data-q="emote"],.dock button[data-q="settings"],.dock button[data-q="quests"],.dock button[data-q="ach"],.dock button[data-q="attend"],.dock button[data-q="guide"],.dock button[data-q="rank"],.dock button[data-q="profile"],.dock button[data-q="card"],.dock button[data-q="offers"],.dock button[data-q="shop"],.dock button[data-q="sashimi"]{display:none!important}
+  .dock .chatonly,.dock button[data-q="toys"],.dock button[data-q="community"],.dock button[data-q="achieve"],.dock button[data-q="settings"],.dock button[data-q="quests"],.dock button[data-q="ach"],.dock button[data-q="attend"],.dock button[data-q="guide"],.dock button[data-q="rank"],.dock button[data-q="profile"],.dock button[data-q="card"],.dock button[data-q="offers"],.dock button[data-q="shop"],.dock button[data-q="sashimi"]{display:none!important}
   .dock{gap:4px!important}.dock>button:not([hidden]){flex:1 1 0;min-width:0;min-height:54px}
   .dock>button span:not(.cnt):not(.badge):not(.qbadge){font-size:11.5px}
   /* 손맛 싸움: 퀵바를 숨기고, 정보는 꽉 차게 · 아래 한 줄에 드랙(가로) + 큰 감기 버튼 */
@@ -1716,6 +1716,15 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .ihow{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;background:rgba(23,138,138,.14);box-shadow:inset 0 0 0 1.5px rgba(23,138,138,.45);font-size:12.5px;line-height:1.5}
 .ishelf.hovering{box-shadow:0 0 0 2px #e2a514,0 8px 0 #c9a46b}
 @media (max-width:820px){.ibig.stage3d{min-height:0;background:none}.istage{width:64px;height:64px}.tshop>.ishelf .ikind{display:none}.tshop>.ishelf .iperks{flex-basis:100%;gap:3px}.tshop>.ishelf .iperks li{padding:3px 6px;font-size:12px}.tshop>.ishelf .iperks li:nth-child(n+4){display:none}.tshop>.ishelf .ihow{flex-basis:100%;font-size:12px;padding:8px 10px}}
+/* v1.110 휴대폰 소식 띠 */
+.newstick{display:none}
+@media (max-width:820px){
+  .newstick{display:block;position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 92px);z-index:6;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:6px 12px;border:0;border-radius:999px;background:rgba(10,18,26,.72);color:#fff;font:700 12.5px/1.2 inherit;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+  .newstick[hidden]{display:none}
+  .newstick.pop{animation:ntpop .5s ease}
+  body.chat-open .newstick,body.sheet-open .newstick,body.fighting .newstick{display:none}
+}
+@keyframes ntpop{0%{transform:translateX(-50%) translateY(-8px);opacity:0}100%{transform:translateX(-50%) translateY(0);opacity:1}}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 /* 개인정보 안내 · 동의 (v1.96) */
 .consent-ov{position:fixed;inset:0;background:rgba(4,10,14,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:14px}
@@ -1969,6 +1978,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
   <div class="pop emopop glass" id="emotePop" hidden></div>
   <div class="mering" id="meRing" hidden></div>
 
+  <button class="newstick" id="newsTick" type="button" hidden aria-label="부두 소식 보기"></button>
   <aside class="hud chat glass" id="chatBox">
     <div class="chat-head"><span>📜 부두 소식</span><button id="chatToggle" aria-expanded="true">접기</button></div>
     <ol id="chatList"><li class="empty">소식을 불러오는 중이에요.</li></ol>
@@ -2054,7 +2064,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.114.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.114.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -4388,7 +4398,7 @@ function stepMove(dt) {
     else { ME.target = null; ME.onArrive = null; }
     ME.ry = lerpAngle(ME.ry, Math.atan2(dx, dz), Math.min(1, dt * 12));
     ME.moving = true; ME.st = running ? "run" : "walk";
-  } else { if (ME.moving) ME.stopAt = Date.now(); ME.moving = false; if (ME.st === "walk" || ME.st === "run") ME.st = "idle"; }
+  } else { const was = ME.moving; if (was) ME.stopAt = Date.now(); ME.moving = false; if (ME.st === "walk" || ME.st === "run") ME.st = "idle"; if (was) presMove(true); }   // v1.110: 멈추는 순간 마지막 위치 · 서 있음을 꼭 보내요 (남의 화면에서 제자리 걸음 · 엉뚱한 자리)
   if (ME.moving) presMove(false); else if (was) presMove(true);
 }
 function lerpAngle(a, b, t) { let d = ((b - a + Math.PI) % (Math.PI * 2)); if (d < 0) d += Math.PI * 2; return a + (d - Math.PI) * t; }
@@ -5174,7 +5184,15 @@ function onPeers(ch) {
 
 /* ===================== 채팅 ===================== */
 let lastSend = 0;
+function updateNewsTick() {   // v1.110 휴대폰: 위쪽 한 줄 소식 띠 (누르면 소식 창)
+  const el = document.getElementById("newsTick"); if (!el) return;
+  const last = (S.chat || []).slice(-1)[0];
+  if (!last || !MOBILE()) { el.hidden = true; return; }
+  const tx = last.kind === "brag" ? "🎣 " + last.nick + "님이 " + last.text + " " + fmtSize(last.size) + "!" : "📜 " + last.text;
+  if (el.dataset.id !== last.id) { el.dataset.id = last.id; el.textContent = tx; el.hidden = false; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }
+}
 function renderChat() {
+  try { updateNewsTick(); } catch {}
   const ttlOf = new Map(); for (const p of otherPeers(true)) if (p.uid && p.ttl) ttlOf.set(p.uid, p.ttl);   // 옛 메시지 보완용: 지금 접속 중인 사람의 칭호
   const list = $("chatList");
   const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 60;
@@ -10539,7 +10557,8 @@ function updateChar(F, f, t, dt, now) {
   const ox = F.px, oz = F.pz;
   F.px += (f.x - F.px) * k; F.pz += (f.z - F.pz) * k;
   F.ry = f.me || onB ? f.ry : lerpAngle(F.ry, f.ry, Math.min(1, dt * 8));
-  const moving = f.me ? ME.moving : Math.hypot(F.px - ox, F.pz - oz) > 0.004 || f.st === "walk" || f.st === "run";
+  if (!f.me && Math.hypot(F.px - ox, F.pz - oz) > 0.004) F.movedAt = performance.now();
+  const moving = f.me ? ME.moving : performance.now() - (F.movedAt || 0) < 200;   // v1.110: 다른 사람은 실제로 위치가 바뀔 때만 걸어요 (예전엔 「걷는 중」 신호만 남아도 제자리 걸음)
   const seat = f.seat ? SEAT[f.seat] : null;
   const stool = f.st === "stall", sitting = !!seat || stool;
   const fishing = seat && (seat.kind === "pier" || seat.kind === "boat");
@@ -14408,7 +14427,7 @@ const QUICK_ITEMS = [
   { id: "rank", name: "랭킹", d: "명예의 전당 분야별 순위", open: "rank" },
   { id: "attend", name: "출석", d: "7일 출석 선물", open: "attend" },
   { id: "offers", name: "거래", d: "받은 거래 · 주문 제안", open: "offers" },
-  { id: "emote", name: "감정표현", short: "감정", d: "손 흔들기 · 박수 · 축하 · 꾸벅", run: () => $("emoteBtn").click() },
+  { id: "emote", name: "감정표현", short: "인사", d: "손 흔들기 · 박수 · 축하 · 꾸벅", run: () => $("emoteBtn").click() },
   { id: "card", name: "명함", d: "명함을 내밀어 친구 만들기", run: () => { S.card ? stopCard() : startCard(); } },
   { id: "profile", name: "내 정보", short: "내 정보", d: "레벨 · 기록 · 닉네임", open: "profile" },
   { id: "settings", name: "설정", d: "소리 · 그림자 · 계정", open: "settings" },
@@ -15429,6 +15448,7 @@ $("codeBtn").addEventListener("click", () => {
 $("setBtn").addEventListener("click", (e) => { e.stopPropagation(); if (S.sheet === "settings") closeSheet(); else openSheet("settings"); });
 document.addEventListener("pointerdown", (e) => { if (!e.target.closest("#settingsPop,#setBtn")) closePop(); });
 $("chatToggle").addEventListener("click", () => { const c = $("chatBox"); const min = c.classList.toggle("min"); c.classList.remove("big"); $("chatToggle").textContent = min ? "펼치기" : "접기"; $("chatToggle").setAttribute("aria-expanded", String(!min)); syncUIState(); });
+$("newsTick").addEventListener("click", () => $("chatDockBtn").click());   // v1.110 소식 띠를 누르면 소식 창
 $("chatDockBtn").addEventListener("click", () => {
   const c = $("chatBox");
   if (MOBILE()) { const open = c.classList.toggle("min") === false; if (open) closeFloatingUI("chat"); c.classList.toggle("big", open); S.chatUnread = 0; drawChatBadge(); syncUIState(); if (open) { const l = $("chatList"); l.scrollTop = l.scrollHeight; } return; }
