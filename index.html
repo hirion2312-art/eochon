@@ -292,6 +292,7 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 .ftrack{position:relative;height:8px;border-radius:4px;background:rgba(255,255,255,.12);margin:6px 10px 2px}
 .ftrack i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:rgba(127,214,224,.55)}
 .ftrack .ffish{position:absolute;top:50%;width:26px;height:15px;transform:translate(-50%,-50%);transition:left .1s linear}
+.fsp{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center;font-size:11.5px;font-weight:700;color:#ffd6a0;margin-top:2px}.fsp .fbar{height:8px}.fsp #fightSpBar{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#f2b630,#e2402a);transition:width .1s}
 .fgauge{display:grid;grid-template-columns:30px minmax(0,1fr);gap:5px 8px;align-items:center;font-size:11px;color:var(--hud-muted)}
 .fbar{position:relative;height:16px;border-radius:8px;background:rgba(255,255,255,.1);overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
 .fbar i{position:absolute;left:0;top:0;bottom:0;border-radius:8px;transition:width .08s linear,background .2s}
@@ -2094,6 +2095,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
       <div class="fperks" id="fightPerks" hidden></div>
       <div class="ftrack" title="물고기까지 남은 거리"><i id="fightProg"></i><svg class="ffish" id="fightFish" viewBox="0 0 34 20" aria-hidden="true"><path d="M31 10 Q24 1 13 4 L3 1 L6 10 L3 19 L13 16 Q24 19 31 10Z" fill="#f2a33a" stroke="#5a2f10" stroke-width="1.5"/><circle cx="25" cy="8.5" r="1.8" fill="#1d1714"/></svg></div>
       <div class="fgauge"><span class="fgl" title="장력: 줄이 받는 힘 · 빨간 선까지 차면 끊겨요">🧵 줄 팽팽함<small>장력</small></span><div class="fbar"><i id="fightTen"></i><b class="lim" title="이 선을 넘으면 줄이 끊겨요"></b></div><em class="fgs" id="fightTenS">안전</em><span class="fgl" title="과열: 릴이 뜨거워진 정도 · 가득 차면 끊겨요 · 손을 떼면 식어요">🔥 릴 열<small>과열</small></span><div class="fbar heat"><i id="fightHeat"></i></div><em class="fgs" id="fightHeatS">괜찮음</em></div>
+      <div class="fsp" id="fightSp" hidden><span id="fightSpL"></span><div class="fbar"><i id="fightSpBar"></i></div></div>
       <div class="fdo" id="fightDo" data-do="slow"><span class="fdo-i" id="fightDoI" aria-hidden="true">🤏</span><span class="fdo-t"><b class="fmsg" id="fightMsg">살살 감기</b><small id="fightWhy">천천히 끌려오는 중</small></span></div>
     </div>
     <div class="fctl">
@@ -2204,7 +2206,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.131.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.132.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2743,11 +2745,18 @@ const ROD_PERK = {
   iridium: [.5, .14, 1.16], titan: [.45, .16, 1.19], obsidian: [.4, .18, 1.22], legend: [.32, .21, 1.26], abyss: [.26, .24, 1.3], palace: [.2, .27, 1.34], myth: [.12, .3, 1.4], primal: [.05, .34, 1.5], merchant: [.42, .17, 1.21],
 };
 for (const r of RODS) { const [jump, calm, tire] = ROD_PERK[r.id] || [1, 0, 1]; Object.assign(r, { jump, calm, tire }); }
+/* v1.126 낚싯대 개성: lift = 바위 숨기를 끌어내는 힘 · sense = 감도(역주 · 속임수를 빨리 알아채요) · twist = 비틀기에 줄이 덜 꼬여요
+   비싼 낚싯대일수록 전반적으로 좋지만, 낚싯대마다 잘하는 게 달라요 (갯바위 · 지깅 = 들어 올리기, 루어 · 원투 = 감도, 이리듐 · 흑요석 = 균형) */
+const ROD_PERK2 = {
+  bamboo: [0, 0, 0], lure: [0, .22, .05], fiber: [.08, .08, .08], rock: [.38, .02, .06], carbon: [.12, .25, .12], surf: [.06, .38, .08], boat: [.34, .12, .14],
+  iridium: [.24, .24, .24], titan: [.5, .1, .18], obsidian: [.3, .32, .3], merchant: [.26, .26, .26], legend: [.36, .38, .3], abyss: [.58, .26, .32], palace: [.38, .52, .42], myth: [.48, .48, .5], primal: [.62, .62, .6],
+};
+for (const r of RODS) { const [lift, sense, twist] = ROD_PERK2[r.id] || [0, 0, 0]; Object.assign(r, { lift, sense, twist }); }
 /* v1.122 낚싯대 강화 +1~+5: 단계마다 낚싯대 강도 +3% (드랙도 같이 세져요) · 비용 = 낚싯대 값 × 비율 (대나무는 최소 500원 기준) */
 const ROD_UP_MAX = 5, ROD_UP_COST = [.25, .35, .5, .7, 1];
 const rodUpLv = (id) => (P && P.rodUp && P.rodUp[id]) | 0;
 const rodUpCost = (r, n) => Math.round(Math.max(50, r.price) * ROD_UP_COST[n] / 10) * 10;
-const rodPerkText = (r) => r.id === "bamboo" ? "특별한 효과 없음" : "점프 때 바늘 빠짐 -" + Math.round((1 - r.jump) * 100) + "% · 몸부림 충격 -" + Math.round(r.calm * 100) + "% · 물고기가 " + Math.round((r.tire - 1) * 100) + "% 빨리 지쳐요";
+const rodPerkText = (r) => r.id === "bamboo" ? "특별한 효과 없음" : "점프 때 바늘 빠짐 -" + Math.round((1 - r.jump) * 100) + "% · 몸부림 충격 -" + Math.round(r.calm * 100) + "% · 물고기가 " + Math.round((r.tire - 1) * 100) + "% 빨리 지쳐요 · 🪨 들어 올리기 " + Math.round(r.lift * 100) + " · 📡 감도 " + Math.round(r.sense * 100) + " · 🌀 꼬임 방지 " + Math.round(r.twist * 100);
 const REELS = [
   { id: "basic", name: "기본 릴", price: 0, lv: 1, heat: 1, cool: .12, speed: 2.2, len: 60, color: 0x8a8f96, desc: "처음 받은 릴이에요. 무난하지만 큰 물고기와는 오래 싸우기 버거워요" },
   { id: "spin", name: "스피닝 릴", price: 1500, lv: 3, heat: .86, cool: .15, speed: 2.45, len: 70, color: 0x2a78bb, desc: "과열이 천천히 쌓이고 조금 빨리 감겨요" },
@@ -2770,12 +2779,12 @@ const TACKLES = [
   { id: "spinner", name: "스피너", price: 500, desc: "입질이 15% 빨리 와요. 기다리는 시간이 줄어요" },
   { id: "trap", name: "트랩 찌", price: 500, desc: "물고기가 줄을 끌고 나갈 때 과열이 20% 덜 쌓여요" },
   { id: "cork", name: "코르크 찌", price: 750, desc: "물고기 체력이 15% 줄어요. 싸움이 그만큼 짧아져요" },
-  { id: "lead", name: "납 찌", price: 750, desc: "물고기가 잠수할 때 당기는 힘이 20% 줄어요" },
-  { id: "barbed", name: "미늘 바늘", price: 1000, lv: 5, desc: "점프할 때 감고 있어도 바늘이 절대 안 빠져요 (점프가 어렵다면 이것!)" },
+  { id: "lead", name: "납 찌", price: 750, desc: "물고기가 잠수할 때 당기는 힘이 20% 줄고, 바위 숨기를 끌어내는 힘(들어 올리기)이 +20 올라요" },
+  { id: "barbed", name: "미늘 바늘", price: 1000, lv: 5, desc: "점프할 때 감고 있어도 바늘이 절대 안 빠져요 (점프가 어렵다면 이것!) · 역주 때 줄이 느슨해져도 절반만 빠져요" },
   { id: "lamp", name: "집어등", price: 900, lv: 8, desc: "밤에만 켜져요. 밤 입질이 30% 빨리 와요" },
-  { id: "swivel", name: "회전 도래", price: 1200, lv: 6, desc: "몸부림 때 줄에 걸리는 충격 -25%. 영웅 이상 대물에게 줄이 덜 끊겨요" },
+  { id: "swivel", name: "회전 도래", price: 1200, lv: 6, desc: "몸부림 때 줄에 걸리는 충격 -25% · 물고기가 몸을 비틀 때 줄이 덜 꼬여요(꼬임 방지 +40)" },
   { id: "shock", name: "쇼크 리더", price: 1500, lv: 10, desc: "줄이 끊기기 전까지 버티는 힘 +8%. 질긴 목줄이에요" },
-  { id: "circle", name: "대물 서클훅", price: 3000, lv: 18, desc: "둥근 대물 바늘이에요. 물고기 체력 -10% · 점프 때 바늘 빠짐 -50%" },
+  { id: "circle", name: "대물 서클훅", price: 3000, lv: 18, desc: "둥근 대물 바늘이에요. 물고기 체력 -10% · 점프 때 바늘 빠짐 -50% · 역주 때 느슨해져도 덜 빠져요" },
   { id: "wire", name: "와이어 목줄", price: 4000, lv: 22, desc: "이빨 센 대물용 쇠줄 목줄이에요. 줄 강도 +12% (드랙도 함께 세져요)" },
 ];
 const TOOLS = [
@@ -3885,7 +3894,7 @@ Object.assign(TUTS, {
     { t: "드랙은 「자동」에 두면 알아서 해요. 자꾸 끊기면 낚싯줄 · 낚싯대를, 자꾸 뜨거워지면 릴을 바꿔요. 상점 맨 위 「👍 지금 추천」을 보세요.", art: ART.drag },
   ] },
 });
-const loseCardWill = (out) => !!(P.tut && !P.tut._off && myLv() <= 15 && (P.stats["lose_" + out] || 0) <= 3 && ["snap", "heat", "shake", "far"].includes(out));
+const loseCardWill = (out) => !!(P.tut && !P.tut._off && (myLv() <= 15 || ["twist", "snag", "slack"].includes(out)) && (P.stats["lose_" + out] || 0) <= 3 && ["snap", "heat", "shake", "far", "twist", "snag", "slack"].includes(out));
 function loseCard(out) {   // 놓친 이유 카드 (Lv.15까지 · 이유마다 처음 3번)
   if (!loseCardWill(out)) return false;
   const rec = () => { const r = gearRec(); closeSheet(); S.shopTab = r ? r.cat : (out === "heat" ? "reel" : out === "snap" ? "line" : "tackle"); S.shopSel = r ? { cat: r.cat, id: r.it.id } : null; openSheet("shop"); };
@@ -3904,6 +3913,15 @@ function loseCard(out) {   // 놓친 이유 카드 (Lv.15까지 · 이유마다 
     far: { icon: "🐟", title: "너무 멀리 도망갔어요", steps: [
       { t: "계속 손을 떼고만 있으면 물고기가 멀리 가 버려요. 물고기가 지쳤을 때(초록 「👆 꾹 감기」) 힘껏 감아야 해요.", art: ART.far },
       { t: "「코르크 찌」는 물고기 체력을 15% 줄여 줘서 싸움이 짧아져요. 「뜰채」가 있으면 3m 앞에서 바로 건져요.", btn: ["🛒 추천 장비 보러 가기", rec] }] },
+    twist: { icon: "🌀", title: "줄이 꼬여서 끊겼어요", steps: [
+      { t: "어떤 물고기는 몸을 빙글빙글 비틀어요(「🌀 비틀기」). 그때 감고 있으면 「🌀 줄 꼬임」 막대가 차고, 가득 차면 줄이 끊겨요." },
+      { t: "비틀 땐 손을 떼요. 「회전 도래」 채비와 꼬임 방지가 좋은 낚싯대(이리듐 · 흑요석 · 용궁 · 신화)가 꼬임을 줄여 줘요.", btn: ["🛒 추천 장비 보러 가기", rec] }] },
+    snag: { icon: "🪨", title: "바위에 줄이 쓸렸어요", steps: [
+      { t: "가라앉는 물고기는 잠수하면서 바위 틈으로 숨어요(「🪨 바위 숨기」). 그때 손을 떼고 있으면 「🪨 바위 쓸림」 막대가 차서 줄이 끊겨요." },
+      { t: "잠수할 땐 감아서 끌어내요. 「납 찌」와 들어 올리는 힘이 좋은 낚싯대(갯바위 · 선상 · 티타늄 지깅대 · 심해)가 도와줘요.", btn: ["🛒 추천 장비 보러 가기", rec] }] },
+    slack: { icon: "💨", title: "줄이 느슨해져서 빠졌어요", steps: [
+      { t: "빠른 물고기는 갑자기 이쪽으로 달려와요(「💨 역주」). 줄이 느슨해지면 「💨 줄 느슨함」 막대가 차고, 가득 차면 바늘이 빠져요." },
+      { t: "달려올 땐 꾹 감아서 줄을 팽팽하게 해요. 「미늘 바늘」 · 「대물 서클훅」과 감도가 좋은 낚싯대(루어대 · 카본 · 원투 · 용궁)가 도와줘요.", btn: ["🛒 추천 장비 보러 가기", rec] }] },
   }[out];
   if (!C) return false;
   TUTS["lose_" + out] = C; delete P.tut["lose_" + out]; coachForce("lose_" + out); return true;
@@ -3914,6 +3932,7 @@ function gearRec() {
   const better = { rod: (it) => it.tens > curRod().tens, reel: (it) => it.heat < curReel().heat, line: (it) => it.add > curLine().add };
   const nextAny = (cat, lockOk) => catList(cat).filter(it => (lockOk || !itemLocked(it)) && !own(cat, it) && it.price > 0 && (!better[cat] || better[cat](it))).sort((a, b) => (a.lv || 1) - (b.lv || 1) || a.price - b.price)[0];
   const next = (cat) => nextAny(cat, false);
+  const bestRod = (k) => RODS.filter(r => !itemLocked(r) && !P.rods.includes(r.id) && r.price > 0 && r[k] > curRod()[k] + .05).sort((a, b) => a.price - b.price)[0];   // v1.126 그 능력이 지금보다 좋은 가장 싼 낚싯대
   const tk = (id) => { const it = TACKLES.find(t => t.id === id); return it && !itemLocked(it) && !own("tackle", it) && curRod().slots > 0 ? it : null; };
   const tool = (id) => { const it = TOOLS.find(t => t.id === id); return it && !itemLocked(it) && !P.tools[id] ? it : null; };
   const L = (k) => P.stats["lose_" + k] || 0;
@@ -3922,9 +3941,12 @@ function gearRec() {
     snap: [["line", next("line")], ["rod", next("rod")], ["tackle", tk("shock")]],
     shake: [["tackle", tk("barbed")], ["rod", next("rod")]],
     far: [["tackle", tk("cork")], ["tool", tool("net")]],
+    twist: [["tackle", tk("swivel")], ["rod", bestRod("twist")]],
+    snag: [["tackle", tk("lead")], ["rod", bestRod("lift")]],
+    slack: [["tackle", tk("barbed")], ["tackle", tk("circle")], ["rod", bestRod("sense")]],
   };
-  const why = { heat: "릴이 과열돼서", snap: "줄이 끊겨서", shake: "바늘이 빠져서", far: "물고기가 도망가서" };
-  for (const k of ["heat", "snap", "shake", "far"].filter(k => L(k) > 0).sort((a, b) => L(b) - L(a)))
+  const why = { heat: "릴이 과열돼서", snap: "줄이 끊겨서", shake: "바늘이 빠져서", far: "물고기가 도망가서", twist: "줄이 꼬여서", snag: "바위에 줄이 쓸려서", slack: "역주 때 바늘이 빠져서" };
+  for (const k of ["heat", "snap", "shake", "far", "twist", "snag", "slack"].filter(k => L(k) > 0).sort((a, b) => L(b) - L(a)))
     for (const [cat, it] of plans[k]) if (it) return { cat, it, why: "최근 " + why[k] + " " + L(k) + "번 놓쳤어요 → " + GEAR_HELP[cat].fix };
   for (const cat of ["line", "reel", "rod"]) { const it = next(cat); if (it) return { cat, it, why: "다음 단계 " + GEAR_HELP[cat].name + "예요 → " + GEAR_HELP[cat].fix }; }
   // 아직 다 잠겨 있으면: 가장 먼저 열리는 것을 알려 줘요 (레벨 올리기가 답)
@@ -4440,6 +4462,23 @@ const TIER_FIGHT = [
   { p: 4.0, s: 72, dist: 39, run: 1.85, boost: .53, regen: .105, rage: .43, rageF: 1.78 },
   { p: 3.5, s: 90, dist: 45, run: 2.0, boost: .58, regen: .12, rage: .52, rageF: 1.92 },
 ];
+/* v1.126 변수 행동: 물고기 유형 · 등급마다 나오는 행동이 달라요 (등급이 높을수록 자주)
+   spin 🌀 비틀기 — 감으면 줄이 꼬여요(꼬임 게이지) · 손을 떼요 / charge 💨 역주 — 이쪽으로 달려와 줄이 느슨해져요 · 꾹 감아요
+   feint 🎭 속임수 — 지친 척하다 갑자기 돌진 · 감도가 높으면 일찍 알아채요 / snag 🪨 바위 숨기 — 잠수 중 손을 떼고 있으면 바위에 줄이 쓸려요 · 감아서 끌어내요
+   multi 💦 연속 점프 — 점프를 2~3번 이어서 해요 */
+const SPECIAL_P = {
+  spin: { min: 3, smooth: .14, mixed: .09, dart: .06, floater: .05, sinker: .04 },
+  charge: { min: 2, dart: .16, mixed: .09, floater: .07, smooth: .06, sinker: .03 },
+  feint: { min: 6, dart: .1, mixed: .12, floater: .1, smooth: .1, sinker: .1 },
+};
+const SPECIAL_KO = { spin: "🌀 비틀기", charge: "💨 역주", feint: "🎭 속임수", snag: "🪨 바위 숨기", multi: "💦 연속 점프" };
+function fishSpecials(tier, type) {
+  const sp = {};
+  for (const [k, t] of Object.entries(SPECIAL_P)) if (tier >= t.min && t[type]) sp[k] = t[type] * Math.min(2, 1 + .15 * (tier - t.min));
+  if (tier >= 2 && (type === "sinker" || (type === "mixed" && tier >= 4))) sp.snag = .2 + .03 * tier;
+  if (tier >= 4 && (type === "floater" || (type === "mixed" && tier >= 5))) sp.multi = .35 + .05 * (tier - 4);
+  return sp;
+}
 const FIGHT_MSG = { rage: "몸부림! 지금은 무조건 손을 떼요", cruise: "천천히 감아요", run: "돌진! 무리하게 감지 마세요", jump: "점프! 손을 떼요", dive: "잠수하며 버티는 중", tired: "지쳤어요 · 지금 감아요!" };
 const STATE_W = { dart: { run: .45, jump: .25, dive: .05, cruise: .25 }, smooth: { run: .35, jump: .05, dive: .1, cruise: .5 }, sinker: { run: .25, jump: .02, dive: .45, cruise: .28 }, floater: { run: .2, jump: .38, dive: .02, cruise: .4 }, mixed: { run: .33, jump: .15, dive: .15, cruise: .37 } };
 S.autoDrag = lsGet("mn.autodrag", true); S.drag = lsGet("mn.drag", 3);
@@ -4452,6 +4491,7 @@ function gearStats(ov) {
   const up = 1 + .03 * rodUpLv(rod.id), lineMax = (rod.tens * up + line.add + (tk("shock") ? .08 : 0) + (tk("wire") ? .12 : 0));
   return { lineMax, dragMax: Math.max(.95, lineMax * .9), far: reel.len || 60, heatMul: reel.heat * (tk("trap") ? .8 : 1), cool: reel.cool, speed: reel.speed,
     lead: tk("lead"), barbed: tk("barbed"), stamMul: (tk("cork") ? .85 : 1) * (tk("circle") ? .9 : 1), landAt: P.tools.net ? 3 : 1.2,
+    lift: Math.min(.85, (rod.lift || 0) + (tk("lead") ? .2 : 0)), sense: Math.min(.85, rod.sense || 0), twistRes: Math.min(.85, (rod.twist || 0) + (tk("swivel") ? .4 : 0)), slackMul: (tk("barbed") ? .5 : 1) * (tk("circle") ? .7 : 1),
     jump: (rod.jump == null ? 1 : rod.jump) * (tk("circle") ? .5 : 1), calm: Math.min(.45, (rod.calm || 0) + (tk("swivel") ? .25 : 0)), tire: rod.tire || 1 };
 }
 /* 손맛 싸움 시작 상태 (화면과 따로 · 시뮬레이션도 같이 씀) */
@@ -4462,7 +4502,7 @@ function reelInit(r, opts, g) {
   const S0 = tf.s * (.85 + dn * .3) * (coop ? 1.2 : 1) * g.stamMul;
   if (coop) { g.lineMax *= .96; g.dragMax *= .96; }
   const dist = tf.dist + Math.random() * 4;
-  return { on: true, r, coop, g, type, tf, rage: 0, P: P0, S0, dist, dist0: dist, stam: 1, heat: 0, maxHeat: 0, tension: .3, F: .3,
+  return { on: true, r, coop, g, type, tf, sp: fishSpecials(r.f.tier, type), twist: 0, snag: 0, slack: 0, jumpsLeft: 0, burst: false, rage: 0, P: P0, S0, dist, dist0: dist, stam: 1, heat: 0, maxHeat: 0, tension: .3, F: .3,
     st: "run", stT: 1.1, runBoost: .1, jumpChecked: false, hold: false, drag: S.autoDrag ? 3 : S.drag, lineOut: 0, overT: 0, shook: false,
     manual: !S.autoDrag, time: 0, perfect: false };
 }
@@ -4476,7 +4516,8 @@ function startReel(r, opts) {
   $("fightGuard").hidden = !REEL.guard; $("fight").classList.remove("guarding"); $("reelBtn").classList.toggle("teach", !!REEL.practice);
   showFightPerks(REEL.g);
   setPhase("reel", 125000);
-  const nm = $("fightName"); nm.textContent = "??? · " + MOTION_KO[type]; nm.style.background = "";   // v1.83: 잡기 전에는 등급을 미리 보여 주지 않아요
+  const spk = Object.keys(REEL.sp || {}).map(k => SPECIAL_KO[k]).filter(Boolean);
+  const nm = $("fightName"); nm.textContent = "??? · " + MOTION_KO[type] + (spk.length ? " · " + spk.join(" ") : ""); nm.style.background = "";   // v1.83: 잡기 전에는 등급을 미리 보여 주지 않아요
   $("fightCoop").hidden = !REEL.coop;
   $("fight").hidden = false; document.body.classList.add("fighting");
   $("fight").classList.remove("boss"); $("fight").removeAttribute("data-tier");   // v1.83: 등급별 글로우도 잡기 전엔 숨겨요
@@ -4486,7 +4527,16 @@ function startReel(r, opts) {
   drawFight(); requestAnimationFrame(reelFrame);
 }
 function nextFishState(R) {
+  const sp = R.sp || {};
+  if (R.st === "feint") { R.st = "run"; R.stT = 1.1 + Math.random() * .5; R.runBoost = R.tf.boost + .35; R.burst = true; if (!R.sim) sfx("splash", .4); return; }   // 🎭 속임수: 지친 척 → 돌진
+  R.burst = false;
+  if (R.st === "jump" && R.jumpsLeft > 0) { R.jumpsLeft--; R.st = "jump"; R.stT = .9; R.jumpChecked = false; if (!R.sim) { sfx("splash", .35); fightJumpFx(); } return; }   // 💦 연속 점프
   if (R.st === "tired") { if (R.stam > .32) { R.st = "cruise"; R.stT = 1.4; } else R.stT = 1.2; return; }
+  if (R.st !== "spin" && R.st !== "charge") {
+    if (sp.charge && R.dist > 8 && Math.random() < sp.charge) { R.st = "charge"; R.stT = .9 + Math.random() * .5; return; }
+    if (sp.spin && Math.random() < sp.spin) { R.st = "spin"; R.stT = 1.2 + Math.random() * .8; return; }
+    if (sp.feint && R.stam < .7 && Math.random() < sp.feint) { R.st = "feint"; R.stT = R.feintLen = .9 + Math.random() * .6; return; }
+  }
   if (R.tf.rage && Math.random() < R.tf.rage && R.stam > .3) { R.st = "rage"; R.stT = 1.1 + Math.random() * .6; R.jumpChecked = false; if (!R.sim) { sfx("splash", .45); fightJumpFx(); } return; }
   const w0 = STATE_W[R.type] || STATE_W.mixed, w = { ...w0, run: w0.run * R.tf.run }, prev = R.st, wt = (k) => (k === prev && k !== "cruise") ? w[k] * .4 : w[k];
   let tot = 0; for (const k in w) tot += wt(k);
@@ -4495,6 +4545,7 @@ function nextFishState(R) {
   R.st = pick; R.jumpChecked = false;
   R.stT = pick === "run" ? .9 + Math.random() * 1.4 : pick === "jump" ? 1.1 : pick === "dive" ? 1.4 + Math.random() : 1.2 + Math.random() * 1.6;
   if (pick === "run") R.runBoost = Math.random() * R.tf.boost;
+  if (pick === "jump") R.jumpsLeft = sp.multi && Math.random() < sp.multi ? (R.tf === TIER_FIGHT[9] || R.tf === TIER_FIGHT[8] || Math.random() < .3 ? 2 : 1) : 0;
   if (pick === "jump" && !R.sim) { sfx("splash", .35); fightJumpFx(); }
 }
 function fightStep(dt, R) {
@@ -4503,7 +4554,7 @@ function fightStep(dt, R) {
   if (R.st !== "tired" && R.stam < .18) { R.st = "tired"; R.stT = 2.5; }
   if (R.stT <= 0) nextFishState(R);
   const st = R.st, P0 = R.P * (.45 + .55 * R.stam);
-  const F = st === "rage" ? R.tf.rageF * (.8 + .2 * R.stam) : st === "run" ? P0 * (1 + R.runBoost) : st === "dive" ? P0 * .82 * (g.lead ? .8 : 1) : st === "jump" ? P0 * .5 : st === "tired" ? P0 * .25 : P0 * .38;
+  const F = st === "rage" ? R.tf.rageF * (.8 + .2 * R.stam) : st === "run" ? P0 * (1 + R.runBoost) : st === "dive" ? P0 * .82 * (g.lead ? .8 : 1) : st === "jump" ? P0 * .5 : (st === "tired" || st === "feint") ? P0 * .25 : st === "spin" ? P0 * .55 : st === "charge" ? P0 * .12 : P0 * .38;
   R.F += (F - R.F) * Math.min(1, dt * 6);
   // 자동 드랙: 감는 힘까지 버티는 가장 약한 칸 (v1.27: 예전엔 살짝 모자란 칸을 골라 지친 물고기를 감아도 줄이 조금씩 풀려 제자리걸음을 했어요)
   if (R.sim || S.autoDrag) { const need = R.F + (R.hold ? .3 : 0); let d = 1; while (d < 5 && dragLim(g, d) < need + .01) d++; R.drag = d; }
@@ -4523,6 +4574,17 @@ function fightStep(dt, R) {
   if (st === "rage" && g.calm) R.tension *= 1 - g.calm;
   if (!R.hold && R.tension > g.lineMax * .97) R.tension = g.lineMax * .97;   // v1.122: 손을 떼고 있으면 줄이 풀려 나가서 끊기진 않아요 — 대신 줄이 다 풀리면(릴 줄 길이) 도망가요   // 몸부림 충격 흡수: 물고기 힘(지치는 속도)은 그대로, 줄에 걸리는 장력만 줄어요
   R.lineOut = out;
+  // v1.126 변수 행동 게이지 (0 → 1 이면 놓쳐요)
+  const tier = R.r && R.r.f ? R.r.f.tier : 0;
+  // 바르게 대응해도 등급이 높을수록 게이지가 조금씩은 차요 → 그 능력이 좋은 낚싯대 · 채비가 대물에서 차이를 만들어요
+  const hi = .1 + .03 * tier;
+  if (st === "spin") R.twist += dt * ((R.hold ? .75 : 0) + hi) * (1 - g.twistRes); else R.twist = Math.max(0, R.twist - dt * .25);
+  if (st === "dive" && R.sp && R.sp.snag) R.snag += dt * R.sp.snag * (R.hold ? hi * 2 : 1) * (1 - g.lift); else R.snag = Math.max(0, R.snag - dt * .2);
+  if (st === "charge") { R.dist -= (1 + tier * .12) * dt; R.slack += dt * (R.hold ? hi * 2.5 : 1.05) * g.slackMul * (1 - .6 * g.sense); } else R.slack = Math.max(0, R.slack - dt * .6);
+  if (R.burst && R.hold) R.heat += .35 * g.heatMul * dt;   // 속임수 돌진 때 감고 있으면 릴이 확 뜨거워져요
+  if (R.twist >= 1) return "twist";
+  if (R.snag >= 1) return "snag";
+  if (R.slack >= 1) return "slack";
   R.stam = Math.max(0, R.stam - (R.F * (st === "run" || st === "rage" ? 1.4 : 1) + out * .05) / R.S0 * g.tire * dt);
   R.maxHeat = Math.max(R.maxHeat, R.heat);
   if (st === "jump" && R.hold && !R.jumpChecked && R.stT < .6) { R.jumpChecked = true; if (!g.barbed && R.tension > .55 && Math.random() < .4 * g.jump) { R.shook = true; return "shake"; } }
@@ -4543,15 +4605,23 @@ function drawFight() {
   // v1.86: 지금 할 일 하나를 크게 (✋ 손 떼기 · 🤏 살살 · 👆 꾹 감기)
   const sTen = $("fightTenS"), sHeat = $("fightHeatS"), tw = tr > .9 ? ["위험!", "bad"] : tr > .72 ? ["조심", "mid"] : ["안전", ""], hw = R.heat > .75 ? ["과열!", "bad"] : R.heat > .45 ? ["뜨거움", "mid"] : ["괜찮음", ""];
   if (sTen.textContent !== tw[0]) { sTen.textContent = tw[0]; sTen.className = "fgs " + tw[1]; } if (sHeat.textContent !== hw[0]) { sHeat.textContent = hw[0]; sHeat.className = "fgs " + hw[1]; }
+  const fRev = R.st === "feint" && (R.feintLen - R.stT) >= R.feintLen * (1 - R.g.sense) * .95;   // 감도가 높을수록 속임수를 일찍 알아채요
   const D = R.guardT > 0 ? ["stop", "✋", "손 떼는 중", "🐣 초보 보호가 대신 손을 뗐어요 · 다시 꾹 누르세요"]
+    : R.st === "charge" ? ["go", "👆", "꾹 감기!", "💨 역주! 이쪽으로 달려와요 · 줄이 느슨해지기 전에 감아요"]
+    : R.st === "spin" ? ["stop", "✋", "손 떼기!", "🌀 몸을 비틀어요 · 감으면 줄이 꼬여요"]
+    : fRev ? ["stop", "✋", "속임수!", "🎭 지친 척이에요 · 곧 돌진해요"]
+    : R.burst ? ["stop", "✋", "손 떼기!", "🎭 속았어요! 갑자기 돌진해요"]
     : R.heat > .75 ? ["stop", "✋", "손 떼기!", "🔥 릴이 너무 뜨거워요 · 떼면 식어요"]
     : tr > .9 ? ["stop", "✋", "손 떼기!", "🧵 줄이 끊어지기 직전이에요" + (S.autoDrag ? "" : " · 드랙을 풀어요(－)")]
     : R.st === "rage" ? ["stop", "✋", "손 떼기!", "몸부림 중 · 버티지 말고 놔 주세요"]
     : R.st === "jump" ? ["stop", "✋", "손 떼기!", "점프 중엔 바늘이 빠질 수 있어요"]
     : R.st === "run" ? ["stop", "✋", "잠깐 떼기", "돌진 중 · 감으면 릴이 뜨거워져요"]
-    : R.st === "tired" ? ["go", "👆", "꾹 눌러 감기!", "물고기가 지쳤어요 · 지금이 기회!"]
+    : (R.st === "tired" || R.st === "feint") ? ["go", "👆", "꾹 눌러 감기!", "물고기가 지쳤어요 · 지금이 기회!"]
+    : R.st === "dive" && R.sp && R.sp.snag ? ["go", "👆", "감아서 끌어내기", "🪨 바위 쪽으로 숨어요 · 감고 있어야 줄이 안 쓸려요"]
     : R.st === "dive" ? ["slow", "🤏", "살살 감기", "잠수하며 버티는 중 · 눌렀다 뗐다"]
     : ["slow", "🤏", "살살 감기", "천천히 끌려오는 중"];
+  { const gs = [["🌀 줄 꼬임", R.twist], ["🪨 바위 쓸림", R.snag], ["💨 줄 느슨함", R.slack]].sort((a, b) => b[1] - a[1])[0], el = $("fightSp");
+    if (el) { const on = gs[1] > .04; if (el.hidden === on) el.hidden = !on; if (on) { if ($("fightSpL").textContent !== gs[0]) $("fightSpL").textContent = gs[0]; $("fightSpBar").style.width = Math.min(100, gs[1] * 100) + "%"; } } }
   const box = $("fightDo"), m = $("fightMsg");
   if (box.dataset.do !== D[0]) box.dataset.do = D[0];
   if (m.textContent !== D[2]) { m.textContent = D[2]; $("fightDoI").textContent = D[1]; }
@@ -4608,10 +4678,13 @@ function fightOver(out) {
   const R = REEL, left = Math.max(0, R.dist).toFixed(1);
   if (out === "land") { R.perfect = R.maxHeat < .5 && !R.shook; return endReel(true); }
   if (out === "snap" || out === "heat") stat("snaps");
-  if (["snap", "heat", "shake", "far"].includes(out) && !R.coop) stat("lose_" + out);
+  if (["snap", "heat", "shake", "far", "twist", "snag", "slack"].includes(out) && !R.coop) stat("lose_" + out);
   const why = out === "snap" ? "줄이 끊겼어요! 남은 거리 " + left + "m · 장력이 빨개지면 드랙을 풀어요"
     : out === "heat" ? "과열로 줄이 끊겼어요… 남은 거리 " + left + "m · 돌진할 땐 손을 떼서 식혀요"
     : out === "shake" ? "점프할 때 바늘이 빠졌어요 · 물고기가 뛰면 손을 떼요"
+    : out === "twist" ? "물고기가 몸을 비틀 때 감아서 줄이 꼬여 끊겼어요 · 🌀 비틀 땐 손을 떼요 (회전 도래 · 꼬임 방지 좋은 낚싯대)"
+    : out === "snag" ? "바위 쪽으로 숨어서 줄이 쓸려 끊겼어요 · 🪨 잠수할 땐 감아서 끌어내요 (납 찌 · 들어 올리기 좋은 낚싯대)"
+    : out === "slack" ? "역주 때 줄이 느슨해져서 바늘이 빠졌어요 · 💨 달려올 땐 꾹 감아요 (미늘 바늘 · 서클훅 · 감도 좋은 낚싯대)"
     : out === "far" ? "줄이 다 풀려서(" + R.g.far + "m) 도망갔어요 · 지쳤을 때 감고, 더 긴 릴 · 강한 낚싯대가 도와줘요"
     : "너무 오래 싸워서 물고기가 빠져나갔어요";
   S.noMissToast = !R.coop && loseCardWill(out);   // 카드가 자세히 알려 주니 같은 토스트는 생략해요
@@ -4647,8 +4720,9 @@ function simRun(g, tier) {
     const R = reelInit({ f: pool[(i * 7) % pool.length], k: 1 }, null, { ...g }); R.sim = true;
     const seen = []; let o = null;
     while (!o && R.time < 120) {
-      seen.push(R.st); const st = seen.length > SIM_LAG ? seen.shift() : "run";
-      R.hold = (st === "cruise" || st === "tired" || st === "dive") && R.heat < .55 && R.tension / R.g.lineMax < .85;
+      const vis = R.st === "feint" && (R.feintLen - R.stT) < R.feintLen * (1 - R.g.sense) * .95 ? "tired" : R.st;   // 사람도 속임수를 알아채기 전엔 「지침」으로 봐요
+      seen.push(vis); const st = seen.length > SIM_LAG ? seen.shift() : "run";
+      R.hold = (st === "cruise" || st === "tired" || st === "dive" || st === "charge") && R.heat < .55 && R.tension / R.g.lineMax < .85;
       R.time += 1 / 60; o = fightStep(1 / 60, R);
     }
     if (o === "land") win++;
@@ -4692,6 +4766,7 @@ function showFightPerks(g) {
   if (g.barbed) out.push("🪝 점프에도 안 빠짐"); else if (g.jump < 1) out.push("🪝 점프 빠짐 -" + Math.round((1 - g.jump) * 100) + "%");
   if (g.calm > 0) out.push("🌀 몸부림 충격 -" + Math.round(g.calm * 100) + "%");
   if (g.tire > 1) out.push("💨 빨리 지침 +" + Math.round((g.tire - 1) * 100) + "%");
+  if (g.lift > 0) out.push("🪨 " + Math.round(g.lift * 100)); if (g.sense > 0) out.push("📡 " + Math.round(g.sense * 100)); if (g.twistRes > 0) out.push("🌀 " + Math.round(g.twistRes * 100));
   if (g.stamMul < 1) out.push("코르크 체력 -15%"); if (g.lead) out.push("납 찌 잠수 -20%"); if (g.heatMul < curReel().heat) out.push("트랩 찌 과열 -20%");
   el.textContent = out.join(" · "); el.hidden = !out.length;
 }
@@ -13094,7 +13169,8 @@ function itemPerks(cat, it) {
     const c0 = curRod();
     out.push(["🧵", "줄이 버티는 힘 " + pct(it.tens) + (it.tens !== c0.tens ? " (지금 " + pct(c0.tens) + ")" : "") + " · 높을수록 줄이 덜 끊겨요"]);
     out.push(["🪝", "채비를 " + it.slots + "개까지 달 수 있어요"]);
-    if (it.id !== "bamboo") { out.push(["🐟", "물고기가 뛸 때 바늘 빠짐 " + pct(1 - it.jump) + "% 줄어요"]); if (it.calm) out.push(["💥", "몸부림 충격 " + pct(it.calm) + "% 흡수"]); if (it.tire > 1) out.push(["😮‍💨", "물고기가 " + pct(it.tire - 1) + "% 빨리 지쳐요"]); }
+    if (it.id !== "bamboo") { out.push(["🐟", "물고기가 뛸 때 바늘 빠짐 " + pct(1 - it.jump) + "% 줄어요"]); if (it.calm) out.push(["💥", "몸부림 충격 " + pct(it.calm) + "% 흡수"]); if (it.tire > 1) out.push(["😮‍💨", "물고기가 " + pct(it.tire - 1) + "% 빨리 지쳐요"]);
+      out.push(["🪨", "들어 올리기 " + pct(it.lift) + " · 바위로 숨는 물고기를 끌어내요"]); out.push(["📡", "감도 " + pct(it.sense) + " · 역주 때 덜 빠지고 속임수를 일찍 알아채요"]); out.push(["🌀", "꼬임 방지 " + pct(it.twist) + " · 비틀 때 줄이 덜 꼬여요"]); }
   }
   if (cat === "reel") { out.push(["🔥", it.heat >= 1 ? "열이 잘 오르는 기본 릴이에요" : "릴 열이 " + pct(1 - it.heat) + "% 덜 올라요"]); out.push(["🧊", "식는 빠르기 " + pct(it.cool)]); out.push(["🌀", "감는 빠르기 " + it.speed.toFixed(1) + "m/s"]); out.push(["📏", "줄 길이 " + (it.len || 60) + "m · 물고기가 이보다 멀리 도망가면 놓쳐요"]); }
   if (cat === "line") out.push(["🧵", it.add ? "끊어지기 전까지 " + pct(it.add) + "% 더 버텨요" : "처음 받은 기본 줄이에요"]);
@@ -13135,7 +13211,8 @@ function shopPreview(cat, it) {
   if (cat === "bait") { const mc = APEX_CHANCE[it.id]; box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: mc ? "🌌 태초 " + (Math.round(mc * 10000) / 100) + "% · 심해에선 ×2, 밤엔 ×1.5, 희귀 축제 땐 ×2까지 올라가요" : "🌌 태초 등급은 이 미끼로는 안 나와요 · 황금 루어 · 전설의 미끼 · 태초의 미끼만 태초를 노릴 수 있어요" }),
     h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: "위 확률은 기본값이에요. 캐스트를 잘 던지거나 심해 · 이벤트에선 낮은 등급 확률이 위쪽으로 올라가고, 뽑힌 등급의 물고기가 지금 장소 · 시간에 없으면 아래 등급이 나와요." })); }
   if (cat === "rod") { const c0 = curRod(); cmp.append(...cmpRow("🧵 줄 버팀", c0.tens, it.tens, 1.5, v => Math.round(v * 100)), ...cmpRow("채비 칸", c0.slots, it.slots, 3, v => v + "칸"),
-    ...cmpRow("점프 버티기", 1 - c0.jump, 1 - it.jump, .9, v => Math.round(v * 100) + "%"), ...cmpRow("몸부림 충격 흡수", c0.calm, it.calm, .3, v => Math.round(v * 100) + "%"), ...cmpRow("빨리 지치게", c0.tire - 1, it.tire - 1, .4, v => "+" + Math.round(v * 100) + "%"));
+    ...cmpRow("점프 버티기", 1 - c0.jump, 1 - it.jump, .9, v => Math.round(v * 100) + "%"), ...cmpRow("몸부림 충격 흡수", c0.calm, it.calm, .3, v => Math.round(v * 100) + "%"), ...cmpRow("빨리 지치게", c0.tire - 1, it.tire - 1, .5, v => "+" + Math.round(v * 100) + "%"),
+    ...cmpRow("🪨 들어 올리기", c0.lift, it.lift, .65, v => Math.round(v * 100)), ...cmpRow("📡 감도", c0.sense, it.sense, .65, v => Math.round(v * 100)), ...cmpRow("🌀 꼬임 방지", c0.twist, it.twist, .65, v => Math.round(v * 100)));
     box.append(h("div", { class: "muted", style: "font-size:12px", text: rodPerkText(it) })); if (it.id === "merchant") box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: "🎯 지정 낚시 — 등급이 뜰 확률은 미끼 그대로고, 그 등급 안에서는 골라 둔 물고기(최대 3종)만 나와요. 태초 등급은 노리지 않아요." })); }
   if (cat === "reel") { const c0 = curReel(); cmp.append(...cmpRow("🔥 열 덜 오름", 1 / c0.heat, 1 / it.heat, 1.7, v => Math.round(v * 100)), ...cmpRow("🧊 잘 식음", c0.cool, it.cool, .24, v => Math.round(v * 100)), ...cmpRow("감는 속도", c0.speed, it.speed, 4, v => v.toFixed(1)), ...cmpRow("📏 줄 길이", c0.len || 60, it.len || 60, 125, v => v + "m")); box.append(h("div", { class: "muted", style: "font-size:12px", text: "과열 속도는 낮을수록, 식는 속도와 감는 속도는 높을수록 좋아요" })); }
   if (cat === "line") { const c0 = curLine(); cmp.append(...cmpRow("🧵 줄 버팀", 1 + c0.add, 1 + it.add, 1.2, v => Math.round(v * 100))); }
