@@ -2104,7 +2104,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.119.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.119.2";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -14670,6 +14670,7 @@ MSHEETS.bag = (body) => {
       tap: (it) => { S.bagSel.has(it.id) ? S.bagSel.delete(it.id) : S.bagSel.add(it.id); sfx("ui-click", .2); refreshSheet(true); } });
     if (chosen.length) mpBar(body, [h("button", { class: "btn", onclick: () => { S.bagSel = new Set(); refreshSheet(true); }, text: "취소" }),
       isJob("sashimi") ? h("button", { class: "btn", onclick: () => { const c = chosen.slice(); S.bagSel = new Set(); cutMany(c); }, text: "🔪 회 뜨기" }) : null,
+      chosen.length === 1 ? h("button", { class: "btn", onclick: () => { const it = chosen[0]; S.bagSel = new Set(); brag(it); }, text: "🙌 자랑하기" }) : null,   // v1.119.2 휴대폰 가방에도 자랑하기
       h("button", { class: "btn pri", onclick: () => { const ids = new Set(chosen.map(x => x.id)); S.bagSel = new Set(); sellItems(x => ids.has(x.id)); }, text: chosen.length + "마리 팔기 · " + won(sum(chosen)) })]);
     else if (P.bag.length) mpBar(body, [h("button", { class: "btn", disabled: !P.bag.some(i => i.tier <= 1), onclick: () => sellItems(i => i.tier <= 1), text: "일반·고급 팔기" }),
       h("button", { class: "btn pri", onclick: () => sellItems(() => true), text: "전부 팔기 · " + won(sum(P.bag)) })], "눌러서 고르면 골라 팔 수 있어요");
