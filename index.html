@@ -2200,7 +2200,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.125.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.126.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -4683,16 +4683,19 @@ const PLACES = [
   { name: "낭만포차거리", x: -15, z: 30, d: "바닷가 포차 8동 · 내 가게를 열고 손님을 받는 곳" },
   { name: "어촌 수산시장", x: -12.5, z: -33, d: "아담한 아치 지붕 시장 · 도매상 왕눈이 사장에게 물고기를 넘겨요" },
   { name: "농가마트 (낭만농협 섬마을마트)", x: 46.5, z: -18, d: "들어가서 장보기 · 씨앗 · 농기구 · 로컬푸드 납품" },
-  { name: "낭만 농장", x: 99.6, z: -18, d: "농사 자격증 · 내 밭 · 작물 12종" },
-  { name: "부두 구멍가게", x: 12.6, z: -82, d: "해변 가는 길의 민트색 가게 · 불꽃 스틱 · 새우깡 · 풍선 · 풍등" },
+  { name: "낭만 농장", x: 59.6, z: 12, d: "섬마을마트 바로 북쪽 · 농사 자격증 · 내 밭 · 작물 12종" },
+  { name: "부두 구멍가게", x: 18.6, z: -82, d: "해변 가는 길의 민트색 가게 · 불꽃 스틱 · 새우깡 · 풍선 · 풍등" },
   { name: "상점가", x: 5, z: 6, d: "미끼 가게 · 방류소 · 얼굴 공방 · 회 센터" },
   { name: "거리 입구", x: 0, z: 34, d: "처음 도착한 곳" },
-  { name: "어촌역", x: 26, z: 53, d: "접속하면 여기서 나와요 · 기차가 서는 작은 시골 역" },
+  { name: "어촌역", x: 26, z: 53, d: "접속하면 여기서 나와요 · 해돋이역 가는 바다열차가 서요" },
+  { name: "해돋이역 · 해돋이 전망대", x: 509.6, z: 66, d: "섬 반대편 동쪽 바닷가 간이역 · 어촌역에서 바다열차로 와요" },
+  { name: "상점가 뒤뜰 (산책길 · 연못)", x: 21.2, z: 6, d: "상점 뒤 가로수 산책길 · 연못 쉼터 · 과수원" },
   { name: "윗마을 공원", x: 11.2, z: 52, d: "분수 광장과 꽃밭 · 벤치에서 쉬어 가요" },
   { name: "명예의 전당", x: 8.2, z: -60.5, d: "분야별 1위의 금빛 동상이 서 있는 광장" },
   { name: "갯벌 해변", x: -4, z: -78, d: "거리 남쪽 끝 모래사장 · 썰물 때 갯벌이 드러나요" },
 ];
 function placeAt(x, z) {
+  if (x > 495 && z > 45 && z < 95) return "해돋이역";
   if (inMudArea(x, z)) return "갯벌";
   if (inSand(x, z)) return "모래사장";
   if (z > 15 && x < -3.5 && x > -31 && z < 66) return "낭만포차거리";
@@ -4702,6 +4705,10 @@ function placeAt(x, z) {
   if (x < -9.7) return "항구";
   if (atHome()) return S.homeDoc ? houseName(S.homeDoc.ownerNick || P.nick, S.homeDoc) : "우리 집";
   if (inHall(x, z)) return "명예의 전당";
+  if (x > 46 && x < 76 && z > -32 && z < -2) return "섬마을마트";   // v1.122 마을 밖도 이름으로
+  if (x > 50 && x < 96 && z > -2 && z < 32) return "낭만 농장";
+  if (x > 15.5 && x < 46 && z > -90 && z < 40) return z < -74 ? "부두 구멍가게" : "상점가 뒤뜰";
+  if (x > 56) return z > 80 && z < 125 ? "바다열차 길" : "섬 들판";
   if (z > 39) return "윗마을";
   if (x > 3.5) return "상점가";
   return "낭만 거리";
@@ -4715,6 +4722,7 @@ function walkable(x, z) {
   if (inSand(x, z)) return true;
   if (inMudArea(x, z)) return tideLow() && !!(P.tools && P.tools.boots);
   if (onDeck(x, z)) return true;
+  { const sw = stnWalk(x, z); if (sw !== null) return sw; }   // v1.122 해돋이역 승강장 · 데크
   if (inIsland(x, z)) return openWalk(x, z);
   return false;
 }
@@ -4733,7 +4741,7 @@ const mudX = (z) => -3 - 48 * beachW(z) * (1 + .05 * Math.sin(z * .17 + 1));
 const inSand = (x, z) => z >= -126 && z <= -68 && x <= -1.5 && x >= shoreX(z);
 const inMudArea = (x, z) => z >= -124 && z <= -70 && x < shoreX(z) && x >= mudX(z) + 1;
 const sandY = (x, z) => -0.26 * clamp((-1 - x) / Math.max(.5, -1 - shoreX(z)), 0, 1);
-const groundY = (x, z) => atHome() ? 0 : inMudArea(x, z) ? -0.3 : inSand(x, z) ? sandY(x, z) : onDeck(x, z) ? 0 : !TER.h ? 0 : (() => { const rn = roadNear(x, z); if (rn.d < 4.2) return onMainSt(x, z) ? 0 : Math.max(rn.h, terH(x, z)) + .07; return inTownFlat(x, z) ? 0 : terH(x, z); })();   // v1.49: 마을은 0, 도로는 도로 높이, 그 밖은 지형
+const groundY = (x, z) => atHome() ? 0 : stnFloor(x, z) !== null ? stnFloor(x, z) : inMudArea(x, z) ? -0.3 : inSand(x, z) ? sandY(x, z) : onDeck(x, z) ? 0 : !TER.h ? 0 : (() => { const rn = roadNear(x, z); if (rn.d < 4.2) return onMainSt(x, z) ? 0 : Math.max(rn.h, terH(x, z)) + .07; return inTownFlat(x, z) ? 0 : terH(x, z); })();   // v1.49: 마을은 0, 도로는 도로 높이, 그 밖은 지형
 /* 물때: 20분 주기, 앞 10분 썰물 */
 const TIDE_MS = 1200000;
 function tideInfo(now) {
@@ -4747,6 +4755,7 @@ const keys = new Set();
 
 /* ===================== 이동 ===================== */
 function leaveSpot(silent) {
+  if (S.ride) { trainLeave(false); return; }
   if (S.coop) coopEnd("함께 낚시를 그만뒀어요", true);
   if (onBoat()) { if (myBoat() && myBoat().status === "sailing") { lockedHint(); return; } boatLeave(); return; }
   if (ME.seat) {
@@ -4763,6 +4772,7 @@ function walkTo(x, z, onArrive) {
   ME.target = { x, z }; ME.onArrive = onArrive || null;
 }
 function stepMove(dt) {
+  if (S.ride) { if (keys.size || (S.joy && S.joy.m > .15)) lockedHint(); ME.target = null; ME.onArrive = null; ME.moving = false; return; }   // v1.122 기차 안
   let dx = 0, dz = 0;
   if (keys.size || (S.joy && S.joy.m > .15)) {
     let f = 0, s = 0;
@@ -4832,12 +4842,13 @@ function sitNow(id) {
   updateLeaveBtn(); updateHint();
 }
 function nearestAction() {
-  if (ME.seat || S.myStall >= 0 || REEL.on || S.coop) return null;
+  if (ME.seat || S.myStall >= 0 || REEL.on || S.coop || S.ride) return null;
   let best = null, bd = 1.9;
   const consider = (x, z, act, lim) => { const d = Math.hypot(ME.x - x, ME.z - z); if (d < (lim || bd) && (!best || d < best.d)) best = { ...act, d }; };
   consider(FMKT.npc.x + 1.9, FMKT.npc.z, { key: "wholesaler", label: "💬 도매상 왕눈이 사장과 말하기", run: () => { ME.ry = -Math.PI / 2; presMove(true); S.wsLine = null; openSheet("wholesale"); } }, 2.8);
   if (atHome()) { homeActions(consider); return best; }
-  if (atRest()) { restActions(consider); return best; }   // 내 포차 안에서는 스테이션만
+  if (atRest()) { restActions(consider); return best; }
+  if (STN_READY) trainActions(consider);   // v1.122 바다열차 타기   // 내 포차 안에서는 스테이션만
   if (SEAT.b0) {
     const docked = S.fleet.filter(b => b.status === "docked"), free = docked.reduce((a, b) => a + (BOAT.max - b.seats.length), 0), sig = S.fleet.map(b => b.status + b.seats.length).join("|");
     consider(BOAT.board.x, BOAT.board.z, { key: "boat:" + sig, label: docked.length ? "배 타기 (정박 " + docked.length + "척 · 빈자리 " + free + ")" : "배 타기 (전부 출항 중)", run: () => openSheet("boat") }, 2.6);
@@ -4891,10 +4902,10 @@ function updateActionUI() {
   }
   const sb = $("standBtn");
   const coopGuest = S.coop && S.coop.role === "guest" && S.coop.stage !== "inviting";
-  const showStand = (!!ME.seat || S.myStall >= 0 || coopGuest || !!S.card) && S.phase !== "bite" && !REEL.on;
+  const showStand = (!!ME.seat || S.myStall >= 0 || coopGuest || !!S.card || !!S.ride) && S.phase !== "bite" && !REEL.on;
   sb.hidden = !showStand;
   sb.classList.toggle("up", showStand && !btn.hidden);
-  if (showStand) sb.textContent = S.card ? "명함 거두기" : coopGuest ? "함께 낚시 그만" : onBoat() ? (myBoat() && myBoat().status === "sailing" ? "중도하차" : "배에서 내리기") : S.myStall >= 0 ? (npcActive(S.stalls[S.myStall]) ? "알바에게 맡기고 자리 뜨기" : "노점 닫기") : "일어나기";
+  if (showStand) sb.textContent = S.ride ? (TRAIN.st && TRAIN.st.phase === "dwell" ? "기차에서 내리기" : "🚆 달리는 중") : S.card ? "명함 거두기" : coopGuest ? "함께 낚시 그만" : onBoat() ? (myBoat() && myBoat().status === "sailing" ? "중도하차" : "배에서 내리기") : S.myStall >= 0 ? (npcActive(S.stalls[S.myStall]) ? "알바에게 맡기고 자리 뜨기" : "노점 닫기") : "일어나기";
   syncUIState();
 }
 function doAction() { if (curAction) { const a = curAction; curAction = null; a.run(); actKey = "-"; } }   // 다음 프레임에 버튼을 꼭 다시 그려요 (팔고 나서 할 일이 없으면 숨김)
@@ -4902,7 +4913,7 @@ let lockHintAt = 0;
 function lockedHint() {
   if (Date.now() - lockHintAt < 4000) return;
   lockHintAt = Date.now();
-  toast(onBoat() && myBoat() && myBoat().status === "sailing" ? "내리려면 「중도하차」를 눌러 주세요" : S.coop ? "함께 낚시를 그만하려면 「함께 낚시 그만」을 눌러 주세요" : S.myStall >= 0 ? "노점을 떠나려면 「노점 닫기」를 눌러 주세요" : "자리에서 움직이려면 「일어나기」를 눌러 주세요");
+  toast(S.ride ? "🚆 기차가 달리는 중이에요 · 역에 서면 「기차에서 내리기」로 내려요" : onBoat() && myBoat() && myBoat().status === "sailing" ? "내리려면 「중도하차」를 눌러 주세요" : S.coop ? "함께 낚시를 그만하려면 「함께 낚시 그만」을 눌러 주세요" : S.myStall >= 0 ? "노점을 떠나려면 「노점 닫기」를 눌러 주세요" : "자리에서 움직이려면 「일어나기」를 눌러 주세요");
 }
 function updateLeaveBtn() { updateActionUI(); }
 
@@ -5502,7 +5513,7 @@ function setChannel(c) {   // 채널을 바꾸고 그 채널의 사람 · 배 ·
 }
 function moveChannel(c) {
   if (c === S.ch) return;
-  if (onBoat() || S.myStall >= 0 || (S.coop && S.coop.stage !== "inviting") || REEL.on) { toast("배 · 노점 · 함께 낚시 · 손맛 싸움 중에는 채널을 옮길 수 없어요"); return; }
+  if (S.ride || onBoat() || S.myStall >= 0 || (S.coop && S.coop.stage !== "inviting") || REEL.on) { toast("배 · 노점 · 함께 낚시 · 손맛 싸움 중에는 채널을 옮길 수 없어요"); return; }
   if ((chCounts().get(c) || 0) >= CH_MAX) { toast(c + "채널은 꽉 찼어요 (최대 " + CH_MAX + "명)"); refreshSheet(); return; }
   if (ME.seat) leaveSpot();
   setChannel(c); closeSheet(); sfx("ui-confirmation", .35); toast("🌊 " + c + "채널로 옮겼어요");
@@ -8493,7 +8504,7 @@ function init3D() {
   buildMart(); buildFarm();   // v1.121 농가마트 · 낭만 농장
   buildBeach();
   buildHall();
-  buildStation();
+  buildStation(); buildRail(); buildStation2();   // v1.122 바다열차 · 해돋이역
   buildTV();
   buildUptown();
   buildFar();
@@ -8531,7 +8542,8 @@ function init3D() {
 
   scene.updateMatrixWorld(true);
   for (const dg of DETAIL_GROUPS) mergeStatic(dg);
-  scene.traverse(o => { if (o.isMesh && o.material && o.material.isMeshToonMaterial) { o.castShadow = true; o.receiveShadow = true; } });
+  setTimeout(mergeStill, 1500);   // v1.122 움직이지 않는 장식 합치기
+  scene.traverse(o => { if (o.isMesh && o.material && o.material.isMeshToonMaterial) { o.castShadow = !o.userData.noShadow; o.receiveShadow = true; } });
   buildLife();
   GUIDE = makeText(); GUIDE.visible = false; scene.add(GUIDE);
   loadProps();
@@ -8785,15 +8797,19 @@ function buildRingRoad() {
 function buildForest() {
   const items = { pine: [], round: [], rock: [] }; let s = 77; const r = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
   for (let n = 0; n < 11000 && items.pine.length + items.round.length < 2400; n++) {
-    const x = -40 + r() * 580, z = -290 + r() * 600; if (townMask(x, z) > .15 || !inIsland(x, z)) continue;
+    const x = -40 + r() * 580, z = -290 + r() * 600; if (townMask(x, z) > .15 || !inIsland(x, z) || (x > 44 && x < 100 && z > -36 && z < 36)) continue;
     const h = terH(x, z), d = coastInfo(x, z).d, dens = vnoise(x / 60 + 3, z / 60) + smooth01(6, 40, h) * .5;
     if (d < 14 || terSlope(x, z) > .7 || roadNear(x, z).d < 9 || southBeach(z, d) > .3) continue;
     if (r() < .06) { items.rock.push([x, h, z, .6 + r() * 1.8]); continue; }
     if (dens < .55 + r() * .25) continue;
     (h > 18 || r() < .55 ? items.pine : items.round).push([x, h, z, .8 + r() * .9]);
   }
-  const mk = (geo, mat, list, place) => { if (!list.length) return; const im = new T3.InstancedMesh(geo, mat, list.length), m = new T3.Matrix4(), q = new T3.Quaternion(), sc = new T3.Vector3(), p = new T3.Vector3();
-    list.forEach((it, i) => { place(it, p, q, sc); m.compose(p, q, sc); im.setMatrixAt(i, m); }); im.castShadow = true; im.receiveShadow = true; scene.add(im); };
+  const mk = (geo, mat, list, place) => { if (!list.length) return; const CH = 150, by = new Map();   // v1.122 숲을 덩어리로 나눠요: 화면 · 그림자 밖 덩어리는 아예 안 그려요
+    for (const it of list) { const k = Math.floor(it[0] / CH) + "," + Math.floor(it[2] / CH); if (!by.has(k)) by.set(k, []); by.get(k).push(it); }
+    geo.computeBoundingSphere(); const gr = geo.boundingSphere.radius + Math.abs(geo.boundingSphere.center.y);
+    for (const part of by.values()) { const im = new T3.InstancedMesh(geo.clone(), mat, part.length), m = new T3.Matrix4(), q = new T3.Quaternion(), sc = new T3.Vector3(), p = new T3.Vector3(), bb = new T3.Box3();
+      part.forEach((it, i) => { place(it, p, q, sc); m.compose(p, q, sc); im.setMatrixAt(i, m); bb.expandByPoint(p); });
+      const sp = new T3.Sphere(); bb.getBoundingSphere(sp); sp.radius += gr * 2; im.geometry.boundingSphere = sp; im.castShadow = true; im.receiveShadow = true; scene.add(im); } };
   const up = new T3.Vector3(0, 1, 0);
   const pineG = new T3.ConeGeometry(1.5, 4.6, 7); pineG.translate(0, 4.4, 0); const pineG2 = new T3.ConeGeometry(1.15, 3.2, 7); pineG2.translate(0, 6.1, 0);
   const trunkG = new T3.CylinderGeometry(.18, .26, 2.4, 6); trunkG.translate(0, 1.2, 0);
@@ -9247,6 +9263,67 @@ const GEOD = {}, DETAIL_GROUPS = [], STALL_GROUPS = [], DECO_FISH = [], CLOUDS =
 let CLOUD_MATS = [], SHOP_LAMP = null, STALL_DECO = { x: 1.0, y: 1.1 };
 let sdSeed = 17; const srnd = () => (sdSeed = (sdSeed * 9301 + 49297) % 233280) / 233280;
 function plain(geo, mat, x, y, z, parent) { const m = new T3.Mesh(geo, mat); m.position.set(x, y, z); (parent || scene).add(m); return m; }
+/* v1.122 최적화: 한동안 움직이지 않은 장식 메시는 (부모 · 재질 · 40m 칸)별로 한 덩어리로 합쳐 그려요 (그리기 횟수 ↓).
+   원래 메시는 그 자리에 두되 안 그려요(layers 0). 나중에 누가 그 메시의 위치 · 회전 · 크기 · 보이기 · 재질 · 모양을 바꾸거나
+   떼어 내면, 그 메시만 곧바로 덩어리에서 빼서 원래대로 따로 그려요 (안전 장치) */
+const STILL_ROOTS = [];
+function mergeStill() {
+  const skip = new Set([...grounds, ...pickables]), cand = [];
+  const ok = (o) => o.isMesh && !o.isInstancedMesh && !o.isSkinnedMesh && o.material && o.material.isMeshToonMaterial && !o.material.vertexColors && !o.children.length && o.visible && o.layers.mask === 1 && o.matrixAutoUpdate && !skip.has(o) && !Object.keys(o.userData).length && o.geometry && o.geometry.attributes.position && o.geometry.attributes.normal && !(o.geometry.morphAttributes && o.geometry.morphAttributes.position);
+  for (const o of scene.children) if (ok(o)) cand.push(o);
+  for (const r of STILL_ROOTS) r.traverse(o => { if (o !== r && ok(o)) cand.push(o); });
+  scene.updateMatrixWorld(true);
+  const snap = new Map(cand.map(o => [o, o.matrixWorld.clone()]));
+  setTimeout(() => {
+    const buckets = new Map(), wp = new T3.Vector3();
+    for (const o of cand) {
+      if (!o.parent || !o.visible || o.layers.mask !== 1) continue;
+      const a = snap.get(o).elements, b = o.matrixWorld.elements; let same = true; for (let i = 0; i < 16; i++) if (Math.abs(a[i] - b[i]) > 1e-5) { same = false; break; }
+      if (!same) continue;   // 움직이는 것 (흔들리는 간판 · 바람개비 · 배 …)
+      wp.setFromMatrixPosition(o.matrixWorld);
+      const key = o.parent.uuid + "|" + o.material.uuid + "|" + Math.floor(wp.x / 40) + "," + Math.floor(wp.z / 40);
+      if (!buckets.has(key)) buckets.set(key, []); buckets.get(key).push(o);
+    }
+    let n = 0, k = 0; for (const list of buckets.values()) if (list.length >= 2) { stillBatch(list); n += list.length; k++; }
+    S.stillMerged = [n, k];
+  }, 5000);
+}
+function stillBatch(list) {
+  const parent = list[0].parent, mat = list[0].material, B = { items: list.slice(), mesh: null };
+  const cat = (arrs) => { let n = 0; for (const a of arrs) n += a.length; const out = new Float32Array(n); let k = 0; for (const a of arrs) { out.set(a, k); k += a.length; } return out; };
+  const inv = new T3.Matrix4(), mt = new T3.Matrix4();
+  const build = () => {
+    if (B.mesh) { parent.remove(B.mesh); B.mesh.geometry.dispose(); B.mesh = null; }
+    if (!B.items.length) return;
+    parent.updateMatrixWorld(true); inv.copy(parent.matrixWorld).invert();
+    const pos = [], nor = [], uv = [];
+    for (const o of B.items) { const g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone(); g.applyMatrix4(mt.multiplyMatrices(inv, o.matrixWorld)); pos.push(g.attributes.position.array); nor.push(g.attributes.normal.array); uv.push(g.attributes.uv ? g.attributes.uv.array : new Float32Array(g.attributes.position.count * 2)); g.dispose(); }
+    const mg = new T3.BufferGeometry(); mg.setAttribute("position", new T3.BufferAttribute(cat(pos), 3)); mg.setAttribute("normal", new T3.BufferAttribute(cat(nor), 3)); mg.setAttribute("uv", new T3.BufferAttribute(cat(uv), 2)); mg.computeBoundingSphere();
+    const m = new T3.Mesh(mg, mat); m.castShadow = B.items.some(o => o.castShadow); m.receiveShadow = true; m.userData.still = 1; m.matrixAutoUpdate = false; parent.__stillAdd(m); B.mesh = m;
+  };
+  if (!parent.__stillAdd) {   // 떼어 낼 때(remove)도 먼저 덩어리에서 빼요
+    const add = parent.add.bind(parent), rm = parent.remove.bind(parent); parent.__stillAdd = add;
+    parent.remove = function (...objs) { for (const x of objs) if (x && x.__stillRel) x.__stillRel(); return rm(...objs); };
+  }
+  const release = (o) => {
+    const i = B.items.indexOf(o); if (i < 0) return; B.items.splice(i, 1);
+    const h = o.__stillHook; o.__stillHook = null; o.__stillRel = null; if (h) h();
+    o.layers.mask = 1; o.matrixAutoUpdate = true; build();
+  };
+  for (const o of list) {
+    const fire = () => release(o), undo = [];
+    const prop = (obj, key) => { let val = obj[key]; Object.defineProperty(obj, key, { configurable: true, enumerable: true, get: () => val, set: (x) => { if (x !== val) { val = x; fire(); } } }); undo.push(() => { const cur = obj[key]; delete obj[key]; obj[key] = cur; }); };
+    prop(o, "visible"); prop(o, "material"); prop(o, "geometry");
+    for (const v of [o.position, o.scale]) for (const key of ["x", "y", "z"]) prop(v, key);
+    const rc = o.rotation._onChangeCallback, qc = o.quaternion._onChangeCallback;
+    o.rotation._onChange(() => { rc(); fire(); }); o.quaternion._onChange(() => { qc(); fire(); });
+    undo.push(() => { o.rotation._onChange(rc); o.quaternion._onChange(qc); });
+    o.__stillHook = () => { for (const u of undo.reverse()) u(); };
+    o.__stillRel = fire;
+    o.layers.mask = 0; o.matrixAutoUpdate = false;
+  }
+  build();
+}
 function mergeStatic(root) {
   const byMat = new Map();
   root.traverse(o => { if (o.isMesh && o.material && o.material.isMeshToonMaterial && !o.children.length) { if (!byMat.has(o.material)) byMat.set(o.material, []); byMat.get(o.material).push(o); } });
@@ -9336,29 +9413,45 @@ function buildDetails() {
   }
   // 길 안내 표지판 (처음 도착하는 거리 입구) · v1.27 — 갯벌 해변이 있는 줄 모르는 사람이 많아서. 처음 보는 방향(남쪽)이 「↑」
   { plain(new T3.CylinderGeometry(.08, .1, 3.4, 8), cmat(0x5a3f2a), 4.55, 1.7, 31.6, det);
-    const boards = [["↑ 수산시장 · 명예의 전당 · 🐚 갯벌 해변", "#2f6f86"], ["← 낭만 부두 · 낚시 · ⛵ 멍낚호", "#c2402a"], ["→ 상점가 (낚시 상점 · 회 센터 …)", "#7a5a2a"], ["↓ 윗마을 (동사무소 · 부동산)", "#4a6a3a"]];
+    const boards = [["↑ 수산시장 · 명예의 전당 · 🐚 갯벌 해변", "#2f6f86"], ["← 낭만 부두 · 낚시 · ⛵ 멍낚호", "#c2402a"], ["→ 상점가 · 🛒 섬마을마트 · 🌾 농장", "#7a5a2a"], ["↓ 윗마을 공원 · 🚉 어촌역 (바다열차)", "#4a6a3a"]];
     boards.forEach(([txt, col], k) => {
       const tex = canvasTex(640, 96, (c) => { c.fillStyle = col; c.beginPath(); c.moveTo(14, 6); c.lineTo(626, 6); c.lineTo(634, 48); c.lineTo(626, 90); c.lineTo(14, 90); c.lineTo(6, 48); c.closePath(); c.fill(); c.strokeStyle = "#fff6dc"; c.lineWidth = 5; c.stroke(); c.fillStyle = "#fff6dc"; let px = 44; const ff = getComputedStyle(document.body).fontFamily; do { c.font = "700 " + px + "px " + ff; px -= 2; } while (c.measureText(txt).width > 590 && px > 20); c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(txt, 320, 51); }, 1, 1);
       const m = new T3.Mesh(new T3.PlaneGeometry(3, .45), new T3.MeshBasicMaterial({ map: tex, transparent: true })); m.position.set(4.55, 3.05 - k * .55, 31.66); scene.add(m);
     }); }
-  // 상점 뒤 언덕 마을 · 나무
-  const pastel = [0xf2e6d0, 0xe9d3c0, 0xd8e4ea, 0xf0dcdc, 0xe4ead2], roofs = [0xd8473a, 0x2f6f86, 0x3f6e58, 0xc98a4a, 0x6b6bd6];
-  const hwin = bulbMat(0x8aa3b0, 0xffd89a), winG = new T3.PlaneGeometry(.5, .5);
-  const keepOut = (x, z) => (x < 26.5 && z > 37 && z < 75) || (x < 23.5 && z > -70 && z < -52) || (x > 22 && x < 56 && z > 28 && z < 92) || (z > -23.5 && z < -12.5);   // v1.121 농가마트 가는 농로는 비워 둠   // 윗마을 · 명예의 전당 · 어촌역 자리는 비워 둠   // 윗마을 · 명예의 전당 자리는 비워 둠
-  for (let i = 0; i < 26; i++) {
-    const x = 21 + srnd() * 22, z = -64 + i * 4.9 + (srnd() - .5) * 2, w = 2.4 + srnd() * 1.4, hh = 1.8 + srnd() * 1.6;
-    if (keepOut(x, z)) continue;
-    plain(new T3.BoxGeometry(w, hh, w * .9), cmat(pastel[i % 5]), x, hh / 2, z, det); BLOCKS.push([x - w / 2 - .3, x + w / 2 + .3, z - w * .45 - .3, z + w * .45 + .3]);
-    plain(new T3.ConeGeometry(w * .82, w * .55, 4), cmat(roofs[(i * 3) % 5]), x, hh + w * .27, z, det).rotation.y = Math.PI / 4;
-    plain(winG, hwin, x - w / 2 - .01, hh * .55, z, det).rotation.y = -Math.PI / 2;
+  buildBackGarden(det);   // v1.122 흩어진 작은 집들을 걷어 내고 정돈된 뒤뜰로
+}
+function buildBackGarden(det) {   // v1.122 상점가 뒤뜰: 뒷길 산책로 · 가로수 · 쉼터 · 연못 · 과수원 · 이정표
+  const sl = (w, d, x, z, rx, rz) => box(w, .04, d, lam(0xffffff, { map: imgTex("a/slabs.jpg", rx, rz) }), x, .045, z, det);
+  const LX = 21.2;
+  sl(2.6, 112, LX, -20, 1, 38);                       // 뒷길 (구멍가게 앞 ~ 역 쪽)
+  sl(33 - LX + 1.3, 2.6, (LX + 33) / 2, 36, 4, 1); sl(2.6, 6, 33, 39, 1, 2);   // → 어촌역 광장
+  sl(9.2, 2.2, 11.4, -18, 3, 1);                      // 거리 → 상점 사이 골목 → 뒷길
+  sl(6, 6, LX, -18, 2, 2);                            // 마트 길과 만나는 네거리
+  for (let z = -70; z <= 30; z += 7) {
+    if (z > -23 && z < -13) continue;
+    if (!(z > -69 && z < -52)) propTree(LX - 2.3, z, .85, det, Math.abs(z / 7) % 2 === 0);
+    propTree(LX + 2.5, z + 3.5, .9, det, false);
   }
-  const trunk = new T3.CylinderGeometry(.14, .2, 1.4, 6), pine = new T3.ConeGeometry(1, 2.6, 7), ball = new T3.IcosahedronGeometry(1.1, 1), leafCols = [0x5e9a52, 0x6fa85e, 0x4f8a4a];
-  for (let i = 0; i < 34; i++) {
-    const x = 17 + srnd() * 28, z = -66 + srnd() * 130, isPine = srnd() < .5, sc = .8 + srnd() * .6;
-    if (keepOut(x, z)) continue;
-    plain(trunk, cmat(0x7a5a3c), x, .7, z, det);
-    plain(isPine ? pine : ball, cmat(leafCols[i % 3]), x, isPine ? 2.4 : 2.1, z, det).scale.setScalar(sc);
+  for (const z of [-62, -44, -30, -6, 8, 22]) propLamp(LX + 1.55, z, [-1, 0], det);
+  for (const z of [-42, 20]) {   // 쉼터
+    sl(5, 5, LX + 7.2, z, 2, 2); sl(3.4, 1.6, LX + 3.9, z, 1, 1);
+    propBench(LX + 9.2, z, Math.PI / 2, det); propPlanter(LX + 7.2, z - 2.1, 3.6, .7, det); propPlanter(LX + 7.2, z + 2.1, 3.6, .7, det);
   }
+  // 연못 쉼터
+  { const px = 35, pz = 6, w = new T3.Mesh(new T3.CircleGeometry(4.2, 36), phong(0x6ec6dc)); w.rotation.x = -Math.PI / 2; w.position.set(px, .07, pz); det.add(w);
+    for (let k = 0; k < 22; k++) { const a = k / 22 * Math.PI * 2, r = plain(GEOD.pondR || (GEOD.pondR = new T3.DodecahedronGeometry(.45, 0)), cmat(k % 3 ? 0x9a948a : 0x8a847a), px + Math.cos(a) * 4.4, .12, pz + Math.sin(a) * 4.4, det); r.scale.set(1.2, .5, 1); r.rotation.y = k; }
+    for (const [dx, dz] of [[-1.6, .8], [1.2, -1.4], [.4, 1.9]]) { const l = new T3.Mesh(new T3.CircleGeometry(.45, 12), cmat(0x4f9a52)); l.rotation.x = -Math.PI / 2; l.position.set(px + dx, .09, pz + dz); det.add(l); }
+    sl(8.3, 2, 26.65, pz, 3, 1); propBench(px, pz + 6.2, Math.PI, det); propBench(px + 6.4, pz, -Math.PI / 2, det);
+    BLOCKS.push([px - 4, px + 4, pz - 4, pz + 4]); }
+  // 과수원 (마트 길 남쪽) · 꽃밭 (연못 북쪽)
+  for (const x of [29, 35, 41]) for (const z of [-58, -50, -42, -34]) { if (x === 29 && z === -42) continue; propTree(x, z, .75, det, false);
+    for (let k = 0; k < 5; k++) { const a = k * 1.3 + x, f = plain(GEOD.fruit || (GEOD.fruit = new T3.IcosahedronGeometry(.13, 0)), cmat(k % 2 ? 0xff7a3c : 0xe8442c), x + Math.cos(a) * .7, 1.5 + (k % 3) * .3, z + Math.sin(a) * .7, det); f.scale.setScalar(1); } }
+  for (const [x, z, w, d] of [[30, 18, 3.4, 1.4], [38, 22, 3.4, 1.4], [42, 18.6, 1.4, 3.4], [32, -26, 4, 1.2]]) propPlanter(x, z, w, d, det, .12);
+  for (const [x, z] of [[30, 26], [40, 28], [44, 8]]) propTree(x, z, 1.0, det, true);
+  // 이정표
+  fingerPost(4.9, -18, [["🛒 섬마을마트 · 🌾 낭만 농장", "#2f8f5b", 60, -18], ["🚉 어촌역 · 바다열차", "#2a78bb", 30, 53], ["🎈 부두 구멍가게 · 🐚 갯벌", "#c2402a", 20, -82]], det);
+  fingerPost(LX + 2.4, -15.6, [["🛒 섬마을마트 · 🌾 농장", "#2f8f5b", 60, -18], ["🚉 어촌역 · 바다열차", "#2a78bb", 33, 53], ["🎈 부두 구멍가게", "#c2402a", 25, -82], ["🏘 상점가 거리", "#7a5a2a", 0, -18]], det);
+  fingerPost(LX + 2.2, -72, [["🎈 부두 구멍가게", "#c2402a", 25, -82], ["🚉 뒷길 → 어촌역", "#2a78bb", LX, 30]], det);
 }
 /* 하늘의 구름 · 갈매기 · 먼바다에 묶인 배 (움직이는 것들) */
 function buildLife() {
@@ -10726,15 +10819,14 @@ const FARM_LV = [   // 땅 단계: 가격(이번 단계만) · 밭 범위(7×7 �
   { name: "낭만 농장주", cost: 50000, lo: 0, hi: 6, add: "황금수박 · 인삼 · 자동 물뿌리기(밭 전체 12시간)" },
 ];
 const FARM_LICENSE = 500, FARM_WET_MS = 3 * 3600e3, FARM_WET_AUTO = 12 * 3600e3, FARM_STEP = 2.4, LOCAL_CAP = 30000;   // v1.122 하루 납품 상한 = 금액 300만원 (예전 300개)
-const FARM = { x: 112, z: -24, y: 2, gate: { x: 102.4, z: -18 }, office: { x: 99.6, z: -30 } };
-const MART = { x0: 49, x1: 73, z0: -28, z1: -6, door: -18 };
+const FARM = { x: 70, z: 14, y: 0, gate: { x: 60.4, z: 12 }, office: { x: 57.6, z: 8 } };   // v1.125 구석(동쪽 언덕)에서 마트 바로 북쪽으로 이사
+const MART = { x0: 49, x1: 73, z0: -28, z1: -6, door: -18, h: 6.2 };
 const inMart = (x, z) => x > MART.x0 && x < MART.x1 && z > MART.z0 && z < MART.z1;
 const inFarm = (x, z) => Math.abs(x - FARM.x) < 9.5 && Math.abs(z - FARM.z) < 9.5;
 /* 평평한 땅 (지형 생성에 섞어요 · 경계는 부드럽게) */
 const TER_PADS = [
   { x0: 46, x1: 76, z0: -30, z1: -4, m: 8, y: () => 0 },
-  { x0: 92, x1: 126, z0: -38, z1: -10, m: 10, y: () => FARM.y },
-  { x0: 74, x1: 100, z0: -20.5, z1: -15.5, m: 5, y: (x) => FARM.y * smooth01(76, 98, x) },
+  { x0: 50, x1: 95, z0: -4, z1: 31, m: 9, y: () => FARM.y },   // v1.125 낭만 농장 (마트 북쪽)
 ];
 function terPad(x, z, nat) {
   for (const p of TER_PADS) {
@@ -10827,25 +10919,74 @@ function cropIcon(id) {
 }
 /* 3D: 농장 울타리 · 관리소 · 밭 7×7 (내 밭만) */
 const FARM3D = { plots: new Map(), dirty: true, last: 0, built: false };
-function buildFarm() {
-  const y0 = FARM.y, g = new T3.Group(); scene.add(g);
+function buildFarm() {   // v1.125 마트 북쪽 새 자리 · 헛간 마당까지 정성껏
+  const y0 = FARM.y, g = new T3.Group(); scene.add(g); STILL_ROOTS.push(g);
   // 울타리 (나무 말뚝 + 가로대) · 입구는 서쪽
-  const wood = cmat(0x8a6038), post = new T3.CylinderGeometry(.08, .1, 1.1, 6), half = 9.6;
+  const wood = cmat(0x8a6038), post = new T3.CylinderGeometry(.08, .1, 1.1, 6), half = 9.6, white = cmat(0xf4efe4), iron = cmat(0x2a2d33);
   const side = (x1, z1, x2, z2) => { const L = Math.hypot(x2 - x1, z2 - z1), n = Math.max(1, Math.round(L / 2)); for (let i = 0; i <= n; i++) { const t = i / n, px = FARM.x + x1 + (x2 - x1) * t, pz = FARM.z + z1 + (z2 - z1) * t; plain(post, wood, px, groundY(px, pz) + .5, pz, g); }
     for (const yy of [.45, .85]) { const r = box(L, .07, .06, wood, FARM.x + (x1 + x2) / 2, y0 + yy, FARM.z + (z1 + z2) / 2, g); r.rotation.y = -Math.atan2(z2 - z1, x2 - x1); } };
   const gz = FARM.gate.z - FARM.z; side(-half, -half, half, -half); side(half, -half, half, half); side(half, half, -half, half); side(-half, half, -half, gz + 2.4); side(-half, -half, -half, gz - 2.4);
-  // 입구 아치 간판
-  { const gx = FARM.x - half, gz = FARM.gate.z; for (const dz of [-2.2, 2.2]) plain(new T3.CylinderGeometry(.12, .14, 3.2, 8), wood, gx, y0 + 1.6, gz + dz, g);
-    const gm = new T3.MeshBasicMaterial({ map: txtTex(512, 100, "#f4e6c8", [["🌾 낭만 농장", 60, "#4a6a2a", .55]]) }), sg = new T3.Mesh(new T3.BoxGeometry(.12, .9, 4.8), [gm, gm, wood, wood, wood, wood]); sg.position.set(gx - .02, y0 + 3.1, gz); g.add(sg); }
-  // 농장 관리소 (작은 붉은 헛간 · 사이딩 벽 · 창)
-  { const s = new T3.Group(); s.position.set(96.9, y0, -30); s.rotation.y = Math.PI / 2; scene.add(s);
+  // 입구 아치 간판 · 문 옆 등
+  { const gx = FARM.x - half, gzz = FARM.gate.z; for (const dz of [-2.2, 2.2]) plain(new T3.CylinderGeometry(.12, .14, 3.2, 8), wood, gx, y0 + 1.6, gzz + dz, g);
+    const gm = new T3.MeshBasicMaterial({ map: txtTex(512, 100, "#f4e6c8", [["🌾 낭만 농장", 60, "#4a6a2a", .55]]) }), sg = new T3.Mesh(new T3.BoxGeometry(.12, .9, 4.8), [gm, gm, wood, wood, wood, wood]); sg.position.set(gx - .02, y0 + 3.1, gzz); g.add(sg);
+    for (const dz of [-3.4, 3.4]) propLamp(gx - 1.2, gzz + dz, [1, 0], g); }
+  // 농장 관리소 (작은 붉은 헛간 · 사이딩 벽 · 창 · 현관 등)
+  { const ox = FARM.office.x - 2.7, oz = FARM.office.z, s2 = new T3.Group(); s2.position.set(ox, y0, oz); s2.rotation.y = Math.PI / 2; g.add(s2);
     const red = phong(0xb84a3a, { map: (() => { const t = wallTex("siding").clone(); t.needsUpdate = true; t.repeat.set(2, 1.2); return t; })() });
-    box(4.6, 2.8, 3.6, red, 0, 1.4, 0, s); const roof = cmat(0x5a4a3a);
-    for (const sx of [-1, 1]) { const r = box(5, .1, 2.3, roof, 0, 3.15, sx * .95, s); r.rotation.x = sx * .55; }
-    box(1.1, 1.9, .08, cmat(0xf4efe4), 0, .95, 1.81, s); box(.9, 1.7, .06, cmat(0x7a4a2a), 0, .9, 1.84, s);
-    for (const sx of [-1.6, 1.6]) box(.7, .6, .06, winMat(0xcfe8f0, 0xffe2a8), sx, 1.7, 1.82, s);
-    const sg = new T3.Mesh(new T3.PlaneGeometry(2.4, .5), new T3.MeshBasicMaterial({ map: txtTex(384, 80, "#fff4dc", [["농장 관리소", 48, "#7a3a2a", .55]]) })); sg.position.set(0, 2.45, 1.83); s.add(sg);
-    BLOCKS.push([95, 98.8, -32.4, -27.6]); }
+    box(4.6, 2.8, 3.6, red, 0, 1.4, 0, s2); const roof = cmat(0x5a4a3a);
+    for (const sx of [-1, 1]) { const r = box(5, .1, 2.3, roof, 0, 3.15, sx * .95, s2); r.rotation.x = sx * .55; }
+    box(1.1, 1.9, .08, white, 0, .95, 1.81, s2); box(.9, 1.7, .06, cmat(0x7a4a2a), 0, .9, 1.84, s2);
+    for (const sx of [-1.6, 1.6]) box(.7, .6, .06, winMat(0xcfe8f0, 0xffe2a8), sx, 1.7, 1.82, s2);
+    const sg = new T3.Mesh(new T3.PlaneGeometry(2.4, .5), new T3.MeshBasicMaterial({ map: txtTex(384, 80, "#fff4dc", [["농장 관리소", 48, "#7a3a2a", .55]]) })); sg.position.set(0, 2.45, 1.86); s2.add(sg);
+    box(5.2, .14, 1.4, wood, 0, .07, 2.5, s2); propAdd(new T3.Mesh(new T3.SphereGeometry(.14, 10, 8), propBulb()), .9, 2.25, 1.95, s2);
+    BLOCKS.push([ox - 1.9, ox + 1.9, oz - 2.4, oz + 2.4]); }
+  // 붉은 헛간 (밭 동쪽): 맞배 겹지붕 · 흰 테두리 · X자 큰 문 · 건초 다락 · 바람개비
+  { const bx = FARM.x + 17, bz = FARM.z + 1, s2 = new T3.Group(); s2.position.set(bx, y0, bz); s2.rotation.y = -Math.PI / 2; g.add(s2);
+    const W = 8, D = 7.4, H = 3.6, redW = phong(0xb0402f, { map: (() => { const t = wallTex("siding").clone(); t.needsUpdate = true; t.repeat.set(3, 1.4); return t; })() }), roofM = cmat(0x3f4a52);
+    box(W, H, D, redW, 0, H / 2, 0, s2);
+    const prof = [[-4.35, -.05], [-3.55, 1.6], [-1.75, 2.72], [0, 2.98], [1.75, 2.72], [3.55, 1.6], [4.35, -.05]];
+    const shp = new T3.Shape(); shp.moveTo(-4, 0); for (const [x, y] of prof.slice(1, -1)) shp.lineTo(x * .92, y * .95); shp.lineTo(4, 0); shp.closePath();
+    const gab = new T3.Mesh(new T3.ExtrudeGeometry(shp, { depth: D, bevelEnabled: false }), redW); gab.position.set(0, H, -D / 2); s2.add(gab);
+    for (let i = 0; i < prof.length - 1; i++) { const [ax, ay] = prof[i], [bx2, by] = prof[i + 1], len = Math.hypot(bx2 - ax, by - ay); const r = box(len + .1, .14, D + .7, roofM, (ax + bx2) / 2, H + (ay + by) / 2, 0, s2); r.rotation.z = Math.atan2(by - ay, bx2 - ax); }
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) box(.2, H, .2, white, sx * (W / 2 - .05), H / 2, sz * (D / 2 - .05), s2);
+    for (const sd of [-1, 1]) { const dz = D / 2 + .04; box(1.6, 2.7, .08, cmat(0x9a3426), sd * .82, 1.35, dz, s2); box(1.6, .14, .1, white, sd * .82, 2.66, dz + .02, s2); box(1.6, .14, .1, white, sd * .82, .07, dz + .02, s2); box(.14, 2.7, .1, white, sd * 1.55, 1.35, dz + .02, s2);
+      for (const r of [1, -1]) { const x = box(.12, 3.0, .1, white, sd * .82, 1.35, dz + .03, s2); x.rotation.z = r * Math.atan2(1.5, 2.6); } }
+    box(1.4, 1.1, .08, white, 0, H + 1.05, D / 2 + .05, s2); box(1.1, .85, .06, cmat(0x2a1a10), 0, H + 1.05, D / 2 + .08, s2); box(1.0, .3, .3, cmat(0xe6c45a), 0, H + .75, D / 2 + .1, s2);
+    for (const sx of [-1, 1]) for (const z of [-1.8, 1.8]) box(.06, .8, 1.0, winMat(0xcfe8f0, 0xffe2a8), sx * (W / 2 + .02), 2.1, z, s2);
+    cyl(.03, .03, 1.0, 6, iron, 0, H + 3.45, 0, s2); const vane = new T3.Group(); vane.position.set(0, H + 3.85, 0); s2.add(vane); box(.9, .05, .05, iron, 0, 0, 0, vane); box(.25, .2, .03, iron, .4, 0, 0, vane);
+    FACADE_ANIM.push((t) => { vane.rotation.y = Math.sin(t * .3) * .8; });
+    propAdd(new T3.Mesh(new T3.SphereGeometry(.18, 10, 8), propBulb()), 0, 3.1, D / 2 + .35, s2);
+    const pl = new T3.PointLight(0xffd8a0, 0, 20, 1.6); pl.position.set(bx - 5, y0 + 3.2, bz); scene.add(pl); glow.push({ light: pl, val: 1.1 });
+    BLOCKS.push([bx - D / 2 - .2, bx + D / 2 + .2, bz - W / 2 - .2, bz + W / 2 + .2]);
+    // 건초 · 트랙터
+    const hay = cmat(0xe6c45a);
+    for (const [hx, hz] of [[bx - 1.5, bz + 6.4], [bx + .1, bz + 6.8], [bx - .7, bz + 5.4]]) { const h2 = cyl(.7, .7, 1.1, 16, hay, hx, y0 + .7, hz, g); h2.rotation.x = Math.PI / 2; h2.rotation.z = hx; }
+    for (let k = 0; k < 5; k++) box(1.0, .5, .55, hay, bx - 6.5 + (k % 3) * 1.02, y0 + .25 + Math.floor(k / 3) * .5, bz - 5.6, g);
+    BLOCKS.push([bx - 2.4, bx + .9, bz + 4.7, bz + 7.6], [bx - 7.1, bx - 3.9, bz - 6, bz - 5.2]);
+    { const tr = new T3.Group(); tr.position.set(bx + 1, y0, bz - 7.6); tr.rotation.y = .5; g.add(tr); const tred = cmat(0xd8382c);
+      box(2.6, .7, 1.2, tred, .3, 1.0, 0, tr); box(1.2, .8, 1.0, tred, 1.1, 1.6, 0, tr); cyl(.06, .06, .7, 6, iron, 1.5, 2.2, .2, tr);
+      for (const [px, pz] of [[-.8, -.5], [-.8, .5], [-.8, 0]]) { if (pz === 0) continue; box(.05, 1.2, .05, iron, px, 1.9, pz, tr); } box(1.0, .06, 1.1, tred, -.8, 2.5, 0, tr);
+      for (const sz of [-1, 1]) { cyl(.62, .62, .4, 16, iron, -.7, .62, sz * .78, tr).rotation.x = Math.PI / 2; cyl(.36, .36, .3, 14, iron, 1.4, .36, sz * .7, tr).rotation.x = Math.PI / 2; }
+      BLOCKS.push([bx - .8, bx + 2.8, bz - 8.8, bz - 6.4]); } }
+  // 풍차 (밭 남동쪽 · 빙글빙글)
+  { const wx = FARM.x + 12.5, wz = FARM.z - 12, tw = new T3.Group(); tw.position.set(wx, y0, wz); g.add(tw); const mt = cmat(0x9aa3aa);
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const l = box(.08, 7.2, .08, mt, sx * .5, 3.5, sz * .5, tw); l.rotation.set(sz * .07, 0, -sx * .07); }
+    for (const y of [1.5, 3.5, 5.5]) box(1.0 - y * .06, .05, 1.0 - y * .06, mt, 0, y, 0, tw);
+    const hub = new T3.Group(); hub.position.set(0, 7.2, .4); tw.add(hub);
+    for (let k = 0; k < 12; k++) { const b2 = box(.14, 1.3, .03, cmat(k % 2 ? 0xf4efe4 : 0xd8382c), 0, .75, 0, hub); const a = k / 12 * Math.PI * 2; b2.position.set(Math.sin(a) * .75, Math.cos(a) * .75, 0); b2.rotation.z = -a; }
+    box(.12, .4, 1.6, mt, 0, 7.2, -.6, tw); box(.04, .9, .9, cmat(0xf4efe4), 0, 7.2, -1.4, tw);
+    FACADE_ANIM.push((t) => { hub.rotation.z = -t * 1.4; });
+    BLOCKS.push([wx - .9, wx + .9, wz - .9, wz + .9]); }
+  // 허수아비 (문 북쪽 · 울타리 밖)
+  { const sx0 = FARM.x - half - 1.6, sz0 = FARM.z + 7.5; cyl(.05, .05, 2.2, 6, wood, sx0, y0 + 1.1, sz0, g); box(1.5, .05, .05, wood, sx0, y0 + 1.6, sz0, g);
+    box(.55, .6, .3, cmat(0x2a78bb), sx0, y0 + 1.45, sz0, g); propAdd(new T3.Mesh(new T3.SphereGeometry(.22, 10, 8), cmat(0xe6c45a)), sx0, y0 + 2.0, sz0, g);
+    cyl(.38, .38, .04, 14, cmat(0xc89a5a), sx0, y0 + 2.2, sz0, g); cyl(.2, .22, .2, 12, cmat(0xc89a5a), sx0, y0 + 2.3, sz0, g); }
+  // 과일나무 줄 (밭 북쪽) · 꽃 띠 (밭 남쪽) · 물통
+  for (let k = 0; k < 5; k++) { const tx = FARM.x - 8 + k * 4, tz = FARM.z + half + 2.6; propTree(tx, tz, .85, g, false);
+    for (let f = 0; f < 5; f++) { const a = f * 1.3 + k; plain(GEOD.fruit || (GEOD.fruit = new T3.IcosahedronGeometry(.13, 0)), cmat(f % 2 ? 0xff7a3c : 0xe8442c), tx + Math.cos(a) * .7, 1.5 + (f % 3) * .3, tz + Math.sin(a) * .7, g); } }
+  for (let k = 0; k < 4; k++) propPlanter(FARM.x - 7 + k * 4.6, FARM.z - half - 1.2, 3.6, .8, g, .12);
+  { const tx = FARM.x - half - 1.4, tz = FARM.z - 8; cyl(.6, .6, 1.3, 14, cmat(0x7a5a3a), tx, y0 + .65, tz, g); cyl(.62, .62, .08, 14, iron, tx, y0 + 1.0, tz, g); cyl(.62, .62, .08, 14, iron, tx, y0 + .3, tz, g); BLOCKS.push([tx - .7, tx + .7, tz - .7, tz + .7]); }
+  fingerPost(FARM.gate.x - 2.6, FARM.gate.z + 4.2, [["🛒 섬마을마트", "#2f8f5b", 47, -18], ["🏘 상점가 뒤뜰 길", "#7a5a2a", 22, 12], ["🚉 어촌역 · 바다열차", "#2a78bb", 30, 53]], g, y0);
   // 땅 팻말 (아직 안 산 곳)
   FARM3D.group = new T3.Group(); scene.add(FARM3D.group);
   const soilT = canvasTex(64, 64, (c, w, hh) => { c.fillStyle = "#6b4a2e"; c.fillRect(0, 0, w, hh); for (let y = 4; y < hh; y += 12) { c.fillStyle = "#5a3c24"; c.fillRect(0, y, w, 5); c.fillStyle = "rgba(255,255,255,.06)"; c.fillRect(0, y + 6, w, 2); } }, 1, 1);
@@ -10894,13 +11035,13 @@ function farmTick(t) {
   }
 }
 /* ── 농가마트 (낭만농협 섬마을마트) · 실내를 걸어 다녀요 ── */
-const MART_CORNERS = [
-  { id: "fresh", name: "신선 채소 · 과일", ico: "🥬", x: 57, z: -12.6, ry: 0 },
-  { id: "local", name: "로컬푸드 직매장", ico: "🧺", x: 59.6, z: -17.5, ry: Math.PI / 2 },
-  { id: "seed", name: "씨앗 · 모종", ico: "🌱", x: 69, z: -21, ry: Math.PI / 2 },
-  { id: "tool", name: "농기구", ico: "🧰", x: 69, z: -11.5, ry: Math.PI / 2 },
-  { id: "pantry", name: "양념 · 가공식품", ico: "🫙", x: 61, z: -23.4, ry: Math.PI },
-  { id: "checkout", name: "계산대", ico: "🧾", x: 53, z: -21.6, ry: Math.PI },
+const MART_CORNERS = [   // v1.125 새 매장 배치
+  { id: "fresh", name: "신선 채소 · 과일", ico: "🥬", x: 55.5, z: -13.6, ry: 0 },
+  { id: "local", name: "로컬푸드 직매장", ico: "🧺", x: 58.4, z: -17, ry: Math.PI / 2 },
+  { id: "seed", name: "씨앗 · 모종", ico: "🌱", x: 69, z: -21.6, ry: Math.PI / 2 },
+  { id: "tool", name: "농기구", ico: "🧰", x: 69.2, z: -11.5, ry: Math.PI / 2 },
+  { id: "pantry", name: "양념 · 가공식품", ico: "🫙", x: 64, z: -25.4, ry: Math.PI },
+  { id: "checkout", name: "계산대", ico: "🧾", x: 55, z: -21.6, ry: Math.PI },
 ];
 const MART_TOOLS = [
   { id: "can", name: "물뿌리개", price: 30, d: "밭에 물을 줘요 · 한 번에 주변 9칸", tool: true },
@@ -10943,69 +11084,185 @@ function martCartChip() {
 }
 function martLeaveCheck() {
   const inside = inMart(ME.x, ME.z);
-  if (MART.roof) { MART.roof.visible = !inside; MART.ceil.visible = !inside; }
+  if (MART.light) { const want = inside ? (isNight() ? 1.3 : .75) : isNight() ? 1.7 : 0; MART.light.intensity += (want - MART.light.intensity) * .08; }   // v1.125 매장 불빛
   if (!inside && S.cart.length && !S.title) { S.cart = []; martCartChip(); toast("🛒 계산 안 한 물건은 제자리에 두고 나왔어요"); }
   if (inside && !MART.clerk && GEO.body) {   // 계산대 점원 (초록 조끼)
-    try { const B = makeBody(); applyOutfit(B, normWear({ hat: "h-cap", top: "t-vest" }), "#2f8f5b"); B.faceMat.map = faceTexture("npc"); B.faceMat.needsUpdate = true; B.g.position.set(52.6, 0, -24.4); B.g.rotation.y = 0; scene.add(B.g); MART.clerk = B; } catch (e) { MART.clerk = true; }
+    try { const B = makeBody(); applyOutfit(B, normWear({ hat: "h-cap", top: "t-vest" }), "#2f8f5b"); B.faceMat.map = faceTexture("npc"); B.faceMat.needsUpdate = true; B.g.position.set(51.45, 0, -24.9); B.g.rotation.y = Math.PI / 2; scene.add(B.g); MART.clerk = B; } catch (e) { MART.clerk = true; }
   }
 }
-function buildMart() {
-  const { x0, x1, z0, z1 } = MART, Hh = 5.2, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, g = new T3.Group(); scene.add(g);
-  const wall = phong(0xeef0ea, { map: (() => { const t = wallTex("panel").clone(); t.needsUpdate = true; t.repeat.set(8, 1.6); return t; })() });
-  const green = cmat(0x2f8f5b), yellow = cmat(0xf2c230), white = cmat(0xffffff), dark = cmat(0x3a3f48);
-  // 바닥 (밝은 타일)
-  { const ft = wallTex("tile").clone(); ft.needsUpdate = true; ft.repeat.set(10, 9); const fl = new T3.Mesh(new T3.PlaneGeometry(x1 - x0, z1 - z0), phong(0xf4f4f0, { map: ft })); fl.rotation.x = -Math.PI / 2; fl.position.set(cx, .03, cz); g.add(fl); }
-  // 벽: 뒤(동) · 양옆(남북) · 앞(서)은 유리 + 가운데 자동문
+function buildMart() {   // v1.125 섬마을마트 새 단장: 입구 · 계산대 3줄 · 신선 코너 · 로컬푸드 장터 · 씨앗/농기구 벽 · 냉장고 · 진열대 · 밤 조명
+  const { x0, x1, z0, z1 } = MART, Hh = MART.h, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, g = new T3.Group(); scene.add(g); STILL_ROOTS.push(g);
+  const wall = phong(0xeef0ea, { map: (() => { const t = wallTex("panel").clone(); t.needsUpdate = true; t.repeat.set(8, 1.9); return t; })() });
+  const green = cmat(0x2f8f5b), greenD = cmat(0x23704a), yellow = cmat(0xf2c230), white = cmat(0xffffff), dark = cmat(0x3a3f48), steel = cmat(0xdde2e6), steelD = cmat(0xaab2ba), wood = cmat(0xa8723c), woodL = cmat(0xd2a466), red = cmat(0xd8382c);
+  const prod = [0xe8442c, 0xf2c230, 0x4fa83f, 0x2f7fd8, 0xffffff, 0xff9a3c, 0x9a7bff, 0xd8382c, 0x37b5a0, 0xf28ab0];
+  const B = (a, b, c, d) => BLOCKS.push([a, b, c, d]);
+  const tm = (w, hh, bg, lines) => new T3.MeshBasicMaterial({ map: txtTex(Math.round(w * 120), Math.round(hh * 120), bg, lines) });
+  const plate = (mat, w, hh, x, y, z, ry, two, parent) => { for (const r of two ? [0, Math.PI] : [0]) { const t = new T3.Mesh(new T3.PlaneGeometry(w, hh), mat); t.rotation.y = ry + r; t.position.set(x + Math.sin(ry + r) * .02, y, z + Math.cos(ry + r) * .02); (parent || g).add(t); } };
+  const hang = (label, bg, fg, w, x, z, ry) => { plate(tm(w, .78, bg, [[label, 54, fg, .56]]), w, .78, x, 4.35, z, ry, true); for (const s2 of [-1, 1]) { const ox = Math.cos(ry) * s2 * w * .4, oz = -Math.sin(ry) * s2 * w * .4; box(.025, Hh - 4.74, .025, dark, x + ox, 4.74 + (Hh - 4.74) / 2, z + oz, g); } };
+  // ── 바닥 · 천장 ──
+  { const ft = wallTex("tile").clone(); ft.needsUpdate = true; ft.repeat.set(12, 11); const fl = new T3.Mesh(new T3.PlaneGeometry(x1 - x0, z1 - z0), phong(0xf6f6f2, { map: ft })); fl.rotation.x = -Math.PI / 2; fl.position.set(cx, .03, cz); g.add(fl);
+    box(8.6, .012, 2.0, cmat(0xa8d696), x0 + 4.9, .042, MART.door, g);   // 입구에서 들어오는 초록 길
+    box(2.0, .03, 3.6, greenD, x0 + 1.2, .046, MART.door, g);            // 발판
+    const ct = wallTex("tile").clone(); ct.needsUpdate = true; ct.repeat.set(10, 9); const ce = new T3.Mesh(new T3.PlaneGeometry(x1 - x0, z1 - z0), phong(0xf4f4f0, { map: ct })); ce.rotation.x = Math.PI / 2; ce.position.set(cx, Hh - .03, cz); g.add(ce); }
+  // ── 벽: 뒤(동) · 양옆(남북) · 앞(서)은 큰 유리 + 가운데 자동문 ──
   box(.3, Hh, z1 - z0, wall, x1, Hh / 2, cz, g);
   for (const zz of [z0, z1]) box(x1 - x0, Hh, .3, wall, cx, Hh / 2, zz, g);
   const D0 = MART.door - 2, D1 = MART.door + 2;
   for (const [a, b] of [[z0, D0], [D1, z1]]) { const L = b - a, m = (a + b) / 2;
-    box(.3, 1.0, L, wall, x0, .5, m, g); box(.12, Hh - 2.2, L - .2, glassMat(), x0, 1 + (Hh - 2.2) / 2, m, g); box(.3, 1.2, L, wall, x0, Hh - .6, m, g);
-    for (let k = 1; k < Math.floor(L / 3); k++) box(.2, Hh - 2.2, .12, dark, x0, 1 + (Hh - 2.2) / 2, a + k * (L / Math.floor(L / 3)), g); }
-  box(.3, Hh - 3, 4.4, wall, x0, 3 + (Hh - 3) / 2, MART.door, g);   // 문 위
-  for (const s of [-1, 1]) box(.1, 2.9, 1.9, glassMat(), x0 - .1, 1.45, MART.door + s * 1.0 + s * .9, g);   // 열려 있는 자동문 (옆으로 밀림)
-  // 지붕 (안에 들어가면 안 보여요) · 입구 차양 · 간판
-  MART.roof = box(x1 - x0 + .6, .4, z1 - z0 + .6, cmat(0x5a6470), cx, Hh + .2, cz, g);
-  { const can = box(2.4, .2, 7, green, x0 - 1.2, 3.3, MART.door, g); for (const s of [-1, 1]) box(.12, 3.3, .12, dark, x0 - 2.3, 1.65, MART.door + s * 3.3, g); }
-  { const sgT = canvasTex(1024, 180, (c, w, hh) => { c.fillStyle = "#2f8f5b"; c.fillRect(0, 0, w, hh); c.fillStyle = "#f2c230"; c.fillRect(0, hh - 28, w, 28); c.fillStyle = "#ffffff"; c.font = "900 92px 'Black Han Sans','IBM Plex Sans KR',sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("낭만농협 섬마을마트", w / 2 + 40, hh * .44);
-      c.fillStyle = "#f2c230"; c.beginPath(); c.arc(90, hh * .44, 50, 0, 7); c.fill(); c.fillStyle = "#2f8f5b"; c.beginPath(); c.ellipse(90, hh * .44 - 4, 20, 34, .5, 0, 7); c.fill(); c.fillStyle = "#3a2a10"; c.font = "700 22px 'IBM Plex Sans KR',sans-serif"; c.fillText("우리 섬에서 난 먹거리 · 로컬푸드 직매장", w / 2, hh - 14); }, 1, 1);
-    const sg = new T3.Mesh(new T3.PlaneGeometry(16, 2.8), new T3.MeshBasicMaterial({ map: sgT })); sg.position.set(x0 - .17, Hh - 1.1, cz); sg.rotation.y = -Math.PI / 2; g.add(sg); }
-  // 진열대: 벽 선반 · 섬 매대 · 상품 상자
-  const prod = [0xe8442c, 0xf2c230, 0x4fa83f, 0x2f7fd8, 0xffffff, 0xff9a3c, 0x9a7bff, 0xd8382c];
-  const shelf = (sx, sz, w, d, rot, rows, sign) => { const s = new T3.Group(); s.position.set(sx, 0, sz); s.rotation.y = rot; g.add(s);
-    box(w, 2.0, .12, cmat(0xd8dde2), 0, 1.0, -d / 2, s); for (let r = 0; r < rows; r++) { box(w, .06, d, cmat(0xc8ced4), 0, .3 + r * .55, 0, s);
-      for (let i = 0; i < Math.floor(w / .34); i++) box(.26, .32 + (i % 3) * .06, d * .6, cmat(prod[(i * 3 + r * 5 + Math.round(sx)) % prod.length]), -w / 2 + .2 + i * .34, .3 + r * .55 + .2, 0, s); }
-    if (sign) { const t = new T3.Mesh(new T3.PlaneGeometry(Math.min(w, 4), .5), new T3.MeshBasicMaterial({ map: txtTex(400, 64, "#2f8f5b", [[sign, 34, "#ffffff", .55]]) })); t.position.set(0, 2.5, -d / 2 + .02); s.add(t); }
-    return s; };
-  shelf(72, -20.5, 7, .7, -Math.PI / 2, 3, "🌱 씨앗 · 모종");
-  shelf(72, -11.5, 7, .7, -Math.PI / 2, 3, "🧰 농기구");
-  shelf(61, -27.3, 10, .7, 0, 3, "🫙 양념 · 가공식품");
-  shelf(61, -7, 10, .7, Math.PI, 3, "🥫 생활용품");
-  // 로컬푸드 섬 매대 (나무 · 초록 간판)
-  { const s = new T3.Group(); s.position.set(63, 0, -17.5); g.add(s); box(4, .9, 3, cmat(0xa8723c), 0, .45, 0, s);
-    for (let i = 0; i < 12; i++) { const cr = box(.8, .28, .7, cmat(0xc89a5a), -1.5 + (i % 4) * 1, .99, -1 + Math.floor(i / 4) * 1, s); for (let k = 0; k < 4; k++) plain(GEOD.mtF || (GEOD.mtF = new T3.SphereGeometry(.11, 8, 6)), cmat(prod[(i + k) % prod.length]), (k % 2 - .5) * .3, .18, (Math.floor(k / 2) - .5) * .25, cr); }
-    const lm = new T3.MeshBasicMaterial({ map: txtTex(512, 100, "#4a8a2a", [["🧺 로컬푸드 직매장", 46, "#ffffff", .5]]) }); for (const ry of [Math.PI / 2, -Math.PI / 2]) { const t = new T3.Mesh(new T3.PlaneGeometry(3.4, .7), lm); t.position.set(ry > 0 ? .01 : -.01, 2.6, 0); t.rotation.y = ry; s.add(t); }
-    for (const dz of [-1.3, 1.3]) box(.06, 1.7, .06, dark, 0, 1.75, dz, s); }
-  // 신선 채소 매대 (기울어진 상자들)
-  { const s = new T3.Group(); s.position.set(57, 0, -9.6); g.add(s); box(6, .8, 2.2, cmat(0x7a5a3a), 0, .4, 0, s);
-    for (let i = 0; i < 6; i++) { const cr = box(.9, .3, 1.8, cmat(0xd8b070), -2.5 + i, .95, 0, s); cr.rotation.x = -.25; for (let k = 0; k < 6; k++) plain(GEOD.mtF, cmat([0x6fbf4a, 0xf4f1ea, 0xe8442c, 0xf2c230, 0xd8382c, 0x8fcf6a][i]), (k % 2 - .5) * .35, .18, (Math.floor(k / 2) - 1) * .5, cr); }
-    const fm = new T3.MeshBasicMaterial({ map: txtTex(512, 90, "#e8442c", [["🥬 신선 채소 · 과일", 44, "#ffffff", .52]]) }); for (const ry of [0, Math.PI]) { const t = new T3.Mesh(new T3.PlaneGeometry(3.4, .6), fm); t.position.set(0, 2.5, ry ? -.01 : .01); t.rotation.y = ry; s.add(t); } }
-  // 계산대 3개
-  for (let i = 0; i < 3; i++) { const s = new T3.Group(); s.position.set(51.6 + i * 2.1, 0, -23.2); g.add(s); box(.9, .9, 2.2, cmat(0xe8e8e4), 0, .45, 0, s); box(.7, .04, 1.6, dark, 0, .92, .2, s); box(.4, .35, .3, dark, 0, 1.1, -.7, s);
-    const lt = new T3.Mesh(new T3.PlaneGeometry(.6, .3), new T3.MeshBasicMaterial({ map: txtTex(128, 64, "#2f8f5b", [[String(i + 1), 44, "#f2c230", .55]]) })); lt.position.set(0, 2.2, 0); s.add(lt); }
-  // 천장 조명
-  MART.ceil = new T3.Group(); g.add(MART.ceil); for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) box(2.4, .08, .3, bulbMat(0xffffff, 0xfff4d8), 53 + i * 5.5, Hh - .1, -23 + j * 7, MART.ceil);
-  // 바깥: 카트 보관소 · 쌀 포대
+    box(.3, 1.0, L, wall, x0, .5, m, g); box(.12, 3.2, L - .2, glassMat(), x0, 2.6, m, g); box(.3, Hh - 4.2, L, wall, x0, 4.2 + (Hh - 4.2) / 2, m, g);
+    for (let k = 1; k < Math.floor(L / 3); k++) box(.2, 3.2, .12, dark, x0, 2.6, a + k * (L / Math.floor(L / 3)), g); }
+  box(.3, Hh - 3, 4.4, wall, x0, 3 + (Hh - 3) / 2, MART.door, g);
+  for (const s2 of [-1, 1]) box(.1, 2.9, 1.9, glassMat(), x0 - .1, 1.45, MART.door + s2 * 1.9, g);   // 열려 있는 자동문
+  // 안쪽 위 띠 그림 (남 · 북 벽)
+  { const mm = tm(22, 1.0, "#2f8f5b", [["🌾 낭만농협 섬마을마트  ·  우리 섬에서 난 먹거리를 우리 섬 사람에게", 56, "#fff6dc", .54]]);
+    plate(mm, 22, 1.0, cx, Hh - .85, z0 + .16, 0); plate(mm, 22, 1.0, cx, Hh - .85, z1 - .16, Math.PI); }
+  // ── 지붕 · 입구 차양 · 간판 ──
+  MART.roof = box(x1 - x0 + .6, .4, z1 - z0 + .6, cmat(0x5a6470), cx, Hh + .2, cz, g); MART.roof.userData.noShadow = 1;   // 그림자를 안 드리워서 안이 밝아요
+  { box(2.4, .2, 7, green, x0 - 1.2, 3.3, MART.door, g); for (const s2 of [-1, 1]) box(.12, 3.3, .12, dark, x0 - 2.3, 1.65, MART.door + s2 * 3.3, g);
+    box(.5, .06, 5.6, bulbMat(0xf4f4f0, 0xfff2c8), x0 - 1.2, 3.18, MART.door, g); }   // 차양 아래 불빛
+  { const sgT = canvasTex(1024, 180, (c, w, hh) => { c.fillStyle = "#2f8f5b"; c.fillRect(0, 0, w, hh); c.fillStyle = "#f2c230"; c.fillRect(0, hh - 30, w, 30); c.fillStyle = "#ffffff"; c.font = "900 92px 'Black Han Sans','IBM Plex Sans KR',sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("낭만농협 섬마을마트", w / 2 + 40, hh * .43);
+      c.fillStyle = "#f2c230"; c.beginPath(); c.arc(90, hh * .43, 50, 0, 7); c.fill(); c.fillStyle = "#2f8f5b"; c.beginPath(); c.ellipse(90, hh * .43 - 4, 20, 34, .5, 0, 7); c.fill(); c.fillStyle = "#3a2a10"; c.font = "700 22px 'IBM Plex Sans KR',sans-serif"; c.fillText("우리 섬에서 난 먹거리 · 로컬푸드 직매장 · 씨앗 · 농기구", w / 2, hh - 15); }, 1, 1);
+    box(.5, 3.1, z1 - z0 + .6, wall, x0 - .1, Hh + 1.3, cz, g); box(.75, .22, z1 - z0 + .9, green, x0 - .1, Hh + 2.95, cz, g);
+    const sg = new T3.Mesh(new T3.PlaneGeometry(16, 2.8), new T3.MeshBasicMaterial({ map: sgT })); sg.position.set(x0 - .37, Hh + 1.3, cz); sg.rotation.y = -Math.PI / 2; g.add(sg); }
+  // ── 입구 안쪽: 장바구니 · 카트 ──
+  for (let k = 0; k < 6; k++) box(.55, .2, .38, red, 50.3, .12 + k * .2, -21.4, g).rotation.y = (k % 2) * .08;
+  plate(tm(.9, .5, "#d8382c", [["🧺 장바구니", 40, "#fff", .55]]), .9, .5, 50.3, 1.75, -21.15, 0);
+  for (let k = 0; k < 4; k++) { const c = new T3.Group(); c.position.set(50.25, 0, -13.2 + k * .42); c.rotation.y = Math.PI / 2; g.add(c); box(.6, .42, .85, steelD, 0, .78, 0, c); box(.5, .02, .7, steel, 0, .58, 0, c); box(.62, .05, .05, red, 0, 1.12, -.48, c); for (const [dx, dz] of [[-.25, -.35], [.25, -.35], [-.25, .35], [.25, .35]]) cyl(.06, .06, .05, 8, dark, dx, .07, dz, c).rotation.z = Math.PI / 2; }
+  B(49.6, 50.9, -13.8, -11.2); B(49.9, 50.7, -21.8, -21);
+  // ── 계산대 3줄 ──
+  for (let i = 0; i < 3; i++) { const lx = 52.4 + i * 2.6, s2 = new T3.Group(); s2.position.set(lx, 0, -24.6); g.add(s2);
+    box(.9, .9, 3.0, cmat(0xe8e8e4), 0, .45, 0, s2); box(.96, .06, 3.06, greenD, 0, .93, 0, s2);
+    box(.62, .03, 2.0, dark, 0, .97, .35, s2); for (let k = 0; k < 7; k++) box(.62, .012, .04, cmat(0x5a6068), 0, .99, -.6 + k * .3, s2);
+    box(.46, .3, .4, dark, -.18, 1.11, -1.1, s2); const scr = box(.4, .28, .03, cmat(0x7fd4f5), -.18, 1.42, -1.27, s2); scr.rotation.x = -.3;
+    box(.5, .04, .5, steel, .12, 1.0, -1.2, s2);   // 봉투 자리
+    cyl(.035, .035, 2.3, 6, dark, .5, 1.15, -1.45, s2);
+    const lamp = new T3.Mesh(new T3.CylinderGeometry(.27, .27, .12, 18), bulbMat(0x2f8f5b, 0x8affc0)); lamp.rotation.x = Math.PI / 2; lamp.position.set(.5, 2.42, -1.45); s2.add(lamp);
+    plate(tm(.36, .36, "#2f8f5b", [[String(i + 1), 30, "#ffd84d", .55]]), .36, .36, .5, 2.42, -1.45 + .065, 0, false, s2); plate(tm(.36, .36, "#2f8f5b", [[String(i + 1), 30, "#ffd84d", .55]]), .36, .36, .5, 2.42, -1.45 - .065, Math.PI, false, s2);
+    box(.46, 1.05, .42, steelD, .62, .53, 1.2, s2); for (let r = 0; r < 3; r++) for (let k = 0; k < 2; k++) box(.17, .15, .12, cmat(prod[(i * 3 + r * 2 + k) % prod.length]), .54 + k * .18, .3 + r * .3, 1.42, s2);   // 껌 · 사탕 진열
+    B(lx - .5, lx + .9, -26.15, -23.05); }
+  hang("🧾 계산대 · 여기서 계산해요", "#f2c230", "#2a2010", 5.4, 55, -22.6, 0);
+  // ── 진열대 만들기 (한 면 / 양면) ──
+  const gondola = (gx, gz, len, ry, kind, hh, seed, two) => {
+    const s2 = new T3.Group(); s2.position.set(gx, 0, gz); s2.rotation.y = ry; g.add(s2);
+    const dep = two ? 1.0 : .6, rows = Math.max(2, Math.round((hh - .3) / .48)), side = two ? [1, -1] : [1];
+    box(len, .14, dep, steelD, 0, .07, 0, s2); box(len, hh, .05, steel, 0, hh / 2, two ? 0 : -dep / 2 + .03, s2);
+    for (const sx of [-1, 1]) box(.05, hh, dep, steelD, sx * len / 2, hh / 2, 0, s2);
+    for (const sd of side) for (let r = 0; r < rows; r++) {
+      const y = .18 + r * ((hh - .3) / rows), zc = two ? sd * dep / 4 : .03, half = two ? dep / 4 : dep / 2;
+      box(len - .08, .035, half * 2 - .06, steelD, 0, y, zc, s2); box(len - .08, .07, .015, yellow, 0, y + .01, zc + sd * (half - .02), s2);
+      const n = Math.floor((len - .2) / .3);
+      for (let i = 0; i < n; i++) { const c = cmat(prod[(i * 7 + r * 3 + seed + (sd > 0 ? 0 : 5)) % prod.length]), px = -len / 2 + .25 + i * (len - .5) / Math.max(1, n - 1);
+        if (kind === "jar") { cyl(.09, .09, .2, 10, c, px, y + .12, zc, s2); cyl(.095, .095, .05, 10, i % 2 ? dark : red, px, y + .245, zc, s2); }
+        else if (kind === "bottle") { cyl(.07, .08, .34, 8, c, px, y + .19, zc, s2); cyl(.028, .028, .07, 6, white, px, y + .39, zc, s2); }
+        else if (kind === "bag") { const bb = box(.24, .3, .14, c, px, y + .17, zc, s2); bb.rotation.z = (i % 3 - 1) * .07; }
+        else if (kind === "can") { for (const dz of [-.08, .08]) cyl(.075, .075, .17, 10, c, px, y + .105, zc + dz * sd, s2); }
+        else box(.22, .3 + (i % 3) * .05, .18, c, px, y + .17 + (i % 3) * .025, zc, s2);
+      }
+    }
+    return s2;
+  };
+  // 양념 · 가공식품 (남쪽 벽)
+  gondola(65.5, -27.5, 11, 0, "jar", 2.1, 1, false); B(60, 71, -28, -26.9); hang("🫙 양념 · 가공식품", "#2f8f5b", "#fff", 4.4, 65.5, -26.4, 0);
+  // 가운데 양면 진열대 2줄 + 끝 특가 매대
+  gondola(66.5, -20.8, 4.2, 0, "bag", 1.6, 3, true); B(64.3, 68.7, -21.4, -20.2); hang("🍪 과자 · 라면", "#2f8f5b", "#fff", 3.2, 66.5, -20.8, 0);
+  gondola(66.5, -13.4, 4.2, 0, "can", 1.6, 5, true); B(64.3, 68.7, -14, -12.8); hang("🥫 통조림 · 생활용품", "#2f8f5b", "#fff", 3.6, 66.5, -13.4, 0);
+  for (const [ex, ez] of [[63.75, -20.8], [63.75, -13.4]]) { box(.9, .5, 1.0, red, ex, .25, ez, g); for (let k = 0; k < 6; k++) box(.26, .26, .3, cmat(prod[(k * 3 + Math.round(ez)) % prod.length]), ex - .28 + (k % 3) * .28, .63 + Math.floor(k / 3) * .27, ez - .15 + (k % 2) * .3, g); plate(tm(.8, .45, "#e8442c", [["🔥 오늘 특가", 34, "#fff", .55]]), .8, .45, ex - .46, 1.35, ez, -Math.PI / 2); B(ex - .45, ex + .45, ez - .5, ez + .5); }
+  // ── 냉장고 (북쪽 벽 동쪽): 유리문 · 안쪽 불빛 ──
+  { const fx0 = 61, fx1 = 71.6, fz = -6.7, L = fx1 - fx0, fc = (fx0 + fx1) / 2;
+    box(L, 2.5, 1.0, white, fc, 1.25, fz, g); box(L - .2, 2.1, .05, cmat(0x2a3440), fc, 1.3, fz + .42, g);
+    const fl = bulbMat(0xeaf6ff, 0xffffff); box(L - .3, .06, .1, fl, fc, 2.32, fz - .3, g);
+    for (let r = 0; r < 4; r++) { const y = .45 + r * .48; box(L - .3, .03, .7, steel, fc, y, fz - .1, g);
+      for (let i = 0; i < Math.floor(L / .24); i++) { const px = fx0 + .25 + i * .24, k = (i + r * 3) % 5;
+        if (k < 2) box(.14, .26, .14, cmat(k ? 0xffffff : 0x8ac8f0), px, y + .15, fz - .1, g); else cyl(.06, .06, .3, 8, cmat([0xff9a3c, 0x4fa83f, 0xe8442c][k - 2]), px, y + .17, fz - .1, g); } }
+    for (let k = 0; k <= 8; k++) box(.06, 2.2, .06, steelD, fx0 + k * L / 8, 1.25, fz - .52, g);
+    box(L, 2.2, .04, glassMat(), fc, 1.25, fz - .54, g);
+    for (let k = 0; k < 8; k++) box(.04, .5, .05, steel, fx0 + (k + .5) * L / 8 + .45, 1.3, fz - .6, g);   // 손잡이
+    plate(tm(L, .55, "#2a78bb", [["🥛 냉장 · 유제품 · 음료", 40, "#fff", .55]]), L, .55, fc, 2.75, fz - .5, Math.PI);
+    B(fx0, fx1, -7.3, -6); }
+  // ── 신선 채소 · 과일 (북쪽 벽 서쪽): 계단식 상자 · 초록 차양 · 과일 탁자 ──
+  { const sx0 = 51.2, sx1 = 60.2, L = sx1 - sx0, sc = (sx0 + sx1) / 2;
+    for (let st = 0; st < 3; st++) { const zz = -6.55 - st * .62, y = .95 - st * .3; box(L, y, .62, woodL, sc, y / 2, zz, g);
+      for (let i = 0; i < 9; i++) { const px = sx0 + .5 + i * (L - 1) / 8, col = [0x6fbf4a, 0xe8442c, 0xf2c230, 0xff9a3c, 0x8fcf6a, 0x9a4ad8, 0xf4f1ea, 0xd8382c, 0x4fa83f][(i + st * 4) % 9];
+        const cr = box(.9, .18, .5, cmat(0xc89a5a), px, y + .09, zz, g); cr.rotation.x = -.2;
+        for (let k = 0; k < 6; k++) plain(GEOD.mtF || (GEOD.mtF = new T3.SphereGeometry(.11, 8, 6)), cmat(col), px - .26 + (k % 3) * .26, y + .23, zz - .1 + Math.floor(k / 3) * .2, g);
+        plate(tm(.34, .2, "#ffffff", [["₩", 18, "#e8442c", .55]]), .34, .2, px, y + .02, zz + .32, 0); } }
+    box(L, .08, .08, steelD, sc, 2.5, -6.35, g);   // 물 뿌리는 관
+    { const aw = box(L + .4, .08, 1.3, green, sc, 2.85, -6.9, g); aw.rotation.x = .3; for (let k = 0; k < 10; k++) box(L / 10 - .05, .32, .04, k % 2 ? white : green, sx0 - .2 + (k + .5) * (L + .4) / 10, 2.55, -7.55, g); }
+    plate(tm(4.6, .7, "#e8442c", [["🥬 신선 채소 · 과일", 50, "#fff", .55]]), 4.6, .7, sc, 3.45, -6.25, Math.PI);
+    B(sx0, sx1, -8.5, -6);
+    // 과일 탁자
+    box(3.2, .8, 1.4, woodL, 55.5, .4, -11.4, g);
+    for (const [px, col] of [[54.4, 0xe8442c], [55.5, 0xff9a3c], [56.6, 0xf2c230]]) for (let lv = 0; lv < 3; lv++) for (let i = 0; i < 3 - lv; i++) for (let j = 0; j < 3 - lv; j++) plain(GEOD.mtF2 || (GEOD.mtF2 = new T3.SphereGeometry(.13, 10, 8)), cmat(col), px - (2 - lv) * .13 + i * .26, .93 + lv * .2, -11.4 - (2 - lv) * .13 + j * .26, g);
+    for (let k = 0; k < 3; k++) { const wm = plain(GEOD.wmel || (GEOD.wmel = new T3.SphereGeometry(.32, 14, 10)), cmat(0x2f7a3a), 53.0 + k * .02, .3 + k * .02, -9.9 - k * .62, g); wm.scale.set(1, .85, 1.15); }
+    box(1.0, .5, 2.0, cmat(0xc89a5a), 53.0, .25, -10.5, g);
+    B(53.9, 57.1, -12.1, -10.7); B(52.5, 53.5, -11.5, -9.5); }
+  // ── 로컬푸드 장터 (가운데 섬): 나무 매대 · 박공 지붕 · 현수막 ──
+  { const s2 = new T3.Group(); s2.position.set(61.5, 0, -17); g.add(s2);
+    box(4.2, .85, 2.6, wood, 0, .425, 0, s2); box(4.4, .08, 2.8, woodL, 0, .89, 0, s2);
+    for (let i = 0; i < 8; i++) { const bx = -1.55 + (i % 4) * 1.03, bz = -.6 + Math.floor(i / 4) * 1.2; cyl(.4, .34, .26, 12, cmat(0xb88a4a), bx, 1.06, bz, s2);
+      for (let k = 0; k < 5; k++) plain(GEOD.mtF, cmat(prod[(i * 2 + k) % prod.length]), bx + Math.cos(k * 1.3) * .18, 1.24, bz + Math.sin(k * 1.3) * .18, s2); }
+    for (const [px, pz] of [[-2, -1.2], [2, -1.2], [-2, 1.2], [2, 1.2]]) cyl(.06, .07, 2.6, 8, wood, px, 1.3, pz, s2);
+    for (const sd of [-1, 1]) { const r = box(4.6, .1, 1.7, sd > 0 ? green : white, 0, 2.95, sd * .7, s2); r.rotation.x = sd * .45; }
+    const bn = tm(3.6, .72, "#4a8a2a", [["🧺 로컬푸드 직매장", 46, "#fff", .4], ["우리 섬 농부가 키웠어요", 26, "#ffe08a", .8]]);
+    plate(bn, 3.6, .72, 0, 2.25, 1.25, 0, false, s2); plate(bn, 3.6, .72, 0, 2.25, -1.25, Math.PI, false, s2);
+    { const cb = box(.06, .9, .7, cmat(0x2a3a2e), -2.15, 1.25, 0, s2); plate(tm(.66, .82, "#2a3a2e", [["오늘 들어온", 14, "#fff", .25], ["상추 · 무 · 감자", 13, "#ffe08a", .5], ["농부 직접 납품", 12, "#cfe0d4", .75]]), .66, .82, -2.19, 1.25, 0, -Math.PI / 2, false, s2); }
+    B(59.3, 63.7, -18.4, -15.6); }
+  // ── 씨앗 · 모종 벽 (동쪽 벽 남쪽): 씨앗 봉투 판 · 모종 탁자 ──
+  { const pk = canvasTex(1024, 288, (c, w, hh) => { c.fillStyle = "#f4efe4"; c.fillRect(0, 0, w, hh); const cols = ["#6fbf4a", "#e8442c", "#f2c230", "#ff9a3c", "#9a4ad8", "#2f7fd8", "#d8382c", "#37b5a0"], ic = ["🥬", "🥕", "🌽", "🎃", "🍆", "🫑", "🍅", "🥒", "🍓", "🍉", "🧅", "🥔"];
+      for (let r = 0; r < 4; r++) for (let k = 0; k < 14; k++) { const x = 8 + k * 72.5, y = 8 + r * 70; c.fillStyle = cols[(k + r * 3) % cols.length]; c.fillRect(x, y, 62, 62); c.fillStyle = "#fffaf0"; c.fillRect(x + 6, y + 6, 50, 34); c.font = "28px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(ic[(k * 5 + r) % ic.length], x + 31, y + 24); c.fillStyle = "#fff"; c.fillRect(x + 8, y + 46, 46, 6); } }, 1, 1);
+    const wx = x1 - .2; box(.12, 2.5, 8.8, woodL, wx, 1.5, -21.6, g);
+    const pl = new T3.Mesh(new T3.PlaneGeometry(8.4, 2.36), new T3.MeshBasicMaterial({ map: pk })); pl.rotation.y = -Math.PI / 2; pl.position.set(wx - .07, 1.5, -21.6); g.add(pl);
+    box(1.4, .8, 5.6, woodL, 70.4, .4, -21.6, g);
+    for (let i = 0; i < 6; i++) { const tz = -24 + i * .95; box(1.1, .1, .8, cmat(0x2a2a2a), 70.4, .85, tz, g); for (let k = 0; k < 8; k++) { const sp = plain(GEOD.seedl || (GEOD.seedl = new T3.ConeGeometry(.07, .2, 5)), cmat(k % 2 ? 0x6fbf4a : 0x4fa83f), 70.0 + (k % 4) * .26, 1.0, tz - .18 + Math.floor(k / 4) * .36, g); sp.rotation.z = (k % 3 - 1) * .2; } }
+    hang("🌱 씨앗 · 모종", "#4a8a2a", "#fff", 3.4, 70.2, -21.6, Math.PI / 2);
+    B(69.6, 73, -24.6, -18.6); B(71.9, 73, -26.1, -17.1); }
+  // ── 농기구 벽 (동쪽 벽 북쪽): 타공판 · 걸린 도구 · 비료 더미 ──
+  { const pb = canvasTex(256, 96, (c, w, hh) => { c.fillStyle = "#c69a62"; c.fillRect(0, 0, w, hh); c.fillStyle = "#8a6438"; for (let y = 6; y < hh; y += 12) for (let x = 6; x < w; x += 12) { c.beginPath(); c.arc(x, y, 1.6, 0, 7); c.fill(); } }, 3, 1);
+    const wx = x1 - .2, pm = new T3.Mesh(new T3.PlaneGeometry(7.2, 2.6), phong(0xffffff, { map: pb })); pm.rotation.y = -Math.PI / 2; pm.position.set(wx - .07, 1.7, -11.2); g.add(pm);
+    const hw = cmat(0x8a6038), mt = cmat(0x8a929a), tz = (k) => -14.4 + k * .9;
+    for (let k = 0; k < 8; k++) { const z = tz(k), kind = k % 4;
+      if (kind === 0) { cyl(.03, .03, 2.0, 6, hw, wx - .2, 1.6, z, g); box(.06, .1, .5, mt, wx - .2, .62, z, g); for (let t = 0; t < 5; t++) box(.04, .14, .03, mt, wx - .2, .5, z - .2 + t * .1, g); }   // 갈퀴
+      else if (kind === 1) { cyl(.03, .03, 1.8, 6, hw, wx - .2, 1.7, z, g); box(.3, .2, .04, mt, wx - .28, .78, z, g); }   // 괭이
+      else if (kind === 2) { cyl(.03, .03, 1.5, 6, hw, wx - .2, 1.9, z, g); const sh = box(.05, .4, .3, mt, wx - .2, .95, z, g); sh.rotation.x = .05; }   // 삽
+      else { cyl(.18, .2, .32, 12, cmat(0x2f8f5b), wx - .3, 1.6, z, g); const sp = cyl(.03, .04, .5, 6, cmat(0x2f8f5b), wx - .55, 1.75, z, g); sp.rotation.z = .9; }   // 물뿌리개
+    }
+    for (let k = 0; k < 4; k++) box(.14, .2, .12, cmat(k % 2 ? 0xf2c230 : 0xe8442c), wx - .2, 2.7, -13.6 + k * .6, g);   // 장갑
+    box(1.2, .14, 2.4, wood, 70.6, .07, -9, g);
+    for (let k = 0; k < 9; k++) { const b2 = box(.55, .22, .85, cmat(k % 3 ? 0xeee6cf : 0xd8e8c8), 70.3 + (k % 2) * .6, .26 + Math.floor(k / 3) * .23, -9.6 + (k % 3) * .6, g); b2.rotation.y = (k % 2) * .1; }
+    plate(tm(1.2, .5, "#4a8a2a", [["🌿 비료", 34, "#fff", .55]]), 1.2, .5, 69.98, 1.35, -9, -Math.PI / 2);
+    hang("🧰 농기구", "#7a5a2a", "#fff", 2.6, 70.2, -11.2, Math.PI / 2);
+    B(71.9, 73, -15.2, -7.2); B(69.9, 71.3, -10.3, -7.7); }
+  // ── 천장: 조명 판 · 삼각 깃발 줄 ──
+  const lampM = bulbMat(0xffffff, 0xfff1d0);
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) box(2.6, .07, .45, lampM, 53 + i * 5.5, Hh - .08, -23.5 + j * 7, g);
+  { const tri = new T3.BufferGeometry(); tri.setAttribute("position", new T3.Float32BufferAttribute([-.18, 0, 0, .18, 0, 0, 0, -.38, 0], 3)); tri.computeVertexNormals();
+    const fc = [0xe8442c, 0xf2c230, 0x2f8f5b, 0x2a78bb, 0xffffff].map(c => cmat(c, { side: T3.DoubleSide }));
+    for (const zz of [-10, -17, -24]) { const y = Hh - .55; cyl(.01, .01, x1 - x0 - 2, 4, dark, cx, y, zz, g).rotation.z = Math.PI / 2;
+      for (let k = 0; k < 28; k++) plain(tri, fc[k % 5], x0 + 1.4 + k * .78, y - .01 - Math.sin(k / 27 * Math.PI) * .25, zz, g); } }
+  // 시계 (계산대 위 남쪽 벽)
+  { const ck = new T3.Mesh(new T3.CircleGeometry(.45, 24), new T3.MeshBasicMaterial({ map: canvasTex(128, 128, (c) => { c.fillStyle = "#fffdf6"; c.beginPath(); c.arc(64, 64, 60, 0, 7); c.fill(); c.strokeStyle = "#2f8f5b"; c.lineWidth = 8; c.stroke(); c.strokeStyle = "#3a3f48"; c.lineWidth = 5; c.beginPath(); c.moveTo(64, 64); c.lineTo(64, 26); c.moveTo(64, 64); c.lineTo(92, 70); c.stroke(); }, 1, 1) })); ck.position.set(55, 3.6, z0 + .17); g.add(ck); }
+  // ── 실내 · 바깥 조명 (밤) ──
+  { const pl = new T3.PointLight(0xfff0d8, 0, 30, 1.3); pl.position.set(61, Hh - .9, -17); scene.add(pl); MART.light = pl; }   // 안에 있거나 밤이면 켜져요 (martLeaveCheck)
+  for (const [lx, lz, ax] of [[46.7, -29.4, -1], [46.7, -6.6, -1], [37, -31.2, 1], [37, -3.2, 1]]) propLamp(lx, lz, [ax, 0], g);
+  // ── 막히는 곳: 벽 (문 자리는 비워요) ──
+  B(x1 - .3, x1 + .3, z0, z1); B(x0, x1, z0 - .3, z0 + .3); B(x0, x1, z1 - .3, z1 + .3); B(x0 - .3, x0 + .3, z0, D0); B(x0 - .3, x0 + .3, D1, z1);
+  // ── 바깥: 카트 보관소 · 쌀 포대 · 주차장 · 간판 기둥 ──
   for (let i = 0; i < 4; i++) { const ct = new T3.Group(); ct.position.set(x0 - 2, 0, z1 - 3 - i * .5); g.add(ct); box(.6, .5, .45, cmat(0xb8c0c8), 0, .65, 0, ct); box(.04, .9, .04, dark, -.28, .45, 0, ct); }
   for (let i = 0; i < 6; i++) box(.7, .25, .45, cmat(0xf4efe4), x0 - 1.4, .13 + Math.floor(i / 3) * .26, z0 + 3 + (i % 3) * .48, g);
-  // 막히는 곳: 벽 (문 자리는 비워요) · 매대
-  const B = (a, b, c, d) => BLOCKS.push([a, b, c, d]);
-  B(x1 - .3, x1 + .3, z0, z1); B(x0, x1, z0 - .3, z0 + .3); B(x0, x1, z1 - .3, z1 + .3); B(x0 - .3, x0 + .3, z0, D0); B(x0 - .3, x0 + .3, D1, z1);
-  B(71.2, 73, -24.2, -16.8); B(71.2, 73, -15.2, -7.8); B(55.8, 66.2, -28, -26.4); B(55.8, 66.2, -7.6, -6); B(60.8, 65.2, -19.3, -15.7); B(53.8, 60.2, -10.9, -8.3);
-  for (let i = 0; i < 3; i++) B(51.1 + i * 2.1, 52.1 + i * 2.1, -24.4, -22.1);
-  // 농로: 상점가 → 마트 → 농장 (z −18 줄 · 돌판 + 흙길)
+  { const asph = cmat(0x4a4e55), lineM = cmat(0xf4f1ea);
+    for (const [za, zb] of [[-30, -20.6], [-15.4, -5]]) { box(9, .05, zb - za, asph, 41.5, .035, (za + zb) / 2, g); for (let z = za + 2.6; z < zb - .5; z += 2.6) box(4, .02, .1, lineM, 42.5, .07, z, g); }
+    const car = (x, z, col) => { const c = new T3.Group(); c.position.set(x, 0, z); g.add(c); box(3.6, .7, 1.7, cmat(col), 0, .65, 0, c); box(2, .6, 1.5, cmat(0xdfe8ee), -.2, 1.25, 0, c); for (const [dx, dz] of [[-1.2, -.8], [1.2, -.8], [-1.2, .8], [1.2, .8]]) cyl(.3, .3, .2, 12, cmat(0x2a2d33), dx, .3, dz, c).rotation.x = Math.PI / 2; };
+    car(42.3, -27.4, 0xd8382c); car(42.3, -9.6, 0x2a78bb); car(42.3, -12.2, 0xf4f1ea);
+    B(40.2, 44.4, -28.4, -26.4); B(40.2, 44.4, -10.6, -8.6); B(40.2, 44.4, -13.2, -11.2);
+    box(.35, 6, .35, dark, 36.2, 3, -21.6, g); box(.36, 2, 3, green, 36.2, 5.4, -21.6, g);
+    const pm = new T3.MeshBasicMaterial({ map: txtTex(512, 340, "#2f8f5b", [["섬마을마트", 96, "#ffffff", .4], ["씨앗 · 농기구 · 로컬푸드", 40, "#f2c230", .76]]) });
+    for (const sx of [-1, 1]) { const t = new T3.Mesh(new T3.PlaneGeometry(2.9, 1.9), pm); t.position.set(36.2 + sx * .19, 5.4, -21.6); t.rotation.y = sx * Math.PI / 2; g.add(t); }
+    B(35.9, 36.5, -21.9, -21.3); }
+  // ── 길: 상점가 → 마트 (돌판) · 뒤뜰 → 농장 (흙길) · 농장 → 마트 앞 ──
   const path = (xa, xb, z, col, w) => { for (let x = xa; x < xb; x += 2) { const px = x + 1, py = groundY(px, z); const p = new T3.Mesh(new T3.PlaneGeometry(2.05, w), cmat(col)); p.rotation.x = -Math.PI / 2; p.position.set(px, py + .04, z); g.add(p); } };
-  path(16, x0 - 2.4, MART.door, 0xd8cfbe, 2.4); path(x1 + .6, FARM.x - 9.6, -18, 0xb08a5a, 2.6);
+  const pathZ = (za, zb, x, col, w) => { for (let z = za; z < zb; z += 2) { const pz = z + 1, py = groundY(x, pz); const p = new T3.Mesh(new T3.PlaneGeometry(w, 2.05), cmat(col)); p.rotation.x = -Math.PI / 2; p.position.set(x, py + .045, pz); g.add(p); } };
+  path(16, x0 - 2.4, MART.door, 0xd8cfbe, 2.4);
+  path(22.4, FARM.gate.x - .4, FARM.gate.z, 0xb08a5a, 2.4); pathZ(-4.6, FARM.gate.z - 1.2, 47.8, 0xb08a5a, 1.6);
 }
 /* 마트 코너 창 · 농장 관리소 창 · 씨앗 고르기 */
 function martSheet(body, corner) {
@@ -11078,9 +11335,9 @@ function seedPickSheet(body) {
   if (!list.length) { body.append(h("div", { class: "empty-note big" }, h("div", { style: "font-size:36px", text: "🌱" }), "가진 씨앗이 없어요.", h("br"), "농가마트 씨앗 코너에서 사 와요")); return; }
   body.append(h("div", { class: "fm-crops" }, list.map(c => h("button", { class: "fm-crop" + (c.lv <= farmData().lv ? "" : " lock"), disabled: c.lv > farmData().lv || !pl, onclick: () => farmPlant(c.id) }, h("img", { src: cropIcon(c.id), alt: "" }), h("b", { text: c.name + " × " + P.seeds[c.id] }), h("small", { text: (c.grow >= 60 ? (c.grow / 60) + "시간" : c.grow + "분") + " · 물을 줘야 자라요" })))));
 }
-const TOYSHOP = { x: 19.5, z: -82, door: { x: 13.6, z: -82 } };
+const TOYSHOP = { x: 25.5, z: -82, door: { x: 19.6, z: -82 } };   // v1.122 앞마당이 일주도로에 닿지 않게 동쪽으로 6m
 function buildToyShop() {
-  const g = new T3.Group(); g.position.set(TOYSHOP.x, 0, TOYSHOP.z); g.rotation.y = -Math.PI / 2; scene.add(g);
+  const g = new T3.Group(); g.position.set(TOYSHOP.x, 0, TOYSHOP.z); g.rotation.y = -Math.PI / 2; scene.add(g); STILL_ROOTS.push(g);
   const W = 8.4, D = 6.4, H = 3.7, FZ = 3.0;   // 가로 · 깊이 · 벽 높이 · 앞벽 위치(안 z)
   const shopGlass = new T3.MeshPhongMaterial({ color: 0xffffff, map: winTex(), transparent: true, opacity: .38, shininess: 120, specular: 0xffffff, depthWrite: false });   // 안이 비치는 맑은 유리
   const white = cmat(0xfffbf2), trim = cmat(0xf4efe4), mint = phong(0xbfe8d8, { map: (() => { const t = wallTex("siding").clone(); t.needsUpdate = true; t.repeat.set(W / 2.6, H / 2.6); return t; })() });
@@ -11224,7 +11481,7 @@ function buildToyShop() {
 function buildShops() {
   for (const b of BUILDINGS) {
     const L = SHOP_LOOK[b.id] || { col: b.color, h: 5 + (hashStr(b.id) % 3) }, hgt = L.h;
-    const g = new T3.Group(); g.position.set(11, 0, b.z); scene.add(g);
+    const g = new T3.Group(); g.position.set(11, 0, b.z); scene.add(g); STILL_ROOTS.push(g);
     { const wt = L.tex ? wallTex(L.tex).clone() : null; if (wt) { wt.needsUpdate = true; wt.repeat.set(9 / 3.2, hgt / 3.2); }
       box(8, hgt, 9, phong(L.col, { flatShading: false, map: wt }), 0, hgt / 2, 0, g); }
     const dg = new T3.Group(); g.add(dg); DETAIL_GROUPS.push(dg);
@@ -11650,6 +11907,8 @@ function removeChar(F) {
 }
 const _v = T3 ? new T3.Vector3() : null, _v2 = T3 ? new T3.Vector3() : null;
 function updateChar(F, f, t, dt, now) {
+  const rp = f.ride != null ? trainSeat(f.ride) : null;   // v1.122 바다열차에 탄 사람: 모두의 화면에서 같은 자리에 앉아 함께 달려요
+  if (rp) { f = { ...f, x: rp.x, z: rp.z, ry: rp.ry }; F.px = rp.x; F.pz = rp.z; F.ry = rp.ry; }
   // 위치 (다른 사람은 부드럽게 따라감)
   if (F.px === null) { F.px = f.x; F.pz = f.z; F.ry = f.ry; }
   const onB = f.seat && SEAT[f.seat] && SEAT[f.seat].boat;
@@ -11658,9 +11917,9 @@ function updateChar(F, f, t, dt, now) {
   F.px += (f.x - F.px) * k; F.pz += (f.z - F.pz) * k;
   F.ry = f.me || onB ? f.ry : lerpAngle(F.ry, f.ry, Math.min(1, dt * 8));
   if (!f.me && Math.hypot(F.px - ox, F.pz - oz) > 0.004) F.movedAt = performance.now();
-  const moving = f.me ? ME.moving : performance.now() - (F.movedAt || 0) < 200;   // v1.110: 다른 사람은 실제로 위치가 바뀔 때만 걸어요 (예전엔 「걷는 중」 신호만 남아도 제자리 걸음)
+  const moving = rp ? false : f.me ? ME.moving : performance.now() - (F.movedAt || 0) < 200;   // v1.110: 다른 사람은 실제로 위치가 바뀔 때만 걸어요 (예전엔 「걷는 중」 신호만 남아도 제자리 걸음)
   const seat = f.seat ? SEAT[f.seat] : null;
-  const stool = f.st === "stall", sitting = !!seat || stool;
+  const stool = f.st === "stall", sitting = !!seat || stool || !!rp;
   const fishing = seat && (seat.kind === "pier" || seat.kind === "boat");
   F.seated = sitting;
   // 다른 사람끼리 겹치지 않게 보기 위치만 살짝 비켜요 (앉아 있으면 그대로)
@@ -11669,7 +11928,7 @@ function updateChar(F, f, t, dt, now) {
     if (!walkable(F.px + F.sx, F.pz + F.sz)) { F.sx *= .5; F.sz *= .5; } }
   else F.sx = F.sz = 0;
   const vx = F.px + (F.sx || 0), vz = F.pz + (F.sz || 0);
-  F.g.position.set(vx, seat && seat.kind === "boat" ? seat.y : seat && seat.kind === "table" ? .3 : stool ? .5 : groundY(vx, vz), vz);
+  F.g.position.set(vx, rp ? rp.y : seat && seat.kind === "boat" ? seat.y : seat && seat.kind === "table" ? .3 : stool ? .5 : groundY(vx, vz), vz);
   let shownRy = F.ry;
   F.g.rotation.y = shownRy;
   applyOutfit(F, f.wear, f.color);
@@ -12003,12 +12262,12 @@ function loop3D(ms) {
   for (const s of SWING) s.g.rotation.x = Math.sin(t * 1.4 + s.ph) * .07;
   updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); pochaExtTick(t); npcShopTick(t, dt); townTick(t, dt); ambTick(t, dt); updateFx(t, dt); for (const fa of FACADE_ANIM) fa(t); breachTick(t, dt); tvTick(t); fwTick(t, dt); toyTick(t, dt); farmTick(t); martLeaveCheck(); marketRoofTick(t);
   SWIM_T.value = t; updateTier89Auras(dt, t); updateJumps(dt, t); updateTide3D(dt); updateDust(dt);
-  updateBoat3D(t, now);
+  updateBoat3D(t, now); trainTick(Date.now());
   if (onBoat()) { const bs = SEAT[ME.seat]; ME.x = bs.x; ME.z = bs.z; ME.ry = bs.ry; }
   updateActionUI();
   // 사람들
   const desired = new Map();
-  if (!S.title) desired.set("me", { me: true, x: ME.x, z: ME.z, ry: ME.ry, st: ME.st, seat: ME.seat, nick: P.nick, color: P.color, skin: P.skin, phase: S.phase, faceUid: "me", wear: P.wear, ttl: myTag(), gm: S.isOwner ? 1 : 0, lv: myLv(), rod: P.rod, reel: P.reel, emo: S.myEmo ? { e: S.myEmo.e, ts: S.myEmo.at } : null });
+  if (!S.title) desired.set("me", { me: true, x: ME.x, z: ME.z, ry: ME.ry, st: ME.st, seat: ME.seat, ride: S.ride ? S.ride.seat : null, nick: P.nick, color: P.color, skin: P.skin, phase: S.phase, faceUid: "me", wear: P.wear, ttl: myTag(), gm: S.isOwner ? 1 : 0, lv: myLv(), rod: P.rod, reel: P.reel, emo: S.myEmo ? { e: S.myEmo.e, ts: S.myEmo.at } : null });
   for (const p of otherPeers()) {
     const bs = p.seat && SEAT[p.seat] && SEAT[p.seat].boat ? SEAT[p.seat] : null;
     desired.set(p.peer, bs ? { ...p, x: bs.x, z: bs.z, ry: bs.ry, me: false, faceUid: p.uid || "_" } : { ...p, me: false, faceUid: p.uid || "_" });
@@ -12050,14 +12309,20 @@ function loop3D(ms) {
   _v.set(ME.x, 1.1 + groundY(ME.x, ME.z), ME.z);
   if (BREACH) { const B = BREACH, m = B.boom ? .55 : .45; _v.set(ME.x + (B.x - ME.x) * m, B.boom && B.last ? Math.max(1.1, B.last.y * .7) : 1.1, ME.z + (B.z - ME.z) * m); }   // 대물 연출: 물고기 쪽을 크게 보여 줌
   cam.t.lerp(_v, 1 - Math.pow(BREACH ? .05 : .002, dt));
-  const pitch0 = S.mung ? Math.max(.15, cam.pitch * .6) : atRest() ? Math.max(.98, cam.pitch) : inMart(ME.x, ME.z) ? Math.max(.95, cam.pitch) : atHome() ? Math.max(.72, cam.pitch) : cam.pitch, pitch = pitch0 + ((.16) - pitch0) * (cam.bz || 0);   // 대물 연출: 낮은 각도로 올려다봄
+  const pitch0 = S.mung ? Math.max(.15, cam.pitch * .6) : atRest() ? Math.max(.98, cam.pitch) : atHome() ? Math.max(.72, cam.pitch) : cam.pitch, pitch = pitch0 + ((.16) - pitch0) * (cam.bz || 0);   // 대물 연출: 낮은 각도로 올려다봄
   if (S.meMenu && ME.moving) closeMeMenu();
   cam.zk = (cam.zk || 0) + ((S.meMenu ? 1 : 0) - (cam.zk || 0)) * Math.min(1, dt * 6);
   cam.bz = (cam.bz || 0) + ((BREACH ? 1 : 0) - (cam.bz || 0)) * Math.min(1, dt * 2);
-  const cd = (atRest() ? clamp(cam.dist, MOBILE() ? 10.5 : 8.5, 13) : inMart(ME.x, ME.z) ? clamp(cam.dist, 9, 13) : atHome() ? Math.min(cam.dist, 12) : cam.dist) * (1 - .3 * cam.zk) + cam.bz * Math.max(3, 15 - cam.dist);
+  const cd = (atRest() ? clamp(cam.dist, MOBILE() ? 10.5 : 8.5, 13) : atHome() ? Math.min(cam.dist, 12) : cam.dist) * (1 - .3 * cam.zk) + cam.bz * Math.max(3, 15 - cam.dist);
   camera.position.set(cam.t.x + Math.sin(cam.yaw) * Math.cos(pitch) * cd, cam.t.y + Math.sin(pitch) * cd, cam.t.z + Math.cos(cam.yaw) * Math.cos(pitch) * cd);
   if (camera.position.y < .6) camera.position.y = .6;
   { const gh = groundY(camera.position.x, camera.position.z) + 1.4; if (camera.position.y < gh) camera.position.y = gh; }   // 언덕에 카메라가 파묻히지 않게
+  if (inMart(ME.x, ME.z)) {   // v1.125 마트 안: 시점은 그대로, 카메라만 벽 · 천장 안쪽으로 당겨요 (예전엔 위에서 내려다보는 시점으로 바뀌었어요)
+    const tx = cam.t.x, ty = cam.t.y, tz = cam.t.z, dx = camera.position.x - tx, dy = camera.position.y - ty, dz = camera.position.z - tz; let k = 1;
+    const lim = (d, t0, lo, hi) => { if (d > 0 && t0 + d > hi) k = Math.min(k, (hi - t0) / d); if (d < 0 && t0 + d < lo) k = Math.min(k, (lo - t0) / d); };
+    lim(dx, tx, MART.x0 + .45, MART.x1 - .45); lim(dz, tz, MART.z0 + .45, MART.z1 - .45); lim(dy, ty, -9, MART.h - .4);
+    k = Math.max(.15, k); camera.position.set(tx + dx * k, ty + dy * k, tz + dz * k);
+  }
   if (S.shake > .002) { camera.position.x += (Math.random() - .5) * S.shake; camera.position.y += (Math.random() - .5) * S.shake; camera.position.z += (Math.random() - .5) * S.shake; S.shake *= Math.pow(.015, dt); }
   camera.lookAt(cam.t);
   }
@@ -12265,8 +12530,9 @@ function syncUIState() {
 function updateHint() {
   const hint = $("hint");
   if (!R) return;
-  hint.classList.toggle("idle", !(S.coop && S.coop.stage !== "inviting") && !onBoat() && !fishingNow() && !(S.myStall >= 0) && !ME.seat);   // 그냥 걸어 다닐 땐 조작 안내를 띄우지 않아요 (v1.40)
+  hint.classList.toggle("idle", !(S.coop && S.coop.stage !== "inviting") && !S.ride && !onBoat() && !fishingNow() && !(S.myStall >= 0) && !ME.seat);   // 그냥 걸어 다닐 땐 조작 안내를 띄우지 않아요 (v1.40)
   if (S.coop && S.coop.stage !== "inviting") hint.textContent = "함께 낚시 중 · 「!」가 뜨면 둘 중 누구든 챔질 → 둘 다 손맛을 버텨야 잡혀요";
+  else if (S.ride) hint.textContent = "🚆 바다열차 탑승 중 · 창밖 풍경을 즐겨요 · 도착하면 저절로 내려요";
   else if (onBoat()) { const mb = myBoat(), nm = BOAT_NAMES[Math.max(0, myBoatIdx())]; hint.textContent = mb && mb.status === "sailing" ? nm + " · 깊은 바다에 도착하면 자동으로 낚시를 시작해요" : nm + " 탑승 중 · 뱃삯이 모이면 바로 출항해요"; }
   else if (fishingNow()) hint.textContent = S.phase === "ready" || S.phase === "charge" ? "꾹 눌렀다가 초록 칸에서 떼면 완벽한 캐스팅! 멀리 던질수록 좋은 물고기" : "「!」가 뜨면 챔질 → 꾹 눌러 감고, 돌진·점프하면 손 떼기 · 과열을 조심해요";
   else if (S.myStall >= 0) hint.textContent = "노점 운영 중 · 주문이 오면 자동으로 팔려요";
@@ -13195,6 +13461,8 @@ function drawIslandMap(cv) {
   g.strokeStyle = "rgba(255,255,255,.9)"; g.setLineDash([4 * u, 3 * u]); g.lineWidth = 1.5 * u; g.strokeRect(X(-45), Y(-130), 75 * k, 210 * k); g.setLineDash([]);
   g.font = "700 " + 9 * u + "px sans-serif"; g.textAlign = "center"; g.fillStyle = "#2a3a2a"; g.fillText("마을", X(-8), Y(-136));
   g.strokeStyle = "rgba(70,74,80,.85)"; g.lineWidth = 2.2 * u; g.beginPath(); RING.pts.forEach(([x, z], i) => i ? g.lineTo(X(x), Y(z)) : g.moveTo(X(x), Y(z))); g.closePath(); g.stroke();
+  if (RAIL.x) { g.save(); g.strokeStyle = "#5a3a22"; g.lineWidth = 2.8 * u; g.beginPath(); for (let i = 0; i < RAIL.n; i += 3) i ? g.lineTo(X(RAIL.x[i]), Y(RAIL.z[i])) : g.moveTo(X(RAIL.x[i]), Y(RAIL.z[i])); g.stroke(); g.strokeStyle = "#fff6dc"; g.lineWidth = 1.2 * u; g.setLineDash([3 * u, 3 * u]); g.stroke(); g.setLineDash([]);
+    for (const [x, z, nm] of [[STN.rail - 2, 53, "어촌역"], [STN2.px0 + 1, STN2.cz, "해돋이역"]]) { g.fillStyle = "#2a78bb"; g.strokeStyle = "#fff"; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(X(x), Y(z), 4.5 * u, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#1d3a5c"; g.font = "800 " + (11 * u) + "px sans-serif"; g.textAlign = "center"; g.fillText("🚉 " + nm, X(x), Y(z) - 9 * u); } g.restore(); }   // v1.122 바다열차
   for (const [px, pz, hh] of PEAKS.slice(0, 3)) { g.fillStyle = "#3a2a1a"; g.font = 8 * u + "px sans-serif"; g.fillText("▲ " + Math.round(hh) + "m", X(px), Y(pz)); }
   for (const p of otherPeers(false)) { const fr = p.uid && P.friends && P.friends[p.uid]; g.fillStyle = "#fff"; g.beginPath(); g.arc(X(p.x), Y(p.z), 2.6 * u, 0, 7); g.fill(); g.fillStyle = fr ? "#2fae7f" : p.color; g.beginPath(); g.arc(X(p.x), Y(p.z), 1.8 * u, 0, 7); g.fill(); }
   const mx = X(ME.x), my = Y(ME.z), a = Math.atan2(Math.cos(ME.ry), Math.sin(ME.ry)), r = 7 * u;
@@ -14700,25 +14968,290 @@ function buildStation() {
   const pr = box(3.6, .14, 30, cmat(0x2a78bb), rail - 3.6, 3.95, cz, det); pr.rotation.z = .12;
   { const ns = makeSign(2.6, .7, { shape: "board", fill: { type: "grad", c: ["#ffffff", "#eef3f6"] }, frame: { c: "#1d3a5c" }, t: { text: "어촌", font: "hyeon", color: "#1d3a5c", size: .5, y: .5 } }, { cw: 500 });
     ns.position.set(rail - 4.6, 2.5, cz + 9); ns.rotation.y = Math.PI / 2; scene.add(ns); const ns2 = ns.clone(); ns2.rotation.y = -Math.PI / 2; ns2.position.x = rail - 4.62; scene.add(ns2); }
-  // 선로: 침목 · 레일 (남북으로 길게, 끝은 언덕 쪽으로 사라짐)
-  const tieG = new T3.BoxGeometry(2.6, .12, .32), tieM = cmat(0x6a4a32), railM = cmat(0x9aa3aa);
-  for (let z = 2; z <= 96; z += .9) plain(tieG, tieM, rail, groundY(rail, z) + .06, z, det);
-  for (const s of [-.72, .72]) { box(.1, .14, 95, railM, rail + s, .2, 49, det); }
-  plain(new T3.BoxGeometry(5, .12, 96), cmat(0x9a9284), rail, .02, 49, det);   // 자갈 바닥
-  for (const z of [1.2, 96.8]) box(2.4, .9, .5, cmat(0xd8382c), rail, .55, z, det);   // 끝 막이
-  // 열차 2량 (승강장에 정차)
-  const train = new T3.Group(); train.position.set(rail, 0, cz); scene.add(train);
-  for (const [dz, c] of [[-6.6, 0x2a78bb], [6.6, 0x2f8f5b]]) {
-    const car = new T3.Group(); car.position.z = dz; train.add(car);
-    box(2.6, 2.6, 12.4, cmat(0xf4f1ea), 0, 1.75, 0, car); box(2.64, .6, 12.44, cmat(c), 0, .9, 0, car); box(2.64, .25, 12.44, cmat(c), 0, 2.6, 0, car);
-    const roofT = new T3.Mesh(new T3.CylinderGeometry(1.4, 1.4, 12.4, 16, 1, false, -Math.PI / 2, Math.PI), cmat(0xb8bec4)); roofT.rotation.x = Math.PI / 2; roofT.rotation.z = Math.PI / 2; roofT.scale.set(1, 1, .3); roofT.position.y = 3.05; car.add(roofT);
-    for (let k = -2; k <= 2; k++) for (const s of [-1, 1]) { const w = new T3.Mesh(new T3.PlaneGeometry(1.6, .9), bulbMat(0x8ab0c6, 0xffe0a0)); w.position.set(s * 1.32, 2.0, k * 2.3); w.rotation.y = s * Math.PI / 2; car.add(w); }
-    for (const z of [-4.6, 4.6]) for (const s of [-1, 1]) { const wh = new T3.Mesh(new T3.CylinderGeometry(.4, .4, .2, 14), cmat(0x2a2d33)); wh.rotation.z = Math.PI / 2; wh.position.set(s * 1.1, .42, z); car.add(wh); }
-  }
-  BLOCKS.push([x0 - .3, x1 + .3, z0 - .3, z1 + .3], [rail - 5.5, rail + 3, 0, 98]);
+  BLOCKS.push([x0 - .3, x1 + .3, z0 - .3, z1 + .3], [rail - 1.3, rail + 3, 20, 92]);   // v1.122 승강장은 걸어 다니고 선로만 막아요 (선로 · 기차는 buildRail)
+  fingerPost(24.6, 49.2, [["🚆 바다열차 타는 곳 (해돋이역행)", "#2a78bb", 45, 53], ["🏘 상점가 거리", "#7a5a2a", 4, 30], ["🌳 상점가 뒤뜰 산책길", "#4a6a3a", 21, 0]], det);
   // 윗마을 공원 → 역 돌길
   const path = box(6.4, .05, 3.4, lam(0xffffff, { map: imgTex("a/slabs.jpg", 2, 1) }), 24.4, .03, cz); grounds.push(path);
   const pl = new T3.PointLight(0xffd8a0, 0, 24, 1.6); pl.position.set(x0 - 2, 4, cz); scene.add(pl); glow.push({ light: pl, val: 1.2 });
+}
+/* ===================== 바다열차 (v1.122) =====================
+   어촌역(서쪽 마을) ↔ 해돋이역(섬 반대편 동쪽 바닷가)을 선로 위로 진짜 달려요 (순간이동 아님).
+   시간표는 시계로 정해져서 모든 사람 화면에서 같은 곳을 달려요. 탄 사람은 자리 번호(ride)만 보내고,
+   다른 사람 화면에서도 그 자리에 앉아 함께 달려요 */
+var STN_READY = false;
+const STN2 = { rail: 507, z0: 51, z1: 89, cz: 70, y: .8, px0: 508.35, px1: 512.6, deck: { x0: 512.6, x1: 523, z0: 63, z1: 77 } };
+const RAIL = { ctrl: [[47.5, 24], [47.5, 53], [47.5, 72], [49.5, 86], [58, 98], [80, 104], [130, 103], [210, 100], [290, 98], [370, 99], [440, 101], [472, 105], [491, 104.5], [502, 98], [507, 87], [507, 70], [507, 46]], step: 1, n: 0, len: 0, x: null, y: null, z: null, sW: 0, sE: 0, cross: null };
+const TRAIN_T = { dwell: 25, vmax: 17, acc: .9 };
+const TRAIN = { cars: null, st: null, cross: null };
+const TRAIN_CARS = [{ kind: "engine", len: 8.2, off: 11.4 }, { kind: "open", len: 10.6, off: 1.2 }, { kind: "open", len: 10.6, off: -10.2 }];   // 동쪽(해돋이) 끝이 기관차
+const TRAIN_ROWS = [-3.6, -1.2, 1.2, 3.6];
+function stnFloor(x, z) {   // 역 승강장 · 전망 데크 · 건널목 판자 높이 (역 밖이면 null)
+  if (!STN_READY) return null;
+  if (x > STN.rail - 5.5 && x < STN.rail - 1.3 && z > 28 && z < 78) return .7;
+  if (x > 495) {
+    if (x > STN2.px0 && z > STN2.z0 && z < STN2.z1 && (x < STN2.px1 || (x < STN2.deck.x1 && z > STN2.deck.z0 && z < STN2.deck.z1))) return STN2.y + .62;
+    if (x > STN2.rail - 1.8 && x <= STN2.px0 && Math.abs(z - (STN2.cz - 4)) < 1.25) return STN2.y + .26;
+  }
+  return null;
+}
+function stnWalk(x, z) {   // 해돋이역 승강장 · 데크는 바닷가라도 걸을 수 있어요 (null = 역 밖)
+  if (x < 500) return null;
+  const H0 = STN2.z1 - 8, H1 = STN2.z1 - 2;
+  if (x > STN2.px0 - .1 && x < STN2.px1 && z > STN2.z0 && z < STN2.z1) return !(x > STN2.px1 - 3.1 && (Math.abs(z - H0) < .25 || Math.abs(z - H1) < .25));   // 대합실 옆벽
+  if (x >= STN2.px1 && x < STN2.deck.x1 - .4 && z > STN2.deck.z0 + .4 && z < STN2.deck.z1 - .4) return true;
+  return null;
+}
+function railAt(s, out) {
+  const f = clamp(s / RAIL.step, 0, RAIL.n - 1.0001), i = Math.floor(f), u = f - i;
+  out[0] = RAIL.x[i] + (RAIL.x[i + 1] - RAIL.x[i]) * u; out[1] = RAIL.y[i] + (RAIL.y[i + 1] - RAIL.y[i]) * u; out[2] = RAIL.z[i] + (RAIL.z[i + 1] - RAIL.z[i]) * u; return out;
+}
+function trainState(nowMs) {   // 시간표: 어촌역 정차 → 해돋이역으로 → 해돋이역 정차 → 어촌역으로 (사다리꼴 속도)
+  const D = RAIL.sE - RAIL.sW, v = TRAIN_T.vmax, a = TRAIN_T.acc, ta = v / a, da = v * v / (2 * a), full = D >= 2 * da;
+  const tr = full ? 2 * ta + (D - 2 * da) / v : 2 * Math.sqrt(D / a), W = TRAIN_T.dwell, cyc = 2 * (W + tr), t = ((nowMs / 1000) % cyc + cyc) % cyc;
+  const dist = (u) => { const r = tr - u; if (full) return u < ta ? .5 * a * u * u : u < tr - ta ? da + v * (u - ta) : D - .5 * a * r * r; return u < tr / 2 ? .5 * a * u * u : D - .5 * a * r * r; };
+  if (t < W) return { phase: "dwell", at: 0, s: RAIL.sW, left: W - t, tr };
+  if (t < W + tr) { const u = t - W; return { phase: "run", dir: 1, s: RAIL.sW + dist(u), left: tr - u, tr }; }
+  if (t < 2 * W + tr) return { phase: "dwell", at: 1, s: RAIL.sE, left: 2 * W + tr - t, tr };
+  const u = t - 2 * W - tr; return { phase: "run", dir: -1, s: RAIL.sE - dist(u), left: tr - u, tr };
+}
+function trainWait(st, k) {   // k역(0 어촌 · 1 해돋이)에 기차가 들어오기까지 남은 초
+  if (st.phase === "dwell") return st.at === k ? 0 : st.left + st.tr;
+  return (st.dir > 0) === (k === 1) ? st.left : st.left + TRAIN_T.dwell + st.tr;
+}
+function makeTrainCar(kind, len) {
+  const g = new T3.Group(), body = new T3.Group(), roof = new T3.Group(); g.add(body, roof);
+  const iron = cmat(0x2a2d33), cream = cmat(0xfff4dc), blue = cmat(0x2a78bb), red = cmat(0xd8382c), gold = cmat(0xf2c230), wood = cmat(0xb07a48), seatM = cmat(0x2f8f5b);
+  for (const z of [-len / 2 + 1.7, len / 2 - 1.7]) { box(2.0, .32, 2.4, iron, 0, .56, z, body); for (const dz of [-.65, .65]) for (const sx of [-1, 1]) cyl(.36, .36, .14, 14, iron, sx * .8, .4, z + dz, body).rotation.z = Math.PI / 2; }
+  box(2.5, .3, len, iron, 0, .86, 0, body);
+  for (const sz of [-1, 1]) box(.5, .25, .4, iron, 0, .86, sz * (len / 2 + .15), body);   // 연결기
+  if (kind === "engine") {
+    const bz = 1.2;
+    cyl(.9, .9, 4.8, 18, blue, 0, 1.95, bz, body).rotation.x = Math.PI / 2;   // 보일러
+    for (const z of [bz - 1.6, bz, bz + 1.6]) cyl(.94, .94, .16, 18, gold, 0, 1.95, z, body).rotation.x = Math.PI / 2;
+    cyl(.93, .93, .4, 18, iron, 0, 1.95, bz + 2.55, body).rotation.x = Math.PI / 2;
+    cyl(.28, .38, 1.1, 12, iron, 0, 3.2, bz + 1.9, body); cyl(.46, .3, .22, 12, iron, 0, 3.85, bz + 1.9, body);   // 굴뚝
+    propAdd(new T3.Mesh(new T3.SphereGeometry(.42, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), gold), 0, 2.75, bz - .3, body);
+    box(2.5, 2.3, 2.6, red, 0, 2.15, -len / 2 + 1.4, body);   // 기관실
+    box(2.75, .16, 3.0, cream, 0, 3.38, -len / 2 + 1.4, body);
+    for (const sx of [-1, 1]) box(.04, .7, 1.2, cmat(0x24323c), sx * 1.26, 2.6, -len / 2 + 1.4, body);
+    box(1.6, .7, .04, cmat(0x24323c), 0, 2.6, -len / 2 + 2.72, body);
+    box(2.7, .4, .3, red, 0, .95, len / 2 - .05, body);
+    box(2.2, .5, .6, iron, 0, .5, len / 2 + .25, body).rotation.x = -.55;   // 배장기
+    const lamp = new T3.Mesh(new T3.CylinderGeometry(.22, .26, .2, 14), bulbMat(0xfff4c0, 0xfff2a0)); lamp.rotation.x = Math.PI / 2; lamp.position.set(0, 2.45, bz + 2.8); g.add(lamp);
+    const nm = new T3.MeshBasicMaterial({ map: txtTex(512, 96, "#1d3a5c", [["바다열차", 58, "#ffe08a", .55]]) });
+    for (const sx of [-1, 1]) { const t = new T3.Mesh(new T3.PlaneGeometry(2.1, .4), nm); t.position.set(sx * .95, 1.95, bz); t.rotation.y = sx * Math.PI / 2; g.add(t); }
+  } else {
+    box(2.5, .12, len, wood, 0, 1.07, 0, body);   // 마루
+    for (const sx of [-1, 1]) { box(.1, .8, len, cream, sx * 1.2, 1.5, 0, body); box(.12, .16, len + .02, blue, sx * 1.2, 1.86, 0, body); box(.12, .12, len + .02, red, sx * 1.2, 1.16, 0, body); }
+    for (const sz of [-1, 1]) box(2.5, .9, .1, cream, 0, 1.55, sz * (len / 2 - .05), body);
+    for (const sx of [-1, 1]) for (const z of [-len / 2 + .2, 0, len / 2 - .2]) cyl(.05, .05, 1.35, 6, iron, sx * 1.18, 2.6, z, body);
+    for (const z of TRAIN_ROWS) { box(2.2, .1, .5, seatM, 0, 1.45, z, body); box(2.2, .5, .08, seatM, 0, 1.75, z - .28, body); for (const sx of [-.9, .9]) box(.08, .38, .4, iron, sx, 1.24, z, body); }
+    const seg = len / 6;
+    for (let k = 0; k < 6; k++) box(2.8, .1, seg, k % 2 ? cream : red, 0, 3.3, -len / 2 + seg * (k + .5), roof);   // 줄무늬 지붕 (내가 타면 숨겨서 안이 보여요)
+    for (const sx of [-1, 1]) box(.06, .22, len + .2, red, sx * 1.4, 3.18, 0, roof);
+  }
+  return { g, body, roof };
+}
+function buildRail() {
+  const pts = RAIL.ctrl.map(([x, z]) => new T3.Vector3(x, 0, z)), curve = new T3.CatmullRomCurve3(pts, false, "centripetal");
+  const L = curve.getLength(), n = Math.round(L) + 1, sp = curve.getSpacedPoints(n - 1);
+  RAIL.n = n; RAIL.step = L / (n - 1); RAIL.len = L; RAIL.x = new Float32Array(n); RAIL.z = new Float32Array(n);
+  let bw = 1e9, be = 1e9;
+  sp.forEach((q, i) => { RAIL.x[i] = q.x; RAIL.z[i] = q.z; const dw = Math.hypot(q.x - STN.rail, q.z - 53), de = Math.hypot(q.x - STN2.rail, q.z - STN2.cz); if (dw < bw) { bw = dw; RAIL.sW = i * RAIL.step; } if (de < be) { be = de; RAIL.sE = i * RAIL.step; } });
+  // 높이: 땅을 위에서 감싸듯 부드럽게 (언덕은 땅 위로, 골짜기는 다리로) · 두 역 근처는 역 높이로 평평하게
+  const raw = new Float32Array(n); for (let i = 0; i < n; i++) raw[i] = Math.max(.15, terH(RAIL.x[i], RAIL.z[i]) + .35);
+  const win = (a, r, mx) => { const o = new Float32Array(n); for (let i = 0; i < n; i++) { let v = mx ? -1e9 : 0, c = 0; for (let k = -r; k <= r; k++) { const j = Math.min(n - 1, Math.max(0, i + k)); if (mx) v = Math.max(v, a[j]); else { v += a[j]; c++; } } o[i] = mx ? v : v / c; } return o; };
+  let h = win(raw, 16, true); h = win(h, 26, false); h = win(h, 26, false);
+  for (let i = 0; i < n; i++) h[i] = Math.max(h[i], raw[i]);
+  h = win(h, 8, false);
+  const flat = (sMid, half, lvl) => { for (let i = 0; i < n; i++) { const k = smooth01(half + 45, half, Math.abs(i * RAIL.step - sMid)); h[i] = h[i] * (1 - k) + lvl * k; } };
+  flat(RAIL.sW, 30, 0); flat(RAIL.sE, 38, STN2.y);
+  for (let i = 0; i < n; i++) { const s = i * RAIL.step; if (Math.abs(s - RAIL.sW) > 30 && Math.abs(s - RAIL.sE) > 38) h[i] = Math.max(h[i], raw[i] - .25); }
+  RAIL.y = h;
+  let bc = 1e9; for (let i = 0; i < n; i++) { if (i * RAIL.step < RAIL.sE - 90 || i * RAIL.step > RAIL.sE) continue; const d = roadNear(RAIL.x[i], RAIL.z[i]).d; if (d < bc) { bc = d; RAIL.cross = { i, s: i * RAIL.step }; } }
+  const det = new T3.Group(); scene.add(det); DETAIL_GROUPS.push(det);
+  const dirAt = (i) => { const a = Math.max(0, i - 1), b = Math.min(n - 1, i + 1), dx = RAIL.x[b] - RAIL.x[a], dz = RAIL.z[b] - RAIL.z[a], l = Math.hypot(dx, dz) || 1; return [dx / l, dz / l]; };
+  const idxs = (every) => { const o = []; for (let i = 0; i < n - 1; i += every) o.push(i); o.push(n - 1); return o; };
+  const ribbon = (off, half, top, botFn, mat, every) => {   // 길게 이어진 띠 (윗면 + 양옆)
+    const strips = [[], [], []];
+    for (const i of idxs(every)) {
+      const [tx, tz] = dirAt(i), nx = -tz, nz = tx, cx = RAIL.x[i] + nx * off, cz = RAIL.z[i] + nz * off, y = RAIL.y[i] + top, bot = botFn(i, y);
+      const lx = cx - nx * half, lz = cz - nz * half, rx = cx + nx * half, rz = cz + nz * half;
+      strips[0].push(lx, bot, lz, lx, y, lz); strips[1].push(lx, y, lz, rx, y, rz); strips[2].push(rx, y, rz, rx, bot, rz);
+    }
+    const pos = [], idx = []; let base = 0;
+    for (const st of strips) { const m = st.length / 6; for (let k = 0; k < m; k++) { for (let q = 0; q < 6; q++) pos.push(st[k * 6 + q]); if (k) { const a = base + (k - 1) * 2, b = base + k * 2; idx.push(a, a + 1, b, b, a + 1, b + 1); } } base += m * 2; }
+    const geo = new T3.BufferGeometry(); geo.setAttribute("position", new T3.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+    return plain(geo, mat, 0, 0, 0, det);
+  };
+  const bedM = phong(0x9a9284, { side: T3.DoubleSide }), railM = phong(0xa9b2b9, { side: T3.DoubleSide });
+  ribbon(0, 1.6, 0, (i, y) => Math.min(y - .35, Math.max(terH(RAIL.x[i], RAIL.z[i]) - .3, y - 1.3)), bedM, 2);   // 자갈 바닥 (높은 곳은 다리 상판)
+  for (const o of [-.72, .72]) ribbon(o, .05, .2, (i, y) => y - .14, railM, 1);   // 레일
+  // 침목: 한 번에 그리는 묶음
+  { const N = Math.floor(L / .9), im = new T3.InstancedMesh(new T3.BoxGeometry(2.5, .12, .3), cmat(0x6a4a32), N), m = new T3.Matrix4(), q = new T3.Quaternion(), up = new T3.Vector3(0, 1, 0), sc = new T3.Vector3(1, 1, 1), v = new T3.Vector3(), a = [0, 0, 0];
+    for (let k = 0; k < N; k++) { const s = k * .9; railAt(s, a); const i = Math.min(n - 1, Math.round(s / RAIL.step)), [tx, tz] = dirAt(i); q.setFromAxisAngle(up, Math.atan2(tx, tz)); v.set(a[0], a[1] + .07, a[2]); m.compose(v, q, sc); im.setMatrixAt(k, m); }
+    im.frustumCulled = false; im.receiveShadow = true; scene.add(im); }
+  // 다리 기둥 (선로가 땅에서 높이 뜬 곳)
+  const pierM = cmat(0xb8b2a6);
+  for (let i = 4; i < n - 4; i += 9) { const gy = terH(RAIL.x[i], RAIL.z[i]), y = RAIL.y[i] - 1.3; if (y - gy < .8) continue; const [tx, tz] = dirAt(i), a = Math.atan2(tx, tz);
+    plain(new T3.BoxGeometry(1.2, y - gy + .6, .9), pierM, RAIL.x[i], (y + gy - .6) / 2, RAIL.z[i], det).rotation.y = a;
+    plain(new T3.BoxGeometry(3.6, .35, 1.2), pierM, RAIL.x[i], y - .1, RAIL.z[i], det).rotation.y = a; }
+  // 끝 막이
+  for (const i of [0, n - 1]) { const [tx, tz] = dirAt(i); plain(new T3.BoxGeometry(2.4, .9, .5), cmat(0xd8382c), RAIL.x[i], RAIL.y[i] + .55, RAIL.z[i], det).rotation.y = Math.atan2(tx, tz); }
+  // 건널목 (일주도로) · 차단기 · 경보등
+  if (RAIL.cross) {
+    const i = RAIL.cross.i, x = RAIL.x[i], z = RAIL.z[i], N = RING.pts.length; let j = 0, bd = 1e9;
+    RING.pts.forEach((pp, k) => { const d = Math.hypot(pp[0] - x, pp[1] - z); if (d < bd) { bd = d; j = k; } });
+    const pa = RING.pts[(j - 3 + N) % N], pb = RING.pts[(j + 3) % N]; let rx = pb[0] - pa[0], rz = pb[1] - pa[1]; const rl = Math.hypot(rx, rz) || 1; rx /= rl; rz /= rl;
+    const lx = -rz, lz = rx, half = RING.w(RING.pts[j]) / 2 + .6;
+    TRAIN.cross = { arms: [], lamps: [] };
+    for (const sd of [-1, 1]) {
+      const px = x + rx * sd * 4.2 + lx * sd * half, pz = z + rz * sd * 4.2 + lz * sd * half, gy = groundY(px, pz);
+      cyl(.09, .11, 3.2, 8, cmat(0xf4f1ea), px, gy + 1.6, pz);
+      for (const r of [-.62, .62]) { const b = box(1.5, .2, .05, cmat(0xffffff), px, gy + 2.85, pz); b.rotation.set(0, Math.atan2(rx, rz) + Math.PI / 2, r, "YXZ"); }
+      for (const o of [-.28, .28]) { const lm = new T3.MeshBasicMaterial({ color: 0x4a1a14 }), l = new T3.Mesh(new T3.SphereGeometry(.13, 10, 8), lm); l.position.set(px + rx * o, gy + 2.3, pz + rz * o); scene.add(l); TRAIN.cross.lamps.push(lm); }
+      const yaw = new T3.Group(); yaw.position.set(px - lx * sd * .3, gy + 1.0, pz - lz * sd * .3); yaw.rotation.y = Math.atan2(-lx * sd, -lz * sd) - Math.PI / 2; scene.add(yaw);
+      const arm = new T3.Group(); yaw.add(arm);
+      for (let k = 0; k < 5; k++) box(.9, .12, .12, cmat(k % 2 ? 0xffffff : 0xd8382c), .45 + k * .9, 0, 0, arm);
+      arm.rotation.z = 1.35; TRAIN.cross.arms.push(arm);
+    }
+  }
+  // 기차 (차량 3량)
+  TRAIN.cars = TRAIN_CARS.map(c => { const car = makeTrainCar(c.kind, c.len); scene.add(car.g); car.g.updateMatrixWorld(true); mergeStatic(car.body); mergeStatic(car.roof); return { ...c, ...car }; });
+  STN_READY = true;
+  trainTick(Date.now());
+}
+const _ra = [0, 0, 0], _rb = [0, 0, 0];
+function placeCar(c, s) {
+  railAt(s + c.len / 2 - 1.7, _ra); railAt(s - c.len / 2 + 1.7, _rb);
+  const dx = _ra[0] - _rb[0], dy = _ra[1] - _rb[1], dz = _ra[2] - _rb[2], dh = Math.hypot(dx, dz) || 1;
+  c.g.position.set((_ra[0] + _rb[0]) / 2, (_ra[1] + _rb[1]) / 2 + .14, (_ra[2] + _rb[2]) / 2);
+  c.g.rotation.set(-Math.atan2(dy, dh), Math.atan2(dx, dz), 0, "YXZ");
+  c.g.updateMatrixWorld(true);
+}
+let _tsv = null;
+function trainSeat(k) {   // 자리 0~15: 객차 2량 × 4줄 × 좌우
+  if (!TRAIN.cars || !(k >= 0 && k < 16)) return null;
+  const c = TRAIN.cars[1 + Math.floor(k / 8)], v = (_tsv || (_tsv = new T3.Vector3())).set(k % 2 ? .62 : -.62, 1.5, TRAIN_ROWS[Math.floor((k % 8) / 2)]);
+  c.g.localToWorld(v); return { x: v.x, y: v.y, z: v.z, ry: c.g.rotation.y };
+}
+function trainTick(now) {
+  if (!TRAIN.cars) return;
+  const st = trainState(now); TRAIN.st = st;
+  for (const c of TRAIN.cars) { placeCar(c, st.s + c.off); c.roof.visible = !S.ride; }
+  if (TRAIN.cross) {
+    const on = st.phase === "run" && Math.abs(st.s - RAIL.cross.s) < 75, blink = (now % 1000) < 500;
+    for (const a of TRAIN.cross.arms) a.rotation.z += ((on ? 0 : 1.35) - a.rotation.z) * .06;
+    TRAIN.cross.lamps.forEach((m, k) => m.color.setHex(on && ((k % 2 === 0) === blink) ? 0xff3a2a : 0x4a1a14));
+  }
+  if (S.ride) {
+    const p = trainSeat(S.ride.seat); if (p) { ME.x = p.x; ME.z = p.z; ME.ry = p.ry; }
+    if (st.phase === "dwell" && st.at !== S.ride.from) trainLeave(true);
+    else if (now - (S.rideSent || 0) > 1000) { S.rideSent = now; presMove(true); }
+  }
+}
+function trainActions(consider) {
+  const st = TRAIN.st || trainState(Date.now());
+  for (const k of [0, 1]) {
+    const px = k ? STN2.px0 + 1.3 : STN.rail - 2.6, pz = k ? clamp(ME.z, STN2.cz - 15, STN2.cz + 15) : clamp(ME.z, 38, 68);
+    if (Math.abs(ME.x - px) > 3 || Math.abs(ME.z - pz) > 3) continue;
+    const here = st.phase === "dwell" && st.at === k, dest = k ? "어촌역" : "해돋이역", sec = Math.ceil(trainWait(st, k));
+    const label = here ? "🚆 바다열차 타기 · " + dest + "행 (" + Math.ceil(st.left) + "초 뒤 출발)" : "🚆 " + dest + "행 기차 · " + sec + "초 뒤 도착";
+    consider(px, pz, { key: "train:" + k + ":" + label, label, run: () => here ? trainBoard(k) : toast("🚆 기차가 " + sec + "초 뒤에 들어와요 · 승강장에서 기다려 주세요") }, 2.8);
+  }
+}
+function trainBoard(k) {
+  const st = trainState(Date.now());
+  if (st.phase !== "dwell" || st.at !== k) { toast("기차가 아직 안 들어왔어요"); return; }
+  if (st.left < 1.5) { toast("문이 닫히고 있어요 · 다음 기차를 타요"); return; }
+  const taken = new Set(otherPeers().map(q => q.ride).filter(v => v != null));
+  let best = -1, bd = 1e9;
+  for (let i = 0; i < 16; i++) { if (taken.has(i)) continue; const q = trainSeat(i), d = Math.hypot(q.x - ME.x, q.z - ME.z); if (d < bd) { bd = d; best = i; } }
+  if (best < 0) { toast("자리가 꽉 찼어요 · 다음 기차를 타요"); return; }
+  leaveSpot(true); ME.target = null; ME.onArrive = null; ME.moving = false;
+  S.ride = { seat: best, from: k }; ME.st = "sit";
+  const q = trainSeat(best); ME.x = q.x; ME.z = q.z; ME.ry = q.ry; cam.yawGoal = q.ry + Math.PI;
+  pushPresence({ ride: best }); presMove(true); sfx("ui-confirmation", .4);
+  toast("🚆 바다열차에 탔어요 · " + (k ? "어촌역" : "해돋이역") + "까지 앉아서 가요 · 도착하면 저절로 내려요");
+  updateActionUI(); updateHint();
+}
+function trainLeave(arrived) {
+  if (!S.ride) return;
+  const st = trainState(Date.now());
+  if (!arrived && st.phase !== "dwell") { lockedHint(); return; }
+  const at = st.phase === "dwell" ? st.at : S.ride.from;
+  S.ride = null; ME.st = "idle";
+  if (at === 1) { ME.x = STN2.px0 + 1.6; ME.z = clamp(ME.z, STN2.z0 + 3, STN2.z1 - 9); ME.ry = Math.PI / 2; }
+  else { ME.x = STN.rail - 2.8; ME.z = clamp(ME.z, 38, 68); ME.ry = -Math.PI / 2; }
+  pushPresence({ ride: null }); presMove(true);
+  if (arrived) { sfx("jingle-catch", .35); toast(at ? "🌅 해돋이역에 도착했어요 · 승강장 바로 옆이 바다 전망대예요" : "🏘 어촌역에 도착했어요 · 역 앞이 윗마을 공원이에요"); }
+  updateActionUI(); updateHint();
+}
+/* 손가락 이정표: items = [[글, 색, 가리킬 곳 x, z]] — 판이 실제 방향을 가리켜요 */
+function fingerPost(x, z, items, parent, y0) {
+  y0 = y0 || 0; const det = parent || scene;
+  cyl(.08, .1, 3.7, 8, cmat(0x5a3f2a), x, y0 + 1.85, z, det); cyl(.14, .14, .12, 8, cmat(0x3a2a1a), x, y0 + 3.76, z, det);
+  const ff = getComputedStyle(document.body).fontFamily;
+  const draw = (txt, col, flip) => canvasTex(640, 112, (c) => {
+    c.fillStyle = col; c.beginPath();
+    if (flip) { c.moveTo(632, 8); c.lineTo(80, 8); c.lineTo(8, 56); c.lineTo(80, 104); c.lineTo(632, 104); } else { c.moveTo(8, 8); c.lineTo(560, 8); c.lineTo(632, 56); c.lineTo(560, 104); c.lineTo(8, 104); }
+    c.closePath(); c.fill(); c.strokeStyle = "#fff6dc"; c.lineWidth = 6; c.stroke(); c.fillStyle = "#fff6dc";
+    let px = 48; do { c.font = "700 " + px + "px " + ff; px -= 2; } while (c.measureText(txt).width > 520 && px > 20);
+    c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(txt, flip ? 350 : 290, 59); }, 1, 1);
+  items.forEach(([txt, col, tx, tz], k) => {
+    const g = new T3.Group(); g.position.set(x, y0 + 3.35 - k * .52, z); g.rotation.y = Math.atan2(tx - x, tz - z) - Math.PI / 2; scene.add(g);
+    const geo = new T3.PlaneGeometry(2.5, .44);
+    const a = new T3.Mesh(geo, new T3.MeshBasicMaterial({ map: draw(txt, col, false), transparent: true })); a.position.set(1.3, 0, .015); g.add(a);
+    const b = new T3.Mesh(geo, new T3.MeshBasicMaterial({ map: draw(txt, col, true), transparent: true })); b.position.set(1.3, 0, -.015); b.rotation.y = Math.PI; g.add(b);
+  });
+}
+/* 해돋이역: 섬 반대편 동쪽 바닷가 간이역 · 승강장 + 대합실 + 바다 전망 데크 */
+function buildStation2() {
+  const det = new T3.Group(); scene.add(det); DETAIL_GROUPS.push(det);
+  const { rail, z0, z1, cz, y, px0, px1, deck } = STN2, top = y + .62, L = z1 - z0, H0 = z1 - 8, H1 = z1 - 2;
+  const pf = new T3.Group(); pf.position.y = top; det.add(pf);
+  const conc = cmat(0xcfc8bc), wood = cmat(0xb98a58), woodD = cmat(0x8a6a44), iron = cmat(0x2a2d33);
+  const gy = Math.min(terH(px0, cz), terH(px1, cz), 0);
+  box(px1 - px0, top - gy + .4, L, conc, (px0 + px1) / 2, (top + gy - .4) / 2, cz, det);
+  box(px1 - px0 + .06, .1, L + .06, cmat(0xe4ddd0), (px0 + px1) / 2, top - .04, cz, det);
+  box(.25, .02, L, cmat(0xf2d36b), px0 + .45, top + .01, cz, det);
+  for (const zz of [z0, z1]) { const r = box(px1 - px0 - .4, .14, 3.4, conc, (px0 + px1) / 2, top - .55, zz + (zz === z0 ? -1.5 : 1.5), det); r.rotation.x = zz === z0 ? .32 : -.32; }   // 경사로
+  // 길 → 선로 건너는 판자 → 승강장
+  box(STN2.px0 - (rail - 1.8), .1, 2.4, woodD, (STN2.px0 + rail - 1.8) / 2, y + .21, cz - 4, det);
+  box((rail - 1.8) - 502.4, .05, 2.4, lam(0xffffff, { map: imgTex("a/slabs.jpg", 1, 1) }), (rail - 1.8 + 502.4) / 2, groundY(504, cz - 4) + .05, cz - 4, det);
+  // 대합실 (북쪽 끝): 뒤는 큰 유리창(바다가 보여요) · 옆은 사이딩 벽 · 붉은 지붕
+  const sid = phong(0xf2ead8, { map: (() => { const t = wallTex("siding").clone(); t.needsUpdate = true; t.repeat.set(2, 1.2); return t; })() });
+  box(.18, .8, H1 - H0, sid, px1 - .12, .4, (H0 + H1) / 2, pf); box(.1, 1.7, H1 - H0 - .4, glassMat(), px1 - .12, 1.65, (H0 + H1) / 2, pf); box(.18, .4, H1 - H0, sid, px1 - .12, 2.7, (H0 + H1) / 2, pf);
+  for (const zz of [H0, H1]) { box(3.1, 2.9, .2, sid, px1 - 1.55, 1.45, zz, pf); const w = new T3.Mesh(new T3.PlaneGeometry(1.2, .9), winMat(0xcfe8f0, 0xffe2a8)); w.position.set(px1 - 1.6, 1.7, zz + (zz === H0 ? -.11 : .11)); w.rotation.y = zz === H0 ? Math.PI : 0; pf.add(w); }
+  { const rf = box(3.8, .18, H1 - H0 + 1.2, cmat(0xc2402a), px1 - 1.5, 3.05, (H0 + H1) / 2, pf); rf.rotation.z = -.12; }
+  propBench(px1 - .8, (H0 + H1) / 2, Math.PI / 2, pf);
+  // 승강장 지붕 · 기둥 · 역 이름판 · 시간표
+  for (let zz = cz - 12; zz <= cz + 6; zz += 6) cyl(.09, .09, 2.9, 8, iron, px1 - .55, 1.45, zz, pf);
+  { const r = box(3.6, .14, 21, cmat(0x2a78bb), px1 - 1.9, 3.0, cz - 3, pf); r.rotation.z = .1; }
+  { const ns = makeSign(2.8, .75, { shape: "board", fill: { type: "grad", c: ["#ffffff", "#eef3f6"] }, frame: { c: "#1d3a5c" }, t: { text: "해돋이", font: "hyeon", color: "#1d3a5c", size: .5, y: .5 } }, { cw: 500 });
+    ns.position.set(px1 - .55, top + 2.2, cz - 6); ns.rotation.y = -Math.PI / 2; scene.add(ns); const ns2 = ns.clone(); ns2.rotation.y = Math.PI / 2; ns2.position.x += .02; scene.add(ns2); }
+  { const sg = makeSign(4.4, 1.0, { shape: "board", fill: { type: "grad", c: ["#1d3a5c", "#122840"] }, frame: { c: "#f2c230" }, t: { text: "해 돋 이 역", font: "hyeon", color: "#fff7e6", size: .56, y: .44 }, sub: { text: "HAEDOJI STATION", color: "#ffe08a", size: .18, y: .84 } }, { cw: 900 });
+    sg.position.set(px1 - 2.9, top + 3.75, (H0 + H1) / 2); sg.rotation.y = -Math.PI / 2; scene.add(sg); }
+  { const tt = new T3.Mesh(new T3.PlaneGeometry(1.9, 1.05), new T3.MeshBasicMaterial({ map: txtTex(512, 284, "#1d3a5c", [["🚆 바다열차 시간표", 46, "#ffe08a", .2], ["해돋이역 ↔ 어촌역", 40, "#ffffff", .45], ["약 2분 30초마다 · 25초 정차", 34, "#cfe0f0", .67], ["승강장에서 「기차 타기」", 34, "#cfe0f0", .86]]) }));
+    tt.position.set(px1 - 1.55, top + 1.6, H0 - .12); tt.rotation.y = Math.PI; scene.add(tt); }
+  for (let zz = z0 + 4; zz < z1 - 9; zz += 11) propLamp(px1 - .45, zz, [-1, 0], pf);
+  for (const zz of [cz - 9, cz + 1]) propBench(px1 - 1.0, zz, Math.PI / 2, pf);
+  for (const zz of [cz - 14, cz + 7]) propPot(px1 - .5, zz, pf, zz > cz);
+  // 바다 전망 데크 (해돋이 전망대)
+  const dg = new T3.Group(); dg.position.y = top; det.add(dg);
+  const dx = (deck.x0 + deck.x1) / 2, dzc = (deck.z0 + deck.z1) / 2, DW = deck.x1 - deck.x0, DL = deck.z1 - deck.z0;
+  box(DW, .25, DL, wood, dx, -.13, dzc, dg);
+  for (let k = 0; k <= Math.round(DL / 1.2); k++) box(DW, .02, .05, woodD, dx, .0, deck.z0 + k * 1.2, dg);
+  for (let xx = deck.x0 + 1.5; xx <= deck.x1 - .3; xx += 3) for (const zz of [deck.z0 + .4, deck.z1 - .4]) cyl(.18, .2, top + 2.4, 8, woodD, xx, -(top + 2.4) / 2, zz, dg);
+  const rail3 = (x0, z0_, x1, z1_) => { const l = Math.hypot(x1 - x0, z1_ - z0_), a = Math.atan2(x1 - x0, z1_ - z0_); box(.12, .1, l, wood, (x0 + x1) / 2, 1.05, (z0_ + z1_) / 2, dg).rotation.y = a; box(.06, .06, l, wood, (x0 + x1) / 2, .6, (z0_ + z1_) / 2, dg).rotation.y = a; for (let d = 0; d <= l; d += 1.5) box(.1, 1.05, .1, woodD, x0 + (x1 - x0) * d / l, .52, z0_ + (z1_ - z0_) * d / l, dg); };
+  rail3(deck.x0 + .2, deck.z0 + .1, deck.x1 - .1, deck.z0 + .1); rail3(deck.x1 - .1, deck.z0 + .1, deck.x1 - .1, deck.z1 - .1); rail3(deck.x1 - .1, deck.z1 - .1, deck.x0 + .2, deck.z1 - .1);
+  for (const zz of [dzc - 3.5, dzc + 3.5]) propBench(deck.x1 - 2.4, zz, -Math.PI / 2, dg);
+  { const ts = new T3.Group(); ts.position.set(deck.x1 - 1.1, 0, dzc); dg.add(ts); cyl(.07, .1, 1.1, 8, iron, 0, .55, 0, ts); const sc = cyl(.13, .2, .8, 12, cmat(0x2f6f86), .1, 1.25, 0, ts); sc.rotation.z = -Math.PI / 2 + .25; }   // 망원경
+  for (const zz of [deck.z0 + 1.2, deck.z1 - 1.2]) propPot(deck.x0 + 1.2, zz, dg, true);
+  { const b = makeSign(2.6, .7, { shape: "board", fill: { type: "grad", c: ["#d4701a", "#b25a12"] }, frame: { c: "#fff6dc" }, t: { text: "🌅 해돋이 전망대", font: "hyeon", color: "#fff6dc", size: .42, y: .52 } }, { cw: 600 });
+    b.position.set(deck.x0 + .3, top + 2.3, dzc); b.rotation.y = -Math.PI / 2; scene.add(b); box(.08, 2.3, .08, iron, deck.x0 + .3, 1.15, dzc - 1.2, dg); box(.08, 2.3, .08, iron, deck.x0 + .3, 1.15, dzc + 1.2, dg); }
+  fingerPost(502.6, cz - 6.6, [["🚆 해돋이역 · 바다열차", "#2a78bb", rail, cz], ["🌅 해돋이 전망대", "#d4701a", dx, dzc], ["🏘 어촌 마을 (일주도로)", "#4a6a3a", 488, 116]], det, groundY(502.6, cz - 6.6));
+  const pl = new T3.PointLight(0xffd8a0, 0, 26, 1.6); pl.position.set(px1 - 1, top + 3, cz); scene.add(pl); glow.push({ light: pl, val: 1.2 });
 }
 function buildUptown() {
   const U = UPTOWN, cx = (U.x0 + U.x1) / 2, cz = (U.z0 + U.z1) / 2;
