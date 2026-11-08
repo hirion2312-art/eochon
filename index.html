@@ -2200,7 +2200,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.126.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.126.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -4884,7 +4884,7 @@ function nearestAction() {
   }
   { const pl = nearPlot(); if (pl) { const a = farmAction(pl); consider(pl.x, pl.z, { key: "farm:" + pl.r + "," + pl.c + ":" + a.label, label: a.label, run: a.run }, 1.7); } }
   consider(FARM.office.x, FARM.office.z, { key: "farmoffice", label: "🌾 농장 관리소 (자격증 · 땅 · 작물표)", run: () => { ME.ry = -Math.PI / 2; presMove(true); openSheet("farm"); } }, 2.4);
-  if (inMart(ME.x, ME.z)) for (const C of MART_CORNERS) consider(C.x, C.z, { key: "mart:" + C.id, label: (C.id === "checkout" ? "🧾 계산대" + (S.cart.length ? " · " + cartCount() + "개 " + won(cartTotal()) : "") : "🛒 " + C.name), run: () => { ME.ry = C.ry; presMove(true); openSheet("mart", C.id); } }, 2.2);
+  if (inMart(ME.x, ME.z)) for (const C of MART_CORNERS) consider(C.x, C.z, { key: "mart:" + C.id, label: (C.id === "checkout" ? "🧾 계산대" + (S.cart.length ? " · " + cartCount() + "개 " + won(cartTotal()) : "") : "🛒 " + C.name), run: () => { ME.ry = C.ry; presMove(true); openSheet("mart", C.id); } }, C.id === "checkout" ? 3.4 : 2.2);
   consider(TOYSHOP.door.x, TOYSHOP.door.z, { key: "toyshop", label: "🎈 부두 구멍가게 들어가기", run: () => { ME.ry = -Math.PI / 2; presMove(true); openSheet("toys"); } }, 2.4);
   for (const b of BUILDINGS) consider(5.6, b.z, { key: "bld:" + b.id, label: b.sheet ? b.name + " 들어가기" : b.name + " (준비 중)", run: () => { ME.ry = Math.PI / 2; presMove(true); if (b.sheet) openSheet(b.sheet); else toast("「" + b.name + "」은 아직 준비 중이에요"); } }, 2.8);
   return best;
@@ -11041,7 +11041,7 @@ const MART_CORNERS = [   // v1.125 새 매장 배치
   { id: "seed", name: "씨앗 · 모종", ico: "🌱", x: 69, z: -21.6, ry: Math.PI / 2 },
   { id: "tool", name: "농기구", ico: "🧰", x: 69.2, z: -11.5, ry: Math.PI / 2 },
   { id: "pantry", name: "양념 · 가공식품", ico: "🫙", x: 64, z: -25.4, ry: Math.PI },
-  { id: "checkout", name: "계산대", ico: "🧾", x: 55, z: -21.6, ry: Math.PI },
+  { id: "checkout", name: "계산대", ico: "🧾", x: 55, z: -22.8, ry: Math.PI },
 ];
 const MART_TOOLS = [
   { id: "can", name: "물뿌리개", price: 30, d: "밭에 물을 줘요 · 한 번에 주변 9칸", tool: true },
