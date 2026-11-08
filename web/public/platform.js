@@ -121,7 +121,9 @@
   }
   function showLogin() {
     // v1.112 타이틀 개편 뒤에는 승선권(.tpass) 안 · 예전 화면(.tcard)도 그대로 지원
-    const acct = document.getElementById("tAcct"), card = (acct && acct.parentElement) || document.querySelector(".tpass .tp-body, .tcard"); if (!card || document.getElementById("tLogin")) return;
+    if (document.getElementById("tLogin")) return;
+    const acct = document.getElementById("tAcct"), card = (acct && acct.parentElement) || document.querySelector(".tpass .tp-body, .tcard") || document.getElementById("title");
+    if (!card) { setTimeout(() => { if (window.WEB_NEED_LOGIN) showLogin(); }, 400); return; }   // 화면이 아직 없으면 잠깐 뒤 다시
     const box = document.createElement("div"); box.id = "tLogin"; box.className = "tlogin";
     box.innerHTML = '<div class="tl-t">로그인하고 시작해요</div>' +
       '<button class="g" data-p="google">' + G_ICON + '구글로 시작</button>' +
