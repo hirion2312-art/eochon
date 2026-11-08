@@ -2204,7 +2204,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.131.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.130.1";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -4942,7 +4942,7 @@ function nearestAction() {
   { const F = farmData(), lv = F.comp || 0, ready = (F.cjobs || []).filter(j => j.done <= Date.now()).length; consider(COMPOST.x - 1.4, COMPOST.z, { key: "compost:" + lv + ":" + ready, label: !lv ? "♻️ 퇴비장 터 · 지으면 비료를 직접 만들어요" : ready ? "♻️ 퇴비장 · 다 된 비료 " + ready + "포대 꺼내기" : "♻️ 퇴비장 (비료 만들기)", run: () => { ME.ry = Math.PI / 2; presMove(true); openSheet("compost"); } }, 2.4); }
   { const ct = canTool(); consider(WELL.x - 1.5, WELL.z, { key: "well:" + (P.water || 0), label: ct ? "🪣 우물에서 물 채우기 · 물통 " + (P.water || 0) + "/" + ct.cap : "🪣 우물 · 물뿌리개가 있으면 물을 담아요", run: wellFill }, 2.4); }
   consider(FARM.office.x, FARM.office.z, { key: "farmoffice", label: "🌾 농장 관리소 (자격증 · 땅 · 작물표)", run: () => { ME.ry = -Math.PI / 2; presMove(true); openSheet("farm"); } }, 2.4);
-  if (inMart(ME.x, ME.z)) for (const C of MART_CORNERS) consider(C.a ? clamp(ME.x, C.a[0], C.a[1]) : C.x, C.a ? clamp(ME.z, C.a[2], C.a[3]) : C.z, { key: "mart:" + C.id, label: (C.id === "checkout" ? "🧾 계산대" + (S.cart.length ? " · " + cartCount() + "개 " + won(cartTotal()) : "") : "🛒 " + C.name), run: () => { ME.ry = C.ry; presMove(true); openSheet("mart", C.id); } }, C.a ? 1.0 : C.id === "checkout" ? 3.4 : 2.2);   // v1.131 매대 둘레 영역 어디서든 (예전엔 정해진 한 점 근처에서만)
+  if (inMart(ME.x, ME.z)) for (const C of MART_CORNERS) consider(C.x, C.z, { key: "mart:" + C.id, label: (C.id === "checkout" ? "🧾 계산대" + (S.cart.length ? " · " + cartCount() + "개 " + won(cartTotal()) : "") : "🛒 " + C.name), run: () => { ME.ry = C.ry; presMove(true); openSheet("mart", C.id); } }, C.id === "checkout" ? 3.4 : 2.2);
   consider(TOYSHOP.door.x, TOYSHOP.door.z, { key: "toyshop", label: "🎈 부두 구멍가게 들어가기", run: () => { ME.ry = -Math.PI / 2; presMove(true); openSheet("toys"); } }, 2.4);
   for (const b of BUILDINGS) consider(5.6, b.z, { key: "bld:" + b.id, label: b.sheet ? b.name + " 들어가기" : b.name + " (준비 중)", run: () => { ME.ry = Math.PI / 2; presMove(true); if (b.sheet) openSheet(b.sheet); else toast("「" + b.name + "」은 아직 준비 중이에요"); } }, 2.8);
   return best;
@@ -11227,13 +11227,13 @@ function farmTick(t) {
 }
 /* ── 농가마트 (낭만농협 섬마을마트) · 실내를 걸어 다녀요 ── */
 const MART_CORNERS = [   // v1.125 새 매장 배치
-  { id: "fresh", name: "신선 채소 · 과일", ico: "🥬", x: 55.5, z: -13.6, ry: 0 , a: [50.6, 60.8, -14.4, -8.3] },
-  { id: "local", name: "로컬푸드 직매장", ico: "🧺", x: 58.4, z: -17, ry: Math.PI / 2 , a: [58, 65, -19.6, -15.1] },
-  { id: "seed", name: "씨앗 · 모종", ico: "🌱", x: 69, z: -21.6, ry: Math.PI / 2 , a: [68.4, 71.9, -26, -17.2] },
-  { id: "tool", name: "농기구", ico: "🧰", x: 69.2, z: -11.5, ry: Math.PI / 2 , a: [68.4, 71.9, -15.4, -7.4] },
-  { id: "pantry", name: "양념 · 가공식품", ico: "🫙", x: 64, z: -25.4, ry: Math.PI , a: [59.6, 71.4, -26.9, -24] },
-  { id: "checkout", name: "계산대", ico: "🧾", x: 55, z: -22.8, ry: Math.PI , a: [50.8, 59.2, -26.5, -21.4] },
-  { id: "life", name: "생활 · 놀거리", ico: "🧺", x: 63.4, z: -13.4, ry: -Math.PI / 2 , a: [62.4, 69.2, -15.1, -11.6] },
+  { id: "fresh", name: "신선 채소 · 과일", ico: "🥬", x: 55.5, z: -13.6, ry: 0 },
+  { id: "local", name: "로컬푸드 직매장", ico: "🧺", x: 58.4, z: -17, ry: Math.PI / 2 },
+  { id: "seed", name: "씨앗 · 모종", ico: "🌱", x: 69, z: -21.6, ry: Math.PI / 2 },
+  { id: "tool", name: "농기구", ico: "🧰", x: 69.2, z: -11.5, ry: Math.PI / 2 },
+  { id: "pantry", name: "양념 · 가공식품", ico: "🫙", x: 64, z: -25.4, ry: Math.PI },
+  { id: "checkout", name: "계산대", ico: "🧾", x: 55, z: -22.8, ry: Math.PI },
+  { id: "life", name: "생활 · 놀거리", ico: "🧺", x: 63.4, z: -13.4, ry: -Math.PI / 2 },
 ];
 const MART_TOOLS = [   // v1.129 모든 도구는 한 번에 1칸부터
   { id: "can1", name: "물뿌리개", price: 30, d: "한 번에 1칸 · 물통 10칸분 · 밭 옆 우물에서 채워요", tool: true, ico: "🚿" },
