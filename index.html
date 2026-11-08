@@ -2200,7 +2200,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.124.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.125.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2214,8 +2214,9 @@ const BAITS = [
   { id: "squid",  name: "생오징어",   price: 120,  p: [26, 30, 26, 10, 5, 2.4, .6, 0, 0], lv: 6, desc: "싱싱한 오징어예요. 영웅급이 제법 나오는 대물 미끼예요." },
   { id: "lure",   name: "황금 루어",  price: 300,  p: [18, 27, 28, 14, 7, 4, 1.6, .4, 0], lv: 9, desc: "금빛으로 번쩍여 대물을 부르고, 아주 가끔 신화급도 물어요." },
   { id: "legend", name: "전설의 미끼", price: 1500, p: [0, 8, 32, 24, 17, 11, 5.4, 2, .6], lv: 16, desc: "전설 그 자체예요. 일반 물고기는 절대 안 물어요." },
+  { id: "primal", name: "태초의 미끼", price: 6000, p: [0, 0, 14, 24, 24, 17, 11, 6.5, 3.5], lv: 60, desc: "바다 맨 밑바닥의 별빛을 빚은 종결 미끼예요. 희귀 아래는 아예 안 물고, 신화 · 초월 · 태초가 자주 와요." },
 ];
-const APEX_CHANCE = { lure: .001, legend: .004 };   // 태초 등급(최상위) 확률 · 상점 설명에도 이 숫자를 그대로 보여요
+const APEX_CHANCE = { lure: .001, legend: .004, primal: .015 };   // 태초 등급(최상위) 확률 · 상점 설명에도 이 숫자를 그대로 보여요
 const RELEASE = [   // v1.106.1 후원 방류권: 최대 5만원 · 금액(1 : 5 : 10 : 50)만큼 등급 · 크기를 크게 벌렸어요 · 번호(0~3)는 예전 방류권과 같아요
   { name: "참돔급",   cost: 1000,  tier: 2, min: 15,  max: 50 },     // 희귀
   { name: "다랑어급", cost: 5000,  tier: 4, min: 40,  max: 150 },    // 영웅
@@ -2728,13 +2729,14 @@ const RODS = [
   { id: "abyss", name: "심해의 낚싯대", price: 50000, lv: 32, tens: 1.42, slots: 3, color: 0x23356e, desc: "심해의 거물과 겨루는 낚싯대예요. 채비 3칸." },
   { id: "palace", name: "용궁 낚싯대", price: 90000, lv: 40, tens: 1.46, slots: 3, color: 0x3fd6cc, desc: "용궁에서 내려왔다는 옥빛 낚싯대예요. 채비 3칸." },
   { id: "myth", name: "신화의 낚싯대", price: 150000, lv: 48, tens: 1.5, slots: 3, color: 0xe57aa8, desc: "신화 속 물고기도 버텨 내는 마지막 낚싯대예요. 채비 3칸." },
+  { id: "primal", name: "태초의 낚싯대", price: 400000, lv: 65, tens: 1.6, slots: 3, color: 0x2a1d5c, desc: "바다가 처음 생길 때 떨어진 별 조각으로 깎았다는 종결 낚싯대예요. 태초급과 끝까지 겨뤄요. 채비 3칸." },
   { id: "merchant", name: "장사꾼의 낚싯대", price: 30000, lv: 24, tens: 1.32, slots: 2, color: 0x0d4042, desc: "포차 사장님들의 비장의 낚싯대예요. 등급 하나와 원하는 물고기 세 종을 골라 두면, 그 등급이 뜰 땐 골라 둔 물고기만 노려요. 태초급 같은 큰 욕심은 안 부려요 — 장사는 확실한 것만 잡는 거예요." },
 ].sort((a, b) => a.lv - b.lv);
 /* 낚싯대 특성 (v1.27): 비쌀수록 확실히 좋아져요
    jump = 점프할 때 감고 있으면 바늘이 빠질 확률 배율(1 = 40%) · calm = 몸부림 때 줄에 걸리는 장력 줄이기(충격 흡수) · tire = 물고기가 지치는 속도 */
 const ROD_PERK = {
   bamboo: [1, 0, 1], lure: [.85, 0, 1.03], fiber: [.8, .04, 1.05], rock: [.7, .07, 1.07], carbon: [.65, .08, 1.1], surf: [.6, .1, 1.12], boat: [.55, .12, 1.14],
-  iridium: [.5, .14, 1.16], titan: [.45, .16, 1.19], obsidian: [.4, .18, 1.22], legend: [.32, .21, 1.26], abyss: [.26, .24, 1.3], palace: [.2, .27, 1.34], myth: [.12, .3, 1.4], merchant: [.42, .17, 1.21],
+  iridium: [.5, .14, 1.16], titan: [.45, .16, 1.19], obsidian: [.4, .18, 1.22], legend: [.32, .21, 1.26], abyss: [.26, .24, 1.3], palace: [.2, .27, 1.34], myth: [.12, .3, 1.4], primal: [.05, .34, 1.5], merchant: [.42, .17, 1.21],
 };
 for (const r of RODS) { const [jump, calm, tire] = ROD_PERK[r.id] || [1, 0, 1]; Object.assign(r, { jump, calm, tire }); }
 /* v1.122 낚싯대 강화 +1~+5: 단계마다 낚싯대 강도 +3% (드랙도 같이 세져요) · 비용 = 낚싯대 값 × 비율 (대나무는 최소 500원 기준) */
@@ -2749,14 +2751,16 @@ const REELS = [
   { id: "power", name: "전동 릴", price: 18000, lv: 20, heat: .62, cool: .23, speed: 3.3, len: 100, color: 0xf2c230, desc: "모터가 감아 줘요. 빠르고 잘 식는 고급 릴이에요" },
   // v1.122 최상위 릴: 줄이 길수록(len) 물고기가 멀리 도망가도 버텨요
   { id: "abyss", name: "심해 릴", price: 45000, lv: 35, heat: .55, cool: .27, speed: 3.6, len: 115, color: 0x23356e, desc: "심해 지깅용 대형 전동 릴이에요. 줄 115m · 신화급과 오래 싸워도 잘 버텨요" },
-  { id: "palace", name: "용궁 릴", price: 100000, lv: 50, heat: .48, cool: .31, speed: 4.0, len: 125, color: 0x3fd6cc, desc: "용궁 장인이 만든 옥빛 릴이에요. 줄 125m · 가장 빠르고 가장 잘 식어요" },
+  { id: "palace", name: "용궁 릴", price: 100000, lv: 50, heat: .48, cool: .31, speed: 4.0, len: 125, color: 0x3fd6cc, desc: "용궁 장인이 만든 옥빛 릴이에요. 줄 125m · 빠르고 잘 식어요" },
+  { id: "primal", name: "태초 릴", price: 250000, lv: 60, heat: .42, cool: .35, speed: 4.4, len: 140, color: 0x6a4cff, desc: "별빛으로 돌아가는 종결 릴이에요. 줄 140m · 가장 빠르고, 거의 뜨거워지지 않아요" },
 ];
 const LINES = [
   { id: "nylon", name: "나일론 줄", price: 0, lv: 1, add: 0, color: "#e9e4d8", desc: "처음 받은 기본 낚싯줄이에요" },
   { id: "carbon", name: "카본 줄", price: 1200, lv: 4, add: .08, color: "#7fd6e0", desc: "끊어지기 전까지 8% 더 버텨요. 가성비가 좋아요" },
   { id: "fluoro", name: "플로로카본 줄", price: 2800, lv: 9, add: .12, color: "#b9e6ff", desc: "물속에서 잘 안 보이는 단단한 줄이에요. 12% 더 버텨요" },
   { id: "pe", name: "합사", price: 5000, lv: 14, add: .16, color: "#ff8a3c", desc: "여러 가닥을 꼰 질긴 줄이에요. 16% 더 버텨요" },
-  { id: "dragon", name: "용궁 합사", price: 30000, lv: 40, add: .24, color: "#3fd6cc", desc: "용의 수염을 꼬았다는 옥빛 합사예요. 24% 더 버텨요 · 가장 질긴 줄" },
+  { id: "dragon", name: "용궁 합사", price: 30000, lv: 40, add: .24, color: "#3fd6cc", desc: "용의 수염을 꼬았다는 옥빛 합사예요. 24% 더 버텨요" },
+  { id: "silk", name: "태초 천잠사", price: 80000, lv: 55, add: .3, color: "#c9b8ff", desc: "하늘 누에가 뽑은 별빛 실이에요. 30% 더 버텨요 · 가장 질긴 종결 줄" },
 ];
 const TACKLES = [
   { id: "spinner", name: "스피너", price: 500, desc: "입질이 15% 빨리 와요. 기다리는 시간이 줄어요" },
@@ -9714,6 +9718,7 @@ function loadRodModels() {
       ROD3D.set(id, { geo, parts: m.g, top: m.lo[1] + m.len, reel: m.reel || null });
     }
     try { const mr = buildMerchantRod(); ROD3D.set("merchant", mr); rodMatCache.delete("merchant"); rodMatCache.delete("merchant|n"); ROD_AXIS.clear(); } catch (e) { console.warn("merchant rod", e); }
+    try { ROD3D.set("primal", buildPrimalRod()); rodMatCache.delete("primal"); rodMatCache.delete("primal|n"); ROD_AXIS.clear(); } catch (e) { console.warn("primal rod", e); }   // v1.124 종결 낚싯대
     makeRodPics();
     for (const k of [...iconCache.keys()]) if (k.startsWith("rod|")) iconCache.delete(k);
     refreshSheet();
@@ -9780,8 +9785,127 @@ function buildMerchantRod() {   // v1.107.1 장사꾼의 낚싯대 (y가 위 · 
   geo.computeBoundingBox();
   return { geo, parts: parts.map(({ list, ...rest }) => rest), top: TOP, reel: [0, .405, .075] };
 }
+function mergeRodParts(parts, TOP, reel) {
+  const pos = [], nor = [], groups = []; let start = 0;
+  parts.forEach((pt, gi) => { let n = 0; for (const g0 of pt.list) { const g = g0.index ? g0.toNonIndexed() : g0; g.computeVertexNormals(); const a = g.attributes.position.array, b = g.attributes.normal.array; for (let i = 0; i < a.length; i++) { pos.push(a[i]); nor.push(b[i]); } n += a.length / 3; } groups.push([start, n, gi]); start += n; });
+  const geo = new T3.BufferGeometry(); geo.setAttribute("position", new T3.Float32BufferAttribute(pos, 3)); geo.setAttribute("normal", new T3.Float32BufferAttribute(nor, 3));
+  for (const [st, n, gi] of groups) geo.addGroup(st, n, gi);
+  geo.computeBoundingBox();
+  return { geo, parts: parts.map(({ list, ...rest }) => rest), top: TOP, reel };
+}
+function buildPrimalRod() {   // v1.124 태초의 낚싯대 — 컨셉: 바다가 처음 생길 때 떨어진 별. 흑요 손잡이에 금실 나선, 심해 남색 → 보라 → 별빛으로 밝아지는 대, 대를 감아 오르는 쌍나선 별띠, 수정 가이드, 손잡이 끝 별 수정
+  const parts = [
+    { c: "#0d0a1c", list: [] },                       // 0 흑요 손잡이
+    { c: "#d9a63a", s: 1, list: [] },                 // 1 금 (띠 · 가이드 다리 · 장식)
+    { c: "#1b1340", s: 1, list: [] },                 // 2 대 1단 심해 남색
+    { c: "#7a52ff", e: "#3a1aa8", s: 1, list: [] },   // 3 대 2단 보라
+    { c: "#efe8ff", e: "#9a80ff", list: [] },         // 4 대 3단 별빛
+    { c: "#eef4ff", e: "#a08cff", o: .85, list: [] }, // 5 수정 (가이드 링 · 손잡이 끝 · 별의 관)
+    { c: "#fff6d0", e: "#f0c050", list: [] },         // 6 별 조각 · 쌍나선 금빛 띠
+    { c: "#c8f0ff", e: "#4a9aff", list: [] },         // 7 쌍나선 푸른 띠
+    { c: "#d9a63a", s: 1, reel: 1, list: [] },        // 8 기본 릴
+    { c: "#1b1340", s: 1, reel: 1, list: [] },        // 9 기본 릴 몸통
+  ];
+  const add = (pi, geo, x, y, z, rx, rz) => { if (rx) geo.rotateX(rx); if (rz) geo.rotateZ(rz); geo.translate(x || 0, y || 0, z || 0); parts[pi].list.push(geo); };
+  const cyl = (r0, r1, hh, seg) => new T3.CylinderGeometry(r0, r1, hh, seg || 18);
+  const TOP = 2.3, B0 = .66, S1 = 1.2, S2 = 1.75;
+  const rAt = (y) => .02 + (.0042 - .02) * (y - B0) / (TOP - B0);
+  const helix = (pi, y0, y1, turns, ph, rr, off) => { const pts = []; for (let i = 0; i <= 90; i++) { const t = i / 90, y = y0 + (y1 - y0) * t, a = ph + t * turns * Math.PI * 2, r = (off ? off(y) : rAt(y)) + rr; pts.push(new T3.Vector3(Math.cos(a) * r, y, Math.sin(a) * r)); } add(pi, new T3.TubeGeometry(new T3.CatmullRomCurve3(pts), 160, rr * .55, 5, false)); };
+  // 손잡이: 흑요 + 금실 나선 + 금 띠
+  add(0, cyl(.033, .036, .08), 0, -.04, 0);
+  add(0, cyl(.029, .033, .4), 0, .2, 0);
+  helix(1, .02, .38, 3, 0, .0035, () => .031); helix(4, .02, .38, 3, Math.PI, .0028, () => .031);   // 금실 + 별빛 실 엇갈림
+  for (const y of [.0, .4]) add(1, new T3.TorusGeometry(.033, .005, 8, 24), 0, y, 0, Math.PI / 2);
+  add(1, cyl(.026, .026, .1), 0, .45, 0);   // 릴 시트
+  for (const y of [.4, .5]) add(1, new T3.TorusGeometry(.028, .006, 8, 22), 0, y, 0, Math.PI / 2);
+  add(0, cyl(.022, .027, .14), 0, .57, 0);  // 앞 손잡이
+  add(5, new T3.TorusGeometry(.025, .006, 8, 22), 0, .5, 0, Math.PI / 2);
+  add(1, new T3.TorusGeometry(.023, .005, 8, 22), 0, .645, 0, Math.PI / 2);
+  // 대: 3단 그러데이션 (이음새에 금 띠 + 수정 링)
+  add(2, cyl(rAt(S1), .02, S1 - B0), 0, B0 + (S1 - B0) / 2, 0);
+  add(3, cyl(rAt(S2), rAt(S1), S2 - S1), 0, S1 + (S2 - S1) / 2, 0);
+  add(4, cyl(.0042, rAt(S2), TOP - S2), 0, S2 + (TOP - S2) / 2, 0);
+  for (const y of [S1, S2]) { add(1, new T3.TorusGeometry(rAt(y) + .003, .0042, 6, 20), 0, y - .012, 0, Math.PI / 2); add(5, new T3.TorusGeometry(rAt(y) + .003, .003, 6, 20), 0, y + .004, 0, Math.PI / 2); add(1, new T3.TorusGeometry(rAt(y) + .003, .0042, 6, 20), 0, y + .02, 0, Math.PI / 2); }
+  // 쌍나선 별띠 (금 · 푸른 빛) — 대를 감아 오르며 위로 갈수록 촘촘
+  helix(6, .7, 2.05, 4.5, 0, .0042); helix(7, .7, 2.05, 4.5, Math.PI, .0042);
+  // 별의 관 (앞 손잡이 위): 금 날개 8 + 수정 날개 8을 두 겹으로 엇갈려 펼쳐요 — 위로 솟는 별빛 폭발
+  const blade = (pi, len, w, a, up, y, r0) => { const g = new T3.OctahedronGeometry(1, 0); g.scale(w * .5, len * .5, w * .18); g.translate(0, len * .5, 0); g.rotateZ(-(Math.PI / 2 - up)); g.rotateY(-a); add(pi, g, Math.cos(a) * r0, y, Math.sin(a) * r0); };
+  for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; blade(1, k % 2 ? .18 : .28, .055, a, .75, .67, .022); blade(5, k % 2 ? .14 : .21, .036, a + Math.PI / 8, 1.05, .7, .02); }
+  add(1, new T3.TorusGeometry(.04, .006, 8, 32), 0, .675, 0, Math.PI / 2);
+  add(5, new T3.TorusGeometry(.03, .008, 8, 28), 0, .69, 0, Math.PI / 2);
+  { const g0 = new T3.OctahedronGeometry(.018); g0.scale(1, 1.4, 1); add(6, g0, 0, .71, .024); }   // 관 앞 보석
+  // 대 위쪽의 작은 별 날개 (2단 이음새)
+  for (let k = 0; k < 4; k++) blade(6, .05, .016, k * Math.PI / 2 + Math.PI / 4, .75, S2 + .02, rAt(S2));
+  // 가이드: 금 다리 2개 + 수정 링 + 금 테
+  for (const [y, rr] of [[.92, .024], [1.2, .02], [1.47, .017], [1.72, .014], [1.94, .012], [2.13, .01]]) {
+    const rb = rAt(y), zc = rb + rr + .014;
+    for (const dy of [-.009, .009]) add(1, cyl(.0024, .0024, zc - rb, 6), 0, y + dy, rb + (zc - rb) / 2, Math.PI / 2);
+    add(1, new T3.TorusGeometry(rr + .002, .0028, 6, 18), 0, y, zc, Math.PI / 2);
+    add(5, new T3.TorusGeometry(rr - .0015, .0022, 6, 18), 0, y, zc, Math.PI / 2);
+  }
+  // 끝: 4갈래 별 + 고리
+  add(1, new T3.TorusGeometry(.006, .0025, 6, 12), 0, TOP + .006, 0);
+  { const st = new T3.OctahedronGeometry(.016); st.scale(.35, 1.4, .35); add(6, st, 0, TOP + .03, 0); const s2 = new T3.OctahedronGeometry(.016); s2.scale(1.4, .35, .35); add(6, s2, 0, TOP + .03, 0); }
+  // 대에 박힌 별 조각 (아래 단)
+  for (let k = 0; k < 16; k++) { const y = .8 + k * .026, a = k * 2.4; add(k % 3 ? 6 : 5, new T3.OctahedronGeometry(k % 3 ? .005 : .007), Math.cos(a) * (rAt(y) + .001), y, Math.sin(a) * (rAt(y) + .001)); }
+  // 손잡이 끝: 금 왕관 받침(꽃잎 6) → 큰 별 수정 → 금 고리 2 (기울여 교차)
+  add(1, cyl(.036, .028, .03), 0, -.095, 0);
+  for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3, pt = new T3.ConeGeometry(.012, .05, 6); pt.rotateZ(Math.PI); pt.rotateX(-.5); pt.rotateY(-a + Math.PI / 2); add(1, pt, Math.cos(a) * .026, -.13, Math.sin(a) * .026); }
+  { const cr = new T3.OctahedronGeometry(.055, 0); cr.scale(1, 1.8, 1); add(5, cr, 0, -.21, 0); const core = new T3.OctahedronGeometry(.024, 0); core.scale(1, 1.6, 1); add(6, core, 0, -.21, 0);
+    for (let k = 0; k < 4; k++) { const sp = new T3.OctahedronGeometry(1, 0); sp.scale(.012, .06, .012); sp.rotateZ(Math.PI / 2); sp.rotateY(k * Math.PI / 2 + Math.PI / 4); add(6, sp, 0, -.21, 0); } }   // 8갈래 별 수정
+  { const r1 = new T3.TorusGeometry(.068, .0035, 8, 32); r1.rotateX(Math.PI / 2 + .45); add(1, r1, 0, -.2, 0); const r2 = new T3.TorusGeometry(.068, .0035, 8, 32); r2.rotateX(Math.PI / 2 - .45); r2.rotateY(Math.PI / 2); add(1, r2, 0, -.2, 0); }
+  add(6, new T3.OctahedronGeometry(.009), 0, -.305, 0);
+  // 기본 릴 (+z 쪽 · 다른 릴을 달면 숨겨요)
+  add(8, cyl(.042, .042, .03, 20), 0, .45, .077, 0, Math.PI / 2); add(8, cyl(.012, .012, .06, 8), 0, .45, .047, Math.PI / 2); add(9, new T3.TorusGeometry(.042, .006, 6, 20), .016, .45, .077, 0, Math.PI / 2);
+  return mergeRodParts(parts, TOP, [0, .45, .077]);
+}
+/* v1.124 태초 릴 — 컨셉: 별이 도는 천구의(天球儀). 남보라 스풀 안에 별빛 고리가 돌고, 금 옆판에 8갈래 별 무늬, 수정 손잡이 2개, 8각 별 드랙, 스풀을 비스듬히 감싸는 천구 고리.
+   크기 · 방향은 기존 릴과 같아요 (스풀 축 = x, 대는 -z 쪽, 가운데가 원점) */
+function buildPrimalReel() {
+  const parts = [
+    { c: "#1b1340", s: 1, list: [] },                 // 0 스풀 · 몸통
+    { c: "#d9a63a", s: 1, list: [] },                 // 1 금 옆판 · 프레임
+    { c: "#c9b8ff", e: "#5a3cff", list: [] },         // 2 별빛 띠
+    { c: "#eaf2ff", e: "#8a7aff", o: .82, list: [] }, // 3 수정
+    { c: "#fff6d0", e: "#e0b040", list: [] },         // 4 별 장식
+    { c: "#b8862a", s: 1, list: [] },                 // 5 진한 금 (손잡이 팔 · 축)
+  ];
+  const add = (pi, geo, x, y, z, rx, ry, rz) => { if (rx) geo.rotateX(rx); if (ry) geo.rotateY(ry); if (rz) geo.rotateZ(rz); geo.translate(x || 0, y || 0, z || 0); parts[pi].list.push(geo); };
+  const X = (r0, r1, len, seg) => { const g = new T3.CylinderGeometry(r0, r1, len, seg || 24); g.rotateZ(Math.PI / 2); return g; };   // x축 원통
+  const Z0 = .012;   // 스풀 중심 (대에서 살짝 떨어져요)
+  add(0, X(.03, .03, .056), 0, 0, Z0);
+  for (const dx of [-.016, 0, .016]) add(2, new T3.TorusGeometry(.0305, .0025, 6, 28), dx, 0, Z0, 0, Math.PI / 2);   // 감긴 별빛 줄
+  for (const sx of [-1, 1]) {
+    const x = sx * .034;
+    add(1, X(.046, .046, .008, 32), x, 0, Z0);
+    add(1, new T3.TorusGeometry(.046, .004, 8, 32), x + sx * .004, 0, Z0, 0, Math.PI / 2);
+    add(0, X(.038, .038, .002, 32), x + sx * .0045, 0, Z0);
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, L = k % 2 ? .022 : .034, bx = new T3.BoxGeometry(.003, L, k % 2 ? .006 : .009); bx.translate(0, L / 2, 0); bx.rotateX(a); add(4, bx, x + sx * .006, 0, Z0); }   // 8갈래 별 무늬
+    { const hub = new T3.OctahedronGeometry(.011); add(3, hub, x + sx * .008, 0, Z0); }
+  }
+  // 프레임: 옆판을 잇는 금 아치 (대 쪽 · 바깥쪽)
+  for (const [y, z] of [[.036, -.03], [-.036, -.03], [0, -.046]]) add(1, X(.006, .006, .076, 10), 0, y, z);
+  { const hs = new T3.CylinderGeometry(.043, .043, .062, 28, 1, false, Math.PI * .5, Math.PI); hs.rotateZ(Math.PI / 2); add(0, hs, 0, 0, Z0); }   // 손바닥 쪽 덮개 (대 쪽 반원통)
+  for (const dx of [-.026, .026]) { const tr = new T3.TorusGeometry(.0435, .003, 6, 28, Math.PI); tr.rotateY(Math.PI / 2); tr.rotateX(Math.PI / 2); add(1, tr, dx, 0, Z0); }   // 덮개 금테
+  { const gem = new T3.OctahedronGeometry(.012); gem.scale(1.6, 1, 1); add(3, gem, 0, .0, Z0 - .046); }   // 덮개 위 수정
+  for (const dx of [-.012, .012]) add(4, new T3.OctahedronGeometry(.005), dx, 0, Z0 - .045);
+  add(5, new T3.BoxGeometry(.05, .016, .03), 0, 0, -.052);   // 대에 붙는 발
+  // 줄 고르개 (앞쪽 금 막대 + 수정 구슬)
+  add(1, X(.0035, .0035, .07, 8), 0, -.03, .05); add(3, new T3.SphereGeometry(.007, 10, 8), .008, -.03, .05);
+  // 천구 고리: 스풀을 비스듬히 감싸요 (두 개 교차)
+  { const r = new T3.TorusGeometry(.058, .0028, 8, 40); r.rotateY(Math.PI / 2); r.rotateZ(.5); r.translate(0, 0, Z0); parts[2].list.push(r); }
+  { const r = new T3.TorusGeometry(.058, .0028, 8, 40); r.rotateY(Math.PI / 2); r.rotateZ(-.5); r.translate(0, 0, Z0); parts[1].list.push(r); }
+  // 손잡이 (+x 쪽): 흑요 팔 + 수정 손잡이 2개 + 8각 별 드랙
+  add(5, X(.006, .006, .02, 10), .047, 0, Z0);
+  add(5, new T3.BoxGeometry(.006, .075, .012), .058, 0, Z0);
+  for (const sy of [-1, 1]) { const kb = new T3.OctahedronGeometry(.016); kb.scale(1.3, 1, 1); add(3, kb, .068, sy * .036, Z0); add(1, X(.004, .004, .012, 8), .063, sy * .036, Z0); }
+  for (const rr of [0, Math.PI / 4]) add(4, new T3.BoxGeometry(.004, .026, .026), .052, 0, Z0, rr, 0, 0);   // 8각 별 드랙
+  add(4, new T3.OctahedronGeometry(.006), .056, 0, Z0);
+  const m = mergeRodParts(parts, 0, null); m.geo.computeBoundingBox(); const bb = m.geo.boundingBox;
+  return { geo: m.geo, parts: m.parts, size: Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z) };
+}
 /* v1.107.1 전설급 이상 낚싯대의 오라: 대를 타고 빙글빙글 올라가는 빛 알갱이 + 은은한 빛 껍질 (손에 든 것 · 상점 미리보기 모두) */
-const ROD_AURA = { legend: [0xffcf4a, 0xfff2b0], merchant: [0x3fe0c8, 0xffd27a], abyss: [0x40ebd9, 0x6a8cff], palace: [0x2ed199, 0xffe08a], myth: [0xff9ad8, 0xfff0ff] };
+const ROD_AURA = { primal: [0x9a7bff, 0xfff4c2], legend: [0xffcf4a, 0xfff2b0], merchant: [0x3fe0c8, 0xffd27a], abyss: [0x40ebd9, 0x6a8cff], palace: [0x2ed199, 0xffe08a], myth: [0xff9ad8, 0xfff0ff] };
 const ROD_AXIS = new Map();
 function rodAxis(id) {   // 대 아래(25~40%) · 위(75~92%) 높이의 실제 중심 → 오라를 대의 기울기까지 맞춰요
   if (ROD_AXIS.has(id)) return ROD_AXIS.get(id);
@@ -9793,7 +9917,7 @@ function rodAxis(id) {   // 대 아래(25~40%) · 위(75~92%) 높이의 실제 �
 }
 function rodAura(id, top) {
   const cols = ROD_AURA[id]; if (!cols) return null;
-  const g = new T3.Group(), ax = rodAxis(id); g.position.set(ax.x, 0, ax.z); g.rotation.set(ax.rx, 0, ax.rz); const N = id === "myth" ? 46 : id === "palace" ? 40 : 32;
+  const g = new T3.Group(), ax = rodAxis(id); g.position.set(ax.x, 0, ax.z); g.rotation.set(ax.rx, 0, ax.rz); const N = id === "primal" ? 64 : id === "myth" ? 46 : id === "palace" ? 40 : 32;
   const pos = new Float32Array(N * 3), col = new Float32Array(N * 3), c1 = new T3.Color(cols[0]), c2 = new T3.Color(cols[1]);
   const geo = new T3.BufferGeometry(); geo.setAttribute("position", new T3.BufferAttribute(pos, 3)); geo.setAttribute("color", new T3.BufferAttribute(col, 3));
   const pts = new T3.Points(geo, new T3.PointsMaterial({ size: .13, map: sparkTex(), vertexColors: true, transparent: true, depthWrite: false, blending: T3.AdditiveBlending }));
@@ -9813,6 +9937,18 @@ function rodAura(id, top) {
   const shell = new T3.Mesh(new T3.CylinderGeometry(.012, .05, top * .9, 14, 1, true), shellM); shell.position.y = top * .5;
   shell.onBeforeRender = () => { shellM.opacity = .1 + Math.sin(performance.now() / 380) * .05; };
   g.add(shell);
+  if (id === "primal") {   // v1.124 태초의 낚싯대: 손잡이 끝 별 수정을 도는 천구 고리 2개 + 끝 별의 맥박 빛
+    for (const [tilt, sp, c] of [[.6, .9, 0xfff2c0], [-.6, -1.2, 0x9a7bff]]) {
+      const rm = new T3.MeshBasicMaterial({ color: c, transparent: true, opacity: .75, depthWrite: false, blending: T3.AdditiveBlending });
+      const ring = new T3.Mesh(new T3.TorusGeometry(.09, .0025, 6, 48), rm); ring.position.y = -.2; ring.rotation.x = Math.PI / 2 + tilt;
+      ring.onBeforeRender = () => { ring.rotation.z = performance.now() / 1000 * sp; }; g.add(ring);
+    }
+    try { primalShards(g); } catch {}
+    for (const [y, k, c] of [[top + .03, .2, 0xfff2c0], [-.21, .26, 0x9a7bff], [.69, .22, 0xfff2c0]]) {
+      const sm = new T3.SpriteMaterial({ map: sparkTex(), color: c, transparent: true, depthWrite: false, blending: T3.AdditiveBlending });
+      const sp = new T3.Sprite(sm); sp.position.y = y; sp.scale.setScalar(k); sp.onBeforeRender = () => { sm.opacity = .5 + .35 * Math.sin(performance.now() / 260 + y); }; g.add(sp);
+    }
+  }
   return g;
 }
 function rodMesh(id, noReel) { const m = ROD3D.get(id); if (!m) return null; const mesh = new T3.Mesh(m.geo, rodMats(id, noReel)); const au = rodAura(id, m.top); if (au) mesh.add(au); return mesh; }
@@ -9867,7 +10003,8 @@ function loadReelModels() {
     }
     // v1.122 새 릴(심해 · 용궁): 전동 릴 모델에 각자 빛깔을 입혀요
     const base = REEL3D.get("power");
-    if (base) for (const [id, glow] of [["abyss", 0], ["palace", 1]]) { const it = REELS.find(r => r.id === id); if (!it || REEL3D.has(id)) continue; const tint = new T3.Color(it.color);
+    if (base) try { REEL3D.set("primal", buildPrimalReel()); reelMatCache.delete("primal"); } catch (e) { console.warn("primal reel", e); }   // v1.124 종결 릴: 전용 모델
+    for (const [id, glow] of [["abyss", 0], ["palace", 1]]) { const it = REELS.find(r => r.id === id); if (!it || REEL3D.has(id)) continue; const tint = new T3.Color(it.color);
       REEL3D.set(id, { geo: base.geo, size: base.size, parts: base.parts.map((p, k) => { const c = new T3.Color(p.c).lerp(tint, .6); return { ...p, c: "#" + c.getHexString(), ...(glow && k === 0 ? { e: "#" + tint.clone().multiplyScalar(.25).getHexString() } : {}) }; }) }); }
     makeReelPics();
     for (const k of [...iconCache.keys()]) if (k.startsWith("reel|")) iconCache.delete(k);
@@ -9886,7 +10023,28 @@ function reelMats(id) {
   });
   reelMatCache.set(id, arr); return arr;
 }
-function reelMesh(id) { const m = REEL3D.get(id); return m ? new T3.Mesh(m.geo, reelMats(id)) : null; }
+function reelMesh(id) { const m = REEL3D.get(id); if (!m) return null; const mesh = new T3.Mesh(m.geo, reelMats(id)); if (id === "primal") try { mesh.add(primalReelFx()); } catch {} return mesh; }
+function primalReelFx() {   // v1.124 태초 릴: 스풀 둘레 두 궤도를 도는 별 알갱이 + 숨 쉬는 중심 빛
+  const g = new T3.Group(), N = 28, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), c1 = new T3.Color(0xb9a6ff), c2 = new T3.Color(0xfff2c0);
+  const geo = new T3.BufferGeometry(); geo.setAttribute("position", new T3.BufferAttribute(pos, 3)); geo.setAttribute("color", new T3.BufferAttribute(col, 3));
+  const pts = new T3.Points(geo, new T3.PointsMaterial({ size: .022, map: sparkTex(), vertexColors: true, transparent: true, depthWrite: false, blending: T3.AdditiveBlending })); pts.frustumCulled = false;
+  pts.onBeforeRender = () => { const t = performance.now() / 1000;
+    for (let i = 0; i < N; i++) { const o = i % 2, a = t * (o ? 1.3 : -1.0) + i * 2 * Math.PI / N * 2, tilt = o ? .5 : -.5, r = .062, y0 = Math.cos(a) * r, z0 = Math.sin(a) * r;
+      pos[i * 3] = Math.sin(tilt) * y0 * .3; pos[i * 3 + 1] = y0 * Math.cos(tilt); pos[i * 3 + 2] = .012 + z0;
+      const c = o ? c2 : c1, f = .55 + .45 * Math.sin(t * 4 + i); col[i * 3] = c.r * f; col[i * 3 + 1] = c.g * f; col[i * 3 + 2] = c.b * f; }
+    geo.attributes.position.needsUpdate = true; geo.attributes.color.needsUpdate = true; };
+  g.add(pts);
+  const glowM = new T3.SpriteMaterial({ map: sparkTex(), color: 0x9a7bff, transparent: true, depthWrite: false, blending: T3.AdditiveBlending });
+  const glow = new T3.Sprite(glowM); glow.scale.setScalar(.09); glow.position.set(0, 0, .012); glow.onBeforeRender = () => { glowM.opacity = .45 + .25 * Math.sin(performance.now() / 300); };
+  g.add(glow); return g;
+}
+function primalShards(g) {   // v1.124 태초의 낚싯대: 대 둘레를 천천히 도는 수정 조각 6개
+  const mat = phong(0xeef4ff, { transparent: true, opacity: .85 }); mat.emissive = new T3.Color(0x8a70ff); mat.emissiveIntensity = 1;
+  const geo = new T3.OctahedronGeometry(.016); geo.scale(1, 1.8, 1);
+  for (let i = 0; i < 6; i++) { const sh = new T3.Mesh(geo, mat), y0 = .95 + i * .12, ph = i * 1.05;
+    sh.onBeforeRender = () => { const t = performance.now() / 1000, a = ph + t * .7, r = .075 + .01 * Math.sin(t * 1.3 + i); sh.position.set(Math.cos(a) * r, y0 + .03 * Math.sin(t * 1.7 + i), Math.sin(a) * r); sh.rotation.y = t * 2 + i; };
+    sh.frustumCulled = false; g.add(sh); }
+}
 // 상점 · 가방 그림: 릴을 살짝 비틀어 한 장씩 찍어요
 function makeReelPics() {
   try {
@@ -12235,7 +12393,14 @@ function itemIcon(cat, it, size) {
   if (cat === "bait" && BAIT_PIC.has(it.id)) {
     g.drawImage(BAIT_PIC.get(it.id), s * .04, s * .04, s * .92, s * .92);
   } else if (cat === "bait") {
-    if (it.id === "worm") { g.lineCap = "round"; const p = () => { g.beginPath(); for (let i = 0; i <= 30; i++) { const t = i / 30, px = s * .2 + t * s * .6, py = y + Math.sin(t * Math.PI * 2.4) * s * .14; i ? g.lineTo(px, py) : g.moveTo(px, py); } }; p(); g.lineWidth = s * .14; g.strokeStyle = OL; g.stroke(); p(); g.lineWidth = s * .1; g.strokeStyle = "#f08aa0"; g.stroke(); g.fillStyle = "#3a2416"; g.beginPath(); g.arc(s * .79, y - s * .1, s * .02, 0, 7); g.fill(); }
+    if (it.id === "primal") {   // v1.124 태초의 미끼: 별빛 구슬 + 고리 + 바늘
+      const gl = g.createRadialGradient(x, y, s * .02, x, y, s * .36); gl.addColorStop(0, "rgba(200,180,255,.95)"); gl.addColorStop(1, "rgba(120,90,255,0)"); g.fillStyle = gl; g.beginPath(); g.arc(x, y, s * .36, 0, 7); g.fill();
+      const bg2 = g.createRadialGradient(x - s * .06, y - s * .08, s * .02, x, y, s * .22); bg2.addColorStop(0, "#fff8e0"); bg2.addColorStop(.35, "#a68cff"); bg2.addColorStop(1, "#2a1d5c"); g.fillStyle = bg2; g.beginPath(); g.arc(x, y, s * .2, 0, 7); g.fill(); olStroke(g, S2);
+      g.save(); g.translate(x, y); g.rotate(-.35); g.beginPath(); g.ellipse(0, 0, s * .32, s * .08, 0, 0, 7); g.lineWidth = s * .03; g.strokeStyle = "#f4e6b0"; g.stroke(); g.restore();
+      g.fillStyle = "#fff"; for (const [dx, dy, r] of [[-.08, -.06, .025], [.07, .05, .018], [.02, -.11, .012]]) { g.beginPath(); g.arc(x + s * dx, y + s * dy, s * r, 0, 7); g.fill(); }
+      SICON.hook(g, x + s * .2, y + s * .2, S2 * .4);
+    }
+    else if (it.id === "worm") { g.lineCap = "round"; const p = () => { g.beginPath(); for (let i = 0; i <= 30; i++) { const t = i / 30, px = s * .2 + t * s * .6, py = y + Math.sin(t * Math.PI * 2.4) * s * .14; i ? g.lineTo(px, py) : g.moveTo(px, py); } }; p(); g.lineWidth = s * .14; g.strokeStyle = OL; g.stroke(); p(); g.lineWidth = s * .1; g.strokeStyle = "#f08aa0"; g.stroke(); g.fillStyle = "#3a2416"; g.beginPath(); g.arc(s * .79, y - s * .1, s * .02, 0, 7); g.fill(); }
     else if (it.id === "shrimp" || it.id === "krill") {
       const sh = (cx, cy, k, col) => { g.save(); g.translate(cx, cy); g.scale(k, k); g.lineCap = "round";
         for (let i = 0; i < 5; i++) { const a = -1.1 + i * .45; g.beginPath(); g.arc(0, 0, s * .2, a, a + .42); g.lineWidth = s * .13; g.strokeStyle = OL; g.stroke(); g.lineWidth = s * .095; g.strokeStyle = col; g.stroke(); }
@@ -12431,7 +12596,7 @@ function shopPreview(cat, it) {
   if (cat === "rod" && st.own) box.append(rodUpBox(it));
   const cmp = h("div", { class: "cmp" });
   if (cat === "bait") box.append(probBar(it.p), h("div", { class: "plegend" }, it.p.map((v, i) => h("span", { style: "--c:var(" + TIER_VARS[i] + ")", text: TIERS[i].name + " " + v + "%" }))));
-  if (cat === "bait") { const mc = APEX_CHANCE[it.id]; box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: mc ? "🌌 태초 " + (Math.round(mc * 10000) / 100) + "% · 심해에선 ×2, 밤엔 ×1.5, 희귀 축제 땐 ×2까지 올라가요" : "🌌 태초 등급은 이 미끼로는 안 나와요 · 황금 루어와 전설의 미끼만 태초를 노릴 수 있어요" }),
+  if (cat === "bait") { const mc = APEX_CHANCE[it.id]; box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: mc ? "🌌 태초 " + (Math.round(mc * 10000) / 100) + "% · 심해에선 ×2, 밤엔 ×1.5, 희귀 축제 땐 ×2까지 올라가요" : "🌌 태초 등급은 이 미끼로는 안 나와요 · 황금 루어 · 전설의 미끼 · 태초의 미끼만 태초를 노릴 수 있어요" }),
     h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: "위 확률은 기본값이에요. 캐스트를 잘 던지거나 심해 · 이벤트에선 낮은 등급 확률이 위쪽으로 올라가고, 뽑힌 등급의 물고기가 지금 장소 · 시간에 없으면 아래 등급이 나와요." })); }
   if (cat === "rod") { const c0 = curRod(); cmp.append(...cmpRow("🧵 줄 버팀", c0.tens, it.tens, 1.5, v => Math.round(v * 100)), ...cmpRow("채비 칸", c0.slots, it.slots, 3, v => v + "칸"),
     ...cmpRow("점프 버티기", 1 - c0.jump, 1 - it.jump, .9, v => Math.round(v * 100) + "%"), ...cmpRow("몸부림 충격 흡수", c0.calm, it.calm, .3, v => Math.round(v * 100) + "%"), ...cmpRow("빨리 지치게", c0.tire - 1, it.tire - 1, .4, v => "+" + Math.round(v * 100) + "%"));
@@ -12475,7 +12640,7 @@ SHEETS.shop = (body) => {
   const rows = h("div", { class: "ilist" }, list.map(it => {
     const st = itemState(cat, it), locked = itemLocked(it);
     const right = locked ? "Lv." + it.lv : st.using ? "사용 중" : (cat === "bait" || cat === "tackle") ? (st.count ? "보유 " + st.count : (it.price ? won(it.price) + "" : "무료")) : st.own ? "보유" : (it.price ? won(it.price) + "" : "기본");
-    const grade = (cat === "rod" || cat === "reel") && (it.lv || 1) >= 40 ? " g5" : (cat === "rod" || cat === "reel") && (it.lv || 1) >= 20 ? " g4" : cat === "bait" && it.id === "legend" ? " g4" : "";   // 좋은 장비는 빛나요
+    const grade = (cat === "rod" || cat === "reel") && (it.lv || 1) >= 40 ? " g5" : (cat === "rod" || cat === "reel") && (it.lv || 1) >= 20 ? " g4" : cat === "bait" && it.id === "primal" ? " g5" : cat === "bait" && it.id === "legend" ? " g4" : "";   // 좋은 장비는 빛나요
     return h("button", { class: "irow" + grade + (it === sel ? " on" : "") + (locked ? " locked" : ""), onclick: () => { S.shopSel = { cat, id: it.id }; sfx("ui-click", .25); refreshSheet(true); },
       onmouseenter: () => shopHover(cat, it), onmouseleave: () => shopHover(cat, null), onfocus: () => shopHover(cat, it) },
       h("img", { class: "iic", src: itemIcon(cat, it), alt: "" }), h("span", { class: "inm" }, h("b", { text: it.name }), h("small", { text: itemStat(cat, it) })),
