@@ -2204,7 +2204,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.127.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.128.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2816,6 +2816,10 @@ const CLOTHES = [
   { id: "k-cooler", slot: "back", name: "아이스박스", price: 900, desc: "잡은 물고기 신선 보관" },
   { id: "k-cape", slot: "back", name: "빨간 망토", price: 1500, desc: "바닷바람에 펄럭" },
   { id: "k-fish", slot: "back", name: "물고기 인형", price: 1300, desc: "등에 업은 말랑 붕어" },
+  { id: "k-tote", slot: "back", name: "시장 에코백", price: 350, desc: "장 보러 갈 땐 이거 하나면 충분" },
+  { id: "k-backpack", slot: "back", name: "탐험 배낭", price: 1100, color: 0x3f7fbf, desc: "섬 구석구석 다닐 때" },
+  { id: "k-duck", slot: "back", name: "오리 튜브 가방", price: 1600, desc: "물놀이 기분 나는 노란 튜브" },
+  { id: "k-shell", slot: "back", name: "조개 가방", price: 2000, desc: "진주 끈이 달린 분홍 조개" },
   // 새내기 어부 세트 · 출석 이벤트로만 받아요 (ev: 받는 날)
   { id: "h-rookie", slot: "hat", name: "새내기 어부 모자", price: 0, ev: 2, color: 0x2f5d7c, desc: "주황 띠에 물고기 배지 · 출석 2일차" },
   { id: "t-rookie", slot: "top", name: "새내기 어부 조끼", price: 0, ev: 4, color: 0xc9a86a, vest: true, desc: "주머니 넉넉한 낚시 조끼 · 출석 4일차" },
@@ -11681,6 +11685,36 @@ function buildCloth(c, B) {
       const b = mk(new T3.SphereGeometry(.24, 14, 10), cmat(0xff9a3c), 0, 0, 0, g); b.scale.set(1.5, .9, .55);
       const t = mk(new T3.ConeGeometry(.17, .26, 3), cmat(0xff9a3c), -.42, 0, 0, g); t.rotation.z = Math.PI / 2;
       mk(new T3.SphereGeometry(.04, 6, 4), cmat(0x1c1c22), .22, .06, .1, g);
+      break;
+    }
+    case "k-tote": {
+      add(mk(new T3.BoxGeometry(.46, .42, .1), cmat(0xf6efe0), 0, .5, -.4, Rg));
+      add(mk(new T3.BoxGeometry(.46, .1, .11), cmat(0x2f8f5b), 0, .33, -.4, Rg));
+      add(mk(new T3.SphereGeometry(.09, 10, 8), cmat(0xff9a3c), 0, .52, -.46, Rg)).scale.set(1.4, .8, .3);
+      for (const sx of [-1, 1]) add(mk(new T3.TorusGeometry(.09, .016, 6, 12, Math.PI), cmat(0xe8dcc0), sx * .11, .71, -.4, Rg));
+      break;
+    }
+    case "k-backpack": {
+      add(mk(new T3.BoxGeometry(.44, .52, .24), cmat(col), 0, .52, -.44, Rg));
+      add(mk(new T3.BoxGeometry(.46, .15, .26), cmat(0x2a5a8a), 0, .76, -.44, Rg));
+      add(mk(new T3.BoxGeometry(.3, .26, .06), cmat(0x2a5a8a), 0, .44, -.58, Rg));
+      add(mk(new T3.BoxGeometry(.32, .05, .06), cmat(0xf2c230), 0, .58, -.58, Rg));
+      for (const sx of [-1, 1]) add(mk(new T3.BoxGeometry(.05, .5, .04), cmat(0x2a5a8a), sx * .17, .58, .3, Rg)).rotation.x = -.15;
+      break;
+    }
+    case "k-duck": {
+      add(mk(new T3.TorusGeometry(.26, .11, 10, 20), cmat(0xffd23e), 0, .55, -.46, Rg));
+      add(mk(new T3.SphereGeometry(.11, 12, 10), cmat(0xffe066), .16, .8, -.46, Rg));
+      const bk = add(mk(new T3.ConeGeometry(.05, .12, 8), cmat(0xff8c1a), .27, .78, -.46, Rg)); bk.rotation.z = -Math.PI / 2;
+      add(mk(new T3.SphereGeometry(.02, 6, 4), cmat(0x1c1c22), .2, .84, -.36, Rg));
+      break;
+    }
+    case "k-shell": {
+      add(mk(new T3.SphereGeometry(.26, 16, 12), cmat(0xf6b8c8), 0, .52, -.44, Rg)).scale.set(1.1, .95, .5);
+      add(mk(new T3.SphereGeometry(.26, 16, 12), cmat(0xfdeef2), 0, .55, -.42, Rg)).scale.set(.92, .78, .42);
+      for (const dx of [-0.12, 0, .12]) add(mk(new T3.BoxGeometry(.02, .3, .02), cmat(0xe88aa5), dx, .52, -.56, Rg)).rotation.z = dx * 1.4;
+      add(mk(new T3.BoxGeometry(.1, .05, .04), cmat(0xf2c230), 0, .76, -.5, Rg));
+      add(mk(new T3.TorusGeometry(.3, .018, 6, 20, Math.PI), cmat(0xffffff), 0, .84, -.1, Rg)).rotation.x = Math.PI / 2;
       break;
     }
   }
