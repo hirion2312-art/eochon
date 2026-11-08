@@ -2031,6 +2031,7 @@ body.titling .martcart{display:none}
 .fm-stamp{position:absolute;right:12px;top:10px;padding:4px 10px;border:2.5px solid #c0392b;border-radius:8px;color:#c0392b;font-weight:900;font-size:12px;transform:rotate(8deg);opacity:.85}
 .fm-minibox{display:flex;flex-direction:column;gap:6px;align-items:center}.fm-minibox small{font-size:11px;color:var(--muted);text-align:center;line-height:1.4}
 .fm-mini{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;width:100%;aspect-ratio:1;padding:6px;border-radius:10px;background:#8fae5a}
+.rup-pips{display:flex;gap:5px;margin:4px 0}.rup-pips i{flex:1;height:8px;border-radius:4px;background:rgba(127,127,127,.25)}.rup-pips i.on{background:linear-gradient(90deg,#f2c230,#ff8a3c)}
 .fm-mini i{border-radius:3px;background:rgba(255,255,255,.18)}.fm-mini i.own{background:#a8c86a}.fm-mini i.till{background:#6b4a2e}.fm-mini i.grow{background:#4f9a3f}.fm-mini i.wet{box-shadow:inset 0 0 0 2px #7fc8f0}.fm-mini i.ready{background:#f2c230}
 .fm-steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .fm-step{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg)}
@@ -2199,7 +2200,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.122.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.123.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2212,7 +2213,7 @@ const BAITS = [
   { id: "paste",  name: "특제 떡밥",  price: 50,   p: [38, 33, 19, 6, 3, 1, 0, 0, 0], lv: 3, desc: "비법 반죽 떡밥이에요. 희귀 이상이 네 번에 한 번꼴로 물어요." },
   { id: "squid",  name: "생오징어",   price: 120,  p: [26, 30, 26, 10, 5, 2.4, .6, 0, 0], lv: 6, desc: "싱싱한 오징어예요. 영웅급이 제법 나오는 대물 미끼예요." },
   { id: "lure",   name: "황금 루어",  price: 300,  p: [18, 27, 28, 14, 7, 4, 1.6, .4, 0], lv: 9, desc: "금빛으로 번쩍여 대물을 부르고, 아주 가끔 신화급도 물어요." },
-  { id: "legend", name: "전설의 미끼", price: 2000, p: [0, 8, 32, 24, 17, 11, 5.4, 2, .6], lv: 16, desc: "전설 그 자체예요. 일반 물고기는 절대 안 물어요." },
+  { id: "legend", name: "전설의 미끼", price: 1500, p: [0, 8, 32, 24, 17, 11, 5.4, 2, .6], lv: 16, desc: "전설 그 자체예요. 일반 물고기는 절대 안 물어요." },
 ];
 const APEX_CHANCE = { lure: .001, legend: .004 };   // 태초 등급(최상위) 확률 · 상점 설명에도 이 숫자를 그대로 보여요
 const RELEASE = [   // v1.106.1 후원 방류권: 최대 5만원 · 금액(1 : 5 : 10 : 50)만큼 등급 · 크기를 크게 벌렸어요 · 번호(0~3)는 예전 방류권과 같아요
@@ -2727,7 +2728,7 @@ const RODS = [
   { id: "abyss", name: "심해의 낚싯대", price: 50000, lv: 32, tens: 1.42, slots: 3, color: 0x23356e, desc: "심해의 거물과 겨루는 낚싯대예요. 채비 3칸." },
   { id: "palace", name: "용궁 낚싯대", price: 90000, lv: 40, tens: 1.46, slots: 3, color: 0x3fd6cc, desc: "용궁에서 내려왔다는 옥빛 낚싯대예요. 채비 3칸." },
   { id: "myth", name: "신화의 낚싯대", price: 150000, lv: 48, tens: 1.5, slots: 3, color: 0xe57aa8, desc: "신화 속 물고기도 버텨 내는 마지막 낚싯대예요. 채비 3칸." },
-  { id: "merchant", name: "장사꾼의 낚싯대", price: 60000, lv: 24, tens: 1.32, slots: 2, color: 0x0d4042, desc: "포차 사장님들의 비장의 낚싯대예요. 등급 하나와 원하는 물고기 세 종을 골라 두면, 그 등급이 뜰 땐 골라 둔 물고기만 노려요. 태초급 같은 큰 욕심은 안 부려요 — 장사는 확실한 것만 잡는 거예요." },
+  { id: "merchant", name: "장사꾼의 낚싯대", price: 30000, lv: 24, tens: 1.32, slots: 2, color: 0x0d4042, desc: "포차 사장님들의 비장의 낚싯대예요. 등급 하나와 원하는 물고기 세 종을 골라 두면, 그 등급이 뜰 땐 골라 둔 물고기만 노려요. 태초급 같은 큰 욕심은 안 부려요 — 장사는 확실한 것만 잡는 거예요." },
 ].sort((a, b) => a.lv - b.lv);
 /* 낚싯대 특성 (v1.27): 비쌀수록 확실히 좋아져요
    jump = 점프할 때 감고 있으면 바늘이 빠질 확률 배율(1 = 40%) · calm = 몸부림 때 줄에 걸리는 장력 줄이기(충격 흡수) · tire = 물고기가 지치는 속도 */
@@ -2736,17 +2737,26 @@ const ROD_PERK = {
   iridium: [.5, .14, 1.16], titan: [.45, .16, 1.19], obsidian: [.4, .18, 1.22], legend: [.32, .21, 1.26], abyss: [.26, .24, 1.3], palace: [.2, .27, 1.34], myth: [.12, .3, 1.4], merchant: [.42, .17, 1.21],
 };
 for (const r of RODS) { const [jump, calm, tire] = ROD_PERK[r.id] || [1, 0, 1]; Object.assign(r, { jump, calm, tire }); }
+/* v1.122 낚싯대 강화 +1~+5: 단계마다 낚싯대 강도 +3% (드랙도 같이 세져요) · 비용 = 낚싯대 값 × 비율 (대나무는 최소 500원 기준) */
+const ROD_UP_MAX = 5, ROD_UP_COST = [.25, .35, .5, .7, 1];
+const rodUpLv = (id) => (P && P.rodUp && P.rodUp[id]) | 0;
+const rodUpCost = (r, n) => Math.round(Math.max(50, r.price) * ROD_UP_COST[n] / 10) * 10;
 const rodPerkText = (r) => r.id === "bamboo" ? "특별한 효과 없음" : "점프 때 바늘 빠짐 -" + Math.round((1 - r.jump) * 100) + "% · 몸부림 충격 -" + Math.round(r.calm * 100) + "% · 물고기가 " + Math.round((r.tire - 1) * 100) + "% 빨리 지쳐요";
 const REELS = [
-  { id: "basic", name: "기본 릴", price: 0, lv: 1, heat: 1, cool: .12, speed: 2.2, color: 0x8a8f96, desc: "처음 받은 릴이에요. 무난하지만 큰 물고기와는 오래 싸우기 버거워요" },
-  { id: "spin", name: "스피닝 릴", price: 1500, lv: 3, heat: .86, cool: .15, speed: 2.45, color: 0x2a78bb, desc: "과열이 천천히 쌓이고 조금 빨리 감겨요" },
-  { id: "bait", name: "베이트 릴", price: 6000, lv: 10, heat: .72, cool: .19, speed: 2.7, color: 0xe2522c, desc: "과열에 강하고 잘 식어요. 큰 물고기와 오래 싸울 때 좋아요" },
-  { id: "power", name: "전동 릴", price: 18000, lv: 20, heat: .62, cool: .23, speed: 3.3, color: 0xf2c230, desc: "모터가 감아 줘요. 가장 빠르고 가장 잘 식는 최고급 릴이에요" },
+  { id: "basic", name: "기본 릴", price: 0, lv: 1, heat: 1, cool: .12, speed: 2.2, len: 60, color: 0x8a8f96, desc: "처음 받은 릴이에요. 무난하지만 큰 물고기와는 오래 싸우기 버거워요" },
+  { id: "spin", name: "스피닝 릴", price: 1500, lv: 3, heat: .86, cool: .15, speed: 2.45, len: 70, color: 0x2a78bb, desc: "과열이 천천히 쌓이고 조금 빨리 감겨요" },
+  { id: "bait", name: "베이트 릴", price: 6000, lv: 10, heat: .72, cool: .19, speed: 2.7, len: 85, color: 0xe2522c, desc: "과열에 강하고 잘 식어요. 큰 물고기와 오래 싸울 때 좋아요" },
+  { id: "power", name: "전동 릴", price: 18000, lv: 20, heat: .62, cool: .23, speed: 3.3, len: 100, color: 0xf2c230, desc: "모터가 감아 줘요. 빠르고 잘 식는 고급 릴이에요" },
+  // v1.122 최상위 릴: 줄이 길수록(len) 물고기가 멀리 도망가도 버텨요
+  { id: "abyss", name: "심해 릴", price: 45000, lv: 35, heat: .55, cool: .27, speed: 3.6, len: 115, color: 0x23356e, desc: "심해 지깅용 대형 전동 릴이에요. 줄 115m · 신화급과 오래 싸워도 잘 버텨요" },
+  { id: "palace", name: "용궁 릴", price: 100000, lv: 50, heat: .48, cool: .31, speed: 4.0, len: 125, color: 0x3fd6cc, desc: "용궁 장인이 만든 옥빛 릴이에요. 줄 125m · 가장 빠르고 가장 잘 식어요" },
 ];
 const LINES = [
   { id: "nylon", name: "나일론 줄", price: 0, lv: 1, add: 0, color: "#e9e4d8", desc: "처음 받은 기본 낚싯줄이에요" },
   { id: "carbon", name: "카본 줄", price: 1200, lv: 4, add: .08, color: "#7fd6e0", desc: "끊어지기 전까지 8% 더 버텨요. 가성비가 좋아요" },
-  { id: "pe", name: "합사", price: 5000, lv: 14, add: .16, color: "#ff8a3c", desc: "여러 가닥을 꼰 가장 질긴 줄이에요. 16% 더 버텨요" },
+  { id: "fluoro", name: "플로로카본 줄", price: 2800, lv: 9, add: .12, color: "#b9e6ff", desc: "물속에서 잘 안 보이는 단단한 줄이에요. 12% 더 버텨요" },
+  { id: "pe", name: "합사", price: 5000, lv: 14, add: .16, color: "#ff8a3c", desc: "여러 가닥을 꼰 질긴 줄이에요. 16% 더 버텨요" },
+  { id: "dragon", name: "용궁 합사", price: 30000, lv: 40, add: .24, color: "#3fd6cc", desc: "용의 수염을 꼬았다는 옥빛 합사예요. 24% 더 버텨요 · 가장 질긴 줄" },
 ];
 const TACKLES = [
   { id: "spinner", name: "스피너", price: 500, desc: "입질이 15% 빨리 와요. 기다리는 시간이 줄어요" },
@@ -2757,6 +2767,8 @@ const TACKLES = [
   { id: "lamp", name: "집어등", price: 900, lv: 8, desc: "밤에만 켜져요. 밤 입질이 30% 빨리 와요" },
   { id: "swivel", name: "회전 도래", price: 1200, lv: 6, desc: "몸부림 때 줄에 걸리는 충격 -25%. 영웅 이상 대물에게 줄이 덜 끊겨요" },
   { id: "shock", name: "쇼크 리더", price: 1500, lv: 10, desc: "줄이 끊기기 전까지 버티는 힘 +8%. 질긴 목줄이에요" },
+  { id: "circle", name: "대물 서클훅", price: 3000, lv: 18, desc: "둥근 대물 바늘이에요. 물고기 체력 -10% · 점프 때 바늘 빠짐 -50%" },
+  { id: "wire", name: "와이어 목줄", price: 4000, lv: 22, desc: "이빨 센 대물용 쇠줄 목줄이에요. 줄 강도 +12% (드랙도 함께 세져요)" },
 ];
 const TOOLS = [
   { id: "net", name: "뜰채", price: 2500, lv: 5, desc: "물고기를 거의 다 당겼을 때, 남은 거리 3m부터 바로 건져 올려요. 파이팅을 짧게 끝내요" },
@@ -3038,20 +3050,20 @@ const restAgeDays = () => Math.max(0, Math.round((Date.parse(kstDay()) - Date.pa
 const restLvAgeDays = () => Math.max(0, Math.round((Date.parse(kstDay()) - Date.parse(P.rest.lvAt || P.rest.start || kstDay())) / 864e5));   // 마지막 승급 뒤 며칠
 function restDay() { const d = kstDay(); if (!P.rest.day || P.rest.day.d !== d) { if (P.rest.day) restSettle({ ...P.rest.day, open: P.rest.day.tickets > 0 }); P.rest.day = { d, sales: 0, plates: 0, tips: 0, tickets: 0, perfect: 0 }; } return P.rest.day; }
 
-/* 작물 목록 (v1.121 · 자세한 농사 동작은 아래 「낭만 농장」 칸) */
+/* 작물 목록 (v1.121 · 자세한 농사 동작은 아래 「낭만 농장」 칸) · v1.122: 납품가 상향 (Lv.1~3 ×4, Lv.4~5는 단계가 오를수록 시간당 더 벌게) */
 const CROPS = [
-  { id: "lettuce", name: "상추", lv: 1, seed: 3, grow: 30, price: 10, shape: "leafy", c1: 0x6fbf4a, c2: 0x9ad86a },
-  { id: "radish", name: "무", lv: 1, seed: 4, grow: 60, price: 16, shape: "root", c1: 0xf4f1ea, c2: 0x5aa83a },
-  { id: "leek", name: "대파", lv: 1, seed: 3, grow: 45, price: 12, shape: "stalk", c1: 0xeef4e2, c2: 0x3f9a3a },
-  { id: "cabbage", name: "배추", lv: 2, seed: 8, grow: 120, price: 34, shape: "leafy", c1: 0x8fcf6a, c2: 0xe8f0c8, big: true },
-  { id: "potato", name: "감자", lv: 2, seed: 6, grow: 90, price: 24, shape: "bush", c1: 0xb8935a, c2: 0x4f9a3f },
-  { id: "pepper", name: "고추", lv: 2, seed: 9, grow: 150, price: 40, shape: "fruitbush", c1: 0xd8382c, c2: 0x3f8a3a },
-  { id: "strawberry", name: "딸기", lv: 3, seed: 15, grow: 180, price: 70, shape: "fruitbush", c1: 0xe8344a, c2: 0x4fa83f, low: true },
-  { id: "tomato", name: "토마토", lv: 3, seed: 12, grow: 150, price: 55, shape: "fruitbush", c1: 0xe8442c, c2: 0x3f8a3a, tall: true },
-  { id: "chamoe", name: "참외", lv: 4, seed: 25, grow: 240, price: 120, shape: "melon", c1: 0xf2c230, c2: 0xf8e8a0 },
-  { id: "watermelon", name: "수박", lv: 4, seed: 35, grow: 360, price: 180, shape: "melon", c1: 0x2f8a3a, c2: 0x1d5a26, big: true },
-  { id: "goldmelon", name: "황금수박", lv: 5, seed: 80, grow: 480, price: 520, shape: "melon", c1: 0xf2c230, c2: 0xc8901a, big: true },
-  { id: "ginseng", name: "인삼", lv: 5, seed: 120, grow: 600, price: 800, shape: "ginseng", c1: 0xe8d0a0, c2: 0x3f7a3a },
+  { id: "lettuce", name: "상추", lv: 1, seed: 3, grow: 30, price: 40, shape: "leafy", c1: 0x6fbf4a, c2: 0x9ad86a },
+  { id: "radish", name: "무", lv: 1, seed: 4, grow: 60, price: 64, shape: "root", c1: 0xf4f1ea, c2: 0x5aa83a },
+  { id: "leek", name: "대파", lv: 1, seed: 3, grow: 45, price: 48, shape: "stalk", c1: 0xeef4e2, c2: 0x3f9a3a },
+  { id: "cabbage", name: "배추", lv: 2, seed: 8, grow: 120, price: 136, shape: "leafy", c1: 0x8fcf6a, c2: 0xe8f0c8, big: true },
+  { id: "potato", name: "감자", lv: 2, seed: 6, grow: 90, price: 96, shape: "bush", c1: 0xb8935a, c2: 0x4f9a3f },
+  { id: "pepper", name: "고추", lv: 2, seed: 9, grow: 150, price: 160, shape: "fruitbush", c1: 0xd8382c, c2: 0x3f8a3a },
+  { id: "strawberry", name: "딸기", lv: 3, seed: 15, grow: 180, price: 280, shape: "fruitbush", c1: 0xe8344a, c2: 0x4fa83f, low: true },
+  { id: "tomato", name: "토마토", lv: 3, seed: 12, grow: 150, price: 220, shape: "fruitbush", c1: 0xe8442c, c2: 0x3f8a3a, tall: true },
+  { id: "chamoe", name: "참외", lv: 4, seed: 25, grow: 240, price: 450, shape: "melon", c1: 0xf2c230, c2: 0xf8e8a0 },
+  { id: "watermelon", name: "수박", lv: 4, seed: 35, grow: 360, price: 700, shape: "melon", c1: 0x2f8a3a, c2: 0x1d5a26, big: true },
+  { id: "goldmelon", name: "황금수박", lv: 5, seed: 80, grow: 480, price: 1100, shape: "melon", c1: 0xf2c230, c2: 0xc8901a, big: true },
+  { id: "ginseng", name: "인삼", lv: 5, seed: 120, grow: 600, price: 1500, shape: "ginseng", c1: 0xe8d0a0, c2: 0x3f7a3a },
 ];
 const CROP = Object.fromEntries(CROPS.map(c => [c.id, c]));
 /* 놀거리 목록 (v1.113 · 자세한 동작은 아래 「놀거리」 칸) */
@@ -3086,6 +3098,7 @@ function normProfile(p) {
   o.crops = {}; if (p.crops && typeof p.crops === "object") for (const c of CROPS) { const v = p.crops[c.id]; if (Array.isArray(v)) o.crops[c.id] = [clamp(Math.floor(Number(v[0]) || 0), 0, 9999), clamp(Math.floor(Number(v[1]) || 0), 0, 9999)]; }
   o.seeds = {}; if (p.seeds && typeof p.seeds === "object") for (const c of CROPS) { const v = Math.floor(Number(p.seeds[c.id]) || 0); if (v > 0) o.seeds[c.id] = Math.min(999, v); }
   o.fert = clamp(Math.floor(Number(p.fert) || 0), 0, 999); o.martStamp = clamp(Math.floor(Number(p.martStamp) || 0), 0, 1e6);
+  o.localDay = p.localDay && typeof p.localDay === "object" ? { d: str(p.localDay.d, 10), n: clamp(Math.floor(Number(p.localDay.n) || 0), 0, 1e5), v: clamp(Math.floor(Number(p.localDay.v) || 0), 0, 1e7) } : null;   // v1.122: 새로고침해도 납품 한도 유지
   o.salt = clamp(Math.floor(Number(p.salt) || 0), 0, 99); o.mudDex = p.mudDex && typeof p.mudDex === "object" ? p.mudDex : {}; o.mudDay = p.mudDay && typeof p.mudDay === "object" ? { d: str(p.mudDay.d, 10), n: clamp(Math.floor(Number(p.mudDay.n) || 0), 0, 999) } : null;
   o.npcSales = p.npcSales && typeof p.npcSales === "object" ? { day: str(p.npcSales.day, 10), n: clamp(Math.floor(Number(p.npcSales.n) || 0), 0, 999) } : { day: "", n: 0 };
   o.shop = normShop(p.shop);
@@ -3096,7 +3109,9 @@ function normProfile(p) {
   o.lines = (Array.isArray(p.lines) ? p.lines : []).filter(id => LINES.some(r => r.id === id)); if (!o.lines.includes("nylon")) o.lines.unshift("nylon");
   o.line = o.lines.includes(p.line) ? p.line : "nylon";
   o.tools = {}; if (p.tools && typeof p.tools === "object") for (const t of TOOLS) if (p.tools[t.id]) o.tools[t.id] = true;
+  o.rodUp = {}; if (p.rodUp && typeof p.rodUp === "object") for (const r of RODS) { const n = Math.floor(Number(p.rodUp[r.id]) || 0); if (n > 0 && o.rods.includes(r.id)) o.rodUp[r.id] = Math.min(ROD_UP_MAX, n); }   // v1.122 낚싯대 강화
   o.xp = clamp(Math.floor(Number(p.xp) || 0), 0, 1e8);
+  o.xpv = 2; if (!(Number(p.xpv) >= 2) && o.xp > 0) { const { old, cur } = xpTables(); let lv = 1; while (lv < 100 && o.xp >= old[lv + 1]) lv++; o.xp = Math.max(o.xp, cur[lv]); }   // v1.122 레벨 곡선 변경: 예전 레벨 지키기
   o.stats = {}; if (p.stats && typeof p.stats === "object") for (const [k, v] of Object.entries(p.stats)) if (/^[a-zA-Z0-9]{1,20}$/.test(k)) o.stats[k] = clamp(Math.floor(Number(v) || 0), 0, 1e9);
   o.ach = {}; if (p.ach && typeof p.ach === "object") for (const [k, v] of Object.entries(p.ach)) if (v && typeof v === "object") o.ach[k] = { t: Number(v.t) || 0, c: !!v.c };
   o.title = str(p.title, 16);
@@ -3896,8 +3911,17 @@ function drawCoach() {
    물고기를 낚거나 조개를 캐면 경험치. 레벨이 오르면 상점의 좋은 장비가 열림 */
 const LV_MAX = 100;
 /* 레벨 곡선 (v1.63): 50까지는 예전 공식 그대로라 누구 레벨도 내려가지 않아요 · 51부터는 한 칸 오를 때마다
-   필요한 경험치가 9%씩 불어나요 (50→51은 571, 99→100은 39,000 · Lv.100까지 누적 482,631) */
-const XP_TABLE = (() => { const base = (lv) => Math.round(40 * Math.pow(Math.max(0, lv - 1), 1.55)); const t = []; for (let l = 0; l <= LV_MAX; l++) t[l] = base(l); let step = t[50] - t[49]; for (let l = 51; l <= LV_MAX; l++) { step = Math.round(step * 1.09); t[l] = t[l - 1] + step; } return t; })();
+   필요한 경험치가 불어나요 (v1.122 표는 아래 xpTables 주석) */
+/* v1.122: Lv.25부터 더 가파르게 (+200 × (레벨-25)^1.9) · 51부터는 칸마다 4.5%씩 — 마지막 낚싯대(Lv.48)까지 약 25~30시간.
+   이미 오른 레벨은 내려가지 않아요: 처음 불러올 때 예전 표 기준 레벨을 지키도록 경험치를 채워 줘요 (normProfile · xpv 2) */
+function xpTables() {
+  const MAX = 100, base = (lv) => Math.round(40 * Math.pow(Math.max(0, lv - 1), 1.55)), old = [], cur = [];
+  for (let l = 0; l <= MAX; l++) { old[l] = base(l); cur[l] = base(l) + (l > 25 ? Math.round(200 * Math.pow(l - 25, 1.9)) : 0); }
+  let so = old[50] - old[49], sc = cur[50] - cur[49];
+  for (let l = 51; l <= MAX; l++) { so = Math.round(so * 1.09); old[l] = old[l - 1] + so; sc = Math.round(sc * 1.045); cur[l] = cur[l - 1] + sc; }
+  return { old, cur };
+}
+const XP_TABLE = xpTables().cur;
 const xpNeed = (lv) => XP_TABLE[clamp(Math.floor(lv) || 0, 0, LV_MAX)];
 /* ---------- 운영자 실험실 (v1.64): 이 기기에만 저장되는 테스트 설정 · 소비 지점에서 S.isOwner일 때만 적용돼요 ---------- */
 const LAB = { fish: lsGet("mn.lab.fish2", 1), xp: lsGet("mn.lab.xp", 1), move: lsGet("mn.lab.move", 1), time: lsGet("mn.lab.time", -1),
@@ -4035,7 +4059,8 @@ function ensureQuests() {
   while (list.length < 3 && pool.length) {
     const q = pool.splice(Math.floor(next() * pool.length), 1)[0];
     const i = Math.floor(next() * q.needs.length);
-    list.push({ kind: q.kind, need: q.needs[i], reward: q.rewards[i], have: 0, claimed: false });
+    const lm = 1 + Math.min(myLv(), 60) / 10;   // v1.122: 레벨이 오를수록 사례금도 커져요 (Lv.30이면 4배 · Lv.60 이상 7배)
+    list.push({ kind: q.kind, need: q.kind === "sell" ? Math.round(q.needs[i] * lm) : q.needs[i], reward: Math.round(q.rewards[i] * lm / 10) * 10, have: 0, claimed: false });
   }
   P.quests = { day, list };
   markDirty();
@@ -4230,10 +4255,11 @@ function missFish(r, msg) {
 function luckProbs(p, extra) {
   const L = buffVal("luck") + (extra || 0); if (!L) return p;
   const q = p.slice(); let lo = q.findIndex(v => v > 0);
-  if (lo < 0 || lo === 4) return q;
+  if (lo < 0 || lo >= q.length - 1) return q;
+  // v1.122: 가장 낮은 등급에서 덜어 낸 몫을 위의 모든 등급(초월까지)에 비율대로 나눠요 — 예전엔 영웅까지만 올라서 배 · 축제가 신화에 효과가 없었어요
   const take = Math.min(L, q[lo]); q[lo] -= take;
   const rest = q.slice(lo + 1).reduce((a, b) => a + b, 0);
-  for (let i = lo + 1; i < 5; i++) q[i] += rest ? take * q[i] / rest : (i === lo + 1 ? take : 0);
+  for (let i = lo + 1; i < q.length; i++) q[i] += rest ? take * q[i] / rest : (i === lo + 1 ? take : 0);
   return q;
 }
 /* 개체 고유 크기: 종마다 기준 크기가 있고, 개체마다 배율이 자유분방하게 달라짐 (등급과 무관). 클수록 값이 많이 오름 */
@@ -4337,19 +4363,22 @@ function landFish(r, perfect, auto) {
    · 줄이 끌려 나가는 동안 과열이 쌓이고, 특히 돌진할 때 감으면 확 뜨거워짐. 과열이 가득 찬 채 0.8초 → 끊김
    · 물고기: 유영 → 돌진 · 점프 · 잠수 → 지침. 지쳤을 때 감는 게 승부처. 점프할 때 감고 있으면 바늘이 빠질 수 있음 */
 const REEL = { on: false };
-const DRAG = [.35, .5, .65, .8, .95];
-/* 등급별 손맛: 높을수록 힘 · 체력 · 거리 · 돌진이 크게 늘고, 영웅 이상은 「몸부림」(약한 장비로는 버티기 어려운 순간 힘)이 와요 */
+/* v1.122 드랙: 5칸의 비율 × 장비의 최대 드랙(줄 강도의 90%, 최소 0.95) — 좋은 낚싯대 · 줄일수록 대물을 버텨요 (예전엔 최고 장비도 0.95에서 막혔어요) */
+const DRAG = [.37, .53, .68, .84, 1];
+const dragLim = (g, d) => (g.dragMax || .95) * DRAG[clamp(d, 1, 5) - 1];
+/* v1.122: 영웅 이상 힘(p)을 올렸어요 — 드랙이 장비를 따라 세진 만큼, 장비 단계마다 잡히는 등급이 자연스럽게 올라가요
+   등급별 손맛: 높을수록 힘 · 체력 · 거리 · 돌진이 크게 늘고, 영웅 이상은 「몸부림」(약한 장비로는 버티기 어려운 순간 힘)이 와요 */
 const TIER_FIGHT = [
   { p: .27, s: 4, dist: 8, run: .6, boost: .03, regen: .01, rage: 0, rageF: 0 },
   { p: .48, s: 9, dist: 12, run: .95, boost: .14, regen: .02, rage: 0, rageF: 0 },
   { p: .64, s: 16, dist: 16, run: 1.2, boost: .24, regen: .035, rage: .05, rageF: .98 },
   { p: .8, s: 26, dist: 20, run: 1.35, boost: .32, regen: .05, rage: .11, rageF: 1.17 },
-  { p: .95, s: 38, dist: 24, run: 1.5, boost: .38, regen: .065, rage: .2, rageF: 1.36 },
-  { p: 1.0, s: 40, dist: 26, run: 1.5, boost: .4, regen: .07, rage: .22, rageF: 1.46 },
-  { p: 1.0, s: 48, dist: 30, run: 1.6, boost: .44, regen: .08, rage: .28, rageF: 1.55 },
-  { p: 1.0, s: 58, dist: 34, run: 1.72, boost: .48, regen: .09, rage: .35, rageF: 1.66 },
-  { p: 1.0, s: 72, dist: 39, run: 1.85, boost: .53, regen: .105, rage: .43, rageF: 1.78 },
-  { p: 1.0, s: 90, dist: 45, run: 2.0, boost: .58, regen: .12, rage: .52, rageF: 1.92 },
+  { p: 1.65, s: 38, dist: 24, run: 1.5, boost: .38, regen: .065, rage: .2, rageF: 1.36 },
+  { p: 1.95, s: 40, dist: 26, run: 1.5, boost: .4, regen: .07, rage: .22, rageF: 1.46 },
+  { p: 2.25, s: 48, dist: 30, run: 1.6, boost: .44, regen: .08, rage: .28, rageF: 1.55 },
+  { p: 3.4, s: 58, dist: 34, run: 1.72, boost: .48, regen: .09, rage: .35, rageF: 1.66 },
+  { p: 4.0, s: 72, dist: 39, run: 1.85, boost: .53, regen: .105, rage: .43, rageF: 1.78 },
+  { p: 3.5, s: 90, dist: 45, run: 2.0, boost: .58, regen: .12, rage: .52, rageF: 1.92 },
 ];
 const FIGHT_MSG = { rage: "몸부림! 지금은 무조건 손을 떼요", cruise: "천천히 감아요", run: "돌진! 무리하게 감지 마세요", jump: "점프! 손을 떼요", dive: "잠수하며 버티는 중", tired: "지쳤어요 · 지금 감아요!" };
 const STATE_W = { dart: { run: .45, jump: .25, dive: .05, cruise: .25 }, smooth: { run: .35, jump: .05, dive: .1, cruise: .5 }, sinker: { run: .25, jump: .02, dive: .45, cruise: .28 }, floater: { run: .2, jump: .38, dive: .02, cruise: .4 }, mixed: { run: .33, jump: .15, dive: .15, cruise: .37 } };
@@ -4360,9 +4389,10 @@ function gearStats(ov) {
   ov = ov || {};
   const rod = (ov.rod && RODS.find(r => r.id === ov.rod)) || curRod(), reel = (ov.reel && REELS.find(r => r.id === ov.reel)) || curReel(), line = (ov.line && LINES.find(r => r.id === ov.line)) || curLine();
   const tk = (id) => ov.tackles ? ov.tackles.includes(id) : hasTackle(id);
-  return { lineMax: rod.tens + line.add + (tk("shock") ? .08 : 0), heatMul: reel.heat * (tk("trap") ? .8 : 1), cool: reel.cool, speed: reel.speed,
-    lead: tk("lead"), barbed: tk("barbed"), stamMul: tk("cork") ? .85 : 1, landAt: P.tools.net ? 3 : 1.2,
-    jump: rod.jump == null ? 1 : rod.jump, calm: Math.min(.45, (rod.calm || 0) + (tk("swivel") ? .25 : 0)), tire: rod.tire || 1 };
+  const up = 1 + .03 * rodUpLv(rod.id), lineMax = (rod.tens * up + line.add + (tk("shock") ? .08 : 0) + (tk("wire") ? .12 : 0));
+  return { lineMax, dragMax: Math.max(.95, lineMax * .9), far: reel.len || 60, heatMul: reel.heat * (tk("trap") ? .8 : 1), cool: reel.cool, speed: reel.speed,
+    lead: tk("lead"), barbed: tk("barbed"), stamMul: (tk("cork") ? .85 : 1) * (tk("circle") ? .9 : 1), landAt: P.tools.net ? 3 : 1.2,
+    jump: (rod.jump == null ? 1 : rod.jump) * (tk("circle") ? .5 : 1), calm: Math.min(.45, (rod.calm || 0) + (tk("swivel") ? .25 : 0)), tire: rod.tire || 1 };
 }
 /* 손맛 싸움 시작 상태 (화면과 따로 · 시뮬레이션도 같이 씀) */
 function reelInit(r, opts, g) {
@@ -4370,7 +4400,7 @@ function reelInit(r, opts, g) {
   const tf = TIER_FIGHT[r.f.tier] || TIER_FIGHT[0], dn = clamp(diff / 130, 0, 1);
   const P0 = tf.p * (.9 + dn * .2) * (coop ? 1.08 : 1);
   const S0 = tf.s * (.85 + dn * .3) * (coop ? 1.2 : 1) * g.stamMul;
-  if (coop) g.lineMax *= .96;
+  if (coop) { g.lineMax *= .96; g.dragMax *= .96; }
   const dist = tf.dist + Math.random() * 4;
   return { on: true, r, coop, g, type, tf, rage: 0, P: P0, S0, dist, dist0: dist, stam: 1, heat: 0, maxHeat: 0, tension: .3, F: .3,
     st: "run", stT: 1.1, runBoost: .1, jumpChecked: false, hold: false, drag: S.autoDrag ? 3 : S.drag, lineOut: 0, overT: 0, shook: false,
@@ -4416,21 +4446,22 @@ function fightStep(dt, R) {
   const F = st === "rage" ? R.tf.rageF * (.8 + .2 * R.stam) : st === "run" ? P0 * (1 + R.runBoost) : st === "dive" ? P0 * .82 * (g.lead ? .8 : 1) : st === "jump" ? P0 * .5 : st === "tired" ? P0 * .25 : P0 * .38;
   R.F += (F - R.F) * Math.min(1, dt * 6);
   // 자동 드랙: 감는 힘까지 버티는 가장 약한 칸 (v1.27: 예전엔 살짝 모자란 칸을 골라 지친 물고기를 감아도 줄이 조금씩 풀려 제자리걸음을 했어요)
-  if (R.sim || S.autoDrag) { const need = R.F + (R.hold ? .3 : 0); let d = 1; while (d < 5 && DRAG[d - 1] < need + .01) d++; R.drag = d; }
-  const lim = DRAG[R.drag - 1], raw = R.F + (R.hold ? .3 : 0);
+  if (R.sim || S.autoDrag) { const need = R.F + (R.hold ? .3 : 0); let d = 1; while (d < 5 && dragLim(g, d) < need + .01) d++; R.drag = d; }
+  const lim = dragLim(g, R.drag), raw = R.F + (R.hold ? .3 : 0);
   let out = 0;
   if (raw > lim) {
     out = (raw - lim) * 6;
-    R.tension = lim + (raw - lim) * .25;
+    R.tension = lim + (raw - lim) * .12;   // v1.122: .25 → .12 · 힘이 드랙을 넘으면 줄이 풀려 나가며 충격을 흡수해요 (시작하자마자 끊기던 문제)
     R.heat += (out * .045 + (R.hold ? .25 : 0)) * g.heatMul * (st === "rage" ? 1 - g.calm : 1) * (S.isOwner && LAB.noHeat ? 0 : 1) * dt;   // 실험실: 과열 없음   // 몸부림 충격 흡수는 그때 쌓이는 과열도 줄여요
     R.dist += out * dt;
   } else {
     R.tension = raw;
     R.heat = Math.max(0, R.heat - (R.hold ? g.cool : g.cool * 1.6) * dt);
     if (R.hold) R.dist -= g.speed * (1 - Math.min(.85, R.F * .6)) * dt;
-    else { R.dist += R.F * .7 * dt; R.stam = Math.min(1, R.stam + R.tf.regen * dt); }
+    else { R.dist += R.F * .7 * dt; if (st === "cruise" || st === "tired") R.stam = Math.min(1, R.stam + R.tf.regen * dt); }   // v1.122: 쉬는 동안(유영 · 지침)만 회복 — 드랙이 세져서 줄이 덜 풀려도 버티기만 하면 지쳐요
   }
-  if (st === "rage" && g.calm) R.tension *= 1 - g.calm;   // 몸부림 충격 흡수: 물고기 힘(지치는 속도)은 그대로, 줄에 걸리는 장력만 줄어요
+  if (st === "rage" && g.calm) R.tension *= 1 - g.calm;
+  if (!R.hold && R.tension > g.lineMax * .97) R.tension = g.lineMax * .97;   // v1.122: 손을 떼고 있으면 줄이 풀려 나가서 끊기진 않아요 — 대신 줄이 다 풀리면(릴 줄 길이) 도망가요   // 몸부림 충격 흡수: 물고기 힘(지치는 속도)은 그대로, 줄에 걸리는 장력만 줄어요
   R.lineOut = out;
   R.stam = Math.max(0, R.stam - (R.F * (st === "run" || st === "rage" ? 1.4 : 1) + out * .05) / R.S0 * g.tire * dt);
   R.maxHeat = Math.max(R.maxHeat, R.heat);
@@ -4438,7 +4469,7 @@ function fightStep(dt, R) {
   if (!(S.isOwner && LAB.noBreak) && R.tension > g.lineMax) return "snap";   // 실험실: 줄 안 끊김
   if (R.heat >= 1) { R.heat = 1; R.overT += dt; if (R.overT > .8) return "heat"; } else R.overT = 0;
   if (R.dist <= g.landAt) return "land";
-  if (R.dist > 60) return "far";
+  if (R.dist > g.far) return "far";   // v1.122: 도망 한계 = 릴에 감긴 줄 길이
   return null;
 }
 function drawFight() {
@@ -4446,7 +4477,7 @@ function drawFight() {
   const ten = $("fightTen"); ten.style.width = Math.min(100, tr * 100) + "%"; ten.style.background = tr > .9 ? "#e2402a" : tr > .72 ? "#f2b630" : "#4cc46a";
   $("fightHeat").style.width = (R.heat * 100) + "%";
   $("fight").classList.toggle("hot", R.heat > .75);
-  $("fightDist").textContent = Math.max(0, R.dist).toFixed(1) + "m";
+  $("fightDist").textContent = Math.max(0, R.dist).toFixed(1) + "m" + (R.dist > g.far * .7 ? " / " + g.far + "m" : "");   // v1.122: 줄이 70% 넘게 풀리면 남은 줄 길이도 보여요
   const pr = clamp(1 - (R.dist - g.landAt) / Math.max(1, R.dist0 - g.landAt), 0, 1);
   $("fightProg").style.width = (pr * 100) + "%"; $("fightFish").style.left = (pr * 100) + "%";
   // v1.86: 지금 할 일 하나를 크게 (✋ 손 떼기 · 🤏 살살 · 👆 꾹 감기)
@@ -4521,7 +4552,7 @@ function fightOver(out) {
   const why = out === "snap" ? "줄이 끊겼어요! 남은 거리 " + left + "m · 장력이 빨개지면 드랙을 풀어요"
     : out === "heat" ? "과열로 줄이 끊겼어요… 남은 거리 " + left + "m · 돌진할 땐 손을 떼서 식혀요"
     : out === "shake" ? "점프할 때 바늘이 빠졌어요 · 물고기가 뛰면 손을 떼요"
-    : out === "far" ? "너무 멀리 도망갔어요 · 지쳤을 때 감아 보세요"
+    : out === "far" ? "줄이 다 풀려서(" + R.g.far + "m) 도망갔어요 · 지쳤을 때 감고, 더 긴 릴 · 강한 낚싯대가 도와줘요"
     : "너무 오래 싸워서 물고기가 빠져나갔어요";
   S.noMissToast = !R.coop && loseCardWill(out);   // 카드가 자세히 알려 주니 같은 토스트는 생략해요
   endReel(false, false, why);
@@ -4565,11 +4596,11 @@ function simRun(g, tier) {
   return win / SIM_N;
 }
 const curGear = () => ({ rod: P.rod, reel: P.reel, line: P.line, tackles: equipped().map(x => x.id) });
-const gearKey = (ov) => [ov.rod, ov.reel, ov.line, ov.tackles.slice().sort().join("+"), P.tools.net ? 1 : 0].join("|");
+const gearKey = (ov) => [ov.rod, ov.reel, ov.line, ov.tackles.slice().sort().join("+"), P.tools.net ? 1 : 0, rodUpLv(ov.rod)].join("|");
 function simRates(ov, cb) {
   const key = gearKey(ov); if (SIM_CACHE.has(key)) { cb(SIM_CACHE.get(key)); return; }
   const g = gearStats(ov), out = {}; let t = 2;
-  const step = () => { out[t] = simRate(g, t); if (++t <= 5) setTimeout(step, 0); else { SIM_CACHE.set(key, out); cb(out); } };
+  const step = () => { out[t] = simRate(g, t); if (++t <= 9) setTimeout(step, 0); else { SIM_CACHE.set(key, out); cb(out); } };
   setTimeout(step, 0);
 }
 /* 상점 진열대: 「지금 장비」 → 「이걸로 바꾸면」 등급별 예상 성공률 */
@@ -4584,7 +4615,7 @@ function rateBox(cat, it) {
     if (!box.isConnected) return;
     box.lastChild.remove();
     const tbl = h("div", { class: "ratetbl" });
-    for (let t = 2; t <= 5; t++) {
+    for (let t = 2; t <= 9; t++) {   // v1.122: 희귀~태초 전부 (예전엔 전설까지만 보여서 신화를 못 잡는 걸 몰랐어요)
       const pa = Math.round(a[t] * 100), pb = Math.round(b[t] * 100), d = pb - pa;
       tbl.append(h("span", null, tierChip(t)), h("span", { class: "num", text: pa + "%" }),
         same ? h("span") : h("span", { class: "num " + (d >= 4 ? "up" : d <= -4 ? "down" : ""), text: "→ " + pb + "%" + (d >= 4 ? " ▲" + d : d <= -4 ? " ▼" + (-d) : " (비슷)") }));
@@ -9834,6 +9865,10 @@ function loadReelModels() {
       const bb = geo.boundingBox, size = Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z, .01);
       REEL3D.set(id, { geo, parts: m.g, size });
     }
+    // v1.122 새 릴(심해 · 용궁): 전동 릴 모델에 각자 빛깔을 입혀요
+    const base = REEL3D.get("power");
+    if (base) for (const [id, glow] of [["abyss", 0], ["palace", 1]]) { const it = REELS.find(r => r.id === id); if (!it || REEL3D.has(id)) continue; const tint = new T3.Color(it.color);
+      REEL3D.set(id, { geo: base.geo, size: base.size, parts: base.parts.map((p, k) => { const c = new T3.Color(p.c).lerp(tint, .6); return { ...p, c: "#" + c.getHexString(), ...(glow && k === 0 ? { e: "#" + tint.clone().multiplyScalar(.25).getHexString() } : {}) }; }) }); }
     makeReelPics();
     for (const k of [...iconCache.keys()]) if (k.startsWith("reel|")) iconCache.delete(k);
     refreshSheet();
@@ -10428,16 +10463,16 @@ function winMat(day, night) { const m = new T3.MeshBasicMaterial({ color: 0xffff
    농장: 농사 자격증 → 땅 Lv.1~5 (밭 3×3 → 7×7) → 작물 12종. 밭은 각자 자기 것만 보여요(같은 자리, 내 밭).
    밭 한 칸: 갈기(호미) → 심기(씨앗) → 물 주기(물뿌리개, 3시간 촉촉) → 자라기(촉촉할 때만) → 수확. 비료 = 특상품 확률 ↑.
    마트: 진짜 들어가서 걸어 다니는 매장. 코너 앞에서 물건을 장바구니에 담고 계산대에서 계산해요. 로컬푸드 코너에 내 작물을 납품(판매).
-   (돈 계산은 손님 쪽 → 하루 납품 300개 · 마트에서 산 채소는 특상품이 아니에요) */
+   (돈 계산은 손님 쪽 → 하루 납품 300만원어치 · 마트에서 산 채소는 특상품이 아니에요) */
 const FARM_LV = [   // 땅 단계: 가격(이번 단계만) · 밭 범위(7×7 판 위 행/열 번호)
   { name: "땅 없음", cost: 0, lo: 0, hi: -1 },
   { name: "후미진 텃밭", cost: 2000, lo: 2, hi: 4, add: "상추 · 무 · 대파" },
   { name: "돌담 밭", cost: 3000, lo: 1, hi: 4, add: "배추 · 감자 · 고추" },
   { name: "비닐하우스 밭", cost: 8000, lo: 1, hi: 5, add: "딸기 · 토마토" },
   { name: "과수원 옆 너른 밭", cost: 20000, lo: 0, hi: 5, add: "참외 · 수박" },
-  { name: "낭만 농장주", cost: 50000, lo: 0, hi: 6, add: "황금수박 · 인삼 · 자동 물뿌리기" },
+  { name: "낭만 농장주", cost: 50000, lo: 0, hi: 6, add: "황금수박 · 인삼 · 자동 물뿌리기(밭 전체 12시간)" },
 ];
-const FARM_LICENSE = 500, FARM_WET_MS = 3 * 3600e3, FARM_STEP = 2.4;
+const FARM_LICENSE = 500, FARM_WET_MS = 3 * 3600e3, FARM_WET_AUTO = 12 * 3600e3, FARM_STEP = 2.4, LOCAL_CAP = 30000;   // v1.122 하루 납품 상한 = 금액 300만원 (예전 300개)
 const FARM = { x: 112, z: -24, y: 2, gate: { x: 102.4, z: -18 }, office: { x: 99.6, z: -30 } };
 const MART = { x0: 49, x1: 73, z0: -28, z1: -6, door: -18 };
 const inMart = (x, z) => x > MART.x0 && x < MART.x1 && z > MART.z0 && z < MART.z1;
@@ -10460,13 +10495,13 @@ const farmRange = () => FARM_LV[farmData().lv] || FARM_LV[0];
 const plotKey = (r, c) => r + "," + c;
 const plotPos = (r, c) => ({ x: FARM.x + (c - 3) * FARM_STEP, z: FARM.z + (r - 3) * FARM_STEP });
 function plotOwned(r, c) { const L = farmRange(); return r >= L.lo && r <= L.hi && c >= L.lo && c <= L.hi; }
-function plotGrow(p, now) {   // 촉촉할 때만 자라요 (Lv.5는 자동 물뿌리기)
+function plotGrow(p, now) {   // 촉촉할 때만 자라요 (v1.122: Lv.5 자동 물뿌리기도 「항상」이 아니라 밭 전체 12시간)
   if (!p || !p.c) return p;
-  now = now || Date.now(); const auto = farmData().lv >= 5, wetEnd = auto ? now : (p.wet || 0);
+  now = now || Date.now(); const wetEnd = p.wet || 0;
   const from = p.at || now, add = Math.max(0, Math.min(now, wetEnd) - from); p.g = (p.g || 0) + add; p.at = now; return p;
 }
 function plotStage(p) { if (!p || !p.c) return -1; const c = CROP[p.c]; if (!c) return -1; const k = (p.g || 0) / (c.grow * 60000); return k >= 1 ? 3 : k >= .6 ? 2 : k >= .25 ? 1 : 0; }
-const plotWet = (p) => farmData().lv >= 5 || (p && (p.wet || 0) > Date.now());
+const plotWet = (p) => !!(p && (p.wet || 0) > Date.now());
 function cropInv(id) { P.crops = P.crops || {}; if (!Array.isArray(P.crops[id])) P.crops[id] = [0, 0]; return P.crops[id]; }
 const cropTotal = () => Object.values(P.crops || {}).reduce((a, v) => a + (v[0] || 0) + (v[1] || 0), 0);
 /* 밭에서 하는 일 */
@@ -10506,11 +10541,12 @@ function farmPlant(id) {
   closeSheet(); farmAnim(pl); sfx("ui-confirmation", .35); toast("🌱 " + c.name + " 씨앗을 심었어요 · 물을 주면 자라요"); markDirty(); FARM3D.dirty = true; stat("planted");
 }
 function farmWater(pl) {
-  if (!P.tools.can) { toast("물뿌리개가 있어야 해요 · 농가마트 농기구 코너"); return; }
-  const F = farmData(), now = Date.now(); let n = 0;
-  for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) { const p = F.plots[plotKey(pl.r + dr, pl.c + dc)]; if (p && p.c) { plotGrow(p, now); p.wet = now + FARM_WET_MS; n++; } }
+  const F = farmData(), now = Date.now(), auto = F.lv >= 5; let n = 0;
+  if (!P.tools.can && !auto) { toast("물뿌리개가 있어야 해요 · 농가마트 농기구 코너"); return; }
+  if (auto) { for (const p of Object.values(F.plots)) if (p && p.c) { plotGrow(p, now); p.wet = now + FARM_WET_AUTO; n++; } }   // v1.122: 자동 물뿌리기 = 밭 전체 12시간
+  else for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) { const p = F.plots[plotKey(pl.r + dr, pl.c + dc)]; if (p && p.c) { plotGrow(p, now); p.wet = now + FARM_WET_MS; n++; } }
   farmAnim(pl, "idle"); sfx("splash", .35); try { for (let i = 0; i < 30; i++) { const d = fwDir(Math.random); if (!FW.pts) fwInit(); fwSpark(pl.x, groundY(pl.x, pl.z) + .9, pl.z, d[0] * 1.6, Math.abs(d[1]) * 1.5, d[2] * 1.6, [.6, .85, 1], .6, .05, 1, 5, 0); } } catch {}
-  toast("💧 " + n + "칸에 물을 줬어요 · 3시간 동안 촉촉해요"); markDirty(); FARM3D.dirty = true;
+  toast(auto ? "💦 자동 물뿌리기를 돌렸어요 · 밭 전체 " + n + "칸이 12시간 동안 촉촉해요" : "💧 " + n + "칸에 물을 줬어요 · 3시간 동안 촉촉해요"); markDirty(); FARM3D.dirty = true;
 }
 function farmFert(pl) { const p = farmData().plots[plotKey(pl.r, pl.c)]; if (!p || p.f || !(P.fert > 0)) return; P.fert--; p.f = 1; farmAnim(pl); sfx("ui-click", .3); toast("🌿 비료를 줬어요 · 특상품이 될 확률이 올라가요"); markDirty(); FARM3D.dirty = true; }
 function farmHarvest(pl) {
@@ -10738,12 +10774,13 @@ function martSheet(body, corner) {
     wrap.append(h("div", { class: "mt-note", text: "양념 · 가공식품은 3단계 「맛집 골목」 식당 요리에 써요 · 식당가가 열리면 팔기 시작해요" }));
     for (const n of MART_PANTRY) wrap.append(prodCard(h("span", { class: "mt-emo", text: { 고추장: "🌶", 된장: "🟫", 간장: "🥢", 참기름: "🫗", 밀가루: "🌾", 쌀: "🍚" }[n] }), n, "준비 중", 10, null, "곧 팔아요"));
   } else if (C.id === "local") {
-    const d = kstDay(); if (!P.localDay || P.localDay.d !== d) P.localDay = { d, n: 0 };
-    wrap.append(h("div", { class: "mt-note local", text: "내 밭에서 키운 작물을 여기에 납품하면 바로 돈을 받아요 · ⭐ 특상품은 1.5배 · 오늘 납품 " + P.localDay.n + "/300" }));
+    const d = kstDay(); if (!P.localDay || P.localDay.d !== d) P.localDay = { d, n: 0, v: 0 };
+    const left = Math.max(0, LOCAL_CAP - (P.localDay.v || 0));
+    wrap.append(h("div", { class: "mt-note local", text: "내 밭에서 키운 작물을 여기에 납품하면 바로 돈을 받아요 · ⭐ 특상품은 1.5배 · 오늘 납품 " + won(P.localDay.v || 0) + " / " + won(LOCAL_CAP) }));
     const mine = CROPS.filter(c => { const v = (P.crops || {})[c.id]; return v && (v[0] || v[1]); });
     if (!mine.length) wrap.append(h("div", { class: "empty-note", text: "아직 납품할 작물이 없어요 · 낭만 농장에서 키워 와요" }));
     for (const c of mine) { const v = cropInv(c.id);
-      for (const q of [1, 0]) if (v[q]) wrap.append(prodCard(h("img", { src: cropIcon(c.id), alt: "" }), (q ? "⭐ 특상품 " : "") + c.name, "가진 것 " + v[q] + "개", Math.round(c.price * (q ? 1.5 : 1)), () => martSell(c.id, q), "전부 납품 · " + won(Math.round(c.price * (q ? 1.5 : 1)) * Math.min(v[q], 300 - P.localDay.n)))); }
+      for (const q of [1, 0]) if (v[q]) wrap.append(prodCard(h("img", { src: cropIcon(c.id), alt: "" }), (q ? "⭐ 특상품 " : "") + c.name, "가진 것 " + v[q] + "개", Math.round(c.price * (q ? 1.5 : 1)), () => martSell(c.id, q), "전부 납품 · " + won(Math.round(c.price * (q ? 1.5 : 1)) * Math.min(v[q], Math.floor(left / Math.round(c.price * (q ? 1.5 : 1))))))); }
   } else {
     const total = cartTotal();
     const rec = h("div", { class: "mt-receipt" }, h("b", { class: "rc-h", text: "낭만농협 섬마을마트" }), h("small", { class: "rc-s", text: new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace("T", " ") + " · 계산대 " + (1 + (hashStr(P.nick) % 3)) + "번" }), h("i", { class: "rc-line" }),
@@ -10756,10 +10793,11 @@ function martSheet(body, corner) {
   if (C.id !== "checkout" && S.cart.length) body.append(h("div", { class: "mt-cartbar" }, h("span", { text: "🛒 " + cartCount() + "개 · " + won(cartTotal()) }), h("small", { text: "입구 옆 계산대에서 계산해요" })));
 }
 function martSell(id, q) {
-  const v = cropInv(id), d = kstDay(); if (!P.localDay || P.localDay.d !== d) P.localDay = { d, n: 0 };
-  const n = Math.min(v[q], 300 - P.localDay.n); if (n <= 0) { toast("오늘 납품 한도(300개)를 다 채웠어요 · 내일 또 와요"); return; }
-  const each = Math.round(CROP[id].price * (q ? 1.5 : 1)), sum = each * n;
-  v[q] -= n; P.localDay.n += n; P.gold += sum; stat("soldGold", sum); questProgress("sell", sum); markDirty(); sfx("coins", .45); try { ACT_FX.sell(sum); } catch {}
+  const v = cropInv(id), d = kstDay(); if (!P.localDay || P.localDay.d !== d) P.localDay = { d, n: 0, v: 0 };
+  const each = Math.round(CROP[id].price * (q ? 1.5 : 1)), n = Math.min(v[q], Math.floor(Math.max(0, LOCAL_CAP - (P.localDay.v || 0)) / each));
+  if (n <= 0) { toast("오늘 납품 한도(" + won(LOCAL_CAP) + ")를 다 채웠어요 · 내일 또 와요"); return; }
+  const sum = each * n;
+  v[q] -= n; P.localDay.n += n; P.localDay.v = (P.localDay.v || 0) + sum; P.gold += sum; stat("soldGold", sum); questProgress("sell", sum); markDirty(); sfx("coins", .45); try { ACT_FX.sell(sum); } catch {}
   toast("🧺 " + CROP[id].name + " " + n + "개를 납품해서 " + won(sum) + "을 받았어요"); refreshSheet();
 }
 function farmSheet(body) {   // 농장 관리소: 토지 대장 + 단계 카드 + 작물표
@@ -10767,7 +10805,7 @@ function farmSheet(body) {   // 농장 관리소: 토지 대장 + 단계 카드 
   setHead("🌾 농장 관리소", "농사 자격증 → 땅 사기 → 넓히기 · 넓힐수록 심을 수 있는 작물이 늘어요");
   const deed = h("div", { class: "fm-deed" }, h("div", { class: "fm-stamp", text: F.lic ? "농사 자격 ✔" : "자격 없음" }), h("b", { class: "fm-t", text: "토지 대장 · 낭만 농장" }),
     h("div", { class: "fm-r" }, h("span", { text: "소유자" }), h("b", { text: P.nick })), h("div", { class: "fm-r" }, h("span", { text: "땅" }), h("b", { text: F.lv ? "Lv." + F.lv + " " + L.name + " · 밭 " + (L.hi - L.lo + 1) + "×" + (L.hi - L.lo + 1) + "칸" : "아직 없어요" })),
-    h("div", { class: "fm-r" }, h("span", { text: "물 주기" }), h("b", { text: F.lv >= 5 ? "자동 물뿌리기 (항상 촉촉)" : P.tools.can ? "물뿌리개 있음 · 한 번에 9칸 · 3시간 촉촉" : "물뿌리개 없음 · 농가마트 농기구" })),
+    h("div", { class: "fm-r" }, h("span", { text: "물 주기" }), h("b", { text: F.lv >= 5 ? "자동 물뿌리기 · 아무 칸에서 물 주기 = 밭 전체 12시간 촉촉" : P.tools.can ? "물뿌리개 있음 · 한 번에 9칸 · 3시간 촉촉" : "물뿌리개 없음 · 농가마트 농기구" })),
     h("div", { class: "fm-r" }, h("span", { text: "창고" }), h("b", { text: "작물 " + cropTotal() + "개 · 씨앗 " + Object.values(P.seeds || {}).reduce((a, b) => a + b, 0) + "봉 · 비료 " + (P.fert || 0) + "포대" })));
   const mini = h("div", { class: "fm-mini" }); for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) { const own = F.lic && plotOwned(r, c), p = own ? plotGrow(F.plots[plotKey(r, c)]) : null, st = p && p.c ? plotStage(p) : -1;
     mini.append(h("i", { class: !own ? "" : st >= 3 ? "ready" : st >= 0 ? (plotWet(p) ? "grow wet" : "grow") : p && p.till ? "till" : "own", title: p && p.c ? CROP[p.c].name + " · " + (st >= 3 ? "수확!" : farmLeft(p)) : "" })); }
@@ -12147,6 +12185,8 @@ function itemIcon(cat, it, size) {
     else if (it.id === "lead") { g.beginPath(); g.moveTo(x, s * .16); g.quadraticCurveTo(x + s * .26, y + s * .12, x, s * .78); g.quadraticCurveTo(x - s * .26, y + s * .12, x, s * .16); g.fillStyle = "#8a9096"; g.fill(); olStroke(g, S2); g.beginPath(); g.ellipse(x - s * .06, y, s * .04, s * .1, 0, 0, 7); g.fillStyle = "rgba(255,255,255,.5)"; g.fill(); }
     else if (it.id === "barbed") { SICON.hook(g, x + s * .04, y + s * .04, S2 * 1.05); }
     else if (it.id === "swivel") { for (const [dy, r0] of [[-.2, .11], [.2, .11]]) { g.beginPath(); g.arc(x, y + s * dy, s * r0, 0, 7); g.lineWidth = s * .05; g.strokeStyle = "#c8ccd2"; g.stroke(); g.lineWidth = s * .02; g.strokeStyle = OL; g.stroke(); } g.beginPath(); g.ellipse(x, y, s * .07, s * .12, 0, 0, 7); g.fillStyle = "#f2c230"; g.fill(); olStroke(g, S2 * .6); }
+    else if (it.id === "circle") { g.save(); g.translate(x, y); g.beginPath(); g.arc(0, s * .02, s * .2, -.4, Math.PI * 1.15); g.lineWidth = s * .055; g.strokeStyle = OL; g.lineCap = "round"; g.stroke(); g.lineWidth = s * .032; g.strokeStyle = "#f2c230"; g.stroke(); g.beginPath(); g.arc(s * .2 * Math.cos(-.4), s * .02 + s * .2 * Math.sin(-.4), s * .03, 0, 7); g.fillStyle = OL; g.fill(); g.restore(); }
+    else if (it.id === "wire") { g.beginPath(); for (let k = 0; k <= 12; k++) { const t = k / 12, px = x - s * .28 + t * s * .56, py = y + Math.sin(t * Math.PI * 4) * s * .1; k ? g.lineTo(px, py) : g.moveTo(px, py); } g.lineWidth = s * .06; g.strokeStyle = OL; g.lineJoin = "round"; g.stroke(); g.lineWidth = s * .03; g.strokeStyle = "#c8ccd2"; g.stroke(); for (const dx of [-.3, .3]) { g.beginPath(); g.arc(x + s * dx, y, s * .05, 0, 7); g.lineWidth = s * .03; g.strokeStyle = OL; g.stroke(); } }
     else if (it.id === "shock") { g.beginPath(); g.moveTo(x - s * .26, y + s * .26); g.bezierCurveTo(x - s * .1, y - s * .4, x + s * .1, y + s * .4, x + s * .26, y - s * .26); g.lineWidth = s * .07; g.strokeStyle = OL; g.lineCap = "round"; g.stroke(); g.lineWidth = s * .04; g.strokeStyle = "#7fd6e0"; g.stroke(); SICON.star(g, x + s * .2, y + s * .2, s * .16); }
     else { SICON.lantern(g, x, y, S2 * .95); }
   } else {
@@ -12260,11 +12300,28 @@ function itemPerks(cat, it) {
     out.push(["🪝", "채비를 " + it.slots + "개까지 달 수 있어요"]);
     if (it.id !== "bamboo") { out.push(["🐟", "물고기가 뛸 때 바늘 빠짐 " + pct(1 - it.jump) + "% 줄어요"]); if (it.calm) out.push(["💥", "몸부림 충격 " + pct(it.calm) + "% 흡수"]); if (it.tire > 1) out.push(["😮‍💨", "물고기가 " + pct(it.tire - 1) + "% 빨리 지쳐요"]); }
   }
-  if (cat === "reel") { out.push(["🔥", it.heat >= 1 ? "열이 잘 오르는 기본 릴이에요" : "릴 열이 " + pct(1 - it.heat) + "% 덜 올라요"]); out.push(["🧊", "식는 빠르기 " + pct(it.cool)]); out.push(["🌀", "감는 빠르기 " + it.speed.toFixed(1) + "m/s"]); }
+  if (cat === "reel") { out.push(["🔥", it.heat >= 1 ? "열이 잘 오르는 기본 릴이에요" : "릴 열이 " + pct(1 - it.heat) + "% 덜 올라요"]); out.push(["🧊", "식는 빠르기 " + pct(it.cool)]); out.push(["🌀", "감는 빠르기 " + it.speed.toFixed(1) + "m/s"]); out.push(["📏", "줄 길이 " + (it.len || 60) + "m · 물고기가 이보다 멀리 도망가면 놓쳐요"]); }
   if (cat === "line") out.push(["🧵", it.add ? "끊어지기 전까지 " + pct(it.add) + "% 더 버텨요" : "처음 받은 기본 줄이에요"]);
   if (cat === "tackle") { out.push(["🪝", it.desc]); out.push(["⏳", "파이팅 " + TACKLE_USES + "번 쓰면 닳아요 · 낚싯대 채비 칸에 달아요"]); }
   if (cat === "tool") out.push(["🧰", it.desc]);
   return out;
+}
+/* v1.122 낚싯대 강화 패널: 가진 낚싯대만 · +1~+5 · 단계마다 강도 +3% */
+function rodUpBox(r) {
+  const n = rodUpLv(r.id), maxed = n >= ROD_UP_MAX, cost = maxed ? 0 : rodUpCost(r, n);
+  const pips = h("div", { class: "rup-pips" }, Array.from({ length: ROD_UP_MAX }, (_, i) => h("i", { class: i < n ? "on" : "" })));
+  return h("div", { class: "ihow rup" }, h("b", { text: "🔨 낚싯대 강화 +" + n + " / +" + ROD_UP_MAX }), pips,
+    h("span", { text: "단계마다 낚싯대 강도 +3% (드랙 최대치도 같이 올라요) · 지금 +" + (n * 3) + "%" }),
+    maxed ? h("span", { class: "muted", text: "최대로 강화했어요" })
+      : h("button", { class: "btn sm pri", disabled: P.gold < cost, onclick: () => rodUpgrade(r), text: "+" + (n + 1) + " 강화 · " + won(cost) }));
+}
+function rodUpgrade(r) {
+  const n = rodUpLv(r.id); if (n >= ROD_UP_MAX || !P.rods.includes(r.id)) return;
+  const cost = rodUpCost(r, n); if (P.gold < cost) { toast("돈이 모자라요 · " + won(cost) + " 필요"); return; }
+  P.gold -= cost; P.rodUp = P.rodUp || {}; P.rodUp[r.id] = n + 1; markDirty(); stat("rodUps"); sfx("jingle-rare", .4);
+  toast([h("b", { text: "🔨 " + r.name + " +" + (n + 1) + " 강화 성공!" }), h("div", { class: "muted", style: "font-size:12px", text: "낚싯대 강도 +" + ((n + 1) * 3) + "% · 대물을 더 잘 버텨요" })], "lvup", 4500);
+  if (P.rod === r.id) try { wearGear(); } catch {}
+  refreshSheet(true);
 }
 function shopPreview(cat, it) {
   const st = itemState(cat, it), locked = itemLocked(it);
@@ -12276,6 +12333,7 @@ function shopPreview(cat, it) {
   if (cat === "rod" && it.id === "merchant") box.append(h("div", { class: "ihow" }, h("b", { text: "🎯 특별 기능 · 지정 낚시" }),
     h("span", { text: "등급 하나(일반~초월)와 그 등급에서 노릴 물고기 최대 3종을 골라 두면, 그 등급이 떴을 때 고른 물고기만 나와요. 등급이 뜰 확률은 미끼 그대로예요." }),
     h("span", { class: "muted", text: st.own ? "설정은 이 화면 아래 「🎯 지정 낚시 설정하기」나 가방 → 장비에서 해요 · 이 낚싯대를 들고 있어야 효과가 있어요" : "사고 나면 이 화면 아래와 가방 → 장비에 「🎯 지정 낚시」 버튼이 생겨요" })));
+  if (cat === "rod" && st.own) box.append(rodUpBox(it));
   const cmp = h("div", { class: "cmp" });
   if (cat === "bait") box.append(probBar(it.p), h("div", { class: "plegend" }, it.p.map((v, i) => h("span", { style: "--c:var(" + TIER_VARS[i] + ")", text: TIERS[i].name + " " + v + "%" }))));
   if (cat === "bait") { const mc = APEX_CHANCE[it.id]; box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: mc ? "🌌 태초 " + (Math.round(mc * 10000) / 100) + "% · 심해에선 ×2, 밤엔 ×1.5, 희귀 축제 땐 ×2까지 올라가요" : "🌌 태초 등급은 이 미끼로는 안 나와요 · 황금 루어와 전설의 미끼만 태초를 노릴 수 있어요" }),
@@ -12283,7 +12341,7 @@ function shopPreview(cat, it) {
   if (cat === "rod") { const c0 = curRod(); cmp.append(...cmpRow("🧵 줄 버팀", c0.tens, it.tens, 1.5, v => Math.round(v * 100)), ...cmpRow("채비 칸", c0.slots, it.slots, 3, v => v + "칸"),
     ...cmpRow("점프 버티기", 1 - c0.jump, 1 - it.jump, .9, v => Math.round(v * 100) + "%"), ...cmpRow("몸부림 충격 흡수", c0.calm, it.calm, .3, v => Math.round(v * 100) + "%"), ...cmpRow("빨리 지치게", c0.tire - 1, it.tire - 1, .4, v => "+" + Math.round(v * 100) + "%"));
     box.append(h("div", { class: "muted", style: "font-size:12px", text: rodPerkText(it) })); if (it.id === "merchant") box.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.55", text: "🎯 지정 낚시 — 등급이 뜰 확률은 미끼 그대로고, 그 등급 안에서는 골라 둔 물고기(최대 3종)만 나와요. 태초 등급은 노리지 않아요." })); }
-  if (cat === "reel") { const c0 = curReel(); cmp.append(...cmpRow("🔥 열 덜 오름", 1 / c0.heat, 1 / it.heat, 1.7, v => Math.round(v * 100)), ...cmpRow("🧊 잘 식음", c0.cool, it.cool, .24, v => Math.round(v * 100)), ...cmpRow("감는 속도", c0.speed, it.speed, 3.4, v => v.toFixed(1))); box.append(h("div", { class: "muted", style: "font-size:12px", text: "과열 속도는 낮을수록, 식는 속도와 감는 속도는 높을수록 좋아요" })); }
+  if (cat === "reel") { const c0 = curReel(); cmp.append(...cmpRow("🔥 열 덜 오름", 1 / c0.heat, 1 / it.heat, 1.7, v => Math.round(v * 100)), ...cmpRow("🧊 잘 식음", c0.cool, it.cool, .24, v => Math.round(v * 100)), ...cmpRow("감는 속도", c0.speed, it.speed, 4, v => v.toFixed(1)), ...cmpRow("📏 줄 길이", c0.len || 60, it.len || 60, 125, v => v + "m")); box.append(h("div", { class: "muted", style: "font-size:12px", text: "과열 속도는 낮을수록, 식는 속도와 감는 속도는 높을수록 좋아요" })); }
   if (cat === "line") { const c0 = curLine(); cmp.append(...cmpRow("🧵 줄 버팀", 1 + c0.add, 1 + it.add, 1.2, v => Math.round(v * 100))); }
   if (cmp.children.length) box.append(cmp, h("div", { class: "muted", style: "font-size:11px", text: "검은 선 = 지금 쓰는 것" }));
   if (["rod", "reel", "line", "tackle"].includes(cat)) box.append(rateBox(cat, it));
@@ -12898,7 +12956,7 @@ function islandMapSheet(body) {
    당첨 번호는 날짜로 정해져서 모두 같아요. 9시에 항구 TV에서 번호가 하나씩 공개되고, 방송이 끝나면 당첨금이 자동으로 들어와요.
    (클라이언트 계산이라 당첨금은 상한을 둬요) */
 const L645 = { price: 10, limit: 100, base: Math.floor((Date.UTC(2026, 10, 4) / 3600000 + 9) / 24) - 1,
-  prize: [0, 50000, 10000, 3000, 500, 50], rankName: ["낙첨", "1등", "2등", "3등", "4등", "5등"] };   // 1등 500만원 · 2등 100만 · 3등 30만 · 4등 5만 · 5등 5천원
+  prize: [0, 50000, 10000, 3000, 1000, 100], rankName: ["낙첨", "1등", "2등", "3등", "4등", "5등"] };   // 1등 500만원 · 2등 100만 · 3등 30만 · 4등 10만 · 5등 1만원 (v1.122: 4 · 5등 2배)
 const kDay = (t) => Math.floor(((t || Date.now()) / 3600000 + 9) / 24);
 const drawAt = (n) => (n * 24 + 21 - 9) * 3600000;
 const DRAW_BALL0 = 30000, DRAW_GAP = 20000, DRAW_END = 10 * 60000;   // 9시 30초에 첫 공, 20초마다 하나, 9시 10분까지 방송
@@ -12964,7 +13022,7 @@ function lotto645Sheet(body) {
   else body.append(h("div", { class: "l6-mine" }, recent.map(t => { const ww = drawDone(t.d, now) ? drawNums(t.d) : null;
     return h("div", { class: "l6-row" }, h("small", { text: (t.d - L645.base) + "회 · " + (t.a ? "자동" : "수동") }), h("div", { class: "l6-balls sm" }, t.n.map(x => ballEl(x, ww && !ww.main.includes(x) && x !== ww.bonus))),
       h("b", { class: "l6-res" + (t.r ? " win" : ""), text: !ww ? "추첨 전" : t.done ? (t.r ? L645.rankName[t.r] + " +" + won(L645.prize[t.r]) : "낙첨") : "곧 정산" })); })));
-  body.append(h("div", { class: "muted", style: "font-size:12px;margin-top:8px;line-height:1.6", text: "판매: 전날 밤 9시 10분 ~ 당일 밤 8시 · 1장 1,000원 · 한 회차 1인 1만원까지 · 당첨: 6개 1등 500만원 · 5개+보너스 2등 100만원 · 5개 3등 30만원 · 4개 4등 5만원 · 3개 5등 5,000원 · 방송이 끝나면 당첨금이 자동으로 들어와요" }));
+  body.append(h("div", { class: "muted", style: "font-size:12px;margin-top:8px;line-height:1.6", text: "판매: 전날 밤 9시 10분 ~ 당일 밤 8시 · 1장 1,000원 · 한 회차 1인 1만원까지 · 당첨: 6개 1등 500만원 · 5개+보너스 2등 100만원 · 5개 3등 30만원 · 4개 4등 10만원 · 3개 5등 1만원 · 방송이 끝나면 당첨금이 자동으로 들어와요" }));
 }
 
 /* ===================== 항구 TV (v1.83) =====================
