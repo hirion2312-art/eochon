@@ -292,6 +292,13 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 .ftrack{position:relative;height:8px;border-radius:4px;background:rgba(255,255,255,.12);margin:6px 10px 2px}
 .ftrack i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:rgba(127,214,224,.55)}
 .ftrack .ffish{position:absolute;top:50%;width:26px;height:15px;transform:translate(-50%,-50%);transition:left .1s linear}
+.fbox{position:relative}.fsave{position:absolute;left:50%;top:38%;z-index:5;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 18px 9px;border-radius:16px;background:linear-gradient(160deg,#2a1d5c,#123a4a);border:2px solid #f2c230;box-shadow:0 0 0 4px rgba(242,194,48,.25),0 10px 30px rgba(0,0,0,.45);color:#fff;pointer-events:none;transform:translate(-50%,-50%) scale(.3);opacity:0;animation:fsave 2.1s cubic-bezier(.2,1.4,.4,1) forwards}
+.fsave b{font-size:30px;font-weight:900;letter-spacing:2px;color:#ffe27a;text-shadow:0 3px 0 #b8602a,0 0 18px rgba(255,210,90,.8);animation:fsaveShake .45s .15s 2}
+.fsave .fsave-i{font-size:26px;line-height:1}.fsave small{font-size:12px;font-weight:700;color:#e8e2ff;white-space:nowrap}
+.fsave-s{position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:50%;background:#ffe27a;box-shadow:0 0 8px #ffd24a;transform:rotate(var(--a)) translateX(0);animation:fsaveSpark .9s .05s ease-out forwards}
+@keyframes fsave{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}22%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1;transform:translate(-50%,-58%) scale(1)}100%{opacity:0;transform:translate(-50%,-75%) scale(.92)}}
+@keyframes fsaveShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-4deg)}75%{transform:translateX(4px) rotate(4deg)}}
+@keyframes fsaveSpark{0%{opacity:1;transform:rotate(var(--a)) translateX(10px)}100%{opacity:0;transform:rotate(var(--a)) translateX(90px)}}
 .fsp{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center;font-size:11.5px;font-weight:700;color:#ffd6a0;margin-top:2px}.fsp .fbar{height:8px}.fsp #fightSpBar{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#f2b630,#e2402a);transition:width .1s}
 .fgauge{display:grid;grid-template-columns:30px minmax(0,1fr);gap:5px 8px;align-items:center;font-size:11px;color:var(--hud-muted)}
 .fbar{position:relative;height:16px;border-radius:8px;background:rgba(255,255,255,.1);overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
@@ -2206,7 +2213,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.132.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.133.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -4502,7 +4509,7 @@ function reelInit(r, opts, g) {
   const S0 = tf.s * (.85 + dn * .3) * (coop ? 1.2 : 1) * g.stamMul;
   if (coop) { g.lineMax *= .96; g.dragMax *= .96; }
   const dist = tf.dist + Math.random() * 4;
-  return { on: true, r, coop, g, type, tf, sp: fishSpecials(r.f.tier, type), twist: 0, snag: 0, slack: 0, jumpsLeft: 0, burst: false, rage: 0, P: P0, S0, dist, dist0: dist, stam: 1, heat: 0, maxHeat: 0, tension: .3, F: .3,
+  return { on: true, r, coop, g, type, tf, sp: fishSpecials(r.f.tier, type), twist: 0, snag: 0, slack: 0, twistRaw: 0, snagRaw: 0, slackRaw: 0, saved: {}, jumpsLeft: 0, burst: false, rage: 0, P: P0, S0, dist, dist0: dist, stam: 1, heat: 0, maxHeat: 0, tension: .3, F: .3,
     st: "run", stT: 1.1, runBoost: .1, jumpChecked: false, hold: false, drag: S.autoDrag ? 3 : S.drag, lineOut: 0, overT: 0, shook: false,
     manual: !S.autoDrag, time: 0, perfect: false };
 }
@@ -4571,28 +4578,42 @@ function fightStep(dt, R) {
     if (R.hold) R.dist -= g.speed * (1 - Math.min(.85, R.F * .6)) * dt;
     else { R.dist += R.F * .7 * dt; if (st === "cruise" || st === "tired") R.stam = Math.min(1, R.stam + R.tf.regen * dt); }   // v1.122: 쉬는 동안(유영 · 지침)만 회복 — 드랙이 세져서 줄이 덜 풀려도 버티기만 하면 지쳐요
   }
-  if (st === "rage" && g.calm) R.tension *= 1 - g.calm;
+  if (st === "rage" && g.calm) { const pre = R.tension; R.tension *= 1 - g.calm; if (!R.sim && R.hold && pre > g.lineMax && R.tension <= g.lineMax) fightSave("calm"); }
   if (!R.hold && R.tension > g.lineMax * .97) R.tension = g.lineMax * .97;   // v1.122: 손을 떼고 있으면 줄이 풀려 나가서 끊기진 않아요 — 대신 줄이 다 풀리면(릴 줄 길이) 도망가요   // 몸부림 충격 흡수: 물고기 힘(지치는 속도)은 그대로, 줄에 걸리는 장력만 줄어요
   R.lineOut = out;
   // v1.126 변수 행동 게이지 (0 → 1 이면 놓쳐요)
   const tier = R.r && R.r.f ? R.r.f.tier : 0;
   // 바르게 대응해도 등급이 높을수록 게이지가 조금씩은 차요 → 그 능력이 좋은 낚싯대 · 채비가 대물에서 차이를 만들어요
   const hi = .1 + .03 * tier;
-  if (st === "spin") R.twist += dt * ((R.hold ? .75 : 0) + hi) * (1 - g.twistRes); else R.twist = Math.max(0, R.twist - dt * .25);
-  if (st === "dive" && R.sp && R.sp.snag) R.snag += dt * R.sp.snag * (R.hold ? hi * 2 : 1) * (1 - g.lift); else R.snag = Math.max(0, R.snag - dt * .2);
-  if (st === "charge") { R.dist -= (1 + tier * .12) * dt; R.slack += dt * (R.hold ? hi * 2.5 : 1.05) * g.slackMul * (1 - .6 * g.sense); } else R.slack = Math.max(0, R.slack - dt * .6);
+  // *Raw = 장비 능력이 없었다면 찼을 양 → 그건 넘었는데 실제론 안 넘었으면 「버팀!」 (v1.133)
+  if (st === "spin") { const inc = dt * ((R.hold ? .75 : 0) + hi); R.twist += inc * (1 - g.twistRes); R.twistRaw = (R.twistRaw || 0) + inc; } else { R.twist = Math.max(0, R.twist - dt * .25); R.twistRaw = Math.max(0, (R.twistRaw || 0) - dt * .25); }
+  if (st === "dive" && R.sp && R.sp.snag) { const inc = dt * R.sp.snag * (R.hold ? hi * 2 : 1); R.snag += inc * (1 - g.lift); R.snagRaw = (R.snagRaw || 0) + inc; } else { R.snag = Math.max(0, R.snag - dt * .2); R.snagRaw = Math.max(0, (R.snagRaw || 0) - dt * .2); }
+  if (st === "charge") { R.dist -= (1 + tier * .12) * dt; const inc = dt * (R.hold ? hi * 2.5 : 1.05); R.slack += inc * g.slackMul * (1 - .6 * g.sense); R.slackRaw = (R.slackRaw || 0) + inc; } else { R.slack = Math.max(0, R.slack - dt * .6); R.slackRaw = Math.max(0, (R.slackRaw || 0) - dt * .6); }
+  if (!R.sim) { if (R.twistRaw >= 1 && R.twist < 1) fightSave("twist"); if (R.snagRaw >= 1 && R.snag < 1) fightSave("snag"); if (R.slackRaw >= 1 && R.slack < 1) fightSave("slack"); if (R.dist > 60 && g.far > 60) fightSave("far"); }
   if (R.burst && R.hold) R.heat += .35 * g.heatMul * dt;   // 속임수 돌진 때 감고 있으면 릴이 확 뜨거워져요
   if (R.twist >= 1) return "twist";
   if (R.snag >= 1) return "snag";
   if (R.slack >= 1) return "slack";
   R.stam = Math.max(0, R.stam - (R.F * (st === "run" || st === "rage" ? 1.4 : 1) + out * .05) / R.S0 * g.tire * dt);
   R.maxHeat = Math.max(R.maxHeat, R.heat);
-  if (st === "jump" && R.hold && !R.jumpChecked && R.stT < .6) { R.jumpChecked = true; if (!g.barbed && R.tension > .55 && Math.random() < .4 * g.jump) { R.shook = true; return "shake"; } }
+  if (st === "jump" && R.hold && !R.jumpChecked && R.stT < .6) { R.jumpChecked = true; const jr = Math.random(); if (!g.barbed && R.tension > .55 && jr < .4 * g.jump) { R.shook = true; return "shake"; } if (!R.sim && R.tension > .55 && jr < .4) fightSave("jump"); }
   if (!(S.isOwner && LAB.noBreak) && R.tension > g.lineMax) return "snap";   // 실험실: 줄 안 끊김
   if (R.heat >= 1) { R.heat = 1; R.overT += dt; if (R.overT > .8) return "heat"; } else R.overT = 0;
   if (R.dist <= g.landAt) return "land";
   if (R.dist > g.far) return "far";   // v1.122: 도망 한계 = 릴에 감긴 줄 길이
   return null;
+}
+/* v1.133 「버팀!」: 실수해서 놓칠 뻔했는데 장비 능력 덕분에 버틴 순간 (싸움마다 종류별로 한 번) */
+const SAVE_KO = { twist: ["🌀", "꼬임 방지 덕분에 줄이 안 끊겼어요"], snag: ["🪨", "들어 올리기 덕분에 바위에서 빼냈어요"], slack: ["💨", "감도 · 바늘 덕분에 안 빠졌어요"],
+  jump: ["🪝", "점프했는데 바늘이 안 빠졌어요"], calm: ["💥", "충격 흡수 덕분에 줄이 버텼어요"], far: ["📏", "긴 릴 줄 덕분에 안 놓쳤어요 (60m 넘음)"] };
+function fightSave(kind) {
+  const R = REEL; if (!R.on || R.sim) return; R.saved = R.saved || {}; if (R.saved[kind]) return; R.saved[kind] = 1;
+  const [ico, txt] = SAVE_KO[kind] || ["🛡️", "장비 덕분에 버텼어요"];
+  stat("saves"); try { navigator.vibrate && navigator.vibrate([20, 40, 60]); } catch {} sfx("jingle-rare", .35);
+  const box = document.querySelector("#fight .fbox"); if (!box) return;
+  const el = h("div", { class: "fsave" }, h("span", { class: "fsave-i", text: ico }), h("b", { text: "버팀!" }), h("small", { text: txt }));
+  for (let i = 0; i < 10; i++) { const sp = h("i", { class: "fsave-s" }); sp.style.setProperty("--a", (i * 36) + "deg"); el.append(sp); }
+  box.append(el); setTimeout(() => el.remove(), 2200);
 }
 function drawFight() {
   const R = REEL, g = R.g, tr = clamp(R.tension / g.lineMax, 0, 1.05);
