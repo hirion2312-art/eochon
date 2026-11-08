@@ -1735,7 +1735,7 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
   .sheet.mp #sheetBody{flex:1 1 auto!important;min-height:0!important;overflow:hidden!important;display:flex;flex-direction:column;gap:8px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))!important}
   .sheet.mp #sheetSub{display:none}
 }
-.mp-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:none}.mp-tabs button{flex:1 0 auto;min-height:40px;padding:0 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:inherit;font:700 13px/1 inherit;white-space:nowrap}
+.mp-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:none}.mp-tabs button{flex:1 0 auto;min-height:40px;padding:0 8px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:inherit;font:700 13px/1 inherit;white-space:nowrap}
 .mp-tabs button.on{background:#e2522c;border-color:#e2522c;color:#fff}
 .mp-gridwrap{flex:1;min-height:0;position:relative}
 .mp-grid{display:grid;gap:8px;height:100%}
@@ -1765,6 +1765,28 @@ body.atrest .hud.chat,body.atrest .place,body.atrest #standBtn{display:none!impo
 .mp-dinfo{display:flex;flex-direction:column;align-items:center;gap:2px}.mp-kind{font-size:11.5px;font-weight:800;color:#a8740a}.mp-dname{font-size:18px}.mp-price{font-size:14px;font-weight:800}
 .mp-perks{list-style:none;margin:0;padding:0;width:100%;display:flex;flex-direction:column;gap:4px}.mp-perks li{display:flex;gap:8px;font-size:12.5px;line-height:1.35;padding:5px 8px;border-radius:10px;background:rgba(255,255,255,.08)}
 .mp-note{font-size:12px;line-height:1.4;padding:6px 10px;border-radius:10px;background:rgba(23,138,138,.16)}
+.mp-chips{flex:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}.mp-chips button{min-height:34px;padding:2px 2px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:inherit;font:700 11px/1.1 inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative}.mp-chips button small{font-size:9.5px;opacity:.75}.mp-chips button i{position:absolute;top:3px;left:3px}.mp-chips button i{width:8px;height:8px;border-radius:50%;background:var(--tc)}.mp-chips button.on{background:#e2522c;border-color:#e2522c;color:#fff}
+.mp-tile.unknown img{filter:brightness(0) opacity(.45)}.mp-chk.n{background:rgba(0,0,0,.35);width:auto;min-width:20px;padding:0 5px;border-radius:999px}
+.mp-dex{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px;margin:0!important}.mp-dex .dx-big{max-height:150px}.mp-dex .dx-big img{max-height:140px}.mp-dex .dx-desc{font-size:12.5px;margin:4px 0}
+.mp-row{display:flex;align-items:center;gap:8px;padding:0 10px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:13px;min-width:0}.mp-row img{width:44px;height:24px;object-fit:contain}.mp-row .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mp-row .mm.up{color:#e2402a}.mp-row .mm.down{color:#2a78bb}
+.mp-today{flex:none;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:linear-gradient(135deg,rgba(255,216,77,.22),rgba(255,140,60,.14))}.mp-today img{width:56px;height:30px;object-fit:contain}.mp-today small{display:block;font-size:11px;color:var(--muted)}.mp-today .grow{flex:1;min-width:0}
+.mp-steps{flex:none;display:flex;gap:4px}.mp-steps button{flex:1;min-height:36px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--muted);font:700 12.5px/1 inherit}.mp-steps button.on{background:#e2522c;border-color:#e2522c;color:#fff}.mp-steps button.done{color:#2f8f5b;border-color:#2f8f5b}
+.mp-pane{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}.mp-pane.top{justify-content:flex-start;align-items:stretch}
+.mp-ta{width:100%;font-size:16px;border-radius:12px;padding:10px;resize:none}
+.mp-promo{display:block;width:auto;max-width:100%;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.25)}.mp-promo.s0{height:min(30vh,220px)}.mp-promo.s1{height:min(24vh,190px)}.mp-promo.s2{height:min(52vh,420px)}
+.mp-lab{align-self:flex-start;font-weight:800;font-size:12px;color:var(--muted)}
+.mp-sw{display:flex;flex-wrap:wrap;gap:6px;width:100%}.mp-sw button{width:42px;height:42px;border-radius:12px;border:2px solid var(--line);background:var(--bg);display:grid;place-items:center;padding:0}.mp-sw button canvas{width:30px;height:30px}.mp-sw button.on{border-color:#e2522c;box-shadow:0 0 0 2px rgba(226,82,44,.45)}.mp-sw.f button{width:auto;flex:1;padding:0 8px;color:inherit;font:700 13px/1 inherit}
+.mp-quote{flex:none;font-size:13px;text-align:center;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.08);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp-stats{flex:none;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.mp-stats span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-radius:12px;background:rgba(255,255,255,.07)}.mp-stats small{font-size:11px;color:var(--muted)}.mp-stats b{font-size:12.5px;color:#f2b630}
+.mp-guests{flex:1;min-height:0;overflow:hidden}.mp-empty2{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center}
+.mp-tools{flex:none;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.mp-tools .rs-tool{min-height:50px;width:auto}
+.mp-canvas{flex:none;width:100%}.mp-canvas .canvasbox{width:100%;aspect-ratio:2/1;height:auto}.mp-canvas canvas{width:100%!important;height:100%!important}
+.mp-sizes{flex:none;display:flex;gap:6px}.mp-sizes button{flex:1;min-height:40px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:inherit;font:700 12.5px/1 inherit;display:flex;align-items:center;justify-content:center;gap:6px}.mp-sizes button i{border-radius:50%}.mp-sizes button.on{border-color:#e2522c;background:rgba(226,82,44,.12)}
+.mp-paints{flex:1;min-height:0;display:grid;grid-template-columns:repeat(8,1fr);gap:6px;align-content:center}.mp-paints button{aspect-ratio:1;max-height:44px;border-radius:50%;border:2px solid rgba(0,0,0,.25);padding:0}.mp-paints button.on{outline:3px solid #e2522c;outline-offset:2px}
+.mp-tank{flex:1;min-height:120px;max-height:none;border-radius:16px}.mp-tank.sm{flex:none;height:min(24vh,170px);min-height:0}
+.mp-field{display:flex;flex-direction:column;gap:4px}.mp-field small{font-weight:800;font-size:12px;color:var(--muted)}.mp-field input,.mp-field textarea{font-size:16px;border-radius:12px;padding:10px;resize:none;width:100%}
+.mp-tix{flex:1;min-height:0;overflow:hidden}.mp-tix .rgrades{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mp-chk4{flex:none;display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
 @media (prefers-reduced-transparency:reduce){.glass,.sheet,.hud.dock,.hud.stat,.hud.chat,.toast{background:#141c25!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 /* 개인정보 안내 · 동의 (v1.96) */
 .consent-ov{position:fixed;inset:0;background:rgba(4,10,14,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:14px}
@@ -2177,7 +2199,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.121.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.122.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -15333,7 +15355,7 @@ function mpGrid(body, o) {   // o: { key, items, tile(it) → 요소, tap(it), t
   if (!o.items.length) { wrap.append(h("div", { class: "mp-empty" }, o.empty || "비어 있어요")); pager.remove(); return; }
   const lay = () => {
     const W = wrap.clientWidth, H = wrap.clientHeight; if (!W || !H) { requestAnimationFrame(lay); return; }
-    const gap = 8, cols = Math.max(2, Math.floor((W + gap) / (o.tw + gap))), rows = Math.max(1, Math.floor((H + gap) / (o.th + gap))), per = cols * rows, pages = Math.max(1, Math.ceil(o.items.length / per));
+    const gap = 8, cols = o.one ? 1 : Math.max(2, Math.floor((W + gap) / (o.tw + gap))), rows = Math.max(1, Math.floor((H + gap) / (o.th + gap))), per = cols * rows, pages = Math.max(1, Math.ceil(o.items.length / per));
     st.page = clamp(st.page, 0, pages - 1); st.per = per;
     grid.style.gridTemplateColumns = "repeat(" + cols + ",minmax(0,1fr))"; grid.style.gridAutoRows = Math.floor((H - gap * (rows - 1)) / rows) + "px";
     grid.replaceChildren(...o.items.slice(st.page * per, st.page * per + per).map(it => { const el = o.tile(it); el.addEventListener("click", () => o.tap(it)); return el; }));
@@ -15421,6 +15443,207 @@ MSHEETS.shop = (body) => {
       h("small", { class: "num", text: locked ? "🔒 Lv." + it.lv : stt.using ? "쓰는 중" : (cat === "bait" || cat === "tackle") && stt.count ? "보유 " + stt.count : stt.own ? "보유" : it.price ? won(it.price) : "무료" })); },
     tap: (it) => { st.det = { cat, id: it.id }; sfx("ui-click", .25); refreshSheet(true); } });
   mpBar(body, [], (GEAR_HELP[cat] || {}).what || "");
+};
+// ── 도감 (v1.122 휴대폰 2단계) ──
+MSHEETS.dex = (body) => {
+  const base = BUILTIN, mine = S.userFish, known = (id) => P.dex[id] && P.dex[id].n > 0, tab = ["base", "user", "market"].includes(S.dexTab) ? S.dexTab : "base", st = mpState("dex");
+  setHead("📖 도감", "기본 " + base.filter(f => known(f.id)).length + "/" + base.length);
+  const all = tab === "user" ? mine.filter(f => visible(f) || f.owner === S.uid) : base;
+  const det = st.det ? all.find(f => f.id === st.det) : null;
+  if (det && tab !== "market") {
+    mpBack(body, "목록으로", () => { st.det = null; refreshSheet(true); });
+    const box = dexDetail(det, known(det.id)); box.classList.add("mp-dex"); const x = box.querySelector(".dx-x"); if (x) x.remove();
+    body.append(box); return;
+  }
+  mpTabs(body, [["base", "🐟 기본"], ["user", "🎨 방류 " + mine.filter(visible).length], ["market", "📈 시세"]], tab, (id) => { S.dexTab = id; st.det = null; refreshSheet(true); });
+  if (tab === "market") {
+    const tf = findFish(todayFish());
+    body.append(h("div", { class: "mp-today" }, h("img", { src: fishArt(tf).src, alt: "" }), h("span", { class: "grow" }, h("small", { text: "⭐ 오늘의 생선 · 팔면 ×" + TODAY_FISH_MUL }), h("b", { text: tf.name })), h("b", { class: "num", text: won(sellValue(Math.round(priceFor(tf, 1) * TODAY_FISH_MUL))) })));
+    const rows = BUILTIN.filter(f => f.id !== tf.id).map(f => ({ f, m: fishMul(f.id), tr: fishTrend(f.id) })).sort((a, b) => b.m - a.m);
+    mpGrid(body, { key: "dex-mkt", items: rows, one: true, tw: 400, th: 46,
+      tile: ({ f, m, tr }) => h("div", { class: "mp-row" }, h("img", { src: fishArt(f).src, alt: "" }), h("b", { class: "grow", text: known(f.id) ? f.name : "???" }), tierChip(f.tier),
+        h("span", { class: "num", text: won(sellValue(Math.round(priceFor(f, 1) * m))) }), h("span", { class: "num mm " + (tr > 0 ? "up" : tr < 0 ? "down" : ""), text: "×" + m.toFixed(2) + (tr > 0 ? "▲" : tr < 0 ? "▼" : "") })),
+      tap: () => {} });
+    mpBar(body, [], "시세는 한국 시각 자정마다 바뀌어요 · 보통 크기 한 마리 값");
+    return;
+  }
+  let list;
+  if (tab === "base") {
+    const tf = S.dexTier == null ? -1 : S.dexTier;
+    body.append(h("div", { class: "mp-chips" }, h("button", { class: tf < 0 ? "on" : "", onclick: () => { S.dexTier = null; mpState("dex-base").page = 0; refreshSheet(true); }, text: "전체" }),
+      TIERS.map((T, i) => { const a = base.filter(f => f.tier === i).length, g = base.filter(f => f.tier === i && known(f.id)).length;
+        return h("button", { class: tf === i ? "on" : "", style: "--tc:var(" + TIER_VARS[i] + ")", onclick: () => { S.dexTier = tf === i ? null : i; mpState("dex-base").page = 0; refreshSheet(true); } }, h("i"), T.name, h("small", { class: "num", text: g + "/" + a })); })));
+    list = base.filter(f => tf < 0 || f.tier === tf).sort((a, b) => a.tier - b.tier || (known(b.id) - known(a.id)));
+  } else list = all.slice().sort((a, b) => b.ts - a.ts);
+  mpGrid(body, { key: "dex-" + tab, items: list, tw: 76, th: 98, empty: tab === "user" ? "아직 방류된 물고기가 없어요 · 방류소에서 그려 풀어 보세요" : "",
+    tile: (f) => { const show = known(f.id) || (f.user && f.owner === S.uid), d = P.dex[f.id];
+      return mpTile(show ? "" : "unknown", f.id === todayFish() ? h("span", { class: "mp-tag", text: "⭐" }) : null, d ? h("span", { class: "mp-chk n", text: d.n }) : null,
+        h("span", { class: "mp-pic" }, h("img", { src: fishArt(f).src, alt: "" })), h("b", { class: "mp-nm", text: show ? f.name : "???" }), tierChip(f.tier)); },
+    tap: (f) => { st.det = f.id; sfx("ui-click", .25); refreshSheet(true); } });
+  if (tab === "user") mpBar(body, [h("button", { class: "btn", onclick: () => { closeSheet(); goBuilding("release"); }, text: "🎨 방류소 가기" })]);
+};
+// ── 회 센터 ──
+MSHEETS.sashimi = (body) => {
+  const tab = S.sashTab === "dish" ? "dish" : "tank", full = P.dishes.length >= DISH_MAX;
+  setHead("🔪 회 센터", P.dishes.length + " / " + DISH_MAX + "접시");
+  const fish = P.bag.filter(it => !isShell(it.fishId)).sort((a, b) => b.tier - a.tier || b.price - a.price);
+  mpTabs(body, [["tank", "🐟 수조 " + fish.length], ["dish", "🍣 선반 " + P.dishes.length]], tab, (id) => { S.sashTab = id; refreshSheet(true); });
+  if (tab === "tank") {
+    const sel = fish.find(x => x.id === S.sashSel) || null;
+    mpGrid(body, { key: "sash-tank", items: fish, tw: 100, th: 112, empty: [h("div", { style: "font-size:40px", text: "🐟" }), "수조가 비어 있어요 · 부두에서 낚아 오세요"],
+      tile: (it) => mpTile(it === sel ? "on" : "", h("span", { class: "mp-pic" }, fishImg(it.fishId)), h("b", { class: "mp-nm", text: it.name }), h("small", { text: "회 " + won(dishPrice(makeDish(it))) }), tierChip(it.tier)),
+      tap: (it) => { S.sashSel = S.sashSel === it.id ? null : it.id; sfx("ui-click", .2); refreshSheet(true); } });
+    const d = sel ? makeDish(sel) : null;
+    mpBar(body, [fish.length > 1 ? h("button", { class: "btn", disabled: full, onclick: () => cutMany(fish), text: "전부 뜨기 (" + Math.min(fish.length, Math.max(0, DISH_MAX - P.dishes.length)) + ")" }) : null,
+      h("button", { class: "btn pri", disabled: !sel || full, onclick: () => { if (sel) { S.sashSel = null; cutSashimi(sel); } }, text: full ? "선반이 가득 찼어요" : sel ? "🔪 " + sel.name + " 회 뜨기" : "물고기를 골라요" })],
+      d ? "그냥 팔면 " + won(fishSell(sel)) + " · 회로 노점에 내면 " + won(dishPrice(d)) + " · 먹으면 " + buffText(d.buff) + " " + d.buff.min + "분" : "물고기를 고르면 회 값과 먹을 때 효과가 보여요");
+  } else {
+    const st = mpState("sash-dish"), sel = P.dishes.find(d => d.id === st.sel) || null, act = P.buffs.filter(b => b.until > Date.now());
+    mpGrid(body, { key: "sash-dish", items: P.dishes, tw: 100, th: 112, empty: [h("div", { style: "font-size:40px", text: "🍣" }), "아직 뜬 회가 없어요 · 수조에서 떠 보세요"],
+      tile: (d) => mpTile(d === sel ? "on" : "", h("span", { class: "mp-pic" }, fishImg(d.fishId)), h("b", { class: "mp-nm", text: d.name.replace(/ 회$/, "") }), h("small", { text: buffText(d.buff) + " · " + d.buff.min + "분" }), tierChip(d.tier)),
+      tap: (d) => { st.sel = st.sel === d.id ? null : d.id; sfx("ui-click", .2); refreshSheet(true); } });
+    mpBar(body, [h("button", { class: "btn pri", disabled: !sel, onclick: () => { if (sel) { st.sel = null; eatDish(sel); } }, text: sel ? "🍣 먹기 · " + buffText(sel.buff) : "회를 골라 먹어요" })],
+      act.length ? "지금 효과: " + act.map(b => buffText(b) + " " + fmtLeft(b.until - Date.now())).join(" · ") : "노점에 올리면 손님에게 팔 수도 있어요");
+  }
+};
+// ── 노점 열기 · 홍보 종이: 단계형 ① 문구 ② 꾸미기 ③ 붙이기 ──
+MSHEETS.stallopen = (body, i) => {
+  const editing = typeof i !== "number";
+  if (!editing && !isJob("sashimi")) return SHEETS.stallopen(body, i);
+  const own = myOwnStall(), st = editing ? S.stalls[own] : S.stalls[i];
+  if (!editing && stallAlive(st) && st.owner !== S.uid) return SHEETS.stallopen(body, i);
+  const key = editing ? "edit" : i, ms = mpState("stallopen");
+  if (promoEd.for !== key) { Object.assign(promoEd, normPromo(st && st.owner === S.uid ? st.promo : null), { for: key }); if (!(st && st.owner === S.uid)) promoEd.text = ""; ms.step = 0; }
+  const step = ms.step || 0, go = (n) => { ms.step = n; refreshSheet(true); };
+  setHead(editing ? "홍보 종이 고치기" : boothName(i) + " 열기", "");
+  body.append(h("div", { class: "mp-steps" }, ["① 문구", "② 꾸미기", "③ 붙이기"].map((l, k) => h("button", { class: k === step ? "on" : k < step ? "done" : "", onclick: () => go(k), text: l }))));
+  const pc = promoCanvas(promoEd, 300); pc.className = "mp-promo s" + step;
+  const redraw = () => { const c2 = promoCanvas(promoEd, 300); pc.getContext("2d").clearRect(0, 0, 300, 400); pc.getContext("2d").drawImage(c2, 0, 0); };
+  if (step === 0) {
+    const ta = h("textarea", { rows: "3", maxlength: "60", class: "mp-ta", placeholder: "예: 갓 잡은 참돔회 있어요! 첫 손님 환영 🐟", "aria-label": "홍보 문구" }); ta.value = promoEd.text;
+    const cnt = h("small", { class: "muted", text: ta.value.length + " / 60" });
+    ta.addEventListener("input", () => { promoEd.text = ta.value; redraw(); cnt.textContent = ta.value.length + " / 60"; });
+    body.append(h("div", { class: "mp-pane" }, h("b", { text: "손님에게 할 한마디를 적어요" }), ta, cnt, pc));
+    mpBar(body, [editing ? h("button", { class: "btn", onclick: () => { promoEd.for = null; openSheet("mystall"); }, text: "취소" }) : null, h("button", { class: "btn pri", onclick: () => { promoEd.text = ta.value; go(1); }, text: "다음 · 꾸미기 ›" })]);
+  } else if (step === 1) {
+    const set = (k, v) => { promoEd[k] = v; refreshSheet(true); };
+    body.append(h("div", { class: "mp-pane" }, pc,
+      h("small", { class: "mp-lab", text: "종이 색" }), h("div", { class: "mp-sw" }, PROMO_PAPERS.map((v, k) => h("button", { class: promoEd.paper === k ? "on" : "", style: "background:" + v, "aria-label": "종이 색 " + (k + 1), onclick: () => set("paper", k) }))),
+      h("small", { class: "mp-lab", text: "스티커" }), h("div", { class: "mp-sw" }, PROMO_STICKERS.map((v, k) => { const c3 = document.createElement("canvas"); c3.width = c3.height = 56; SICON[v](c3.getContext("2d"), 28, 28, 44);
+        return h("button", { class: promoEd.sticker === k ? "on" : "", "aria-label": "스티커 " + (k + 1), onclick: () => set("sticker", k) }, c3); })),
+      h("small", { class: "mp-lab", text: "글씨" }), h("div", { class: "mp-sw f" }, PROMO_FONTS.map(([f, l], k) => h("button", { class: promoEd.font === k ? "on" : "", onclick: () => set("font", k), text: l })))));
+    mpBar(body, [h("button", { class: "btn", onclick: () => go(0), text: "‹ 문구" }), h("button", { class: "btn pri", onclick: () => go(2), text: "다음 · 붙이기 ›" })]);
+  } else {
+    body.append(h("div", { class: "mp-pane" }, pc, h("small", { class: "muted", text: editing ? "이 종이로 바꿔 붙여요" : "노점 앞에 이렇게 붙어요 · 열면 상은 비어 있어요. 회를 올려 팔아요" })));
+    const b = h("button", { class: "btn pri", onclick: async () => {
+      b.disabled = true;
+      if (editing) { if (await savePromo(promoEd)) { toast("홍보 종이를 새로 붙였어요"); promoEd.for = null; openSheet("mystall"); } else b.disabled = false; }
+      else { promoEd.for = null; await openStall(i, { ...promoEd }); }
+    }, text: editing ? "📌 바꿔 붙이기" : "📌 붙이고 노점 열기" });
+    mpBar(body, [h("button", { class: "btn", onclick: () => go(1), text: "‹ 꾸미기" }), b]);
+  }
+};
+// ── 노점 (손님) ──
+MSHEETS.stall = (body, i) => {
+  const st = S.stalls[i];
+  if (!stallAlive(st)) return SHEETS.stall(body, i);
+  if (st.owner === S.uid) return MSHEETS.mystall(body);
+  const npc = npcActive(st) && !ownerAtStall(i), ms = mpState("stall"), sel = st.menu.find(m => m.id === ms.sel) || null;
+  setHead(st.nick + "네 횟집", (npc ? "알바생이 팔고 있어요 · " : "") + won(P.gold));
+  if (st.promo && st.promo.text) body.append(h("div", { class: "mp-quote", text: "“" + st.promo.text + "”" }));
+  mpGrid(body, { key: "stall", items: st.menu, tw: 100, th: 118, empty: [h("div", { style: "font-size:40px", text: "🍽" }), "아직 상이 비어 있어요 · 조금 뒤에 다시 와 보세요"],
+    tile: (m) => mpTile(m === sel ? "on" : "", h("span", { class: "mp-pic" }, fishImg(m.fishId)), h("b", { class: "mp-nm", text: m.name }), h("small", { class: "num", text: won(m.price) }), h("small", { text: buffText(m.buff) })),
+    tap: (m) => { ms.sel = ms.sel === m.id ? null : m.id; sfx("ui-click", .2); refreshSheet(true); } });
+  const short = sel ? sel.price - P.gold : 0;
+  mpBar(body, [h("button", { class: "btn pri", disabled: !sel || short > 0, onclick: () => { if (sel) { ms.sel = null; buyDish(i, sel); } }, text: !sel ? "회를 골라요" : short > 0 ? won(short) + " 부족" : "🍣 사기 · " + won(sel.price) })],
+    sel ? dishBuffLine(sel) + " · " + buffEffectNote(sel.buff) : "사면 바로 회 보관함에 들어와요");
+};
+// ── 노점 (사장님): 탭 영업 · 회 · 알바 · 꾸미기 · 종이 ──
+MSHEETS.mystall = (body) => {
+  const i = S.myStall >= 0 ? S.myStall : myOwnStall(), st = S.stalls[i];
+  if (i < 0 || !st) return SHEETS.mystall(body);
+  const seated = S.myStall === i, npc = npcActive(st), ms = mpState("mystall"), tab = ms.tab || "biz";
+  setHead("내 횟집 · " + boothName(i), seated ? "🔥 영업 중" : npc ? "알바생이 팔고 있어요" : "자리를 비웠어요");
+  mpTabs(body, [["biz", "🔥영업"], ["menu", "🍣회 " + st.menu.length], ["staff", "🧑‍🍳알바"], ["upg", "🛠꾸미기"], ["paper", "📜종이"]], tab, (id) => { ms.tab = id; ms.sel = null; refreshSheet(true); });
+  const stars = shopStars();
+  if (tab === "biz") {
+    body.append(h("div", { class: "mp-stats" },
+      h("span", null, h("small", { text: "평판" }), h("b", { text: "★".repeat(stars) + "☆".repeat(5 - stars) })),
+      h("span", null, h("small", { text: "오늘" }), h("b", { class: "num", text: S.shopToday.n + "접시 · " + won(S.shopToday.gold) })),
+      h("span", null, h("small", { text: "상 위" }), h("b", { class: "num", text: st.menu.length + "/" + menuMax() }))));
+    if (seated) { body.append(h("div", { id: "guestPanel", class: "guests mp-guests" })); setTimeout(renderGuests, 0); }
+    else body.append(h("div", { class: "mp-empty2" }, h("div", { style: "font-size:44px", text: "🪑" }), h("b", { text: "노점에 앉아야 손님이 주문해요" }), h("small", { class: "muted", text: "직접 팔면 팁과 평판을 받아요 · 알바는 천천히 팔고 팁이 없어요" })));
+    mpBar(body, [armBtn("노점 닫기", "한 번 더 누르면 닫혀요", () => { closeSheet(); closeStall(); }),
+      seated && boothStaff() ? h("button", { class: "btn", onclick: () => { boothKeep(true); setTimeout(leaveStallSeat, 400); }, text: "알바에게 맡기기" }) : null,
+      !seated ? h("button", { class: "btn pri", onclick: () => returnToStall(i), text: "🪑 가서 앉기" }) : null]);
+  } else if (tab === "menu") {
+    const room = menuMax() - st.menu.length, items = st.menu.map(m => ["on", m]).concat(P.dishes.map(d => ["bag", d]));
+    mpGrid(body, { key: "mystall-menu", items, tw: 100, th: 112, empty: [h("div", { style: "font-size:40px", text: "🍣" }), "가진 회가 없어요 · 회 센터에서 떠 오세요"],
+      tile: ([k, d]) => mpTile(k === "on" ? "on" : "", k === "on" ? h("span", { class: "mp-tag", text: "상 위" }) : null, h("span", { class: "mp-pic" }, fishImg(d.fishId)), h("b", { class: "mp-nm", text: d.name.replace(/ 회$/, "") }), h("small", { class: "num", text: won(k === "on" ? d.price : dishPrice(d)) }), h("small", { text: k === "on" ? "눌러서 내리기" : seated ? "눌러서 올리기" : "앉아야 올려요" })),
+      tap: ([k, d]) => { if (k === "on") unlistDish(d.id); else if (!seated) toast("노점에 앉아 있어야 올릴 수 있어요"); else if (room <= 0) toast("상이 가득 찼어요"); else listDish(d.id); } });
+    mpBar(body, [h("button", { class: "btn pri", disabled: !seated || room <= 0 || !P.dishes.length, onclick: () => listDishes(P.dishes.map(d => d.id)), text: "🍣 모두 올리기 (" + Math.max(0, Math.min(room, P.dishes.length)) + ")" })], "상 " + st.menu.length + "/" + menuMax() + "접시 · 값은 기본 판매가의 " + DISH_MUL + "배");
+  } else if (tab === "staff") {
+    const cur = P.rest.booth && P.rest.booth.g, sel = ms.sel || cur, B = sel && BOOTH_STAFF[sel];
+    mpGrid(body, { key: "mystall-staff", items: Object.entries(BOOTH_STAFF), tw: 150, th: 110,
+      tile: ([g, b]) => mpTile(g === sel ? "on" : "", g === cur ? h("span", { class: "mp-tag", text: "근무 중" }) : null, h("div", { style: "font-size:30px", text: b.ico }), h("b", { class: "mp-nm", text: b.name }), h("small", { text: "고용 " + won(b.hire) + " · 일당 " + won(b.wage) })),
+      tap: ([g]) => { ms.sel = g; refreshSheet(true); } });
+    mpBar(body, [sel && sel === cur ? h("button", { class: "btn", onclick: fireBoothStaff, text: "내보내기" }) : B ? h("button", { class: "btn pri", disabled: P.gold < B.hire + B.wage, onclick: () => hireBoothStaff(sel), text: (cur ? "바꾸기 · " : "고용 · ") + won(B.hire + B.wage) }) : null],
+      B ? B.d : "알바가 있으면 자리를 비워도 회가 팔려요 · 고용비는 처음 한 번, 일당은 날마다");
+  } else if (tab === "upg") {
+    const sel = ms.sel && SHOP_UPG[ms.sel] ? ms.sel : null, U = sel && SHOP_UPG[sel], lv = sel ? shopLv(sel) : 0, max = U && lv >= U.cost.length - 1, cost = U && !max ? U.cost[lv + 1] : 0;
+    mpGrid(body, { key: "mystall-upg", items: Object.entries(SHOP_UPG), tw: 100, th: 104,
+      tile: ([k, u]) => mpTile(k === sel ? "on" : "", h("div", { style: "font-size:30px", text: u.ico }), h("b", { class: "mp-nm", text: u.name }), h("small", { text: shopLv(k) + "단계" })),
+      tap: ([k]) => { ms.sel = k; refreshSheet(true); } });
+    mpBar(body, [U ? h("button", { class: "btn pri", disabled: max || P.gold < cost, onclick: () => buyShopUpg(sel), text: max ? "최고 단계" : "올리기 · " + won(cost) }) : null],
+      U ? "지금: " + U.fx(U.eff[lv]) + (max ? "" : " → 다음: " + U.fx(U.eff[lv + 1])) : "어느 노점을 열어도 따라와요 · 골라서 올려요");
+  } else {
+    const pc = promoCanvas(st.promo, 300); pc.className = "mp-promo s2";
+    body.append(h("div", { class: "mp-pane" }, pc));
+    mpBar(body, [h("button", { class: "btn pri", onclick: () => openSheet("stallopen", "edit"), text: "✏️ 홍보 종이 고치기" })]);
+  }
+};
+// ── 방류소: 단계형 ① 방류권 ② 그리기 ③ 이름 ④ 방류 ──
+MSHEETS.studio = (body) => {
+  ensureStudioCanvas();
+  const ms = mpState("studio"), step = ms.step || 0, go = (n) => { ms.step = n; refreshSheet(true); };
+  setHead("🎨 방류소", "");
+  body.append(h("div", { class: "mp-steps" }, ["① 방류권", "② 그리기", "③ 이름", "④ 방류"].map((l, k) => h("button", { class: k === step ? "on" : k < step ? "done" : "", onclick: () => go(k), text: l }))));
+  const free = canReleaseFree(), tixN = free ? 0 : myTickets().length;
+  if (step === 0) {
+    body.append(h("div", { class: "mp-pane top" },
+      free ? h("div", { class: "rs-ban ok" }, h("span", { class: "ic", text: "🛠" }), h("div", { class: "grow" }, h("b", { text: "등급을 골라 방류해요" })))
+        : tixN ? h("div", { class: "rs-ban ok" }, h("span", { class: "ic", text: "🎟" }), h("div", { class: "grow" }, h("b", { text: "방류권 " + tixN + "장 있어요" }), h("small", { text: "하나 골라 그리고 이름을 지으면 바다에 풀 수 있어요" })))
+        : h("div", { class: "rs-ban" }, h("span", { class: "ic", text: "💝" }), h("div", { class: "grow" }, h("b", { text: "물고기 방류는 후원자 전용이에요" }), h("small", { text: "후원하면 금액에 맞는 방류권(1,000원부터)을 받아요 · 그림은 미리 그려 둘 수 있어요" }))),
+      h("div", { id: "releaseBox", class: "rs-tix mp-tix" })));
+    mpBar(body, [!free ? h("button", { class: "btn", onclick: () => openSheet("donate"), text: tixN ? "더 받기" : "💝 후원 안내" }) : null,
+      h("button", { class: "btn pri", onclick: () => go(1), text: free || tixN ? "다음 · 그리기 ›" : "미리 그려 둘게요 ›" })]);
+    renderReleaseBox();
+  } else if (step === 1) {
+    const tool = (id, ico, l) => h("button", { class: "rs-tool", "aria-pressed": String(studio.tool === id), title: l, onclick: () => { studio.tool = id; refreshSheet(true); } }, h("span", { text: ico }), h("small", { text: l }));
+    const clr = h("button", { class: "rs-tool danger", onclick: (e) => { const b = e.currentTarget;
+      if (!b.dataset.armed) { b.dataset.armed = "1"; b.lastChild.textContent = "한 번 더"; setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.lastChild.textContent = "다 지우기"; } }, 2500); return; }
+      pushUndo(); studio.ctx.clearRect(0, 0, 320, 160); studioChanged(); refreshSheet(true); } }, h("span", { text: "🧽" }), h("small", { text: "다 지우기" }));
+    body.append(h("div", { class: "mp-tools" }, tool("pen", "✏️", "펜"), tool("eraser", "🩹", "지우개"), tool("fill", "🪣", "채우기"),
+      h("button", { class: "rs-tool", disabled: !studio.undo.length, onclick: () => { const u = studio.undo.pop(); if (u) studio.ctx.putImageData(u, 0, 0); studioChanged(); refreshSheet(true); } }, h("span", { text: "↶" }), h("small", { text: "되돌리기" })),
+      h("button", { class: "rs-tool", "aria-pressed": String(studio.guide), onclick: () => { studio.guide = !studio.guide; refreshSheet(true); } }, h("span", { text: "🐟" }), h("small", { text: "밑그림" })), clr));
+    body.append(h("div", { class: "mp-canvas" }, h("div", { class: "canvasbox" }, studio.canvas, studio.guide ? guideCanvas() : null)));
+    body.append(h("div", { class: "mp-sizes" }, [[3, "가늘게"], [6, "보통"], [12, "굵게"]].map(([s, l]) => h("button", { class: studio.size === s ? "on" : "", onclick: () => { studio.size = s; refreshSheet(true); } }, h("i", { style: "width:" + (4 + s) + "px;height:" + (4 + s) + "px;background:" + (studio.tool === "eraser" ? "#bbb" : studio.color) }), l))));
+    body.append(h("div", { class: "mp-paints" }, PALETTE16.map(c => h("button", { class: studio.color === c && studio.tool !== "eraser" ? "on" : "", "aria-label": "색 " + c, style: "background:" + c, onclick: () => { studio.color = c; if (studio.tool === "eraser") studio.tool = "pen"; refreshSheet(true); } }))));
+    mpBar(body, [h("button", { class: "btn", onclick: () => go(0), text: "‹ 방류권" }), h("button", { class: "btn pri", onclick: () => go(2), text: "다음 · 이름 ›" })]);
+  } else if (step === 2) {
+    const nameIn = h("input", { id: "fishName", maxlength: "12", placeholder: "예: 노을빛 꽁치", value: studio.name });
+    nameIn.addEventListener("input", () => { studio.name = nameIn.value; studioChanged(); });
+    const descIn = h("textarea", { id: "fishDesc", maxlength: "60", rows: "3", placeholder: "도감에 보일 한 줄 설명" }); descIn.value = studio.desc;
+    descIn.addEventListener("input", () => { studio.desc = descIn.value; });
+    body.append(h("div", { class: "rs-tank mp-tank sm", id: "fprev" }),
+      h("div", { class: "mp-pane top" }, h("label", { class: "mp-field" }, h("small", { text: "물고기 이름 (12자)" }), nameIn), h("label", { class: "mp-field" }, h("small", { text: "한 줄 소개 (60자)" }), descIn)));
+    mpBar(body, [h("button", { class: "btn", onclick: () => go(1), text: "‹ 그리기" }), h("button", { class: "btn pri", onclick: () => go(3), text: "다음 · 방류 ›" })]);
+  } else {
+    body.append(h("div", { class: "rs-tank mp-tank", id: "fprev" }), h("div", { class: "steps rs-steps mp-chk4", id: "steps" }), h("div", { class: "err", id: "studioErr" }));
+    const b = h("button", { class: "btn pri", id: "releaseBtn", onclick: doRelease, text: "🌊 바다에 방류하기" });
+    mpBar(body, [h("button", { class: "btn", onclick: () => go(2), text: "‹ 이름" }), b], "낚일 때마다 판매가의 10%가 로열티로 들어와요");
+  }
+  setTimeout(studioChanged, 0);
 };
 SHEETS.help = (body) => {   // v1.86 도움말 센터: 처음 온 사람이 궁금한 것 한곳에
   setHead("❓ 도움말", "모르는 게 있으면 여기부터 · 카드를 누르면 그림으로 다시 알려 줘요");
@@ -16292,7 +16515,7 @@ async function doRelease() {
     postSys(P.nick + "님이 " + r.name + " 「" + name + "」을 바다에 방류했어요");
     toast("「" + name + "」이 바다로 헤엄쳐 갔어요");
     studio.ctx.clearRect(0, 0, 320, 160); studio.undo = []; studio.name = ""; studio.desc = "";
-    S.dexTab = "user"; openSheet("dex");
+    if (S.mp.studio) S.mp.studio.step = 0; S.dexTab = "user"; openSheet("dex");
   } catch (e) {
     err.textContent = e && e.code === "quota_exceeded" ? "바다가 가득 찼어요. 저장 공간이 부족해 방류하지 못했어요." : "방류하지 못했어요. 방류권은 그대로예요. 잠시 후 다시 시도해 주세요.";
   }
