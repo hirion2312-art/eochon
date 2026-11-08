@@ -2204,7 +2204,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.130.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.131.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -3078,6 +3078,31 @@ const CROPS = [
   { id: "ginseng", name: "인삼", lv: 5, seed: 120, grow: 600, price: 1500, shape: "ginseng", c1: 0xe8d0a0, c2: 0x3f7a3a },
 ];
 const CROP = Object.fromEntries(CROPS.map(c => [c.id, c]));
+/* v1.130 비료 6종: 한 칸에 하나 · 사거나(농가마트) 퇴비장에서 직접 만들어요 */
+const FERTS = {
+  compost: { name: "퇴비", ico: "🟤", d: "특상품 확률 15% → 35%", price: 8 },
+  fish: { name: "어분 비료", ico: "🐟", d: "자라는 시간 −30%", price: 40 },
+  lime: { name: "패각 석회", ico: "🐚", d: "물 주면 촉촉 시간 2배 · 메마르지 않아요", price: 30 },
+  kelp: { name: "해초 액비", ico: "🌊", d: "40% 확률로 2개 수확", price: 60 },
+  high: { name: "고급 비료", ico: "🌿", d: "특상품 확률 → 50%", price: 15 },
+  gold: { name: "황금 비료", ico: "✨", d: "특상품 확정 · 자라는 시간 −20%", price: 0 },
+};
+const FERT_IDS = ["compost", "fish", "lime", "kelp", "gold"];   // high = 예전 비료(P.fert)
+const COMPOST_LV = [{ cost: 0, slots: 0 }, { cost: 4000, slots: 2 }, { cost: 2000, slots: 4 }, { cost: 6000, slots: 6 }];
+const COMPOST_RECIPES = [
+  { id: "compost", need: [["scraps", 5]], min: 120 },
+  { id: "fish", need: [["fish0", 3]], min: 60 },
+  { id: "lime", need: [["shell", 5]], min: 60 },
+  { id: "kelp", need: [["seaweed", 4]], min: 90 },
+  { id: "gold", need: [["scrop", 1], ["f:fish", 1], ["f:lime", 1]], min: 240 },
+];
+const NEED_KO = { scraps: "🍂 수확 부산물", fish0: "🐟 일반 등급 물고기", shell: "🐚 갯벌 조개 · 생물", seaweed: "🌊 해초", scrop: "⭐ 특상품 작물", "f:fish": "🐟 어분 비료", "f:lime": "🐚 패각 석회" };
+const fertN = (id) => id === "high" ? (P.fert || 0) : ((P.ferts || {})[id] || 0);
+const fertAdd = (id, n) => { if (id === "high") P.fert = clamp((P.fert || 0) + n, 0, 999); else { P.ferts = P.ferts || {}; P.ferts[id] = clamp((P.ferts[id] || 0) + n, 0, 999); } };
+const fertTotal = () => Object.keys(FERTS).reduce((a, k) => a + fertN(k), 0);
+const fertKind = (p) => p && p.f ? (FERTS[p.f] ? p.f : "high") : null;   // 예전 칸의 p.f = 1 → 고급 비료
+const fertSpecial = (k) => k === "gold" ? 1 : k === "high" ? .5 : k === "compost" ? .35 : .15;
+const fertSpeed = (k) => k === "fish" ? 1 / .7 : k === "gold" ? 1 / .8 : 1;
 /* 놀거리 목록 (v1.113 · 자세한 동작은 아래 「놀거리」 칸) */
 const TOYS = [
   { id: "spark", ico: "🎇", name: "불꽃 스틱", price: 30, dur: 30000, keep: true, d: "손에 들면 30초 동안 타닥타닥 불꽃이 튀어요. 밤에 특히 예뻐요", tag: "밤에 강추" },
@@ -3127,7 +3152,10 @@ function normProfile(p) {
   o.farm = p.farm && typeof p.farm === "object" ? { lic: !!p.farm.lic, lv: clamp(Math.floor(Number(p.farm.lv) || 0), 0, 5), plots: p.farm.plots && typeof p.farm.plots === "object" ? p.farm.plots : {} } : { lic: false, lv: 0, plots: {} };
   o.crops = {}; if (p.crops && typeof p.crops === "object") for (const c of CROPS) { const v = p.crops[c.id]; if (Array.isArray(v)) o.crops[c.id] = [clamp(Math.floor(Number(v[0]) || 0), 0, 9999), clamp(Math.floor(Number(v[1]) || 0), 0, 9999)]; }
   o.seeds = {}; if (p.seeds && typeof p.seeds === "object") for (const c of CROPS) { const v = Math.floor(Number(p.seeds[c.id]) || 0); if (v > 0) o.seeds[c.id] = Math.min(999, v); }
-  o.fert = clamp(Math.floor(Number(p.fert) || 0), 0, 999); o.martStamp = clamp(Math.floor(Number(p.martStamp) || 0), 0, 1e6);
+  o.fert = clamp(Math.floor(Number(p.fert) || 0), 0, 999);
+  o.ferts = {}; if (p.ferts && typeof p.ferts === "object") for (const k of FERT_IDS) { const v = Math.floor(Number(p.ferts[k]) || 0); if (v > 0) o.ferts[k] = Math.min(999, v); }   // v1.130 비료 · 부산물 · 해초
+  o.scraps = clamp(Math.floor(Number(p.scraps) || 0), 0, 9999); o.seaweed = clamp(Math.floor(Number(p.seaweed) || 0), 0, 999);
+  if (o.farm && p.farm && typeof p.farm === "object") { o.farm.comp = clamp(Math.floor(Number(p.farm.comp) || 0), 0, 3); o.farm.cjobs = Array.isArray(p.farm.cjobs) ? p.farm.cjobs.filter(j => j && FERTS[j.f] && Number(j.done) > 0).slice(0, 6).map(j => ({ f: j.f, done: Number(j.done) })) : []; } o.martStamp = clamp(Math.floor(Number(p.martStamp) || 0), 0, 1e6);
   o.localDay = p.localDay && typeof p.localDay === "object" ? { d: str(p.localDay.d, 10), n: clamp(Math.floor(Number(p.localDay.n) || 0), 0, 1e5), v: clamp(Math.floor(Number(p.localDay.v) || 0), 0, 1e7) } : null;   // v1.122: 새로고침해도 납품 한도 유지
   o.salt = clamp(Math.floor(Number(p.salt) || 0), 0, 99); o.mudDex = p.mudDex && typeof p.mudDex === "object" ? p.mudDex : {}; o.mudDay = p.mudDay && typeof p.mudDay === "object" ? { d: str(p.mudDay.d, 10), n: clamp(Math.floor(Number(p.mudDay.n) || 0), 0, 999) } : null;
   o.npcSales = p.npcSales && typeof p.npcSales === "object" ? { day: str(p.npcSales.day, 10), n: clamp(Math.floor(Number(p.npcSales.n) || 0), 0, 999) } : { day: "", n: 0 };
@@ -4357,6 +4385,7 @@ function landFish(r, perfect, auto) {
   if (Object.keys(P.dex).length === 5) coach("dex");   // v1.85: 5종 모으면 도감·등급 안내
   gainXp(xpFor(r, perfect, auto));
   P.caught = (P.caught || 0) + 1;
+  if (Math.random() < .06) { P.seaweed = Math.min(999, (P.seaweed || 0) + 1); setTimeout(() => toast("🌊 해초가 같이 걸려 올라왔어요 · 퇴비장에서 해초 액비 재료예요"), 1600); }   // v1.130
   stat("t" + f.tier); if (k >= 2.2) stat("monster"); if (isNight()) stat("nightCatch"); if (perfect && !auto) stat("perfectFights"); if (r.manual && !auto) stat("manualWins"); if (r.coop) stat("coop");
   questProgress("catch"); if (f.tier >= 2) questProgress("tier2"); if (k >= 1.6) questProgress("big"); if (perfect) questProgress("perfect"); if (r.coop) questProgress("coop");
   checkRecord(f, k, size);
@@ -4910,9 +4939,10 @@ function nearestAction() {
     consider(HALL.x1 - 3, HALL.cz, { key: "hall:board", label: "🏆 명예의 전당 랭킹판 보기", run: () => openSheet("rank") }, 2.2);
   }
   { const pl = nearPlot(); if (pl) { const a = farmAction(pl); consider(pl.x, pl.z, { key: "farm:" + pl.r + "," + pl.c + ":" + a.label, label: a.label, run: a.run }, 1.7); } }
+  { const F = farmData(), lv = F.comp || 0, ready = (F.cjobs || []).filter(j => j.done <= Date.now()).length; consider(COMPOST.x - 1.4, COMPOST.z, { key: "compost:" + lv + ":" + ready, label: !lv ? "♻️ 퇴비장 터 · 지으면 비료를 직접 만들어요" : ready ? "♻️ 퇴비장 · 다 된 비료 " + ready + "포대 꺼내기" : "♻️ 퇴비장 (비료 만들기)", run: () => { ME.ry = Math.PI / 2; presMove(true); openSheet("compost"); } }, 2.4); }
   { const ct = canTool(); consider(WELL.x - 1.5, WELL.z, { key: "well:" + (P.water || 0), label: ct ? "🪣 우물에서 물 채우기 · 물통 " + (P.water || 0) + "/" + ct.cap : "🪣 우물 · 물뿌리개가 있으면 물을 담아요", run: wellFill }, 2.4); }
   consider(FARM.office.x, FARM.office.z, { key: "farmoffice", label: "🌾 농장 관리소 (자격증 · 땅 · 작물표)", run: () => { ME.ry = -Math.PI / 2; presMove(true); openSheet("farm"); } }, 2.4);
-  if (inMart(ME.x, ME.z)) for (const C of MART_CORNERS) consider(C.x, C.z, { key: "mart:" + C.id, label: (C.id === "checkout" ? "🧾 계산대" + (S.cart.length ? " · " + cartCount() + "개 " + won(cartTotal()) : "") : "🛒 " + C.name), run: () => { ME.ry = C.ry; presMove(true); openSheet("mart", C.id); } }, C.id === "checkout" ? 3.4 : 2.2);
+  if (inMart(ME.x, ME.z)) for (const C of MART_CORNERS) consider(C.a ? clamp(ME.x, C.a[0], C.a[1]) : C.x, C.a ? clamp(ME.z, C.a[2], C.a[3]) : C.z, { key: "mart:" + C.id, label: (C.id === "checkout" ? "🧾 계산대" + (S.cart.length ? " · " + cartCount() + "개 " + won(cartTotal()) : "") : "🛒 " + C.name), run: () => { ME.ry = C.ry; presMove(true); openSheet("mart", C.id); } }, C.a ? 1.0 : C.id === "checkout" ? 3.4 : 2.2);   // v1.131 매대 둘레 영역 어디서든 (예전엔 정해진 한 점 근처에서만)
   consider(TOYSHOP.door.x, TOYSHOP.door.z, { key: "toyshop", label: "🎈 부두 구멍가게 들어가기", run: () => { ME.ry = -Math.PI / 2; presMove(true); openSheet("toys"); } }, 2.4);
   for (const b of BUILDINGS) consider(5.6, b.z, { key: "bld:" + b.id, label: b.sheet ? b.name + " 들어가기" : b.name + " (준비 중)", run: () => { ME.ry = Math.PI / 2; presMove(true); if (b.sheet) openSheet(b.sheet); else toast("「" + b.name + "」은 아직 준비 중이에요"); } }, 2.8);
   return best;
@@ -10867,7 +10897,7 @@ function plotState(p, now) {   // none · till · hard · wet · dry · parched
   now = now || Date.now(); if (!p || !p.till) return "none";
   if (!p.c) return p.tt && now - p.tt > FARM_HARD_MS ? "hard" : "till";
   if (plotWet(p)) return "wet";
-  return now - Math.max(p.wet || 0, p.pt || 0) > FARM_DRY_MS ? "parched" : "dry";
+  return fertKind(p) !== "lime" && now - Math.max(p.wet || 0, p.pt || 0) > FARM_DRY_MS ? "parched" : "dry";
 }
 function sprRefresh() {   // 스프링클러 둘레 칸은 늘 촉촉 (spw)
   const F = farmData(), now = Date.now(), list = [];
@@ -10892,6 +10922,48 @@ function wellFill() {
   ME.ry = Math.atan2(WELL.x - ME.x, WELL.z - ME.z); presMove(true); P.water = ct.cap; markDirty(); sfx("splash", .45);
   toast("🪣 우물에서 물을 가득 채웠어요 · " + ct.name + " " + ct.cap + "칸분");
 }
+const COMPOST = { x: FARM.x - 12.8, z: FARM.z - 12.8 };   // v1.130 퇴비장 자리 (밭 남서쪽)
+function needHave(key) {
+  if (key === "scraps") return P.scraps || 0; if (key === "seaweed") return P.seaweed || 0;
+  if (key === "fish0") return P.bag.filter(it => !isShell(it.fishId) && it.tier === 0).length;
+  if (key === "shell") return P.bag.filter(it => isShell(it.fishId)).length;
+  if (key === "scrop") return CROPS.reduce((a, c) => a + cropInv(c.id)[1], 0);
+  if (key.startsWith("f:")) return fertN(key.slice(2)); return 0;
+}
+function needTake(key, n) {
+  if (key === "scraps") P.scraps -= n; else if (key === "seaweed") P.seaweed -= n;
+  else if (key === "fish0" || key === "shell") { const pick = P.bag.filter(it => key === "shell" ? isShell(it.fishId) : (!isShell(it.fishId) && it.tier === 0)).sort((a, b) => (a.price || 0) - (b.price || 0)).slice(0, n), ids = new Set(pick.map(it => it.id)); P.bag = P.bag.filter(it => !ids.has(it.id)); }
+  else if (key === "scrop") { for (const c of CROPS.slice().sort((a, b) => a.price - b.price)) { const v = cropInv(c.id); while (n > 0 && v[1] > 0) { v[1]--; n--; } if (!n) break; } }
+  else if (key.startsWith("f:")) fertAdd(key.slice(2), -n);
+}
+function compostStart(rc) {
+  const F = farmData(), L = COMPOST_LV[F.comp || 0]; F.cjobs = F.cjobs || [];
+  if (!L.slots || F.cjobs.length >= L.slots) { toast("퇴비장 자리가 꽉 찼어요 · 다 된 것을 꺼내거나 퇴비장을 키워요"); return; }
+  if (!rc.need.every(([k, n]) => needHave(k) >= n)) { toast("재료가 모자라요"); return; }
+  for (const [k, n] of rc.need) needTake(k, n);
+  F.cjobs.push({ f: rc.id, done: Date.now() + rc.min * 60000 }); markDirty(); flushSave(); sfx("ui-confirmation", .35);
+  toast("♻️ " + FERTS[rc.id].name + " 재료를 넣었어요 · " + (rc.min >= 60 ? rc.min / 60 + "시간" : rc.min + "분") + " 뒤에 꺼내요"); refreshSheet(true); compost3D();
+}
+function compostTake() {
+  const F = farmData(), now = Date.now(), done = (F.cjobs || []).filter(j => j.done <= now); if (!done.length) return;
+  for (const j of done) fertAdd(j.f, 1); F.cjobs = F.cjobs.filter(j => j.done > now);
+  markDirty(); flushSave(); sfx("jingle-catch", .35); toast("♻️ 비료 " + done.length + "포대를 꺼냈어요 · " + done.map(j => FERTS[j.f].ico).join(" ")); refreshSheet(true); compost3D();
+}
+function compost3D() {   // 퇴비장 단계만큼 나무 칸 · 삭는 중이면 김이 모락
+  if (!FARM3D.group) return; if (FARM3D.comp) { FARM3D.comp.parent.remove(FARM3D.comp); } FARM3D.compKey = (farmData().comp || 0) + "|" + (farmData().cjobs || []).length;
+  const F = farmData(), lv = F.comp || 0, g = new T3.Group(); g.position.set(COMPOST.x, FARM.y, COMPOST.z); scene.add(g); FARM3D.comp = g;
+  const wood = cmat(0x8a6038), woodL = cmat(0xb0844e), dirt = cmat(0x4a3424);
+  if (!lv) { cyl(.06, .06, 1.4, 6, wood, 0, .7, 0, g); const sg = new T3.Mesh(new T3.PlaneGeometry(1.5, .55), new T3.MeshBasicMaterial({ map: txtTex(300, 110, "#fff4dc", [["♻️ 퇴비장 터", 40, "#4a6a2a", .38], ["40만원 · 농장 관리소 옆", 24, "#7a5a2a", .76]]) })); sg.position.set(0, 1.35, .05); g.add(sg); const sg2 = sg.clone(); sg2.rotation.y = Math.PI; sg2.position.z = -.05; g.add(sg2); return; }
+  const busy = (F.cjobs || []).length;
+  for (let i = 0; i < lv; i++) { const bx = i * 1.55;
+    for (const [sx, sz, w, d] of [[0, -.6, 1.3, .08], [0, .6, 1.3, .08], [-.6, 0, .08, 1.2], [.6, 0, .08, 1.2]]) for (let k = 0; k < 3; k++) box(w, .14, d, k % 2 ? woodL : wood, bx + sx, .15 + k * .22, sz, g);
+    for (const [sx, sz] of [[-.6, -.6], [.6, -.6], [-.6, .6], [.6, .6]]) box(.1, .8, .1, wood, bx + sx, .4, sz, g);
+    const pile = new T3.Mesh(GEOD.cpile || (GEOD.cpile = new T3.SphereGeometry(.5, 12, 8)), dirt); pile.scale.set(1.1, i < busy ? .75 : .35, 1.1); pile.position.set(bx, .25, 0); g.add(pile);
+    if (i < busy) for (let k = 0; k < 3; k++) { const st = new T3.Mesh(GEOD.steam || (GEOD.steam = new T3.SphereGeometry(.12, 8, 6)), GEOD.steamM || (GEOD.steamM = new T3.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .35, depthWrite: false }))); st.position.set(bx + (k - 1) * .2, .9 + k * .25, 0); st.userData.steam = k; g.add(st); }
+  }
+  const sg = new T3.Mesh(new T3.PlaneGeometry(1.3, .4), new T3.MeshBasicMaterial({ map: txtTex(260, 80, "#4a6a2a", [["♻️ 퇴비장 Lv." + lv, 40, "#fff", .55]]) })); sg.position.set(-.95, .9, 0); sg.rotation.y = -Math.PI / 2; g.add(sg);
+  FARM3D.compKey = lv + "|" + busy;
+}
 const inFarm = (x, z) => Math.abs(x - FARM.x) < 9.5 && Math.abs(z - FARM.z) < 9.5;
 /* 평평한 땅 (지형 생성에 섞어요 · 경계는 부드럽게) */
 const TER_PADS = [
@@ -10914,8 +10986,8 @@ function plotGrow(p, now) {   // 촉촉할 때만 자라요 (스프링클러 칸
   if (!p || !p.c) return p;
   now = now || Date.now(); if (!p.pt) p.pt = p.at || now;
   const wetEnd = p.spw ? now : (p.wet || 0);
-  const from = p.at || now, add = Math.max(0, Math.min(now, wetEnd) - from); p.g = (p.g || 0) + add; p.at = now;
-  if (!p.spw && plotStage(p) < 3 && now - Math.max(wetEnd, p.pt) > FARM_DRY_MS) p.wilt = 1;
+  const from = p.at || now, add = Math.max(0, Math.min(now, wetEnd) - from) * fertSpeed(fertKind(p)); p.g = (p.g || 0) + add; p.at = now;
+  if (!p.spw && fertKind(p) !== "lime" && plotStage(p) < 3 && now - Math.max(wetEnd, p.pt) > FARM_DRY_MS) p.wilt = 1;
   return p;
 }
 function plotStage(p) { if (!p || !p.c) return -1; const c = CROP[p.c]; if (!c) return -1; const k = (p.g || 0) / (c.grow * 60000); return k >= 1 ? 3 : k >= .6 ? 2 : k >= .25 ? 1 : 0; }
@@ -10948,7 +11020,7 @@ function farmAction(pl) {
     if ((P.water || 0) <= 0) return { label: pre + "🪣 물통이 비었어요 · 밭 옆 우물에서 채워요", run: () => farmWater(pl) };
     return { label: pre + "💧 물 주기 · " + reachTxt(ct.n) + " · 물통 " + P.water + "/" + ct.cap, run: () => farmWater(pl) };
   }
-  if (!p.f && (P.fert || 0) > 0) return { label: "🌿 비료 주기 (" + P.fert + ") · 특상품 확률 ↑", run: () => farmFert(pl) };
+  if (!p.f && fertTotal() > 0) return { label: "🌿 비료 주기 · " + fertTotal() + "포대", run: () => { S.plotSel = pl; openSheet("fertpick"); } };
   return { label: "🌱 " + CROP[p.c].name + " 자라는 중 · " + farmLeft(p) + (p.spw ? " · 🌀" : ""), run: () => openSheet("farm") };
 }
 function farmLeft(p) { const c = CROP[p.c], left = Math.max(0, c.grow * 60000 - (p.g || 0)), m = Math.ceil(left / 60000); return (m >= 60 ? Math.floor(m / 60) + "시간 " + (m % 60) + "분" : m + "분") + " 남음" + (plotWet(p) ? "" : " (말라서 멈춤)"); }
@@ -10976,19 +11048,22 @@ function farmWater(pl) {
   else {
     const ct = canTool(); if (!ct) { toast("물뿌리개가 있어야 해요 · 농가마트 농기구 코너"); return; }
     if ((P.water || 0) <= 0) { toast("🪣 물통이 비었어요 · 밭 옆 우물에서 채워요"); return; }
-    for (const [r, c] of toolCells(pl, ct.n, ry)) { if (P.water <= 0) break; const p = F.plots[plotKey(r, c)]; if (p && p.c && !plotWet(p)) { plotGrow(p, now); p.wet = now + FARM_WET_MS; n++; P.water--; } }
+    for (const [r, c] of toolCells(pl, ct.n, ry)) { if (P.water <= 0) break; const p = F.plots[plotKey(r, c)]; if (p && p.c && !plotWet(p)) { plotGrow(p, now); p.wet = now + FARM_WET_MS * (fertKind(p) === "lime" ? 2 : 1); n++; P.water--; } }
     if (!n) { toast("물 줄 칸이 없어요 (이미 촉촉해요)"); return; }
   }
   farmAnim(pl, "idle"); sfx("splash", .35); try { for (let i = 0; i < 30; i++) { const d = fwDir(Math.random); if (!FW.pts) fwInit(); fwSpark(pl.x, groundY(pl.x, pl.z) + .9, pl.z, d[0] * 1.6, Math.abs(d[1]) * 1.5, d[2] * 1.6, [.6, .85, 1], .6, .05, 1, 5, 0); } } catch {}
   toast(auto ? "💦 자동 물뿌리기를 돌렸어요 · 밭 전체 " + n + "칸이 12시간 동안 촉촉해요" : "💧 " + n + "칸에 물을 줬어요 · 3시간 촉촉 · 물통 " + P.water + "/" + canTool().cap + (P.water ? "" : " · 우물에서 채워요")); markDirty(); FARM3D.dirty = true;
 }
-function farmFert(pl) { const p = farmData().plots[plotKey(pl.r, pl.c)]; if (!p || p.f || !(P.fert > 0)) return; P.fert--; p.f = 1; farmAnim(pl); sfx("ui-click", .3); toast("🌿 비료를 줬어요 · 특상품이 될 확률이 올라가요"); markDirty(); FARM3D.dirty = true; }
+function farmFert(pl, k) {   // v1.130 한 칸에 비료 하나
+  k = k || "high"; const p = farmData().plots[plotKey(pl.r, pl.c)]; if (!p || !p.c || p.f || fertN(k) <= 0) return;
+  fertAdd(k, -1); p.f = k; closeSheet(); farmAnim(pl); sfx("ui-click", .3); toast(FERTS[k].ico + " " + FERTS[k].name + "를 줬어요 · " + FERTS[k].d); markDirty(); FARM3D.dirty = true;
+}
 function farmHarvest(pl) {
   const F = farmData(), k = plotKey(pl.r, pl.c), p = plotGrow(F.plots[k]); if (!p || plotStage(p) < 3) return;
-  const c = CROP[p.c], special = Math.random() < (p.f ? .5 : .15) - (p.wilt ? .1 : 0), inv = cropInv(c.id); inv[special ? 1 : 0]++;
+  const c = CROP[p.c], fk = fertKind(p), special = Math.random() < fertSpecial(fk) - (p.wilt ? .1 : 0), inv = cropInv(c.id), two = fk === "kelp" && Math.random() < .4, scr = 1 + (Math.random() < .5 ? 1 : 0); inv[special ? 1 : 0] += two ? 2 : 1; P.scraps = Math.min(9999, (P.scraps || 0) + scr);
   F.plots[k] = { till: true, tt: Date.now() }; farmAnim(pl); sfx(special ? "jingle-rare" : "jingle-catch", .4); gainXp(Math.max(2, Math.round(c.price / 8))); stat("harvests");
   try { fxPop(ME.x, 2.4, ME.z, (special ? "⭐ 특상품 " : "") + c.name + "!", special ? "#ffd84d" : "#e8ffd0"); } catch {}
-  toast([h("img", { src: cropIcon(c.id), alt: "" }), h("div", null, h("b", { text: (special ? "⭐ 특상품 " : "") + c.name + " 수확!" }), h("div", { class: "muted", style: "font-size:12px", text: "농가마트 로컬푸드 코너에 납품하면 " + won(Math.round(c.price * (special ? 1.5 : 1))) + " · 3단계 맛집 골목 요리 재료" }))], "catch", 4200);
+  toast([h("img", { src: cropIcon(c.id), alt: "" }), h("div", null, h("b", { text: (special ? "⭐ 특상품 " : "") + c.name + (two ? " 2개" : "") + " 수확!" + (two ? " 🌊" : "") + " · 🍂 부산물 +" + scr }), h("div", { class: "muted", style: "font-size:12px", text: "농가마트 로컬푸드 코너에 납품하면 " + won(Math.round(c.price * (special ? 1.5 : 1))) + " · 3단계 맛집 골목 요리 재료" }))], "catch", 4200);
   markDirty(); FARM3D.dirty = true;
 }
 /* 작물 그림 (아이콘) */
@@ -11094,7 +11169,8 @@ function buildFarm() {   // v1.125 마트 북쪽 새 자리 · 헛간 마당까�
     FARM3D.soilDry = phong(0xffffff, { map: dryT }); FARM3D.soilHard = phong(0xffffff, { map: hardT }); }   // v1.129 메마른 땅 (갈라짐) · 굳은 땅
   FARM3D.soilWet = phong(0x9a8a7a, { map: soilT }); FARM3D.plotGeo = new T3.BoxGeometry(2.0, .12, 2.0);
   FARM3D.grass = cmat(0x8fae5a); FARM3D.sale = cmat(0xb8c88a);
-  FARM3D.built = true;
+  FARM3D.built = true; compost3D();
+  BLOCKS.push([COMPOST.x - .8, COMPOST.x + 4, COMPOST.z - .8, COMPOST.z + .8]);   // 퇴비장 자리 (3칸까지)
 }
 function sprMesh(kind) {   // 스프링클러: 기둥 + 빙글빙글 도는 머리 + 물줄기
   const g = new T3.Group(), mt = cmat(0x9aa3aa), big = kind === "s5";
@@ -11131,6 +11207,7 @@ function farmTick(t) {
   if (!FARM3D.built) return;
   const near = Math.hypot(ME.x - FARM.x, ME.z - FARM.z) < 70 && !atHome();
   FARM3D.group.visible = near; if (!near) return;
+  { const F0 = farmData(), ck = (F0.comp || 0) + "|" + (F0.cjobs || []).length; if (FARM3D.compKey !== ck) compost3D(); }   // 불러온 뒤 · 단계가 바뀌면 퇴비장을 다시 그려요
   const now = Date.now();
   if (!FARM3D.dirty && now - FARM3D.last < 5000) { for (const v of FARM3D.plots.values()) if (v.crop) v.crop.traverse(o => { if (o.userData.spin) o.rotation.y = t * 2; }); return; }
   FARM3D.dirty = false; FARM3D.last = now;
@@ -11150,13 +11227,13 @@ function farmTick(t) {
 }
 /* ── 농가마트 (낭만농협 섬마을마트) · 실내를 걸어 다녀요 ── */
 const MART_CORNERS = [   // v1.125 새 매장 배치
-  { id: "fresh", name: "신선 채소 · 과일", ico: "🥬", x: 55.5, z: -13.6, ry: 0 },
-  { id: "local", name: "로컬푸드 직매장", ico: "🧺", x: 58.4, z: -17, ry: Math.PI / 2 },
-  { id: "seed", name: "씨앗 · 모종", ico: "🌱", x: 69, z: -21.6, ry: Math.PI / 2 },
-  { id: "tool", name: "농기구", ico: "🧰", x: 69.2, z: -11.5, ry: Math.PI / 2 },
-  { id: "pantry", name: "양념 · 가공식품", ico: "🫙", x: 64, z: -25.4, ry: Math.PI },
-  { id: "checkout", name: "계산대", ico: "🧾", x: 55, z: -22.8, ry: Math.PI },
-  { id: "life", name: "생활 · 놀거리", ico: "🧺", x: 63.4, z: -13.4, ry: -Math.PI / 2 },
+  { id: "fresh", name: "신선 채소 · 과일", ico: "🥬", x: 55.5, z: -13.6, ry: 0 , a: [50.6, 60.8, -14.4, -8.3] },
+  { id: "local", name: "로컬푸드 직매장", ico: "🧺", x: 58.4, z: -17, ry: Math.PI / 2 , a: [58, 65, -19.6, -15.1] },
+  { id: "seed", name: "씨앗 · 모종", ico: "🌱", x: 69, z: -21.6, ry: Math.PI / 2 , a: [68.4, 71.9, -26, -17.2] },
+  { id: "tool", name: "농기구", ico: "🧰", x: 69.2, z: -11.5, ry: Math.PI / 2 , a: [68.4, 71.9, -15.4, -7.4] },
+  { id: "pantry", name: "양념 · 가공식품", ico: "🫙", x: 64, z: -25.4, ry: Math.PI , a: [59.6, 71.4, -26.9, -24] },
+  { id: "checkout", name: "계산대", ico: "🧾", x: 55, z: -22.8, ry: Math.PI , a: [50.8, 59.2, -26.5, -21.4] },
+  { id: "life", name: "생활 · 놀거리", ico: "🧺", x: 63.4, z: -13.4, ry: -Math.PI / 2 , a: [62.4, 69.2, -15.1, -11.6] },
 ];
 const MART_TOOLS = [   // v1.129 모든 도구는 한 번에 1칸부터
   { id: "can1", name: "물뿌리개", price: 30, d: "한 번에 1칸 · 물통 10칸분 · 밭 옆 우물에서 채워요", tool: true, ico: "🚿" },
@@ -11166,7 +11243,11 @@ const MART_TOOLS = [   // v1.129 모든 도구는 한 번에 1칸부터
   { id: "hoe3", name: "괭이", price: 1200, d: "바라보는 쪽 3칸(한 줄)을 한 번에 갈아요", tool: true, ico: "⛏" },
   { id: "spr1", name: "스프링클러", price: 500, d: "밭 한 칸에 세우면 둘레 8칸이 늘 촉촉 · 그 칸엔 못 심어요", ico: "🌀" },
   { id: "spr5", name: "고급 스프링클러", price: 2500, d: "세운 칸 둘레 24칸(5×5)이 늘 촉촉", ico: "🌀" },
-  { id: "fert", name: "비료 1포대", price: 15, d: "심은 칸에 주면 특상품 확률 15% → 50%", ico: "🌿" },
+  { id: "f_compost", name: "퇴비 1포대", price: 8, d: "특상품 확률 15% → 35% · 퇴비장에서 만들 수도 있어요", ico: "🟤" },
+  { id: "fert", name: "고급 비료 1포대", price: 15, d: "특상품 확률 → 50%", ico: "🌿" },
+  { id: "f_fish", name: "어분 비료 1포대", price: 40, d: "자라는 시간 −30%", ico: "🐟" },
+  { id: "f_lime", name: "패각 석회 1포대", price: 30, d: "물 주면 촉촉 시간 2배 · 메마르지 않아요", ico: "🐚" },
+  { id: "f_kelp", name: "해초 액비 1병", price: 60, d: "40% 확률로 2개 수확", ico: "🌊" },
   { id: "salt", name: "맛소금 통 (10번)", price: 30, d: "갯벌 맛조개 구멍에 뿌려요", ico: "🧂" },
   { id: "light", name: "손전등", price: 180, d: "밤이 되면 자동으로 켜져서 내 주변을 밝혀요", tool: true, ico: "🔦" },
   { id: "charm", name: "행운 부적", price: 500, d: "낚시할 때 고급 이상 확률 +1%p · 늘 몸에 지녀요", tool: true, ico: "🍀" },
@@ -11203,6 +11284,7 @@ function martCheckout() {
     else if (it.kind === "pantry") { P.pantry = P.pantry || {}; P.pantry[it.id] = (P.pantry[it.id] || 0) + it.n; }
     else if (it.id === "fert") P.fert = (P.fert || 0) + it.n;
     else if (it.id === "salt") P.salt = Math.min(99, (P.salt || 0) + 10 * it.n);
+    else if (/^f_/.test(it.id)) fertAdd(it.id.slice(2), it.n);
     else if (it.id === "spr1" || it.id === "spr5") { P.spr = P.spr || {}; const k2 = it.id === "spr1" ? "s1" : "s5"; P.spr[k2] = (P.spr[k2] || 0) + it.n; }
     else P.tools[it.id] = true;
   }
@@ -11423,7 +11505,7 @@ function martSheet(body, corner) {
     for (const c of CROPS) { const pr0 = Math.round(c.price * 1.3), pr = c.id === saleC ? Math.round(pr0 * .7) : pr0; wrap.append(prodCard(h("img", { src: cropIcon(c.id), alt: "" }), (c.id === saleC ? "🔥 오늘 특가 " : "") + c.name, "요리 재료 · 보통 품질" + (c.id === saleC ? " · 30% 할인" : ""), pr, () => cartAdd("fresh", c.id, c.name, pr))); }
   } else if (C.id === "tool") {
     for (const t of MART_TOOLS) { const owned = t.tool && toolOwned(t.id), sprN = t.id === "spr1" ? (P.spr || {}).s1 : t.id === "spr5" ? (P.spr || {}).s5 : 0;
-      wrap.append(prodCard(h("span", { class: "mt-emo", text: t.ico || "🧰" }), t.name, t.d + (t.id === "fert" && P.fert ? " · 가진 것 " + P.fert : "") + (sprN ? " · 가진 것 " + sprN : ""), t.price, owned ? null : () => cartAdd("tool", t.id, t.name, t.price), owned ? "가지고 있어요" : "담기")); }
+      wrap.append(prodCard(h("span", { class: "mt-emo", text: t.ico || "🧰" }), t.name, t.d + (t.id === "fert" && P.fert ? " · 가진 것 " + P.fert : /^f_/.test(t.id) && fertN(t.id.slice(2)) ? " · 가진 것 " + fertN(t.id.slice(2)) : "") + (sprN ? " · 가진 것 " + sprN : ""), t.price, owned ? null : () => cartAdd("tool", t.id, t.name, t.price), owned ? "가지고 있어요" : "담기")); }
   } else if (C.id === "pantry") {
     wrap.append(h("div", { class: "mt-note", text: "양념 · 가공식품 — 식당 요리의 재료예요 · 사면 재료 창고에 쌓여요" }));
     for (const n of MART_PANTRY) { const own = (P.pantry && P.pantry[n]) || 0; wrap.append(prodCard(h("span", { class: "mt-emo", text: { 고추장: "🌶", 된장: "🟫", 간장: "🥢", 참기름: "🫗", 밀가루: "🌾", 쌀: "🍚" }[n] }), n, "요리 재료" + (own ? " · 가진 것 " + own : ""), PANTRY_PRICE[n] || 10, () => cartAdd("pantry", n, n, PANTRY_PRICE[n] || 10))); }
@@ -11470,7 +11552,7 @@ function farmSheet(body) {   // 농장 관리소: 토지 대장 + 단계 카드 
   const deed = h("div", { class: "fm-deed" }, h("div", { class: "fm-stamp", text: F.lic ? "농사 자격 ✔" : "자격 없음" }), h("b", { class: "fm-t", text: "토지 대장 · 낭만 농장" }),
     h("div", { class: "fm-r" }, h("span", { text: "소유자" }), h("b", { text: P.nick })), h("div", { class: "fm-r" }, h("span", { text: "땅" }), h("b", { text: F.lv ? "Lv." + F.lv + " " + L.name + " · 밭 " + (L.hi - L.lo + 1) + "×" + (L.hi - L.lo + 1) + "칸" : "아직 없어요" })),
     h("div", { class: "fm-r" }, h("span", { text: "물 주기" }), h("b", { text: (F.lv >= 5 ? "자동 물뿌리기(밭 전체 12시간) · " : "") + (canTool() ? canTool().name + " · " + reachTxt(canTool().n) + " · 물통 " + (P.water || 0) + "/" + canTool().cap + " (우물에서 채워요)" : "물뿌리개 없음 · 농가마트 농기구") + ((P.spr && (P.spr.s1 || P.spr.s5)) ? " · 🌀 설치 안 한 스프링클러 " + ((P.spr.s1 || 0) + (P.spr.s5 || 0)) + "개" : "") }), h("b", { style: "display:none", text: P.tools.can ? "" : "물뿌리개 없음 · 농가마트 농기구" })),
-    h("div", { class: "fm-r" }, h("span", { text: "창고" }), h("b", { text: "작물 " + cropTotal() + "개 · 씨앗 " + Object.values(P.seeds || {}).reduce((a, b) => a + b, 0) + "봉 · 비료 " + (P.fert || 0) + "포대" })));
+    h("div", { class: "fm-r" }, h("span", { text: "창고" }), h("b", { text: "작물 " + cropTotal() + "개 · 씨앗 " + Object.values(P.seeds || {}).reduce((a, b) => a + b, 0) + "봉 · 비료 " + fertTotal() + "포대 · 🍂 부산물 " + (P.scraps || 0) + " · 🌊 해초 " + (P.seaweed || 0) })));
   const mini = h("div", { class: "fm-mini" }); for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) { const own = F.lic && plotOwned(r, c), p = own ? plotGrow(F.plots[plotKey(r, c)]) : null, st = p && p.c ? plotStage(p) : -1;
     mini.append(h("i", { class: !own ? "" : st >= 3 ? "ready" : st >= 0 ? (plotWet(p) ? "grow wet" : "grow") : p && p.till ? "till" : "own", title: p && p.c ? CROP[p.c].name + " · " + (st >= 3 ? "수확!" : farmLeft(p)) : "" })); }
   body.append(h("div", { class: "fm-top" }, deed, h("div", { class: "fm-minibox" }, mini, h("small", { text: "🟫 갈린 밭 · 🟩 자라는 중 · 💧 촉촉 · 🟨 수확" }))));
@@ -14164,6 +14246,33 @@ function toyTick(t, dt) {
   }
 }
 SHEETS.mudhut = mudhutSheet;
+SHEETS.fertpick = (body) => {   // v1.130 비료 고르기
+  const pl = S.plotSel; setHead("🌿 비료 주기", "한 칸에 한 가지만 줄 수 있어요 · 효과를 보고 골라요");
+  const list = Object.keys(FERTS).filter(k => fertN(k) > 0);
+  if (!list.length) { body.append(h("div", { class: "empty-note big" }, h("div", { style: "font-size:36px", text: "🌿" }), "비료가 없어요.", h("br"), "농가마트 농기구 코너에서 사거나 퇴비장에서 만들어요")); return; }
+  body.append(h("div", { class: "fm-crops" }, list.map(k => h("button", { class: "fm-crop", disabled: !pl, onclick: () => farmFert(pl, k) }, h("span", { style: "font-size:30px", text: FERTS[k].ico }), h("b", { text: FERTS[k].name + " × " + fertN(k) }), h("small", { text: FERTS[k].d })))));
+};
+SHEETS.compost = (body) => {   // v1.130 퇴비장: 짓기 · 키우기 · 넣기 · 꺼내기
+  const F = farmData(), lv = F.comp || 0, L = COMPOST_LV[lv], next = COMPOST_LV[lv + 1], now = Date.now(); F.cjobs = F.cjobs || [];
+  setHead("♻️ 퇴비장", lv ? "Lv." + lv + " · 한 번에 " + L.slots + "개까지 삭혀요 · 넣고 시간이 지나면 비료가 돼요" : "짓고 나면 부산물 · 물고기 · 조개 · 해초로 비료를 직접 만들어요");
+  const mins = (m) => m >= 60 ? (m / 60) + "시간" : m + "분";
+  if (!lv) {
+    body.append(h("div", { class: "fm-steps" }, h("div", { class: "fm-step now" }, h("b", { text: "♻️ 퇴비장 짓기" }), h("small", { text: "나무 칸 2개 · 한 번에 2개까지 삭혀요 · 키우면 4개 · 6개" }),
+      h("button", { class: "btn sm pri", disabled: !F.lic || P.gold < next.cost, onclick: () => { if (!F.lic || P.gold < next.cost) return; P.gold -= next.cost; F.comp = 1; markDirty(); flushSave(); sfx("fanfare-hero", .4); toast("♻️ 퇴비장을 지었어요!"); compost3D(); refreshSheet(true); } }, F.lic ? "짓기 · " + won(next.cost) : "농사 자격증이 먼저 필요해요"))));
+  } else {
+    const ready = F.cjobs.filter(j => j.done <= now);
+    body.append(h("div", { class: "fm-steps" }, F.cjobs.length ? F.cjobs.map(j => h("div", { class: "fm-step" + (j.done <= now ? " done" : " now") }, h("b", { text: FERTS[j.f].ico + " " + FERTS[j.f].name }), h("small", { text: j.done <= now ? "다 됐어요!" : fmtLeft(j.done - now) + " 남음" })))
+      : h("div", { class: "fm-step" }, h("b", { text: "비어 있어요" }), h("small", { text: "아래에서 재료를 넣어요 · " + L.slots + "칸" })),
+      ready.length ? h("button", { class: "btn pri", onclick: compostTake }, "모두 꺼내기 (" + ready.length + "포대)") : null));
+    body.append(h("div", { class: "fm-crops" }, COMPOST_RECIPES.map(rc => { const ok = rc.need.every(([k, n]) => needHave(k) >= n), full = F.cjobs.length >= L.slots;
+      return h("div", { class: "fm-crop" + (ok ? "" : " lock") }, h("span", { style: "font-size:28px", text: FERTS[rc.id].ico }), h("b", { text: FERTS[rc.id].name + " · 가진 것 " + fertN(rc.id) }), h("small", { text: FERTS[rc.id].d }),
+        h("small", { class: "num", text: rc.need.map(([k, n]) => NEED_KO[k] + " " + Math.min(needHave(k), 999) + "/" + n).join(" · ") + " · " + mins(rc.min) }),
+        h("button", { class: "btn sm pri", disabled: !ok || full, onclick: () => compostStart(rc) }, full ? "자리가 꽉 찼어요" : ok ? "넣기" : "재료가 모자라요")); })));
+    body.append(h("div", { class: "muted", style: "font-size:12px;line-height:1.5;margin:8px 2px", text: "🍂 부산물은 작물을 거둘 때 1~2개 · 🐟 일반 등급 물고기는 가방에서 값싼 것부터 · 🐚 조개 · 갯벌 생물은 가방에서 · 🌊 해초는 낚시할 때 가끔 같이 걸려요" }));
+    if (next) body.append(h("div", { class: "fm-steps" }, h("div", { class: "fm-step now" }, h("b", { text: "퇴비장 키우기 → Lv." + (lv + 1) }), h("small", { text: "한 번에 " + next.slots + "개까지" }),
+      h("button", { class: "btn sm pri", disabled: P.gold < next.cost, onclick: () => { if (P.gold < next.cost) return; P.gold -= next.cost; F.comp = lv + 1; markDirty(); flushSave(); sfx("ui-confirmation", .4); toast("♻️ 퇴비장 Lv." + (lv + 1) + " · 한 번에 " + next.slots + "개"); compost3D(); refreshSheet(true); } }, won(next.cost)))));
+  }
+};
 SHEETS.farm = farmSheet; SHEETS.seedpick = seedPickSheet; SHEETS.mart = martSheet;   // v1.121   // v1.120 갯벌 체험장
 SHEETS.toys = (body) => {   // 부두 구멍가게: 줄무늬 차양 아래 나무 리어카 매대
   setHead("🎈 부두 구멍가게", "다 같이 가지고 노는 작은 장난감 · 쓰면 주변 사람들 화면에도 보여요");
@@ -16750,7 +16859,7 @@ MSHEETS.clothes = (body) => {
 };
 /* v1.127 휴대폰 3단계: 전용 화면이 없는 가게 화면은 「쪽 나누기」로 — 그대로 그린 뒤 넘치면 화면 높이에 맞춰 덩어리째 쪽으로 나눠요(스크롤 0).
    큰 상자는 안쪽으로 들어가 나누고, 칸 격자는 줄 단위로 끊겨요. 쪽은 ◀ ▶ · 옆으로 밀기 */
-const MPAGED = new Set(["bank", "lotto", "clothes", "face", "office", "realty", "boat", "restmanage", "restbook", "restfridge", "settings", "help", "guide", "mart", "farm", "seedpick", "mudhut", "toys", "ach", "achieve", "attend", "travel", "donate", "profile", "quests", "privacy", "mydata", "storage", "guestbook", "invite", "feedback", "offers", "player", "community", "friends", "rank", "tv", "wholesale", "channels", "tank", "mrod", "quests"]);
+const MPAGED = new Set(["fertpick", "compost", "bank", "lotto", "clothes", "face", "office", "realty", "boat", "restmanage", "restbook", "restfridge", "settings", "help", "guide", "mart", "farm", "seedpick", "mudhut", "toys", "ach", "achieve", "attend", "travel", "donate", "profile", "quests", "privacy", "mydata", "storage", "guestbook", "invite", "feedback", "offers", "player", "community", "friends", "rank", "tv", "wholesale", "channels", "tank", "mrod", "quests"]);
 const MP_ATOM = /^(CANVAS|IMG|TEXTAREA|SELECT|INPUT|svg|TABLE|BUTTON|LABEL|VIDEO|IFRAME)$/;
 function mpPaged(body, key, render) {
   const sheet = document.querySelector(".sheet"), wrap = h("div", { class: "mp-pages" }), pager = h("div", { class: "mp-pager none" }), st = mpState("pg-" + key);
