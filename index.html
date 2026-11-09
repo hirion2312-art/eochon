@@ -299,6 +299,8 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 @keyframes fsave{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}22%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1;transform:translate(-50%,-58%) scale(1)}100%{opacity:0;transform:translate(-50%,-75%) scale(.92)}}
 @keyframes fsaveShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-4deg)}75%{transform:translateX(4px) rotate(4deg)}}
 @keyframes fsaveSpark{0%{opacity:1;transform:rotate(var(--a)) translateX(10px)}100%{opacity:0;transform:rotate(var(--a)) translateX(90px)}}
+.fh-box{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;background:rgba(127,127,127,.12);border:2px dashed rgba(127,127,127,.35)}.fh-box.on{background:linear-gradient(135deg,#f6eccf,#e8d6a0);border:2px solid #c9973f;color:#3a2410}.fh-box b{display:block}.fh-box small{display:block;opacity:.8;font-size:12px}.fh-ico{font-size:34px}
+.fh-log{margin-top:6px;display:flex;flex-direction:column;gap:3px;font-size:12.5px;padding:8px 10px;border-radius:12px;background:rgba(127,127,127,.08)}
 .aq-hero{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:linear-gradient(135deg,#dff3fb,#b8e2f2);border:2px solid #2f8fb8;color:#123040}.aq-hero b{font-size:18px;display:block}.aq-hero small{display:block;font-weight:700;color:#2f6f86;margin:2px 0 6px}.aq-ico{font-size:44px}
 .aq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}.aq-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border-radius:14px;background:linear-gradient(180deg,#e6f6fd,#c6e7f5);color:#123040;text-align:center}.aq-card img{width:84px;height:60px;object-fit:contain}.aq-card b{font-size:13px}.aq-card small{font-size:11px;opacity:.8}.aq-card.t5,.aq-card.t6,.aq-card.t7,.aq-card.t8,.aq-card.t9{box-shadow:0 0 0 2px #f2c230}
 .cwx{margin-left:6px;font-size:15px;cursor:pointer}
@@ -2225,7 +2227,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.138.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.139.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -3191,6 +3193,7 @@ function normProfile(p) {
   if (o.farm && p.farm && typeof p.farm === "object") { o.farm.comp = clamp(Math.floor(Number(p.farm.comp) || 0), 0, 3); o.farm.cjobs = Array.isArray(p.farm.cjobs) ? p.farm.cjobs.filter(j => j && FERTS[j.f] && Number(j.done) > 0).slice(0, 6).map(j => ({ f: j.f, done: Number(j.done) })) : []; } o.martStamp = clamp(Math.floor(Number(p.martStamp) || 0), 0, 1e6);
   o.cupBest = p.cupBest && typeof p.cupBest === "object" ? { key: str(p.cupBest.key, 10), size: clamp(Number(p.cupBest.size) || 0, 0, 1e6) } : null;   // v1.135 주말 낚시 대회
   o.fest = p.fest && typeof p.fest === "object" ? { sid: str(p.fest.sid, 16), stamps: clamp(Math.floor(Number(p.fest.stamps) || 0), 0, 7), day: str(p.fest.day, 10), prog: clamp(Math.floor(Number(p.fest.prog) || 0), 0, 99), alt: clamp(Math.floor(Number(p.fest.alt) || 0), 0, 99), stamped: !!p.fest.stamped } : null;   // v1.137 계절 축제
+  o.farmHand = p.farmHand && typeof p.farmHand === "object" ? { until: Number(p.farmHand.until) || 0, last: Number(p.farmHand.last) || 0, replant: p.farmHand.replant !== false, byeSaid: !!p.farmHand.byeSaid, log: Array.isArray(p.farmHand.log) ? p.farmHand.log.filter(l => l && typeof l.t === "string").slice(0, 12).map(l => ({ t: str(l.t, 120), at: Number(l.at) || 0 })) : [] } : null;   // v1.139 농장 알바
   o.aquaLocal = Array.isArray(p.aquaLocal) ? p.aquaLocal.filter(r => r && typeof r.fishId === "string").slice(0, 260) : [];   // v1.138 혼자 모드 수족관
   o.townDon = clamp(Math.floor(Number(p.townDon) || 0), 0, 1e9);   // v1.136 마을 공동 프로젝트 누적 기부
   o.cupDone = Array.isArray(p.cupDone) ? p.cupDone.filter(x => typeof x === "string").slice(-8) : [];
@@ -11122,7 +11125,7 @@ function plotGrow(p, now) {   // 촉촉할 때만 자라요 (스프링클러 칸
   if (!p || !p.c) return p;
   now = now || Date.now(); if (!p.pt) p.pt = p.at || now;
   const wetEnd = p.spw ? now : (p.wet || 0);
-  const from = p.at || now, add = Math.max(0, Math.min(now, wetEnd) - from) * fertSpeed(fertKind(p)) * (typeof wxGrow === "function" && farmData().lv < 3 ? wxGrow() : 1);   // v1.137 눈 오면 노지 작물은 절반 속도 (비닐하우스 Lv.3부터는 괜찮아요) p.g = (p.g || 0) + add; p.at = now;
+  const from = p.at || now, add = Math.max(0, Math.min(now, wetEnd) - from) * fertSpeed(fertKind(p)) * (typeof wxGrow === "function" && farmData().lv < 3 ? wxGrow() : 1); p.g = (p.g || 0) + add; p.at = now;   // v1.137 눈 오면 노지 작물은 절반 속도 (비닐하우스 Lv.3부터는 괜찮아요) · v1.139 줄 끝이 주석에 묻혀 안 자라던 문제 고침
   if (!p.spw && fertKind(p) !== "lime" && plotStage(p) < 3 && now - Math.max(wetEnd, p.pt) > FARM_DRY_MS) p.wilt = 1;
   return p;
 }
@@ -11652,7 +11655,7 @@ function martSheet(body, corner) {
     const mine = CROPS.filter(c => { const v = (P.crops || {})[c.id]; return v && (v[0] || v[1]); });
     if (!mine.length) wrap.append(h("div", { class: "empty-note", text: "아직 납품할 작물이 없어요 · 낭만 농장에서 키워 와요" }));
     for (const c of mine) { const v = cropInv(c.id);
-      for (const q of [1, 0]) if (v[q]) wrap.append(prodCard(h("img", { src: cropIcon(c.id), alt: "" }), (q ? "⭐ 특상품 " : "") + c.name, "가진 것 " + v[q] + "개", Math.round(c.price * (q ? 1.5 : 1)), () => martSell(c.id, q), "전부 납품 · " + won(Math.round(c.price * (q ? 1.5 : 1)) * Math.min(v[q], Math.floor(left / Math.round(c.price * (q ? 1.5 : 1))))))); }
+      for (const q of [1, 0]) if (v[q]) { const hot = c.id === hotCrop(), ea = Math.round(c.price * (q ? 1.5 : 1) * (hot ? 1.4 : 1)); wrap.append(prodCard(h("img", { src: cropIcon(c.id), alt: "" }), (hot ? "🔥 오늘 인기 " : "") + (q ? "⭐ 특상품 " : "") + c.name, "가진 것 " + v[q] + "개" + (hot ? " · 오늘 납품가 1.4배" : ""), ea, () => martSell(c.id, q), "전부 납품 · " + won(ea * Math.min(v[q], Math.floor(left / ea))))); } }
   } else if (C.id === "life") {
     const sale = goodsSaleId(), sn = seasonNow(), seasonal = TOYS.filter(t => t.season === sn.name);
     const owned = MART_GOODS.map(id => TOY[id]).concat(seasonal).filter(t => t && toyCount(t.id) > 0);
@@ -11674,9 +11677,10 @@ function martSheet(body, corner) {
   body.append(wrap);
   if (C.id !== "checkout" && S.cart.length) body.append(h("div", { class: "mt-cartbar" }, h("span", { text: "🛒 " + cartCount() + "개 · " + won(cartTotal()) }), h("small", { text: "입구 옆 계산대에서 계산해요" })));
 }
+const hotCrop = () => { const pool = CROPS.filter(c => c.lv <= Math.max(2, farmData().lv || 0)); return pool[mixHash("hot|" + kstDay()) % pool.length].id; };   // v1.139 오늘의 인기 작물 (로컬푸드 납품가 1.4배)
 function martSell(id, q) {
   const v = cropInv(id), d = kstDay(); if (!P.localDay || P.localDay.d !== d) P.localDay = { d, n: 0, v: 0 };
-  const each = Math.round(CROP[id].price * (q ? 1.5 : 1)), n = Math.min(v[q], Math.floor(Math.max(0, LOCAL_CAP - (P.localDay.v || 0)) / each));
+  const each = Math.round(CROP[id].price * (q ? 1.5 : 1) * (id === hotCrop() ? 1.4 : 1)), n = Math.min(v[q], Math.floor(Math.max(0, LOCAL_CAP - (P.localDay.v || 0)) / each));
   if (n <= 0) { toast("오늘 납품 한도(" + won(LOCAL_CAP) + ")를 다 채웠어요 · 내일 또 와요"); return; }
   const sum = each * n;
   v[q] -= n; P.localDay.n += n; P.localDay.v = (P.localDay.v || 0) + sum; P.gold += sum; stat("soldGold", sum); questProgress("sell", sum); markDirty(); sfx("coins", .45); try { ACT_FX.sell(sum); } catch {}
@@ -11692,6 +11696,7 @@ function farmSheet(body) {   // 농장 관리소: 토지 대장 + 단계 카드 
   const mini = h("div", { class: "fm-mini" }); for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) { const own = F.lic && plotOwned(r, c), p = own ? plotGrow(F.plots[plotKey(r, c)]) : null, st = p && p.c ? plotStage(p) : -1;
     mini.append(h("i", { class: !own ? "" : st >= 3 ? "ready" : st >= 0 ? (plotWet(p) ? "grow wet" : "grow") : p && p.till ? "till" : "own", title: p && p.c ? CROP[p.c].name + " · " + (st >= 3 ? "수확!" : farmLeft(p)) : "" })); }
   body.append(h("div", { class: "fm-top" }, deed, h("div", { class: "fm-minibox" }, mini, h("small", { text: "🟫 갈린 밭 · 🟩 자라는 중 · 💧 촉촉 · 🟨 수확" }))));
+  if (F.lic && F.lv) try { handWork(true); body.append(handSection()); } catch (e) { console.warn("hand", e); }   // v1.139 농장 알바
   const steps = h("div", { class: "fm-steps" });
   steps.append(h("div", { class: "fm-step" + (F.lic ? " done" : " now") }, h("b", { text: "농사 자격증" }), h("small", { text: "씨앗을 사고 땅을 살 수 있어요" }), F.lic ? h("span", { class: "fm-ok", text: "✔ 있어요" }) : h("button", { class: "btn sm pri", disabled: P.gold < FARM_LICENSE, onclick: () => { if (P.gold < FARM_LICENSE) return; P.gold -= FARM_LICENSE; F.lic = true; markDirty(); flushSave(); sfx("fanfare-hero", .4); toast("🌾 농사 자격증을 땄어요! 이제 땅을 살 수 있어요"); FARM3D.dirty = true; refreshSheet(true); }, text: won(FARM_LICENSE) })));
   FARM_LV.slice(1).forEach((s, i) => { const lv = i + 1, done = F.lv >= lv, now = F.lic && F.lv === lv - 1;
@@ -12653,6 +12658,7 @@ function loop3D(ms) {
   const hr = gameHour(now);
   const P2 = wxPeriod(periodFor(hr)); applyPeriod(P2);   // v1.137 날씨가 하늘 · 빛을 바꿔요
   try { precipTick(dt); } catch {}
+  try { handTick(dt); } catch {}
   const prog = hr >= 5.6 && hr < 19.6 ? (hr - 5.6) / 14 : (((hr - 19.6) + 24) % 24) / 10;
   const ang = Math.PI * clamp(prog, 0.05, 0.95);
   sunMesh.position.set(-520, 40 + Math.sin(ang) * 200, Math.cos(ang) * 420);
@@ -15197,6 +15203,65 @@ SHEETS.rank = (body) => {
     h("button", { class: "btn sm", disabled: !S.online, onclick: () => { pushRank(true); setTimeout(() => loadRanks(true), 800); toast("내 기록을 올렸어요"); }, text: "기록 올리기" }),
     !inHall(ME.x, ME.z) ? h("button", { class: "btn sm pri", onclick: () => { closeSheet(); goHall(c.id); }, text: "동상 보러 가기" }) : null));
 };
+/* ===================== 👩‍🌾 농장 알바 (v1.139) =====================
+   농장 관리소에서 하루 · 사흘 고용. 1분마다(접속 안 해도 다음 접속 때 몰아서) 마른 칸 물 주기 · 다 자란 작물 수확 · 같은 씨앗이 있으면 다시 심기.
+   일당은 땅 단계마다 달라요. 고용 중엔 밭에서 밀짚모자 알바가 돌아다녀요 */
+const HAND_FEE = [0, 300, 600, 1200, 2000, 3200];   // 하루 (땅 Lv 별)
+function handData() { if (!P.farmHand || typeof P.farmHand !== "object") P.farmHand = { until: 0, replant: true, log: [] }; return P.farmHand; }
+const handOn = () => { const H = handData(); return H.until > Date.now() && farmData().lic && farmData().lv > 0; };
+function handHire(days) {
+  const F = farmData(); if (!F.lic || !F.lv) { toast("땅이 있어야 알바를 쓸 수 있어요"); return; }
+  const fee = HAND_FEE[F.lv] * days; if (P.gold < fee) { toast("돈이 모자라요 · " + won(fee)); return; }
+  const H = handData(); P.gold -= fee; H.until = Math.max(Date.now(), H.until) + days * 864e5; H.last = H.last || Date.now(); markDirty(); sfx("coins", .4);
+  toast("👩‍🌾 농장 알바를 " + days + "일 고용했어요 · 물 주기 · 수확" + (H.replant ? " · 다시 심기" : "") + "를 맡겨요"); handWork(true); refreshSheet(true);
+}
+function handLog(t) { const H = handData(); H.log = [{ t, at: Date.now() }].concat(H.log || []).slice(0, 12); }
+function handWork(force) {   // 알바가 하는 일 (지난 접속 사이 분량까지 한 번에)
+  const H = handData(); if (!H.until) return; const F = farmData(); if (!F.lic || !F.lv) return;
+  const now = Date.now(), end = Math.min(now, H.until); if (!force && now - (H.tick || 0) < 55000) return; H.tick = now;
+  if (end <= (H.last || 0)) return;
+  let wat = 0, hv = 0, rp = 0; const got = {};
+  for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) {
+    if (!plotOwned(r, c)) continue; const k = plotKey(r, c); let p = F.plots[k];
+    if (p && p.c) { if ((p.wet || 0) < end) { p.wet = Math.max(p.wet || 0, end); } plotGrow(p, now); if ((p.wet || 0) < now + 60e3 && now < H.until) { p.wet = now + FARM_WET_MS; wat++; } }
+    p = F.plots[k];
+    if (p && p.c && plotStage(p) >= 3) {
+      const cr = CROP[p.c], sp = Math.random() < fertSpecial(fertKind(p)) - (p.wilt ? .1 : 0), inv = cropInv(cr.id); inv[sp ? 1 : 0]++; hv++; got[cr.name] = (got[cr.name] || 0) + 1; stat("harvests"); try { festProgress("harvest"); } catch {}
+      const id = p.c; F.plots[k] = { till: true, tt: now };
+      if (H.replant && ((P.seeds || {})[id] || 0) > 0 && cr.lv <= F.lv && now < H.until) { P.seeds[id]--; F.plots[k] = { till: true, c: id, g: 0, at: now, pt: now, wet: now + FARM_WET_MS, f: 0 }; rp++; }
+    }
+  }
+  H.last = end;
+  if (wat || hv || rp) { const g = Object.entries(got).map(([n, v]) => n + " " + v).join(", "); handLog((hv ? "🧺 수확 " + hv + "개 (" + g + ")" : "") + (rp ? " · 🌱 다시 심기 " + rp + "칸" : "") + (wat ? " · 💧 물 " + wat + "칸" : ""));
+    if (hv) toast("👩‍🌾 알바가 " + hv + "개를 수확해서 창고에 넣었어요" + (rp ? " · " + rp + "칸 다시 심었어요" : ""), null, 4500);
+    markDirty(); try { sprRefresh(); } catch {} if (typeof FARM3D !== "undefined") FARM3D.dirty = true; }
+  if (now >= H.until && !H.byeSaid) { H.byeSaid = true; handLog("👋 고용 기간이 끝났어요"); toast("👩‍🌾 농장 알바 고용 기간이 끝났어요 · 농장 관리소에서 다시 고용해요"); markDirty(); }
+  if (now < H.until) H.byeSaid = false;
+}
+setInterval(() => { try { if (!S.title && S.profileReady !== false) handWork(); } catch (e) { console.warn("hand", e); } }, 15000);
+function handSection() {
+  const F = farmData(), H = handData(), on = handOn(), fee = HAND_FEE[F.lv] || 0;
+  const box = h("div", { class: "fh-box" + (on ? " on" : "") }, h("span", { class: "fh-ico", text: "👩‍🌾" }), h("div", { class: "grow" }, h("b", { text: "농장 알바 · " + (on ? "일하는 중 (" + fmtLong(H.until - Date.now()) + " 남음)" : "쉬는 중") }),
+    h("small", { text: "마른 칸 물 주기 · 다 자란 작물 수확 · 같은 씨앗이 있으면 다시 심기 · 접속하지 않아도 일해요" }),
+    h("div", { class: "row", style: "gap:6px;flex-wrap:wrap;margin-top:6px" },
+      h("button", { class: "btn sm pri", disabled: !F.lv || P.gold < fee, onclick: () => handHire(1), text: (on ? "하루 연장 · " : "하루 고용 · ") + won(fee) }),
+      h("button", { class: "btn sm", disabled: !F.lv || P.gold < fee * 3, onclick: () => handHire(3), text: "사흘 · " + won(fee * 3) }),
+      h("button", { class: "btn sm", "aria-pressed": String(!!H.replant), onclick: () => { H.replant = !H.replant; markDirty(); refreshSheet(true); }, text: (H.replant ? "✅" : "⬜") + " 다시 심기" }))));
+  const log = (H.log || []).slice(0, 5);
+  return h("div", null, h("div", { class: "sec", text: "👩‍🌾 농장 알바" }), box, log.length ? h("div", { class: "fh-log" }, log.map(l => h("div", null, h("small", { class: "muted", text: new Date(l.at + 9 * 3600e3).toISOString().slice(11, 16) + " " }), h("span", { text: l.t })))) : null);
+}
+/* 알바 3D: 밀짚모자 · 초록 조끼 · 밭 사이를 걸어 다녀요 */
+let HAND3D = null;
+function handTick(dt) {
+  if (!T3 || !scene || !GEO.body || typeof FARM === "undefined") return;
+  const show = handOn() && !atHome() && Math.hypot(ME.x - FARM.x, ME.z - FARM.z) < 70;
+  if (!HAND3D && show) { try { const B = makeBody(); applyOutfit(B, normWear({ hat: "h-straw", top: "t-vest" }), "#c9973f"); B.faceMat.map = faceTexture("npc"); B.faceMat.needsUpdate = true; scene.add(B.g); HAND3D = { B, x: FARM.x, z: FARM.z, tx: FARM.x, tz: FARM.z, wait: 0 }; } catch (e) { HAND3D = { fail: true }; } }
+  if (!HAND3D || HAND3D.fail) return; HAND3D.B.g.visible = show; if (!show) return;
+  const A = HAND3D, L = farmRange(), dx = A.tx - A.x, dz = A.tz - A.z, d = Math.hypot(dx, dz);
+  if (d < .15) { A.wait -= dt; if (A.wait <= 0) { const r = L.lo + Math.floor(Math.random() * (L.hi - L.lo + 1)), c = L.lo + Math.floor(Math.random() * (L.hi - L.lo + 1)), pp = plotPos(r, c); A.tx = pp.x + .9; A.tz = pp.z; A.wait = 2.5 + Math.random() * 3; } }
+  else { const sp = Math.min(d, 1.6 * dt); A.x += dx / d * sp; A.z += dz / d * sp; A.B.g.rotation.y = Math.atan2(dx, dz); }
+  const gy = groundY(A.x, A.z), t = performance.now() / 1000; A.B.g.position.set(A.x, gy + (d > .15 ? Math.abs(Math.sin(t * 9)) * .06 : 0), A.z);
+}
 /* ===================== 🐠 마을 수족관 (v1.138) =====================
    잡은 물고기를 기증하면 종마다 「가장 큰 한 마리」가 수족관에 전시돼요(더 큰 걸 기증하면 바뀌어요). 기록 records/aq_<fishId> (필드 aqs = 크기 cm).
    어촌역 동쪽 「어촌 수족관」 유리 전시관 수조 3개에 가장 귀한 전시 9마리가 헤엄쳐요. 기증하면 판매가의 1.5배를 사례금으로 받아요 */
