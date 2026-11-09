@@ -2238,7 +2238,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.141.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.142.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -8722,6 +8722,7 @@ function init3D() {
   buildFar();
   buildCoast();
   buildDetails();
+  try { buildWindPark(); } catch (e) { console.warn("wind park", e); }   // v1.142 바람언덕 공원 (숲보다 먼저 · 가드 통과한 것만)
   (S.landTrees || []).forEach(([x, z], k) => propTree(x, z, .8 + k * .1, null, false, "landTrees"));
   buildForest();   // v1.141 숲은 마지막에: 선로 · 역 · 건물 · 길이 다 놓인 뒤 그 자리를 피해서 심어요
 
@@ -15223,6 +15224,40 @@ SHEETS.rank = (body) => {
     h("button", { class: "btn sm", disabled: !S.online, onclick: () => { pushRank(true); setTimeout(() => loadRanks(true), 800); toast("내 기록을 올렸어요"); }, text: "기록 올리기" }),
     !inHall(ME.x, ME.z) ? h("button", { class: "btn sm pri", onclick: () => { closeSheet(); goHall(c.id); }, text: "동상 보러 가기" }) : null));
 };
+/* ===================== 🌳 바람언덕 공원 (v1.142 2트랙 · 구역 보강) =====================
+   어촌역 동쪽 빈 언덕(수족관 · 전망대 사이)을 기준 구역(상점가) 밀도로 채워요: 선로 건널목 · 돌길 · 가로등 · 섞어 심은 군락 · 화단 · 바다 보는 벤치.
+   모든 장식은 placeOK 가드를 지나야 놓여요. 정적 장식은 mergeStatic으로 묶어 모바일 부담을 줄여요 */
+const PARK = { cross: { x: 48.35, z: 85, w: 4 } };
+function buildWindPark() {
+  const g = new T3.Group(); scene.add(g); DETAIL_GROUPS.push(g);
+  const Y = (x, z) => (TER.h ? terH(x, z) : 0), at = (x, z) => { const hg = new T3.Group(); hg.position.y = Y(x, z); g.add(hg); return hg; };   // 언덕 위 소품은 땅 높이 받침에
+  const slab = (x0, z0, x1, z1, w) => { const L = Math.hypot(x1 - x0, z1 - z0), n = Math.max(1, Math.round(L / 1.25)), ang = Math.atan2(x1 - x0, z1 - z0);   // 땅을 따라 계단처럼 놓는 판석 (기울이지 않아요)
+    for (let k = 0; k < n; k++) { const t = (k + .5) / n, mx = x0 + (x1 - x0) * t, mz = z0 + (z1 - z0) * t; const b = box(w, .12, L / n - .08, lam(0xffffff, { map: imgTex("a/slabs.jpg", 1, .5) }), mx, Y(mx, mz) + .06, mz, g); b.rotation.y = ang; } };
+  // ① 선로 건널목 (승강장 북쪽 끝 · 판자 + 양옆 차단 표지) — 역 ↔ 수족관 · 전망대 지름길
+  const C = PARK.cross; box(6.4, .12, C.w, cmat(0x8a6a44), C.x, .26, C.z, g);
+  for (let k = -2; k <= 2; k++) box(6.4, .02, .06, cmat(0x5a4028), C.x, .33, C.z + k * .8, g);
+  for (const sx of [-1, 1]) { const px = C.x + sx * 3.6, pz = C.z - 2.4; cyl(.06, .07, 2.2, 8, cmat(0xf4f1ea), px, 1.1, pz, g); for (const r of [-.6, .6]) { const bb = box(1.1, .16, .04, cmat(0xffffff), px, 2.0, pz, g); bb.rotation.z = r; } box(.6, .25, .04, cmat(0xd8382c), px, 1.55, pz, g); }
+  // ② 돌길: 건널목 → 전망대 마당 · 수족관 앞
+  slab(52, C.z, 63, C.z, 2.6); slab(63, C.z, 70.5, 90.5, 2.6); slab(63, C.z, 63, 62, 2.4); slab(63, 62, 63, 52, 2.4); slab(63, 52, 71, 52, 2.4);
+  // ③ 가로등 (밤에도 살아 있게)
+  for (const [x, z, ax, az] of [[55, 87, 0, -1], [60.6, 80, 1, 0], [60.6, 70, 1, 0], [60.6, 58, 1, 0], [66, 88.5, 0, -1]]) propLamp(x, z, [ax, az], at(x, z));
+  // ④ 화단 (돌길 옆)
+  for (const [x, z, w, d] of [[57.5, 83, 4, .8], [65.2, 74, .8, 4], [65.2, 66, .8, 4], [67, 49.6, 4, .8]]) propPlanter(x, z, w, d, at(x, z), .14);
+  // ⑤ 바다 보는 쉼터 (전망대 가는 길 북쪽 · 벤치 2 + 망원경)
+  for (const [x, z, ry] of [[56, 91.5, Math.PI], [59.5, 91.5, Math.PI]]) propBench(x, z, ry, at(x, z));
+  { const ts = new T3.Group(); ts.position.set(53, Y(53, 92), 92.5); g.add(ts); cyl(.07, .1, 1.1, 8, cmat(0x2a2d33), 0, .55, 0, ts); const sc = cyl(.13, .2, .8, 12, cmat(0x2f6f86), .1, 1.25, 0, ts); sc.rotation.z = -Math.PI / 2 + .25; }
+  // ⑥ 군락 식재: 종(소나무 · 활엽수) · 크기 · 간격을 섞어서 (줄 세우기 없이)
+  let sd = 11; const rr = () => ((sd = (sd * 9301 + 49297) % 233280) / 233280);
+  for (const [cx, cz, n] of [[56, 70, 4], [56, 56, 3], [74, 76, 3], [88, 76, 4], [90, 60, 3], [78, 108, 4], [60, 104, 3]]) for (let k = 0; k < n; k++) {
+    const a = rr() * Math.PI * 2, d = 1.8 + rr() * 3.2, x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d; if (!placeOK(x, z, 1) || !treeSpaceOK(x, z)) continue;
+    propTree(x, z, .7 + rr() * .55, null, rr() < .45, "windpark"); }
+  // ⑦ 낮은 관목 · 꽃 무더기 (군락 발치)
+  for (let k = 0; k < 16; k++) { const x = 52 + rr() * 42, z = 46 + rr() * 66; if (!placeOK(x, z, .5)) continue; const y = Y(x, z); const bsh = new T3.Mesh(new T3.IcosahedronGeometry(.35 + rr() * .25, 1), cmat([0x4f8f4a, 0x5e9a52, 0x3f7f45][k % 3])); bsh.position.set(x, y + .25, z); bsh.scale.y = .75; g.add(bsh);
+    for (let f = 0; f < 3; f++) { const fl = new T3.Mesh(new T3.IcosahedronGeometry(.07, 0), cmat([0xff7a8a, 0xffd84d, 0xffffff, 0xb08ae8][(k + f) % 4])); fl.position.set(x + (rr() - .5) * .7, y + .5, z + (rr() - .5) * .7); g.add(fl); } }
+  // ⑧ 선로 옆 나무 울타리 (마트 동쪽 구간 · 사람이 선로로 들어서지 않게 보이는 경계) — 15m마다 틈
+  for (let z = -62; z < -12; z += 2.5) { if (((z + 62) % 15) < 2.5) continue; for (const sx of [-1, 1]) { const x = 95.2 + sx * 3.3 + (z > -30 ? (z + 30) * -.06 : 0); if (roadNear(x, z).d < 5) continue; const y = Y(x, z); cyl(.06, .07, .9, 6, cmat(0x8a6a44), x, y + .45, z, g); box(.05, .06, 2.5, cmat(0xa07a50), x, y + .75, z + 1.25, g); box(.05, .06, 2.5, cmat(0xa07a50), x, y + .45, z + 1.25, g); } }
+  g.updateMatrixWorld(true); try { mergeStatic(g); } catch (e) { console.warn("park merge", e); }
+}
 /* ===================== 📸 사진 모드 · 마을 사진전 (v1.140) =====================
    사진 모드: 화면 글자를 다 숨기고(카메라는 끌어서 돌려요) 셔터로 찍어요 → 내려받기 · 사진전에 걸기.
    사진전: records/photo_<id> (photoTs · img = 작은 JPEG) 최근 24장 · 좋아요(❤ likes) */
@@ -15953,6 +15988,7 @@ const KEEP_CLEAR = () => [   // 입구 · 광장 · 새 시설 앞 (사람이 �
   [AQUA.x - AQUA.w / 2 - 2, AQUA.x + AQUA.w / 2 + 2, AQUA.z - AQUA.d / 2 - 5, AQUA.z + AQUA.d / 2 + 2],   // 수족관 앞마당
   [TOWNP.x - 10, TOWNP.x + 10, TOWNP.z - 12, TOWNP.z + 10],                                // 전망대 마당
   [STN2.px0 - 4, STN2.deck.x1 + 1, STN2.z0 - 3, STN2.z1 + 3],                             // 해돋이역 · 전망 데크
+  [44, 66, 82, 88.5], [61.5, 64.5, 50, 88], [61.5, 73, 50.5, 53.5],                          // v1.142 공원 건널목 · 돌길
 ];
 function placeOK(x, z, r) {
   r = r == null ? .8 : r;
@@ -16124,7 +16160,7 @@ function buildStation() {
   const pr = box(3.6, .14, 30, cmat(0x2a78bb), rail - 3.6, 3.95, cz, det); pr.rotation.z = .12;
   { const ns = makeSign(2.6, .7, { shape: "board", fill: { type: "grad", c: ["#ffffff", "#eef3f6"] }, frame: { c: "#1d3a5c" }, t: { text: "어촌", font: "hyeon", color: "#1d3a5c", size: .5, y: .5 } }, { cw: 500 });
     ns.position.set(rail - 4.6, 2.5, cz + 9); ns.rotation.y = Math.PI / 2; scene.add(ns); const ns2 = ns.clone(); ns2.rotation.y = -Math.PI / 2; ns2.position.x = rail - 4.62; scene.add(ns2); }
-  BLOCKS.push([x0 - .3, x1 + .3, z0 - .3, z1 + .3], [rail - 1.3, rail + 3, 20, 92]);   // v1.122 승강장은 걸어 다니고 선로만 막아요 (선로 · 기차는 buildRail)
+  BLOCKS.push([x0 - .3, x1 + .3, z0 - .3, z1 + .3], [rail - 1.3, rail + 3, 20, 83], [rail - 1.3, rail + 3, 87, 92]);   // v1.142 승강장 북쪽 z 83~87은 건널목 (바람언덕 공원 지름길)   // v1.122 승강장은 걸어 다니고 선로만 막아요 (선로 · 기차는 buildRail)
   fingerPost(24.6, 49.2, [["🚆 바다열차 타는 곳 (순환선)", "#2a78bb", 45, 53], ["🏘 상점가 거리", "#7a5a2a", 4, 30], ["🌳 상점가 뒤뜰 산책길", "#4a6a3a", 21, 0]], det);
   // 윗마을 공원 → 역 돌길
   const path = box(6.4, .05, 3.4, lam(0xffffff, { map: imgTex("a/slabs.jpg", 2, 1) }), 24.4, .03, cz); grounds.push(path);
