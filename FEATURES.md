@@ -1,6 +1,6 @@
 # 어촌생활 · 전체 기능 정리
 
-> 현재 버전: **v1.139.0** · 마지막 정리: 2026-11-08
+> 현재 버전: **v1.140.0** · 마지막 정리: 2026-11-08
 > v1.68: 마을 생물 애니메이션(비둘기·돌고래·고양이·강아지·게, 모델 고유 모션 재생)과 낚시·캐기 동작 개선(KayKit 낚시 모션 분석을 현 캐릭터 구조에 이식 — 캐스팅 궤도, 릴 감는 손, 파이팅 자세, 캐치 포즈). 캐릭터 신체 비율은 변경하지 않았고, 비율이 맞지 않는 사람용 스켈레톤 클립은 적용하지 않았어요.
 > 업데이트할 때마다 이 문서를 고치고, 바뀐 내용은 [CHANGELOG.md](CHANGELOG.md)에 남겨요.
 
@@ -667,3 +667,7 @@
 ## 농장 알바 · 오늘의 인기 작물 (v1.139)
 - `P.farmHand { until, last, replant, log }`: `handHire(일)` · 일당 `HAND_FEE[땅Lv]`. `handWork()`(15초마다 · 관리소 열 때) — 지난 처리 시각부터 고용 끝까지 성장분을 반영하고, 물 주기 · 수확 · 다시 심기를 해요. 3D `handTick`(밭 근처에서만).
 - `hotCrop()`: 날짜 해시로 고른 작물. `martSell` 납품가 ×1.4.
+
+## 수산시장 경매 · 사진 모드 · 사진전 (v1.140)
+- 경매 `records/auc_<id>` (aucEnd · seller · item · start · bid · bidder · paid · winClaimed). 입찰하면 돈을 바로 빼고, 이전 최고 입찰자에게는 우편 `auc_refund`. 정산 `aucSettle()`: 각자 `update({winClaimed})` / `update({paid})`, 이중 정산을 막으려고 `P.aucDone`에 기록해요.
+- 사진 모드 `photoMode()`(body.photomode가 HUD를 숨기고, `data-pfx` 필터) · `photoShot()`(다시 그려서 960px JPEG). 사진전 `records/photo_<id>` (photoTs · img 640px JPEG ≤300KB · likes), 좋아요는 `P.likedPhotos`.
