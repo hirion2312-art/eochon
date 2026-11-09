@@ -2213,7 +2213,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.133.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.134.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -4907,7 +4907,7 @@ const keys = new Set();
 
 /* ===================== 이동 ===================== */
 function leaveSpot(silent) {
-  if (S.ride) { trainLeave(false); return; }
+  if (S.ride) { if (TRAIN.st && TRAIN.st.phase !== "dwell") { S.ride.dest = (S.ride.dest + 1) % RAIL.stops.length; if (S.ride.dest === S.ride.from && RAIL.stops.length > 2) S.ride.dest = (S.ride.dest + 1) % RAIL.stops.length; toast("🎯 목적지를 " + stopName(S.ride.dest) + "(으)로 바꿨어요"); updateActionUI(); return; } trainLeave(false); return; }
   if (S.coop) coopEnd("함께 낚시를 그만뒀어요", true);
   if (onBoat()) { if (myBoat() && myBoat().status === "sailing") { lockedHint(); return; } boatLeave(); return; }
   if (ME.seat) {
@@ -5059,7 +5059,7 @@ function updateActionUI() {
   const showStand = (!!ME.seat || S.myStall >= 0 || coopGuest || !!S.card || !!S.ride) && S.phase !== "bite" && !REEL.on;
   sb.hidden = !showStand;
   sb.classList.toggle("up", showStand && !btn.hidden);
-  if (showStand) sb.textContent = S.ride ? (TRAIN.st && TRAIN.st.phase === "dwell" ? "기차에서 내리기" : "🚆 달리는 중") : S.card ? "명함 거두기" : coopGuest ? "함께 낚시 그만" : onBoat() ? (myBoat() && myBoat().status === "sailing" ? "중도하차" : "배에서 내리기") : S.myStall >= 0 ? (npcActive(S.stalls[S.myStall]) ? "알바에게 맡기고 자리 뜨기" : "노점 닫기") : "일어나기";
+  if (showStand) sb.textContent = S.ride ? (TRAIN.st && TRAIN.st.phase === "dwell" ? "기차에서 내리기" : "🎯 목적지 · " + stopName(S.ride.dest)) : S.card ? "명함 거두기" : coopGuest ? "함께 낚시 그만" : onBoat() ? (myBoat() && myBoat().status === "sailing" ? "중도하차" : "배에서 내리기") : S.myStall >= 0 ? (npcActive(S.stalls[S.myStall]) ? "알바에게 맡기고 자리 뜨기" : "노점 닫기") : "일어나기";
   syncUIState();
 }
 function doAction() { if (curAction) { const a = curAction; curAction = null; a.run(); actKey = "-"; } }   // 다음 프레임에 버튼을 꼭 다시 그려요 (팔고 나서 할 일이 없으면 숨김)
@@ -12897,7 +12897,7 @@ function updateHint() {
   if (!R) return;
   hint.classList.toggle("idle", !(S.coop && S.coop.stage !== "inviting") && !S.ride && !onBoat() && !fishingNow() && !(S.myStall >= 0) && !ME.seat);   // 그냥 걸어 다닐 땐 조작 안내를 띄우지 않아요 (v1.40)
   if (S.coop && S.coop.stage !== "inviting") hint.textContent = "함께 낚시 중 · 「!」가 뜨면 둘 중 누구든 챔질 → 둘 다 손맛을 버텨야 잡혀요";
-  else if (S.ride) hint.textContent = "🚆 바다열차 탑승 중 · 창밖 풍경을 즐겨요 · 도착하면 저절로 내려요";
+  else if (S.ride) hint.textContent = "🚆 바다열차 순환선 · 목적지 " + stopName(S.ride.dest) + " · 도착하면 저절로 내려요 (🎯 버튼으로 목적지 바꾸기)";
   else if (onBoat()) { const mb = myBoat(), nm = BOAT_NAMES[Math.max(0, myBoatIdx())]; hint.textContent = mb && mb.status === "sailing" ? nm + " · 깊은 바다에 도착하면 자동으로 낚시를 시작해요" : nm + " 탑승 중 · 뱃삯이 모이면 바로 출항해요"; }
   else if (fishingNow()) hint.textContent = S.phase === "ready" || S.phase === "charge" ? "꾹 눌렀다가 초록 칸에서 떼면 완벽한 캐스팅! 멀리 던질수록 좋은 물고기" : "「!」가 뜨면 챔질 → 꾹 눌러 감고, 돌진·점프하면 손 떼기 · 과열을 조심해요";
   else if (S.myStall >= 0) hint.textContent = "노점 운영 중 · 주문이 오면 자동으로 팔려요";
@@ -13830,7 +13830,7 @@ function drawIslandMap(cv) {
   g.font = "700 " + 9 * u + "px sans-serif"; g.textAlign = "center"; g.fillStyle = "#2a3a2a"; g.fillText("마을", X(-8), Y(-136));
   g.strokeStyle = "rgba(70,74,80,.85)"; g.lineWidth = 2.2 * u; g.beginPath(); RING.pts.forEach(([x, z], i) => i ? g.lineTo(X(x), Y(z)) : g.moveTo(X(x), Y(z))); g.closePath(); g.stroke();
   if (RAIL.x) { g.save(); g.strokeStyle = "#5a3a22"; g.lineWidth = 2.8 * u; g.beginPath(); for (let i = 0; i < RAIL.n; i += 3) i ? g.lineTo(X(RAIL.x[i]), Y(RAIL.z[i])) : g.moveTo(X(RAIL.x[i]), Y(RAIL.z[i])); g.stroke(); g.strokeStyle = "#fff6dc"; g.lineWidth = 1.2 * u; g.setLineDash([3 * u, 3 * u]); g.stroke(); g.setLineDash([]);
-    for (const [x, z, nm] of [[STN.rail - 2, 53, "어촌역"], [STN2.px0 + 1, STN2.cz, "해돋이역"]]) { g.fillStyle = "#2a78bb"; g.strokeStyle = "#fff"; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(X(x), Y(z), 4.5 * u, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#1d3a5c"; g.font = "800 " + (11 * u) + "px sans-serif"; g.textAlign = "center"; g.fillText("🚉 " + nm, X(x), Y(z) - 9 * u); } g.restore(); }   // v1.122 바다열차
+    for (const [x, z, nm] of [[STN.rail - 2, 53, "어촌역"], [STN2.px0 + 1, STN2.cz, "해돋이역"], ...(RAIL.stops || []).filter(q => q.plat).map(q => [q.plat.x + q.plat.nx * 4, q.plat.z + q.plat.nz * 4, q.name])]) { g.fillStyle = "#2a78bb"; g.strokeStyle = "#fff"; g.lineWidth = 1.5 * u; g.beginPath(); g.arc(X(x), Y(z), 4.5 * u, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#1d3a5c"; g.font = "800 " + (11 * u) + "px sans-serif"; g.textAlign = "center"; g.fillText("🚉 " + nm, X(x), Y(z) - 9 * u); } g.restore(); }   // v1.122 바다열차
   for (const [px, pz, hh] of PEAKS.slice(0, 3)) { g.fillStyle = "#3a2a1a"; g.font = 8 * u + "px sans-serif"; g.fillText("▲ " + Math.round(hh) + "m", X(px), Y(pz)); }
   for (const p of otherPeers(false)) { const fr = p.uid && P.friends && P.friends[p.uid]; g.fillStyle = "#fff"; g.beginPath(); g.arc(X(p.x), Y(p.z), 2.6 * u, 0, 7); g.fill(); g.fillStyle = fr ? "#2fae7f" : p.color; g.beginPath(); g.arc(X(p.x), Y(p.z), 1.8 * u, 0, 7); g.fill(); }
   const mx = X(ME.x), my = Y(ME.z), a = Math.atan2(Math.cos(ME.ry), Math.sin(ME.ry)), r = 7 * u;
@@ -15405,7 +15405,7 @@ function buildStation() {
   { const ns = makeSign(2.6, .7, { shape: "board", fill: { type: "grad", c: ["#ffffff", "#eef3f6"] }, frame: { c: "#1d3a5c" }, t: { text: "어촌", font: "hyeon", color: "#1d3a5c", size: .5, y: .5 } }, { cw: 500 });
     ns.position.set(rail - 4.6, 2.5, cz + 9); ns.rotation.y = Math.PI / 2; scene.add(ns); const ns2 = ns.clone(); ns2.rotation.y = -Math.PI / 2; ns2.position.x = rail - 4.62; scene.add(ns2); }
   BLOCKS.push([x0 - .3, x1 + .3, z0 - .3, z1 + .3], [rail - 1.3, rail + 3, 20, 92]);   // v1.122 승강장은 걸어 다니고 선로만 막아요 (선로 · 기차는 buildRail)
-  fingerPost(24.6, 49.2, [["🚆 바다열차 타는 곳 (해돋이역행)", "#2a78bb", 45, 53], ["🏘 상점가 거리", "#7a5a2a", 4, 30], ["🌳 상점가 뒤뜰 산책길", "#4a6a3a", 21, 0]], det);
+  fingerPost(24.6, 49.2, [["🚆 바다열차 타는 곳 (순환선)", "#2a78bb", 45, 53], ["🏘 상점가 거리", "#7a5a2a", 4, 30], ["🌳 상점가 뒤뜰 산책길", "#4a6a3a", 21, 0]], det);
   // 윗마을 공원 → 역 돌길
   const path = box(6.4, .05, 3.4, lam(0xffffff, { map: imgTex("a/slabs.jpg", 2, 1) }), 24.4, .03, cz); grounds.push(path);
   const pl = new T3.PointLight(0xffd8a0, 0, 24, 1.6); pl.position.set(x0 - 2, 4, cz); scene.add(pl); glow.push({ light: pl, val: 1.2 });
@@ -15416,14 +15416,35 @@ function buildStation() {
    다른 사람 화면에서도 그 자리에 앉아 함께 달려요 */
 var STN_READY = false;
 const STN2 = { rail: 507, z0: 51, z1: 89, cz: 70, y: .8, px0: 508.35, px1: 512.6, deck: { x0: 512.6, x1: 523, z0: 63, z1: 77 } };
-const RAIL = { ctrl: [[47.5, 24], [47.5, 53], [47.5, 72], [49.5, 86], [58, 98], [80, 104], [130, 103], [210, 100], [290, 98], [370, 99], [440, 101], [472, 105], [491, 104.5], [502, 98], [507, 87], [507, 70], [507, 46]], step: 1, n: 0, len: 0, x: null, y: null, z: null, sW: 0, sE: 0, cross: null };
-const TRAIN_T = { dwell: 25, vmax: 17, acc: .9 };
-const TRAIN = { cars: null, st: null, cross: null };
+/* v1.134 순환선: 일주도로 바깥(바다 쪽)으로 12m를 따라 섬을 한 바퀴 돌아요. 마을 쪽은 마트 동쪽을 따라 내려와 마트 · 농장 사이 틈으로 어촌역에 들어와요.
+   방향은 늘 한쪽(어촌역 → 모래톱역 → 해돋이역 → 별빛역 → 어촌역) */
+function railLoopCtrl() {
+  const P = RING.pts, N = P.length, near = (x, z) => { let bi = 0, bd = 1e9; P.forEach((p, i) => { const d = (p[0] - x) ** 2 + (p[1] - z) ** 2; if (d < bd) { bd = d; bi = i; } }); return bi; };
+  const out = (i) => {   // 일주도로에서 바다 쪽으로 12m (바다에 너무 붙으면 덜 나가요)
+    const a = P[(i - 2 + N) % N], b = P[(i + 2) % N]; let tx = b[0] - a[0], tz = b[1] - a[1]; const L = Math.hypot(tx, tz) || 1; tx /= L; tz /= L;
+    let nx = -tz, nz = tx; if (coastInfo(P[i][0] + nx * 6, P[i][1] + nz * 6).d > coastInfo(P[i][0] - nx * 6, P[i][1] - nz * 6).d) { nx = -nx; nz = -nz; }
+    for (let r = 12; r >= 4; r -= 2) { const x = P[i][0] + nx * r, z = P[i][1] + nz * r; if (coastInfo(x, z).d >= 9) return [x, z]; }
+    return [P[i][0] + nx * 4, P[i][1] + nz * 4];
+  };
+  const iA = near(40, 128), iB = near(62, -150), ctrl = [[47.5, 24], [47.5, 53], [47.5, 76], [49.5, 94], [54, 122]];
+  for (let i = iA - 18; i > iB; i -= 18) {
+    const p = out(i);
+    if (Math.hypot(p[0] - 507, p[1] - 66) < 70) continue;   // 해돋이역 앞은 아래에서 따로 이어요
+    ctrl.push(p);
+    if (p[1] > 66 && p[0] > 440 && !ctrl.some(q => q[0] === 507)) ctrl.push([506, 104], [507, 87], [507, 66], [507, 46], [506, 28]);
+  }
+  ctrl.push([82, -160], [90, -130], [94, -95], [95, -60], [95, -30], [93, -10], [85, -1.5], [70, -.8], [58, .6], [50.5, 7], [47.6, 16]);   // 마트(남) · 농장(북) 사이 틈으로 들어와 어촌역 남쪽 끝으로
+  return ctrl;
+}
+const RAIL = { ctrl: railLoopCtrl(), loop: true, step: 1, n: 0, len: 0, x: null, y: null, z: null, sW: 0, sE: 0, cross: null };
+const TRAIN_T = { dwell: 20, vmax: 20, acc: .9 };
+const TRAIN = { cars: null, st: null, cross: null, crosses: [] };
 const TRAIN_CARS = [{ kind: "engine", len: 8.2, off: 11.4 }, { kind: "open", len: 10.6, off: 1.2 }, { kind: "open", len: 10.6, off: -10.2 }];   // 동쪽(해돋이) 끝이 기관차
 const TRAIN_ROWS = [-3.6, -1.2, 1.2, 3.6];
 function stnFloor(x, z) {   // 역 승강장 · 전망 데크 · 건널목 판자 높이 (역 밖이면 null)
   if (!STN_READY) return null;
   if (x > STN.rail - 5.5 && x < STN.rail - 1.3 && z > 28 && z < 78) return .7;
+  for (const P of STN_PLATS) { const u = (x - P.x) * P.tx + (z - P.z) * P.tz, v = (x - P.x) * P.nx + (z - P.z) * P.nz; if (v > P.v0 + .15 && v < P.v1 - .1) { const au = Math.abs(u); if (au < P.L / 2) return P.top; if (au < P.L / 2 + 3.3) { const gh = TER.h ? terH(x, z) : 0; return Math.max(gh, P.top - (au - P.L / 2) / 3.3 * (P.top - P.gy)); } } }
   if (x > 495) {
     if (x > STN2.px0 && z > STN2.z0 && z < STN2.z1 && (x < STN2.px1 || (x < STN2.deck.x1 && z > STN2.deck.z0 && z < STN2.deck.z1))) return STN2.y + .62;
     if (x > STN2.rail - 1.8 && x <= STN2.px0 && Math.abs(z - (STN2.cz - 4)) < 1.25) return STN2.y + .26;
@@ -15438,22 +15459,29 @@ function stnWalk(x, z) {   // 해돋이역 승강장 · 데크는 바닷가라�
   return null;
 }
 function railAt(s, out) {
+  if (RAIL.loop) s = ((s % RAIL.len) + RAIL.len) % RAIL.len;
   const f = clamp(s / RAIL.step, 0, RAIL.n - 1.0001), i = Math.floor(f), u = f - i;
   out[0] = RAIL.x[i] + (RAIL.x[i + 1] - RAIL.x[i]) * u; out[1] = RAIL.y[i] + (RAIL.y[i + 1] - RAIL.y[i]) * u; out[2] = RAIL.z[i] + (RAIL.z[i + 1] - RAIL.z[i]) * u; return out;
 }
-function trainState(nowMs) {   // 시간표: 어촌역 정차 → 해돋이역으로 → 해돋이역 정차 → 어촌역으로 (사다리꼴 속도)
-  const D = RAIL.sE - RAIL.sW, v = TRAIN_T.vmax, a = TRAIN_T.acc, ta = v / a, da = v * v / (2 * a), full = D >= 2 * da;
-  const tr = full ? 2 * ta + (D - 2 * da) / v : 2 * Math.sqrt(D / a), W = TRAIN_T.dwell, cyc = 2 * (W + tr), t = ((nowMs / 1000) % cyc + cyc) % cyc;
-  const dist = (u) => { const r = tr - u; if (full) return u < ta ? .5 * a * u * u : u < tr - ta ? da + v * (u - ta) : D - .5 * a * r * r; return u < tr / 2 ? .5 * a * u * u : D - .5 * a * r * r; };
-  if (t < W) return { phase: "dwell", at: 0, s: RAIL.sW, left: W - t, tr };
-  if (t < W + tr) { const u = t - W; return { phase: "run", dir: 1, s: RAIL.sW + dist(u), left: tr - u, tr }; }
-  if (t < 2 * W + tr) return { phase: "dwell", at: 1, s: RAIL.sE, left: 2 * W + tr - t, tr };
-  const u = t - 2 * W - tr; return { phase: "run", dir: -1, s: RAIL.sE - dist(u), left: tr - u, tr };
+const STN_PLATS = [];   // v1.134 새 역 승강장 (걸을 수 있는 판)
+const trRun = (D) => { const v = TRAIN_T.vmax, a = TRAIN_T.acc, da = v * v / (2 * a); return D >= 2 * da ? 2 * v / a + (D - 2 * da) / v : 2 * Math.sqrt(D / a); };
+const trDist = (u, D, tr) => { const v = TRAIN_T.vmax, a = TRAIN_T.acc, ta = v / a, da = v * v / (2 * a), full = D >= 2 * da, r = tr - u; if (full) return u < ta ? .5 * a * u * u : u < tr - ta ? da + v * (u - ta) : D - .5 * a * r * r; return u < tr / 2 ? .5 * a * u * u : D - .5 * a * r * r; };
+function trainState(nowMs) {   // v1.134 순환 시간표: 역마다 정차 → 다음 역으로 (늘 한 방향 · 사다리꼴 속도)
+  const S0 = RAIL.stops, W = TRAIN_T.dwell; let t = ((nowMs / 1000) % RAIL.cyc + RAIL.cyc) % RAIL.cyc; const t0 = t;
+  for (let i = 0; i < S0.length; i++) {
+    const st = S0[i];
+    if (t < W) return { phase: "dwell", at: i, s: st.s, left: W - t, t: t0, next: (i + 1) % S0.length };
+    t -= W;
+    if (t < st.tr) return { phase: "run", dir: 1, s: st.s + trDist(t, st.D, st.tr), left: st.tr - t, t: t0, from: i, next: (i + 1) % S0.length };
+    t -= st.tr;
+  }
+  return { phase: "dwell", at: 0, s: S0[0].s, left: W, t: t0, next: 1 };
 }
-function trainWait(st, k) {   // k역(0 어촌 · 1 해돋이)에 기차가 들어오기까지 남은 초
-  if (st.phase === "dwell") return st.at === k ? 0 : st.left + st.tr;
-  return (st.dir > 0) === (k === 1) ? st.left : st.left + TRAIN_T.dwell + st.tr;
+function trainWait(st, k) {   // k역에 기차가 들어오기까지 남은 초
+  if (st.phase === "dwell" && st.at === k) return 0;
+  return ((RAIL.stops[k].a - st.t) % RAIL.cyc + RAIL.cyc) % RAIL.cyc;
 }
+const stopName = (k) => (RAIL.stops && RAIL.stops[k] ? RAIL.stops[k].name : "");
 function makeTrainCar(kind, len) {
   const g = new T3.Group(), body = new T3.Group(), roof = new T3.Group(); g.add(body, roof);
   const iron = cmat(0x2a2d33), cream = cmat(0xfff4dc), blue = cmat(0x2a78bb), red = cmat(0xd8382c), gold = cmat(0xf2c230), wood = cmat(0xb07a48), seatM = cmat(0x2f8f5b);
@@ -15489,22 +15517,31 @@ function makeTrainCar(kind, len) {
   return { g, body, roof };
 }
 function buildRail() {
-  const pts = RAIL.ctrl.map(([x, z]) => new T3.Vector3(x, 0, z)), curve = new T3.CatmullRomCurve3(pts, false, "centripetal");
+  const pts = RAIL.ctrl.map(([x, z]) => new T3.Vector3(x, 0, z)), curve = new T3.CatmullRomCurve3(pts, true, "centripetal");
   const L = curve.getLength(), n = Math.round(L) + 1, sp = curve.getSpacedPoints(n - 1);
   RAIL.n = n; RAIL.step = L / (n - 1); RAIL.len = L; RAIL.x = new Float32Array(n); RAIL.z = new Float32Array(n);
   let bw = 1e9, be = 1e9;
   sp.forEach((q, i) => { RAIL.x[i] = q.x; RAIL.z[i] = q.z; const dw = Math.hypot(q.x - STN.rail, q.z - 53), de = Math.hypot(q.x - STN2.rail, q.z - STN2.cz); if (dw < bw) { bw = dw; RAIL.sW = i * RAIL.step; } if (de < be) { be = de; RAIL.sE = i * RAIL.step; } });
+  // v1.134 역 4곳 (선로 순서대로): 어촌 → 모래톱(남쪽 바닷가) → 해돋이 → 별빛(북쪽 바닷가)
+  const nearS = (x, z) => { let bi = 0, bd = 1e9; for (let i = 0; i < n; i++) { const d = (RAIL.x[i] - x) ** 2 + (RAIL.z[i] - z) ** 2; if (d < bd) { bd = d; bi = i; } } return bi * RAIL.step; };
+  RAIL.stops = [{ name: "어촌역", s: RAIL.sW, lvl: 0, half: 30 }, { name: "모래톱역", s: nearS(236, 278), half: 26, gen: true, en: "MORAETOP", col: "#d4701a" }, { name: "해돋이역", s: RAIL.sE, lvl: STN2.y, half: 38 }, { name: "별빛역", s: nearS(246, -252), half: 26, gen: true, en: "BYEOLBIT", col: "#5a4ab8" }].sort((a, b) => a.s - b.s);
+  { const k0 = RAIL.stops.findIndex(q => q.name === "어촌역"); RAIL.stops = RAIL.stops.slice(k0).concat(RAIL.stops.slice(0, k0)); }
+  let acc = 0; RAIL.stops.forEach((q, i) => { const nx = RAIL.stops[(i + 1) % RAIL.stops.length]; q.D = ((nx.s - q.s) % L + L) % L; q.tr = trRun(q.D); q.a = acc; acc += TRAIN_T.dwell + q.tr; }); RAIL.cyc = acc;
   // 높이: 땅을 위에서 감싸듯 부드럽게 (언덕은 땅 위로, 골짜기는 다리로) · 두 역 근처는 역 높이로 평평하게
   const raw = new Float32Array(n); for (let i = 0; i < n; i++) raw[i] = Math.max(.15, terH(RAIL.x[i], RAIL.z[i]) + .35);
-  const win = (a, r, mx) => { const o = new Float32Array(n); for (let i = 0; i < n; i++) { let v = mx ? -1e9 : 0, c = 0; for (let k = -r; k <= r; k++) { const j = Math.min(n - 1, Math.max(0, i + k)); if (mx) v = Math.max(v, a[j]); else { v += a[j]; c++; } } o[i] = mx ? v : v / c; } return o; };
+  const win = (a, r, mx) => { const o = new Float32Array(n); for (let i = 0; i < n; i++) { let v = mx ? -1e9 : 0, c = 0; for (let k = -r; k <= r; k++) { const j = ((i + k) % (n - 1) + (n - 1)) % (n - 1); if (mx) v = Math.max(v, a[j]); else { v += a[j]; c++; } } o[i] = mx ? v : v / c; } return o; };   // 순환선: 끝과 처음이 이어져요
   let h = win(raw, 16, true); h = win(h, 26, false); h = win(h, 26, false);
   for (let i = 0; i < n; i++) h[i] = Math.max(h[i], raw[i]);
   h = win(h, 8, false);
-  const flat = (sMid, half, lvl) => { for (let i = 0; i < n; i++) { const k = smooth01(half + 45, half, Math.abs(i * RAIL.step - sMid)); h[i] = h[i] * (1 - k) + lvl * k; } };
-  flat(RAIL.sW, 30, 0); flat(RAIL.sE, 38, STN2.y);
-  for (let i = 0; i < n; i++) { const s = i * RAIL.step; if (Math.abs(s - RAIL.sW) > 30 && Math.abs(s - RAIL.sE) > 38) h[i] = Math.max(h[i], raw[i] - .25); }
-  RAIL.y = h;
-  let bc = 1e9; for (let i = 0; i < n; i++) { if (i * RAIL.step < RAIL.sE - 90 || i * RAIL.step > RAIL.sE) continue; const d = roadNear(RAIL.x[i], RAIL.z[i]).d; if (d < bc) { bc = d; RAIL.cross = { i, s: i * RAIL.step }; } }
+  const wd = (a, b) => { const d = Math.abs(a - b) % L; return Math.min(d, L - d); };
+  for (const q of RAIL.stops) if (q.gen) { const i = Math.round(q.s / RAIL.step); let m = 0; for (let k = -12; k <= 12; k++) m = Math.max(m, raw[((i + k) % n + n) % n]); q.lvl = m; }
+  const flat = (sMid, half, lvl) => { for (let i = 0; i < n; i++) { const k = smooth01(half + 45, half, wd(i * RAIL.step, sMid)); h[i] = h[i] * (1 - k) + lvl * k; } };
+  for (const q of RAIL.stops) flat(q.s, q.half, q.lvl);
+  for (let i = 0; i < n; i++) { const s = i * RAIL.step; if (RAIL.stops.every(q => wd(s, q.s) > q.half)) h[i] = Math.max(h[i], raw[i] - .25); }
+  h[n - 1] = h[0]; RAIL.y = h;
+  // 건널목: 일주도로를 지나는 곳마다 (역 근처 제외)
+  RAIL.crosses = []; { let best = null; for (let i = 0; i < n; i++) { const d = roadNear(RAIL.x[i], RAIL.z[i]).d, s = i * RAIL.step; if (d < 3.5 && RAIL.stops.every(q => wd(s, q.s) > 20)) { if (!best || d < best.d) best = { i, s, d }; } else if (best && d > 9) { RAIL.crosses.push(best); best = null; } } if (best) RAIL.crosses.push(best); }
+  RAIL.cross = RAIL.crosses[0] || null;
   const det = new T3.Group(); scene.add(det); DETAIL_GROUPS.push(det);
   const dirAt = (i) => { const a = Math.max(0, i - 1), b = Math.min(n - 1, i + 1), dx = RAIL.x[b] - RAIL.x[a], dz = RAIL.z[b] - RAIL.z[a], l = Math.hypot(dx, dz) || 1; return [dx / l, dz / l]; };
   const idxs = (every) => { const o = []; for (let i = 0; i < n - 1; i += every) o.push(i); o.push(n - 1); return o; };
@@ -15533,14 +15570,14 @@ function buildRail() {
     plain(new T3.BoxGeometry(1.2, y - gy + .6, .9), pierM, RAIL.x[i], (y + gy - .6) / 2, RAIL.z[i], det).rotation.y = a;
     plain(new T3.BoxGeometry(3.6, .35, 1.2), pierM, RAIL.x[i], y - .1, RAIL.z[i], det).rotation.y = a; }
   // 끝 막이
-  for (const i of [0, n - 1]) { const [tx, tz] = dirAt(i); plain(new T3.BoxGeometry(2.4, .9, .5), cmat(0xd8382c), RAIL.x[i], RAIL.y[i] + .55, RAIL.z[i], det).rotation.y = Math.atan2(tx, tz); }
+
   // 건널목 (일주도로) · 차단기 · 경보등
-  if (RAIL.cross) {
-    const i = RAIL.cross.i, x = RAIL.x[i], z = RAIL.z[i], N = RING.pts.length; let j = 0, bd = 1e9;
+  for (const CR of RAIL.crosses) {
+    const i = CR.i, x = RAIL.x[i], z = RAIL.z[i], N = RING.pts.length; let j = 0, bd = 1e9;
     RING.pts.forEach((pp, k) => { const d = Math.hypot(pp[0] - x, pp[1] - z); if (d < bd) { bd = d; j = k; } });
     const pa = RING.pts[(j - 3 + N) % N], pb = RING.pts[(j + 3) % N]; let rx = pb[0] - pa[0], rz = pb[1] - pa[1]; const rl = Math.hypot(rx, rz) || 1; rx /= rl; rz /= rl;
     const lx = -rz, lz = rx, half = RING.w(RING.pts[j]) / 2 + .6;
-    TRAIN.cross = { arms: [], lamps: [] };
+    TRAIN.cross = { arms: [], lamps: [], s: CR.s }; TRAIN.crosses.push(TRAIN.cross);
     for (const sd of [-1, 1]) {
       const px = x + rx * sd * 4.2 + lx * sd * half, pz = z + rz * sd * 4.2 + lz * sd * half, gy = groundY(px, pz);
       cyl(.09, .11, 3.2, 8, cmat(0xf4f1ea), px, gy + 1.6, pz);
@@ -15552,6 +15589,7 @@ function buildRail() {
       arm.rotation.z = 1.35; TRAIN.cross.arms.push(arm);
     }
   }
+  for (const q of RAIL.stops) if (q.gen) try { buildLoopStation(q, det); } catch (e) { console.warn("station", q.name, e); }
   // 기차 (차량 3량)
   TRAIN.cars = TRAIN_CARS.map(c => { const car = makeTrainCar(c.kind, c.len); scene.add(car.g); car.g.updateMatrixWorld(true); mergeStatic(car.body); mergeStatic(car.roof); return { ...c, ...car }; });
   STN_READY = true;
@@ -15575,24 +15613,33 @@ function trainTick(now) {
   if (!TRAIN.cars) return;
   const st = trainState(now); TRAIN.st = st;
   for (const c of TRAIN.cars) { placeCar(c, st.s + c.off); c.roof.visible = !S.ride; }
-  if (TRAIN.cross) {
-    const on = st.phase === "run" && Math.abs(st.s - RAIL.cross.s) < 75, blink = (now % 1000) < 500;
-    for (const a of TRAIN.cross.arms) a.rotation.z += ((on ? 0 : 1.35) - a.rotation.z) * .06;
-    TRAIN.cross.lamps.forEach((m, k) => m.color.setHex(on && ((k % 2 === 0) === blink) ? 0xff3a2a : 0x4a1a14));
+  for (const CX of TRAIN.crosses) {
+    const ds = ((CX.s - st.s) % RAIL.len + RAIL.len) % RAIL.len, on = st.phase === "run" && (ds < 75 || ds > RAIL.len - 25), blink = (now % 1000) < 500;
+    for (const a of CX.arms) a.rotation.z += ((on ? 0 : 1.35) - a.rotation.z) * .06;
+    CX.lamps.forEach((m, k) => m.color.setHex(on && ((k % 2 === 0) === blink) ? 0xff3a2a : 0x4a1a14));
   }
   if (S.ride) {
     const p = trainSeat(S.ride.seat); if (p) { ME.x = p.x; ME.z = p.z; ME.ry = p.ry; }
-    if (st.phase === "dwell" && st.at !== S.ride.from) trainLeave(true);
+    if (st.phase === "run") { S.ride.moved = true; S.ride.annAt = -1; }
+    if (st.phase === "dwell" && S.ride.moved && st.at === S.ride.dest) trainLeave(true);
+    else if (st.phase === "dwell" && S.ride.moved && S.ride.ann !== st.at + ":" + Math.floor(st.t)) { if (S.ride.annAt !== st.at) { S.ride.annAt = st.at; toast("🚉 " + stopName(st.at) + "이에요 · 목적지 " + stopName(S.ride.dest) + "까지 계속 가요 (여기서 내리려면 「기차에서 내리기」)"); } }
     else if (now - (S.rideSent || 0) > 1000) { S.rideSent = now; presMove(true); }
   }
 }
+function stopPlat(k, x, z) {   // k역 승강장에서 (x, z)에 가장 가까운 탈 곳 (멀면 null)
+  const q = RAIL.stops[k];
+  if (q.name === "어촌역") return [STN.rail - 2.6, clamp(z, 38, 68)];
+  if (q.name === "해돋이역") return [STN2.px0 + 1.3, clamp(z, STN2.cz - 15, STN2.cz + 15)];
+  const P = q.plat; if (!P) return null; const u = clamp((x - P.x) * P.tx + (z - P.z) * P.tz, -P.L / 2 + 2, P.L / 2 - 2), v = P.v0 + 1.1;
+  return [P.x + P.tx * u + P.nx * v, P.z + P.tz * u + P.nz * v];
+}
 function trainActions(consider) {
   const st = TRAIN.st || trainState(Date.now());
-  for (const k of [0, 1]) {
-    const px = k ? STN2.px0 + 1.3 : STN.rail - 2.6, pz = k ? clamp(ME.z, STN2.cz - 15, STN2.cz + 15) : clamp(ME.z, 38, 68);
+  for (let k = 0; k < RAIL.stops.length; k++) {
+    const pp = stopPlat(k, ME.x, ME.z); if (!pp) continue; const [px, pz] = pp;
     if (Math.abs(ME.x - px) > 3 || Math.abs(ME.z - pz) > 3) continue;
-    const here = st.phase === "dwell" && st.at === k, dest = k ? "어촌역" : "해돋이역", sec = Math.ceil(trainWait(st, k));
-    const label = here ? "🚆 바다열차 타기 · " + dest + "행 (" + Math.ceil(st.left) + "초 뒤 출발)" : "🚆 " + dest + "행 기차 · " + sec + "초 뒤 도착";
+    const here = st.phase === "dwell" && st.at === k, nx = stopName((k + 1) % RAIL.stops.length), sec = Math.ceil(trainWait(st, k));
+    const label = here ? "🚆 바다열차 타기 · 순환선 (다음 " + nx + " · " + Math.ceil(st.left) + "초 뒤 출발)" : "🚆 바다열차 순환선 · " + sec + "초 뒤 도착";
     consider(px, pz, { key: "train:" + k + ":" + label, label, run: () => here ? trainBoard(k) : toast("🚆 기차가 " + sec + "초 뒤에 들어와요 · 승강장에서 기다려 주세요") }, 2.8);
   }
 }
@@ -15605,22 +15652,23 @@ function trainBoard(k) {
   for (let i = 0; i < 16; i++) { if (taken.has(i)) continue; const q = trainSeat(i), d = Math.hypot(q.x - ME.x, q.z - ME.z); if (d < bd) { bd = d; best = i; } }
   if (best < 0) { toast("자리가 꽉 찼어요 · 다음 기차를 타요"); return; }
   leaveSpot(true); ME.target = null; ME.onArrive = null; ME.moving = false;
-  S.ride = { seat: best, from: k }; ME.st = "sit";
+  S.ride = { seat: best, from: k, dest: (k + 1) % RAIL.stops.length, moved: false, annAt: -1 }; ME.st = "sit";
   const q = trainSeat(best); ME.x = q.x; ME.z = q.z; ME.ry = q.ry; cam.yawGoal = q.ry + Math.PI;
   pushPresence({ ride: best }); presMove(true); sfx("ui-confirmation", .4);
-  toast("🚆 바다열차에 탔어요 · " + (k ? "어촌역" : "해돋이역") + "까지 앉아서 가요 · 도착하면 저절로 내려요");
+  toast("🚆 바다열차에 탔어요 · 목적지 " + stopName(S.ride.dest) + " · 도착하면 저절로 내려요 (아래 버튼으로 목적지를 바꿔요)");
   updateActionUI(); updateHint();
 }
 function trainLeave(arrived) {
   if (!S.ride) return;
   const st = trainState(Date.now());
   if (!arrived && st.phase !== "dwell") { lockedHint(); return; }
-  const at = st.phase === "dwell" ? st.at : S.ride.from;
+  const at = st.phase === "dwell" ? st.at : S.ride.from, nm = stopName(at);
   S.ride = null; ME.st = "idle";
-  if (at === 1) { ME.x = STN2.px0 + 1.6; ME.z = clamp(ME.z, STN2.z0 + 3, STN2.z1 - 9); ME.ry = Math.PI / 2; }
-  else { ME.x = STN.rail - 2.8; ME.z = clamp(ME.z, 38, 68); ME.ry = -Math.PI / 2; }
+  if (nm === "해돋이역") { ME.x = STN2.px0 + 1.6; ME.z = clamp(ME.z, STN2.z0 + 3, STN2.z1 - 9); ME.ry = Math.PI / 2; }
+  else if (nm === "어촌역") { ME.x = STN.rail - 2.8; ME.z = clamp(ME.z, 38, 68); ME.ry = -Math.PI / 2; }
+  else { const pp = stopPlat(at, ME.x, ME.z), P = RAIL.stops[at].plat; if (pp) { ME.x = pp[0] + P.nx * .6; ME.z = pp[1] + P.nz * .6; ME.ry = Math.atan2(P.nx, P.nz); } }
   pushPresence({ ride: null }); presMove(true);
-  if (arrived) { sfx("jingle-catch", .35); toast(at ? "🌅 해돋이역에 도착했어요 · 승강장 바로 옆이 바다 전망대예요" : "🏘 어촌역에 도착했어요 · 역 앞이 윗마을 공원이에요"); }
+  if (arrived) { sfx("jingle-catch", .35); toast({ "해돋이역": "🌅 해돋이역에 도착했어요 · 승강장 바로 옆이 바다 전망대예요", "어촌역": "🏘 어촌역에 도착했어요 · 역 앞이 윗마을 공원이에요", "모래톱역": "🏖 모래톱역에 도착했어요 · 남쪽 바닷가 모래언덕이에요", "별빛역": "🌌 별빛역에 도착했어요 · 북쪽 바닷가, 밤하늘이 가장 잘 보이는 곳이에요" }[nm] || nm + "에 도착했어요"); }
   updateActionUI(); updateHint();
 }
 /* 손가락 이정표: items = [[글, 색, 가리킬 곳 x, z]] — 판이 실제 방향을 가리켜요 */
@@ -15640,6 +15688,64 @@ function fingerPost(x, z, items, parent, y0) {
     const a = new T3.Mesh(geo, new T3.MeshBasicMaterial({ map: draw(txt, col, false), transparent: true })); a.position.set(1.3, 0, .015); g.add(a);
     const b = new T3.Mesh(geo, new T3.MeshBasicMaterial({ map: draw(txt, col, true), transparent: true })); b.position.set(1.3, 0, -.015); b.rotation.y = Math.PI; g.add(b);
   });
+}
+/* v1.134 순환선 새 역 (모래톱 · 별빛): 선로 옆 안쪽(섬 쪽)에 승강장 · 벽돌 대합실 · 차양 · 이름판 · 시간표 · 가로등 · 테마 소품 */
+function buildLoopStation(q, det) {
+  const n = RAIL.n, i = Math.round(q.s / RAIL.step) % (n - 1), a = Math.max(0, i - 3), b = Math.min(n - 1, i + 3);
+  let tx = RAIL.x[b] - RAIL.x[a], tz = RAIL.z[b] - RAIL.z[a]; const tl = Math.hypot(tx, tz) || 1; tx /= tl; tz /= tl;
+  const x = RAIL.x[i], z = RAIL.z[i]; let nx = -tz, nz = tx; if (coastInfo(x + nx * 8, z + nz * 8).d < coastInfo(x - nx * 8, z - nz * 8).d) { nx = -nx; nz = -nz; }
+  const L = 34, v0 = 1.3, v1 = 5.6, top = RAIL.y[i] + .62, sg = Math.sign(nx * tz - nz * tx) || 1, X = (v) => sg * v;
+  let gy = 1e9; for (const u of [-L / 2, 0, L / 2]) for (const v of [v0, v1]) gy = Math.min(gy, terH(x + tx * u + nx * v, z + tz * u + nz * v));
+  const G = new T3.Group(); G.position.set(x, 0, z); G.rotation.y = Math.atan2(tx, tz); det.add(G);
+  const conc = cmat(0xd2cbbf), iron = cmat(0x2a2d33), accent = cmat(new T3.Color(q.col).getHex());
+  const brick = phong(0xffffff, { map: (() => { const t = wallTex("brick").clone(); t.needsUpdate = true; t.repeat.set(3, 1.2); return t; })() });
+  const plaster = phong(0xf4ecdc, { map: (() => { const t = wallTex("plaster").clone(); t.needsUpdate = true; t.repeat.set(1, 1); return t; })() });
+  const vm = (v0 + v1) / 2, W = v1 - v0;
+  box(W, top - gy + .5, L, conc, X(vm), (top + gy - .5) / 2, 0, G);
+  box(W + .06, .1, L + .06, cmat(0xe8e1d4), X(vm), top - .04, 0, G);
+  box(.25, .02, L, cmat(0xf2d36b), X(v0 + .45), top + .01, 0, G);
+  for (const e of [-1, 1]) { const r = box(W - .3, .16, 3.4, conc, X(vm), (top + gy) / 2, e * (L / 2 + 1.6), G); r.rotation.x = e * Math.atan2(top - gy, 3.4); }   // 끝 경사로
+  // 대합실: 벽돌 뒷벽 + 큰 유리창 · 회반죽 옆벽 · 테마색 지붕
+  const sz0 = 4, sz1 = 13, sc = (sz0 + sz1) / 2, sl = sz1 - sz0;
+  const hall = new T3.Group(); hall.position.y = top; G.add(hall);
+  box(.2, 2.9, sl, brick, X(v1 - .12), 1.45, sc, hall);
+  { const gl = box(.08, 1.3, sl - 2, glassMat(), X(v1 - .24), 1.7, sc, hall); }
+  for (const zz of [sz0, sz1]) box(2.4, 2.9, .2, plaster, X(v1 - 1.2), 1.45, zz, hall);
+  for (const zz of [sz0, sz1]) { const w = new T3.Mesh(new T3.PlaneGeometry(1.1, .8), winMat(0xcfe8f0, 0xffe2a8)); w.position.set(X(v1 - 1.25), 1.75, zz + (zz === sz0 ? -.11 : .11)); w.rotation.y = zz === sz0 ? Math.PI : 0; hall.add(w); }
+  { const rf = box(3.4, .18, sl + 1.2, accent, X(v1 - 1.3), 3.05, sc, hall); rf.rotation.z = -sg * .12; box(3.5, .08, sl + 1.3, cmat(0xfff6e0), X(v1 - 1.3), 2.94, sc, hall).rotation.z = -sg * .12; }
+  propBench(X(v1 - .8), sc, sg > 0 ? -Math.PI / 2 : Math.PI / 2, hall);
+  // 승강장 차양 · 기둥
+  for (let zz = -14; zz <= 2; zz += 4) cyl(.09, .09, 2.9, 8, iron, X(v1 - .5), 1.45, zz, hall);
+  { const r = box(3.6, .14, 19, cmat(0x2a78bb), X(v1 - 1.9), 3.0, -6, hall); r.rotation.z = -sg * .1; }
+  for (let zz = -16; zz <= 16; zz += 10) propLamp(X(v1 - .4), zz, [-sg, 0], hall);
+  for (const zz of [-9, -3]) propBench(X(v1 - 1.0), zz, sg > 0 ? -Math.PI / 2 : Math.PI / 2, hall);
+  for (const zz of [-15.5, 15.5]) propPot(X(v1 - .6), zz, hall, zz > 0);
+  // 이름판 (기둥) · 큰 간판 (대합실 지붕 위) · 시간표
+  const face = (m, v, y, zz, back) => { m.position.set(X(v), y, zz); m.rotation.y = (sg > 0 ? -Math.PI / 2 : Math.PI / 2) + (back ? Math.PI : 0); hall.add(m); };
+  { const ns = makeSign(2.8, .75, { shape: "board", fill: { type: "grad", c: ["#ffffff", "#eef3f6"] }, frame: { c: "#1d3a5c" }, t: { text: q.name.replace("역", ""), font: "hyeon", color: "#1d3a5c", size: .5, y: .5 } }, { cw: 500 });
+    face(ns, v1 - .55, 2.2, -11, false); const ns2 = ns.clone(); face(ns2, v1 - .53, 2.2, -11, true); }
+  { const sg2 = makeSign(4.4, 1.0, { shape: "board", fill: { type: "grad", c: ["#1d3a5c", "#122840"] }, frame: { c: q.col }, t: { text: q.name.split("").join(" "), font: "hyeon", color: "#fff7e6", size: .56, y: .44 }, sub: { text: q.en + " STATION", color: "#ffe08a", size: .18, y: .84 } }, { cw: 900 });
+    face(sg2, v1 - 2.6, 3.8, sc, false); const b2 = sg2.clone(); face(b2, v1 - 2.62, 3.8, sc, true); }
+  { const tt = new T3.Mesh(new T3.PlaneGeometry(1.9, 1.05), new T3.MeshBasicMaterial({ map: txtTex(512, 284, "#1d3a5c", [["🚆 바다열차 순환선", 46, "#ffe08a", .2], ["어촌 → 모래톱 → 해돋이 → 별빛", 32, "#ffffff", .45], ["역마다 20초 정차 · 한 바퀴 약 4분", 30, "#cfe0f0", .67], ["승강장에서 「기차 타기」", 34, "#cfe0f0", .86]]) }));
+    tt.position.set(X(v1 - 1.2), 1.6, sz0 - .12); tt.rotation.y = Math.PI; hall.add(tt); }
+  // 테마 소품
+  if (q.name === "모래톱역") {
+    for (const [zz, c] of [[-12.5, 0xe2522c], [-1, 0x2a78bb]]) { const pg = new T3.Group(); pg.position.set(X(v1 + 2.2), 0, zz); G.add(pg); const gyy = terH(x + tx * zz + nx * (v1 + 2.2), z + tz * zz + nz * (v1 + 2.2)); pg.position.y = gyy;
+      cyl(.05, .05, 2.4, 6, cmat(0xf4f1ea), 0, 1.2, 0, pg); const um = new T3.Mesh(new T3.ConeGeometry(1.5, .6, 10), cmat(c)); um.position.y = 2.5; pg.add(um);
+      for (let k = 0; k < 5; k++) { const st = new T3.Mesh(new T3.ConeGeometry(1.52, .6, 10, 1, true, k * Math.PI * .4, Math.PI * .2), cmat(0xfff6e0)); st.position.y = 2.5; pg.add(st); }
+      box(.6, .08, 1.6, cmat(0xf2d36b), .9, .25, 0, pg); }
+  } else {
+    { const ts = new T3.Group(); ts.position.set(X(v1 - .8), 0, 12); hall.add(ts); cyl(.07, .1, 1.1, 8, iron, 0, .55, 0, ts); const scp = cyl(.13, .2, .8, 12, cmat(0x5a4ab8), .1, 1.25, 0, ts); scp.rotation.z = -Math.PI / 2 + .25; }   // 별 보는 망원경
+    for (const zz of [-13, -7, -1]) { const st = new T3.Mesh(new T3.OctahedronGeometry(.16), bulbMat(0xfff4c0, 0xfff2a0)); st.position.set(X(v1 - 1.9), 2.75, zz); hall.add(st); }   // 차양 아래 별 등
+  }
+  // 길: 승강장 안쪽 끝 → 일주도로 쪽 돌길
+  { const rd = roadNear(x + nx * 12, z + nz * 12); let len = 10; for (let d = 6; d < 30; d += 1) { if (roadNear(x + nx * d, z + nz * d).d < 3) { len = d - v1; break; } }
+    const pv = v1 + len / 2, px = x + nx * pv, pz = z + nz * pv; const pth = box(2.4, .06, len, lam(0xffffff, { map: imgTex("a/slabs.jpg", 1, Math.max(1, Math.round(len / 2.4))) }), px, groundY(px, pz) + .04, pz); pth.rotation.y = Math.atan2(nx, nz); }
+  { const fx = x + nx * (v1 + 1.6) + tx * (-L / 2 + 1), fz = z + nz * (v1 + 1.6) + tz * (-L / 2 + 1);
+    fingerPost(fx, fz, [["🚆 " + q.name + " · 바다열차", "#2a78bb", x, z], ["🌊 바닷가", q.col, x - nx * 20, z - nz * 20]], det, groundY(fx, fz)); }
+  const pl = new T3.PointLight(0xffd8a0, 0, 24, 1.6); pl.position.set(x + nx * 4, top + 3, z + nz * 4); scene.add(pl); glow.push({ light: pl, val: 1.2 });
+  q.plat = { x, z, tx, tz, nx, nz, L, v0, v1, top, gy };
+  STN_PLATS.push(q.plat);
 }
 /* 해돋이역: 섬 반대편 동쪽 바닷가 간이역 · 승강장 + 대합실 + 바다 전망 데크 */
 function buildStation2() {
@@ -15668,7 +15774,7 @@ function buildStation2() {
     ns.position.set(px1 - .55, top + 2.2, cz - 6); ns.rotation.y = -Math.PI / 2; scene.add(ns); const ns2 = ns.clone(); ns2.rotation.y = Math.PI / 2; ns2.position.x += .02; scene.add(ns2); }
   { const sg = makeSign(4.4, 1.0, { shape: "board", fill: { type: "grad", c: ["#1d3a5c", "#122840"] }, frame: { c: "#f2c230" }, t: { text: "해 돋 이 역", font: "hyeon", color: "#fff7e6", size: .56, y: .44 }, sub: { text: "HAEDOJI STATION", color: "#ffe08a", size: .18, y: .84 } }, { cw: 900 });
     sg.position.set(px1 - 2.9, top + 3.75, (H0 + H1) / 2); sg.rotation.y = -Math.PI / 2; scene.add(sg); }
-  { const tt = new T3.Mesh(new T3.PlaneGeometry(1.9, 1.05), new T3.MeshBasicMaterial({ map: txtTex(512, 284, "#1d3a5c", [["🚆 바다열차 시간표", 46, "#ffe08a", .2], ["해돋이역 ↔ 어촌역", 40, "#ffffff", .45], ["약 2분 30초마다 · 25초 정차", 34, "#cfe0f0", .67], ["승강장에서 「기차 타기」", 34, "#cfe0f0", .86]]) }));
+  { const tt = new T3.Mesh(new T3.PlaneGeometry(1.9, 1.05), new T3.MeshBasicMaterial({ map: txtTex(512, 284, "#1d3a5c", [["🚆 바다열차 순환선", 46, "#ffe08a", .2], ["어촌 → 모래톱 → 해돋이 → 별빛", 32, "#ffffff", .45], ["순환선 · 역마다 20초 정차", 34, "#cfe0f0", .67], ["승강장에서 「기차 타기」", 34, "#cfe0f0", .86]]) }));
     tt.position.set(px1 - 1.55, top + 1.6, H0 - .12); tt.rotation.y = Math.PI; scene.add(tt); }
   for (let zz = z0 + 4; zz < z1 - 9; zz += 11) propLamp(px1 - .45, zz, [-1, 0], pf);
   for (const zz of [cz - 9, cz + 1]) propBench(px1 - 1.0, zz, Math.PI / 2, pf);
