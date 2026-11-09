@@ -1,6 +1,6 @@
 # 어촌생활 · 전체 기능 정리
 
-> 현재 버전: **v1.143.0** · 마지막 정리: 2026-11-08
+> 현재 버전: **v1.144.0** · 마지막 정리: 2026-11-08
 > v1.68: 마을 생물 애니메이션(비둘기·돌고래·고양이·강아지·게, 모델 고유 모션 재생)과 낚시·캐기 동작 개선(KayKit 낚시 모션 분석을 현 캐릭터 구조에 이식 — 캐스팅 궤도, 릴 감는 손, 파이팅 자세, 캐치 포즈). 캐릭터 신체 비율은 변경하지 않았고, 비율이 맞지 않는 사람용 스켈레톤 클립은 적용하지 않았어요.
 > 업데이트할 때마다 이 문서를 고치고, 바뀐 내용은 [CHANGELOG.md](CHANGELOG.md)에 남겨요.
 
@@ -106,6 +106,7 @@
 - **개인정보 안내 (v1.96)**: 첫 입장 동의 모달(수집 항목 요약 카드 + 전문), 타이틀·설정에서 여는 안내 시트(수집 항목·목적, Firebase 서울/싱가포르 저장·국외 이전, 보유 기간, 이용자 권리), 내 정보 시트(기록 열람·기기 데이터 삭제·계정 탈퇴와 서버 기록 삭제).
 
 ## 1-1. 섬
+- **v1.144 가방 2.0**: 주머니 `BAG_POCKETS` 10개 · 물건 모으기 `bagItems(pk)` → { key, pic, name, sub, n, tag, cls, desc, acts } · 켜기/끄기 `bagSwitches()`(자동 챔질 · 자동 드랙 · 뜰채 · 손전등 · 부적 · 지정 낚시 · 채비 = `tackleToggle`) · 꺼 둔 기능 `P.off`(`offed()` → 뜰채 landAt · 부적 확률 · 손전등 · 지정 낚시에 반영) · PC `.bag2`(가죽 · 칸 `.bag-slot` · 자세히 `.bag-detail`) · 휴대폰 `MSHEETS.bag`(mpGrid 칸 · 아래 버튼).
 - **v1.130 비료 · 퇴비장**: `FERTS`(compost · fish · lime · kelp · high=예전 `P.fert` · gold) · 보유 `P.ferts` · 칸 `p.f`(예전 1 → high) · `fertSpecial` · `fertSpeed`(어분 ×1/0.7 · 황금 ×1/0.8) · 석회는 촉촉 2배 + 메마름 없음 · 해초 액비 40% 2개 · 수확 부산물 `P.scraps` · 해초 `P.seaweed`(낚시 6%) · 퇴비장 `COMPOST`(밭 남서쪽) `farm.comp` Lv0~3(`COMPOST_LV` 2/4/6칸) · 작업 `farm.cjobs` · `COMPOST_RECIPES` · `SHEETS.fertpick` · `SHEETS.compost` · `compost3D`.
 - **v1.129 농사 2.0 1단계** ([FARM_PLAN.md](FARM_PLAN.md)): `plotState` none · till · hard(갈고 3일 `FARM_HARD_MS`) · wet · dry · parched(마른 지 8시간 `FARM_DRY_MS` → `p.wilt` 특상품 −10%p) · 도구 `canTool`(can1 1칸 10 · can3 앞 3칸 30 · can9/옛 can 9칸 60) · `hoeTool`(hoe 1칸 · hoe3 3칸) · `toolCells` · 물통 `P.water` + 우물 `WELL`(`wellFill`) · 스프링클러 `SPR`(s1 둘레 1 · s5 둘레 2) 칸에 설치 `p.spr` → `sprRefresh`가 둘레 칸에 `p.spw`(늘 촉촉) · `P.spr` 보유 수 · 3D `sprMesh` · 메마른/굳은 흙 재질.
 - **v1.126 마트 · 농장**: 섬마을마트 내부 새로 짓기(`buildMart` · 높이 `MART.h` 6.2 · 코너 자리 `MART_CORNERS` 갱신 · 계산대 3줄 · 신선/로컬푸드/씨앗/농기구/냉장고/진열대 · 지붕 그림자 끔 `userData.noShadow`) · 마트 안 카메라는 시점을 바꾸지 않고 벽 · 천장 안쪽으로만 당김 · 매장 조명 `MART.light`(안에 있거나 밤에 켜짐) · 낭만 농장 `FARM` (70, 14)로 이사(마트 북쪽 · `TER_PADS` 평탄화 · 헛간 · 풍차 · 트랙터 · 허수아비 · 밤 조명 · 뒤뜰→농장 흙길).
