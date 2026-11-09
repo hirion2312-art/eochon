@@ -299,6 +299,9 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 @keyframes fsave{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}22%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1;transform:translate(-50%,-58%) scale(1)}100%{opacity:0;transform:translate(-50%,-75%) scale(.92)}}
 @keyframes fsaveShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-4deg)}75%{transform:translateX(4px) rotate(4deg)}}
 @keyframes fsaveSpark{0%{opacity:1;transform:rotate(var(--a)) translateX(10px)}100%{opacity:0;transform:rotate(var(--a)) translateX(90px)}}
+.cup-hero{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:linear-gradient(135deg,#fff3d6,#ffe1b8);border:2px solid #e8b860;color:#3a2410}.cup-hero.on{background:linear-gradient(135deg,#ffe6c4,#ffc9a0);border-color:#e2522c;box-shadow:0 0 0 3px rgba(226,82,44,.18)}
+.cup-hero b{font-size:18px;display:block}.cup-hero small{font-weight:800;color:#b8442a}.cup-fish{width:84px;height:84px;border-radius:50%;background:radial-gradient(circle,#fff,#ffd9a0);display:grid;place-items:center;flex:none;box-shadow:inset 0 0 0 3px #f2c230}.cup-fish img{width:74px;height:74px;object-fit:contain}
+.cup-prize{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}.cup-prize span{display:flex;flex-direction:column;align-items:center;padding:7px 4px;border-radius:12px;background:var(--card,rgba(127,127,127,.12))}.cup-prize b{font-size:15px}.cup-prize small{font-size:11.5px;font-weight:700}
 .fsp{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center;font-size:11.5px;font-weight:700;color:#ffd6a0;margin-top:2px}.fsp .fbar{height:8px}.fsp #fightSpBar{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#f2b630,#e2402a);transition:width .1s}
 .fgauge{display:grid;grid-template-columns:30px minmax(0,1fr);gap:5px 8px;align-items:center;font-size:11px;color:var(--hud-muted)}
 .fbar{position:relative;height:16px;border-radius:8px;background:rgba(255,255,255,.1);overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
@@ -2213,7 +2216,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.134.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.135.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -3172,6 +3175,8 @@ function normProfile(p) {
   o.ferts = {}; if (p.ferts && typeof p.ferts === "object") for (const k of FERT_IDS) { const v = Math.floor(Number(p.ferts[k]) || 0); if (v > 0) o.ferts[k] = Math.min(999, v); }   // v1.130 비료 · 부산물 · 해초
   o.scraps = clamp(Math.floor(Number(p.scraps) || 0), 0, 9999); o.seaweed = clamp(Math.floor(Number(p.seaweed) || 0), 0, 999);
   if (o.farm && p.farm && typeof p.farm === "object") { o.farm.comp = clamp(Math.floor(Number(p.farm.comp) || 0), 0, 3); o.farm.cjobs = Array.isArray(p.farm.cjobs) ? p.farm.cjobs.filter(j => j && FERTS[j.f] && Number(j.done) > 0).slice(0, 6).map(j => ({ f: j.f, done: Number(j.done) })) : []; } o.martStamp = clamp(Math.floor(Number(p.martStamp) || 0), 0, 1e6);
+  o.cupBest = p.cupBest && typeof p.cupBest === "object" ? { key: str(p.cupBest.key, 10), size: clamp(Number(p.cupBest.size) || 0, 0, 1e6) } : null;   // v1.135 주말 낚시 대회
+  o.cupDone = Array.isArray(p.cupDone) ? p.cupDone.filter(x => typeof x === "string").slice(-8) : [];
   o.localDay = p.localDay && typeof p.localDay === "object" ? { d: str(p.localDay.d, 10), n: clamp(Math.floor(Number(p.localDay.n) || 0), 0, 1e5), v: clamp(Math.floor(Number(p.localDay.v) || 0), 0, 1e7) } : null;   // v1.122: 새로고침해도 납품 한도 유지
   o.salt = clamp(Math.floor(Number(p.salt) || 0), 0, 99); o.mudDex = p.mudDex && typeof p.mudDex === "object" ? p.mudDex : {}; o.mudDay = p.mudDay && typeof p.mudDay === "object" ? { d: str(p.mudDay.d, 10), n: clamp(Math.floor(Number(p.mudDay.n) || 0), 0, 999) } : null;
   o.npcSales = p.npcSales && typeof p.npcSales === "object" ? { day: str(p.npcSales.day, 10), n: clamp(Math.floor(Number(p.npcSales.n) || 0), 0, 999) } : { day: "", n: 0 };
@@ -3340,6 +3345,9 @@ const stat = (k, n) => { P.stats[k] = (P.stats[k] || 0) + (n == null ? 1 : n); }
 const dexCount = () => Object.keys(P.dex).filter(id => findFish(id) && !isShell(id)).length;
 const ACH_ICON = { "캐스팅": "🎣", "낚시": "🐟", "파이팅": "💪", "도감": "📖", "함께": "🤝", "갯벌": "🐚", "회 · 시장": "🍣", "성장": "⭐", "은행 · 복권": "💰", "초대 · 출석": "🎁", "직업": "🪪", "집": "🏠" };
 const ACH = [
+  { id: "cup1", cat: "마을 함께", name: "대회 데뷔", desc: "주말 낚시 대회에 참가하기", stat: "cupJoins", goal: 1, gold: 300 },
+  { id: "cupPod", name: "시상대에 서다", desc: "주말 낚시 대회 3위 안에 들기", stat: "cupPodium", goal: 1, gold: 1000, title: "대회 입상자" },
+  { id: "cupWin", name: "주말의 왕", desc: "주말 낚시 대회 우승", stat: "cupWins", goal: 1, gold: 3000, title: "대회 챔피언" },
   { id: "cast1", cat: "캐스팅", name: "첫 캐스팅", desc: "낚싯대를 처음 던지기", stat: "casts", goal: 1, gold: 50 },
   { id: "cast100", name: "던지기 장인", desc: "100번 던지기", stat: "casts", goal: 100, gold: 500 },
   { id: "pcast10", name: "완벽한 포물선", desc: "완벽한 캐스팅 10번", stat: "perfectCasts", goal: 10, gold: 400, title: "포물선 장인" },
@@ -4014,7 +4022,7 @@ const xpNeed = (lv) => XP_TABLE[clamp(Math.floor(lv) || 0, 0, LV_MAX)];
 /* ---------- 운영자 실험실 (v1.64): 이 기기에만 저장되는 테스트 설정 · 소비 지점에서 S.isOwner일 때만 적용돼요 ---------- */
 const LAB = { fish: lsGet("mn.lab.fish2", 1), xp: lsGet("mn.lab.xp", 1), move: lsGet("mn.lab.move", 1), time: lsGet("mn.lab.time", -1),
   noHeat: !!lsGet("mn.lab.noHeat", 0), noBreak: !!lsGet("mn.lab.noBreak", 0), fastBite: !!lsGet("mn.lab.fastBite", 0), perfect: !!lsGet("mn.lab.perfect", 0), tier: lsGet("mn.lab.tier", -1),
-  instant: !!lsGet("mn.lab.instant", 0), fishId: lsGet("mn.lab.fishId", ""), forceGuest: lsGet("mn.lab.forceGuest", "") };
+  instant: !!lsGet("mn.lab.instant", 0), cup: lsGet("mn.lab.cup", 0), fishId: lsGet("mn.lab.fishId", ""), forceGuest: lsGet("mn.lab.forceGuest", "") };
 const labSet = (k, v) => { LAB[k] = v; lsSet("mn.lab." + k, v); if (S.sheet === "admintools") refreshSheet(true); };
 function labRestLv(dv) {   // 실험실: 가게 등급 테스트 (비용 없이 · 내 가게에만 저장돼요)
   const v = clamp(P.rest.lv + dv, 0, REST_LV.length - 1);
@@ -4395,7 +4403,7 @@ function rollFish(baitId, opts) {
   let mrodHit = false;
   if (P.rod === "merchant" && P.mrod && tier === P.mrod.tier && P.mrod.list && P.mrod.list.length) { const wish = cands.filter(f => P.mrod.list.includes(f.id)); if (wish.length) { cands = wish; mrodHit = true; } }   // 장사꾼의 지정 (v1.103): 등급 확률은 그대로, 종만 지정
   // 깊은 바다 물고기는 배 위에서 3배 잘 나오고, 부두에서는 절반
-  const w = cands.map(f => (DEEP.has(f.id) ? (deep ? 3 : 0.5) : 1) * habitatW(f));
+  const cupF = cupOn(), w = cands.map(f => (DEEP.has(f.id) ? (deep ? 3 : 0.5) : 1) * habitatW(f) * (cupF && cupF.fish.id === f.id ? 4 : 1));   // v1.135 대회 어종은 4배 잘 물어요
   let rr = Math.random() * w.reduce((a, b) => a + b, 0), f = cands[0];
   for (let i = 0; i < cands.length; i++) { if ((rr -= w[i]) < 0) { f = cands[i]; break; } }
   let k = rollSizeK() * (1 + buffVal("size") / 100) * (deep ? 1.15 : 1);
@@ -4418,6 +4426,7 @@ function landFish(r, perfect, auto) {
   stat("t" + f.tier); if (k >= 2.2) stat("monster"); if (isNight()) stat("nightCatch"); if (perfect && !auto) stat("perfectFights"); if (r.manual && !auto) stat("manualWins"); if (r.coop) stat("coop");
   questProgress("catch"); if (f.tier >= 2) questProgress("tier2"); if (k >= 1.6) questProgress("big"); if (perfect) questProgress("perfect"); if (r.coop) questProgress("coop");
   checkRecord(f, k, size);
+  try { cupCatch(f, size, k); } catch (e) { console.warn("cup", e); }
   let sold = false; const sv = fishSell(item), isToday = f.id === todayFish();
   if (P.bag.length >= BAG_MAX) { P.gold += sv; sold = true; toast("가방이 가득 차서 바로 팔았어요 (+" + won(sv) + ")"); }
   else P.bag.unshift(item);
@@ -15156,6 +15165,95 @@ SHEETS.rank = (body) => {
     h("button", { class: "btn sm", disabled: !S.online, onclick: () => { pushRank(true); setTimeout(() => loadRanks(true), 800); toast("내 기록을 올렸어요"); }, text: "기록 올리기" }),
     !inHall(ME.x, ME.z) ? h("button", { class: "btn sm pri", onclick: () => { closeSheet(); goHall(c.id); }, text: "동상 보러 가기" }) : null));
 };
+/* ===================== 🏆 주말 낚시 대회 (v1.135) =====================
+   토 · 일 밤 8~10시(한국 시간) 2시간 · 날마다 어종 하나를 정해 가장 큰 개체를 겨뤄요. 기록은 records/cup_<날짜>_<uid> (필드 c<날짜> = 크기 cm).
+   끝나면 각자 화면에서 순위를 확인해 상금을 받아요 (1위 200만 · 2위 100만 · 3위 50만 · 참가 5만원) */
+const fmtLong = (ms) => { ms = Math.max(0, ms); const d = Math.floor(ms / 864e5), hh = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60; return d ? d + "일 " + hh + "시간" : hh ? hh + "시간 " + m + "분" : m + "분 " + Math.floor(ms / 1000) % 60 + "초"; };
+const CUP = { h0: 20, len: 2 * 3600e3, prize: [20000, 10000, 5000], join: 500 };
+function cupWindow(t) {   // 지금 진행 중이거나 다음에 열릴 대회 (실험실 강제 열기 포함)
+  t = t || Date.now();
+  if (S.isOwner && LAB.cup && LAB.cup + CUP.len > t) return cupMake("test", LAB.cup);
+  for (let d = 0; d < 9; d++) {
+    const k = new Date(t + 9 * 3600e3 + d * 864e5), dow = k.getUTCDay(); if (dow !== 0 && dow !== 6) continue;
+    const key = k.toISOString().slice(0, 10).replace(/-/g, ""), start = Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate(), CUP.h0) - 9 * 3600e3;
+    if (start + CUP.len > t) return cupMake(key, start);
+  }
+  return null;
+}
+function cupMake(key, start) {
+  const pool = BUILTIN.filter(f => f.tier >= 2 && f.tier <= 4 && f.where !== "sea"), f = pool[mixHash("cup|" + key) % pool.length];
+  return { key, start, end: start + CUP.len, fish: f, on: Date.now() >= start && Date.now() < start + CUP.len };
+}
+function cupPrev(t) {   // 최근에 끝난 대회 2개(토 · 일) 키
+  t = t || Date.now(); const out = [];
+  for (let d = 0; d < 9 && out.length < 2; d++) { const k = new Date(t + 9 * 3600e3 - d * 864e5), dow = k.getUTCDay(); if (dow !== 0 && dow !== 6) continue;
+    const key = k.toISOString().slice(0, 10).replace(/-/g, ""), start = Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate(), CUP.h0) - 9 * 3600e3; if (start + CUP.len <= t) out.push(cupMake(key, start)); }
+  return out;
+}
+const cupOn = () => { const c = cupWindow(); return c && c.on ? c : null; };
+function cupCatch(f, size, k) {   // 대회 어종을 낚으면 내 최고 기록 갱신 (더 클 때만 올려요)
+  const c = cupOn(); if (!c || f.id !== c.fish.id) return;
+  P.cupBest = P.cupBest && P.cupBest.key === c.key ? P.cupBest : { key: c.key, size: 0 };
+  if (size <= P.cupBest.size) { toast("🏆 대회 어종이에요 · " + fmtSize(size) + " (내 최고 " + fmtSize(P.cupBest.size) + ")"); return; }
+  P.cupBest.size = size; stat("cupCatches"); markDirty();
+  toast([h("b", { text: "🏆 대회 기록 갱신! " + c.fish.name + " " + fmtSize(size) }), h("div", { class: "muted", style: "font-size:12px", text: "순위는 메뉴 › 업적 › 주말 낚시 대회에서 봐요" })], "lvup", 5000);
+  if (S.online && S.db && S.uid && c.key !== "test") S.db.doc("records/cup_" + c.key + "_" + S.uid).set({ ["c" + c.key]: size, k, nick: P.nick, uid: S.uid, fishId: f.id, ts: Date.now() }).catch((e) => console.warn("cup", e));
+  else if (c.key === "test") S.cupTest = [{ nick: P.nick, uid: S.uid || "me", size }];
+  S.cupAt = 0;
+}
+async function cupLoad(key, force) {
+  S.cupBoard = S.cupBoard || {};
+  if (!force && S.cupBoard[key] && Date.now() - (S.cupBoard[key].at || 0) < 25000) return S.cupBoard[key].list;
+  if (key === "test") { const l = S.cupTest || []; S.cupBoard[key] = { at: Date.now(), list: l }; return l; }
+  if (!S.online || !S.db) return [];
+  try { const q = await S.db.collection("records").orderBy("c" + key, "desc").limit(20).get();
+    const list = q.docs.map(d => d.data()).filter(r => r && r.nick && Number(r["c" + key]) > 0).map(r => ({ nick: str(r.nick, 16), uid: r.uid, size: Number(r["c" + key]), fishId: r.fishId }));
+    S.cupBoard[key] = { at: Date.now(), list }; return list; } catch (e) { console.warn("cup load", e); return (S.cupBoard[key] && S.cupBoard[key].list) || []; }
+}
+async function cupSettle() {   // 끝난 대회 상금 받기 (한 번만)
+  if (!S.profileReady && S.online) return;
+  P.cupDone = Array.isArray(P.cupDone) ? P.cupDone : [];
+  for (const c of cupPrev()) {
+    if (P.cupDone.includes(c.key)) continue;
+    const mine = P.cupBest && P.cupBest.key === c.key && P.cupBest.size > 0;
+    if (!mine) { P.cupDone = P.cupDone.concat(c.key).slice(-8); continue; }
+    const list = await cupLoad(c.key, true), r = list.findIndex(x => x.uid === S.uid);
+    const g = r >= 0 && r < 3 ? CUP.prize[r] : CUP.join;
+    P.gold += g; P.cupDone = P.cupDone.concat(c.key).slice(-8); stat("cupJoins"); if (r === 0) stat("cupWins"); if (r >= 0 && r < 3) stat("cupPodium"); markDirty();
+    sfx(r >= 0 && r < 3 ? "fanfare-legend" : "coins", .5);
+    toast([h("b", { text: r >= 0 && r < 3 ? ["🥇", "🥈", "🥉"][r] + " 주말 낚시 대회 " + (r + 1) + "위! +" + won(g) : "🏆 주말 낚시 대회 참가 상금 +" + won(g) }), h("div", { class: "muted", style: "font-size:12px", text: c.fish.name + " · 내 기록 " + fmtSize(P.cupBest.size) + (r >= 0 ? " · " + (r + 1) + "위" : "") })], "lvup", 8000);
+    if (r === 0 && S.online && S.db) S.db.doc("records/cupwin_" + c.key).set({ key: c.key, nick: P.nick, uid: S.uid, size: P.cupBest.size, fishId: c.fish.id, ts: Date.now() }).catch(() => {});
+  }
+}
+function cupTick() {
+  const c = cupWindow(); if (!c || S.title) return;
+  if (c.on && S.cupAnn !== c.key) { S.cupAnn = c.key; sfx("jingle-rare", .4); toast([h("b", { text: "🏆 주말 낚시 대회가 시작됐어요!" }), h("div", { class: "muted", style: "font-size:12px", text: "목표 어종 「" + c.fish.name + "」 · 2시간 동안 가장 큰 한 마리 · 이 시간엔 이 물고기가 더 잘 물어요" }), h("button", { class: "btn sm", style: "margin-top:6px", onclick: () => openSheet("cup"), text: "🏆 대회 보기" })], "lvup", 9000); }
+  renderNoticeBar();
+  if (!c.on) cupSettle();
+  if (S.sheet === "cup" && Date.now() - (S.cupAt || 0) > 30000) { S.cupAt = Date.now(); cupLoad(c.key, true).then(() => refreshSheet()); }
+}
+setInterval(() => { try { cupTick(); } catch (e) { console.warn("cupTick", e); } }, 5000);
+SHEETS.cup = (body) => {
+  const c = cupWindow(); setHead("🏆 주말 낚시 대회", "토 · 일 밤 8~10시 · 정해진 어종 중 가장 큰 한 마리를 겨뤄요");
+  if (!c) { body.append(h("div", { class: "empty-note", text: "대회 일정을 불러오지 못했어요" })); return; }
+  const left = c.on ? c.end - Date.now() : c.start - Date.now(), art = fishArt(c.fish);
+  body.append(h("div", { class: "cup-hero" + (c.on ? " on" : "") },
+    h("div", { class: "cup-fish" }, h("img", { src: art.src, alt: "" })),
+    h("div", { class: "grow" }, h("small", { text: c.on ? "🔴 진행 중 · " + fmtLong(left) + " 남음" : "다음 대회 · " + fmtLong(left) + " 뒤 시작 (" + (c.key === "test" ? "테스트" : c.key.slice(4, 6) + "/" + c.key.slice(6) + " 밤 8시") + ")" }),
+      h("b", { text: "목표 어종 · " + c.fish.name }), h("span", { class: "muted", style: "font-size:12px", text: TIERS[c.fish.tier].name + " · 대회 시간엔 이 물고기가 4배 잘 물어요" }))));
+  body.append(h("div", { class: "cup-prize" }, [["🥇", CUP.prize[0]], ["🥈", CUP.prize[1]], ["🥉", CUP.prize[2]], ["🎣 참가", CUP.join]].map(([a, g]) => h("span", null, h("b", { text: a }), h("small", { class: "num", text: won(g) })))));
+  const B = (S.cupBoard && S.cupBoard[c.key]) || null; if (!B) cupLoad(c.key).then(() => { if (S.sheet === "cup") refreshSheet(); });
+  const list = B ? B.list : [];
+  body.append(h("div", { class: "sec", text: c.on ? "실시간 순위" : "지난 기록" }));
+  if (!list.length) body.append(h("div", { class: "empty-note", text: c.on ? "아직 아무도 못 낚았어요. 첫 기록의 주인공이 되어 보세요!" : "대회가 열리면 여기에 순위가 떠요" }));
+  else body.append(h("div", { class: "rlist" }, list.slice(0, 10).map((r, k) => h("div", { class: "rankrow" + (r.uid === S.uid ? " mine" : "") }, h("span", { class: "rk", text: k < 3 ? ["🥇", "🥈", "🥉"][k] : String(k + 1) }), nickAvatar(r.nick, r.uid, 32), h("b", { class: "grow", text: r.nick + (r.uid === S.uid ? " (나)" : "") }), h("b", { class: "num rv", text: fmtSize(r.size) })))));
+  const mine = P.cupBest && P.cupBest.key === c.key ? P.cupBest.size : 0;
+  body.append(h("div", { class: "rme" }, nickAvatar(P.nick, "me", 40), h("div", { class: "grow" }, h("b", { text: "내 최고 기록 · " + (mine ? fmtSize(mine) : "아직 없음") }), h("small", { text: c.on ? "「" + c.fish.name + "」을(를) 낚으면 저절로 올라가요" : "대회가 끝나면 다음 접속 때 상금이 들어와요" }))));
+  const prevs = cupPrev(); if (prevs.length) { body.append(h("div", { class: "sec", text: "지난 대회 우승" })); const wrap = h("div", { class: "rlist" }); body.append(wrap);
+    for (const p of prevs) { const row = h("div", { class: "rankrow" }, h("span", { class: "rk", text: "👑" }), h("b", { class: "grow", text: p.key.slice(4, 6) + "/" + p.key.slice(6) + " · " + p.fish.name }), h("small", { class: "muted", text: "불러오는 중…" })); wrap.append(row);
+      if (S.online && S.db) S.db.doc("records/cupwin_" + p.key).get().then(d => { const v = d.exists ? d.data() : null; row.lastChild.textContent = v ? str(v.nick, 16) + " · " + fmtSize(Number(v.size) || 0) : "우승자 정산 전"; }).catch(() => { row.lastChild.textContent = "—"; }); } }
+};
+try { document.getElementById("noticeBar").addEventListener("click", () => { const c = cupWindow(); if (c && (c.on || c.start - Date.now() < 12 * 3600e3)) openSheet("cup"); }); } catch {}
 /* ===================== 동사무소 · 직업 =====================
    낚시·갯벌은 누구나. 직업은 「부수입을 버는 방법」을 정해요(한 사람에 하나).
    지금은 횟집 사장만 열려 있고, 나머지는 다음 업데이트에서 열려요. */
@@ -16287,6 +16385,7 @@ function renderNoticeBar() {
   const parts = [];
   if (n && n.text && (!n.until || n.until > Date.now())) parts.push("📢 " + n.text);
   if (ev) { const e = EVENTS.find(x => x.id === ev.id); if (e) parts.push(e.ico + " " + e.name + " 이벤트 · " + fmtLeft(ev.until - Date.now()) + " 남음"); }
+  try { const c = cupWindow(); if (c && c.on) parts.push("🏆 주말 낚시 대회 · 목표 「" + c.fish.name + "」 · " + fmtLong(c.end - Date.now()) + " 남음 (눌러서 순위 보기)"); else if (c && c.start - Date.now() < 12 * 3600e3) parts.push("🏆 오늘 밤 8시 주말 낚시 대회 · 목표 「" + c.fish.name + "」"); } catch {}
   el.hidden = !parts.length || S.title; if (parts.length) el.textContent = parts.join("   ·   "); syncUIState();
 }
 async function adminSet(path, data) {
@@ -16382,7 +16481,7 @@ SHEETS.admintools = (body) => {
     body.append(h("div", { class: "sec", text: "⭐ 경험치 배율" }), chipSet("xp", [[1, "×1"], [2, "×2"], [5, "×5"], [10, "×10"]]));
     body.append(h("div", { class: "sec", text: "🏃 이동 속도" }), chipSet("move", [[0.5, "×0.5"], [1, "×1"], [1.5, "×1.5"], [2, "×2"], [3, "×3"]]));
     body.append(h("div", { class: "sec", text: "🕐 시간 고정 (낚시 · 배경 · 시계까지)" }), chipSet("time", [[-1, "실제 시간"], [6, "아침 6시"], [12, "낮 12시"], [18, "저녁 18시"], [23, "밤 23시"], [2, "새벽 2시"]]));
-    body.append(h("div", { class: "sec", text: "🛡 파이팅 편의" }), h("div", { class: "chips" }, tg("과열 안 쌓임", "noHeat"), tg("줄 안 끊김", "noBreak"), tg("입질 즉시", "fastBite"), tg("항상 퍼펙트 캐스트", "perfect"), tg("⚡ 바로 낚기 (파이팅 없이 즉시)", "instant")));
+    body.append(h("div", { class: "sec", text: "🛡 파이팅 편의" }), h("div", { class: "chips" }, tg("과열 안 쌓임", "noHeat"), tg("줄 안 끊김", "noBreak"), tg("입질 즉시", "fastBite"), h("button", { "aria-pressed": String(!!(LAB.cup && LAB.cup + CUP.len > Date.now())), onclick: () => { labSet("cup", LAB.cup && LAB.cup + CUP.len > Date.now() ? 0 : Date.now()); S.cupAnn = null; toast(LAB.cup ? "🏆 테스트 대회를 지금 열었어요 (이 기기에서만 · 2시간)" : "테스트 대회를 닫았어요"); }, text: "🏆 대회 지금 열기" }), tg("항상 퍼펙트 캐스트", "perfect"), tg("⚡ 바로 낚기 (파이팅 없이 즉시)", "instant")));
     const fsel = h("select", { "aria-label": "지정 물고기", style: "flex:1;min-height:38px" },
       h("option", { value: "" }, "끔 — 랜덤 (평소대로)"),
       ...allFish().slice().sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name, "ko")).map(f => h("option", { value: f.id }, TIERS[f.tier].name + " · " + f.name)));
@@ -16452,6 +16551,8 @@ SHEETS.achieve = (body) => {
   body.append(h("div", { class: "sec", text: "오늘" }), h("div", { class: "av-list" },
     row("📜", "#c98a4a", "오늘의 의뢰", qs.length ? qDone + " / " + qs.length + " 완료 · 자정에 새로 와요" : "오늘의 부탁 3개", qs.length ? qDone / qs.length : 0, questDone(), () => openSheet("quests"), qs.length && qDone >= qs.length),
     row("🎁", "#e2522c", "출석 도장", attendDone() ? "7일 모두 찍었어요" : P.attend.n + " / 7일 · " + (attendCan() ? "오늘 도장을 찍을 수 있어요" : "오늘은 찍었어요"), P.attend.n / 7, attendCan() ? 1 : 0, () => openSheet("attend"), attendDone())));
+  { const c = cupWindow(); body.append(h("div", { class: "sec", text: "마을 함께" }), h("div", { class: "av-list", id: "avTown" },
+    row("🎣", "#d4701a", "주말 낚시 대회", c ? (c.on ? "🔴 진행 중 · 목표 「" + c.fish.name + "」 · " + fmtLong(c.end - Date.now()) + " 남음" : "다음 대회 " + fmtLong(c.start - Date.now()) + " 뒤 · 토 · 일 밤 8시") : "토 · 일 밤 8시", null, 0, () => openSheet("cup")))); }
   body.append(h("div", { class: "sec", text: "모아 가기" }), h("div", { class: "av-list" },
     row("🏆", "#d9a514", "도전과제", achDone + " / " + ACH.length + " 달성 · 칭호는 이름표에", achDone / ACH.length, achClaimable(), () => openSheet("ach")),
     row("🏅", "#7a5ad6", "명예의 전당", "분야별 랭킹 · 1위는 광장에 동상", null, 0, () => openSheet("rank")),
