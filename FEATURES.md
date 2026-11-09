@@ -1,6 +1,6 @@
 # 어촌생활 · 전체 기능 정리
 
-> 현재 버전: **v1.140.0** · 마지막 정리: 2026-11-08
+> 현재 버전: **v1.141.0** · 마지막 정리: 2026-11-08
 > v1.68: 마을 생물 애니메이션(비둘기·돌고래·고양이·강아지·게, 모델 고유 모션 재생)과 낚시·캐기 동작 개선(KayKit 낚시 모션 분석을 현 캐릭터 구조에 이식 — 캐스팅 궤도, 릴 감는 손, 파이팅 자세, 캐치 포즈). 캐릭터 신체 비율은 변경하지 않았고, 비율이 맞지 않는 사람용 스켈레톤 클립은 적용하지 않았어요.
 > 업데이트할 때마다 이 문서를 고치고, 바뀐 내용은 [CHANGELOG.md](CHANGELOG.md)에 남겨요.
 
@@ -671,3 +671,8 @@
 ## 수산시장 경매 · 사진 모드 · 사진전 (v1.140)
 - 경매 `records/auc_<id>` (aucEnd · seller · item · start · bid · bidder · paid · winClaimed). 입찰하면 돈을 바로 빼고, 이전 최고 입찰자에게는 우편 `auc_refund`. 정산 `aucSettle()`: 각자 `update({winClaimed})` / `update({paid})`, 이중 정산을 막으려고 `P.aucDone`에 기록해요.
 - 사진 모드 `photoMode()`(body.photomode가 HUD를 숨기고, `data-pfx` 필터) · `photoShot()`(다시 그려서 960px JPEG). 사진전 `records/photo_<id>` (photoTs · img 640px JPEG ≤300KB · likes), 좋아요는 `P.likedPhotos`.
+
+## 배치 가드 (v1.141)
+- `placeOK(x, z, r)`: 바다 · 부두 · 마을 큰길(|x|<4.5+r) · 일주도로(`roadNear` < 4.3+r) · 선로(`railDist` < 2.8+r) · `BLOCKS` · `KEEP_CLEAR()`(가게 앞 · 역 · 마트 · 수산시장 입구 · 농장 · 수족관 · 전망대 · 해돋이역) · `STN_PLATS` · 포장 길 띠(`paveRects`, grounds 박스 중 좁은 것).
+- `placeFix`: 걸리면 9m 안의 가장 가까운 빈자리로 옮기고, 나무끼리는 1.6m 간격(`treeSpaceOK`). `propTree`는 가드를 거친 뒤 땅 높이에 맞춰 심고 `[x, z]`(없으면 null)를 돌려줘요. 숲 `buildForest`는 맨 마지막에 지어요.
+- 감사 기록 `PLACE_LOG`(나무 · 숲 · 벤치 · 화분 · 가로등).

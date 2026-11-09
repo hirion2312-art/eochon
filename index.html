@@ -2238,7 +2238,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.140.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.141.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -8722,6 +8722,8 @@ function init3D() {
   buildFar();
   buildCoast();
   buildDetails();
+  (S.landTrees || []).forEach(([x, z], k) => propTree(x, z, .8 + k * .1, null, false, "landTrees"));
+  buildForest();   // v1.141 숲은 마지막에: 선로 · 역 · 건물 · 길이 다 놓인 뒤 그 자리를 피해서 심어요
 
   // 캐릭터 공용
   GEO.body = new T3.SphereGeometry(.4, 18, 12);
@@ -8976,7 +8978,6 @@ function buildIsland() {
   for (let k = 0; k < nx * nz; k++) { const ny = nrm.getY(k); if (ny < .82 && pos[k * 3 + 1] > .5) { tmp.setRGB(col[k * 3], col[k * 3 + 1], col[k * 3 + 2]).lerp(cRock, smooth01(.82, .6, ny)); col[k * 3] = tmp.r; col[k * 3 + 1] = tmp.g; col[k * 3 + 2] = tmp.b; } }
   const land = new T3.Mesh(g, phong(0xffffff, { vertexColors: true, map: groundDetailTex() })); land.receiveShadow = true; scene.add(land); grounds.push(land);
   buildRingRoad();
-  buildForest();
 }
 // 일주도로 리본: 아스팔트 + 가장자리 흰 선 + 가운데 노란 점선. 마을 큰길과 같은 폭으로 이어져요
 function buildRingRoad() {
@@ -9012,6 +9013,7 @@ function buildForest() {
     const x = -40 + r() * 580, z = -290 + r() * 600; if (townMask(x, z) > .15 || !inIsland(x, z) || (x > 44 && x < 100 && z > -36 && z < 36)) continue;
     const h = terH(x, z), d = coastInfo(x, z).d, dens = vnoise(x / 60 + 3, z / 60) + smooth01(6, 40, h) * .5;
     if (d < 14 || terSlope(x, z) > .7 || roadNear(x, z).d < 9 || southBeach(z, d) > .3) continue;
+    if (!placeOK(x, z, 2.2)) { PLACE_LOG.push({ kind: "forest", x0: x, z0: z, x, z, src: "buildForest", dropped: true }); continue; }   // v1.141 선로 · 역 · 시설 자리는 비워요
     if (r() < .06) { items.rock.push([x, h, z, .6 + r() * 1.8]); continue; }
     if (dens < .55 + r() * .25) continue;
     (h > 18 || r() < .55 ? items.pine : items.round).push([x, h, z, .8 + r() * .9]);
@@ -9081,7 +9083,8 @@ function buildCoast() {
 }
 function buildLand() {
   buildIsland();
-  for (const x of [-5.5, -8]) { const t = new T3.Mesh(new T3.IcosahedronGeometry(1.1, 0), phong(0x6fa85e)); t.position.set(x + 9, 1.6, -73); scene.add(t); cyl(.12, .16, 1.2, 5, phong(0x7a5a3c), x + 9, .6, -73); }
+  // v1.141 일주도로 위에 서 있던 나무 2그루(3.5, −73) · (1, −73) → 배치 가드로 길가 빈자리로 옮겨요 (TER가 준비된 뒤 심어요)
+  S.landTrees = [[3.5, -73], [1, -73]];
   // 차도
   // 큰길은 섬 일주도로(buildRingRoad)의 한 구간이에요 (v1.49)
   // 인도
@@ -9641,8 +9644,8 @@ function buildBackGarden(det) {   // v1.122 상점가 뒤뜰: 뒷길 산책로 �
   sl(6, 6, LX, -18, 2, 2);                            // 마트 길과 만나는 네거리
   for (let z = -70; z <= 30; z += 7) {
     if (z > -23 && z < -13) continue;
-    if (!(z > -69 && z < -52)) propTree(LX - 2.3, z, .85, det, Math.abs(z / 7) % 2 === 0);
-    propTree(LX + 2.5, z + 3.5, .9, det, false);
+    if (placeOK(LX - 2.3, z, .9)) propTree(LX - 2.3, z, .8 + (Math.abs(z) % 3) * .08, det, Math.abs(z / 7) % 2 === 0, "backstreet");   // v1.141 수동 구간 제외(z −69~−52) → 공통 배치 가드
+    if (placeOK(LX + 2.5, z + 3.5, .9)) propTree(LX + 2.5, z + 3.5, .85 + (Math.abs(z) % 2) * .1, det, Math.abs(z / 7) % 3 === 1, "backstreet");
   }
   for (const z of [-62, -44, -30, -6, 8, 22]) propLamp(LX + 1.55, z, [-1, 0], det);
   for (const z of [-42, 20]) {   // 쉼터
@@ -9656,7 +9659,7 @@ function buildBackGarden(det) {   // v1.122 상점가 뒤뜰: 뒷길 산책로 �
     sl(8.3, 2, 26.65, pz, 3, 1); propBench(px, pz + 6.2, Math.PI, det); propBench(px + 6.4, pz, -Math.PI / 2, det);
     BLOCKS.push([px - 4, px + 4, pz - 4, pz + 4]); }
   // 과수원 (마트 길 남쪽) · 꽃밭 (연못 북쪽)
-  for (const x of [29, 35, 41]) for (const z of [-58, -50, -42, -34]) { if (x === 29 && z === -42) continue; propTree(x, z, .75, det, false);
+  for (const x0 of [29, 35, 41]) for (const z0 of [-58, -50, -42, -34]) { if (x0 === 29 && z0 === -42) continue; const tp = propTree(x0, z0, .75 + ((x0 + z0) % 3) * .08, det, (x0 + z0) % 4 === 0, "orchard"); if (!tp) continue; const [x, z] = tp;   // v1.141 옮겨지면 열매도 따라가요
     for (let k = 0; k < 5; k++) { const a = k * 1.3 + x, f = plain(GEOD.fruit || (GEOD.fruit = new T3.IcosahedronGeometry(.13, 0)), cmat(k % 2 ? 0xff7a3c : 0xe8442c), x + Math.cos(a) * .7, 1.5 + (k % 3) * .3, z + Math.sin(a) * .7, det); f.scale.setScalar(1); } }
   for (const [x, z, w, d] of [[30, 18, 3.4, 1.4], [38, 22, 3.4, 1.4], [42, 18.6, 1.4, 3.4], [32, -26, 4, 1.2]]) propPlanter(x, z, w, d, det, .12);
   for (const [x, z] of [[30, 26], [40, 28], [44, 8]]) propTree(x, z, 1.0, det, true);
@@ -11302,7 +11305,7 @@ function buildFarm() {   // v1.125 마트 북쪽 새 자리 · 헛간 마당까�
     box(.55, .6, .3, cmat(0x2a78bb), sx0, y0 + 1.45, sz0, g); propAdd(new T3.Mesh(new T3.SphereGeometry(.22, 10, 8), cmat(0xe6c45a)), sx0, y0 + 2.0, sz0, g);
     cyl(.38, .38, .04, 14, cmat(0xc89a5a), sx0, y0 + 2.2, sz0, g); cyl(.2, .22, .2, 12, cmat(0xc89a5a), sx0, y0 + 2.3, sz0, g); }
   // 과일나무 줄 (밭 북쪽) · 꽃 띠 (밭 남쪽) · 물통
-  for (let k = 0; k < 5; k++) { const tx = FARM.x - 8 + k * 4, tz = FARM.z + half + 2.6; propTree(tx, tz, .85, g, false);
+  for (let k = 0; k < 5; k++) { const tp = propTree(FARM.x - 8 + k * 4, FARM.z + half + 2.6, .8 + (k % 3) * .08, g, false, "farm"); if (!tp) continue; const [tx, tz] = tp;
     for (let f = 0; f < 5; f++) { const a = f * 1.3 + k; plain(GEOD.fruit || (GEOD.fruit = new T3.IcosahedronGeometry(.13, 0)), cmat(f % 2 ? 0xff7a3c : 0xe8442c), tx + Math.cos(a) * .7, 1.5 + (f % 3) * .3, tz + Math.sin(a) * .7, g); } }
   for (let k = 0; k < 4; k++) propPlanter(FARM.x - 7 + k * 4.6, FARM.z - half - 1.2, 3.6, .8, g, .12);
   { const tx = FARM.x - half - 1.4, tz = FARM.z - 8; cyl(.6, .6, 1.3, 14, cmat(0x7a5a3a), tx, y0 + .65, tz, g); cyl(.62, .62, .08, 14, iron, tx, y0 + 1.0, tz, g); cyl(.62, .62, .08, 14, iron, tx, y0 + .3, tz, g); BLOCKS.push([tx - .7, tx + .7, tz - .7, tz + .7]); }
@@ -15922,16 +15925,74 @@ SHEETS.office = (body) => {
 const PROP_BULB = {};
 const propBulb = () => PROP_BULB.m || (PROP_BULB.m = bulbMat(0x8a8a80, 0xffe2a8));
 const propAdd = (m, x, y, z, parent) => { m.position.set(x, y, z); (parent || scene).add(m); return m; };
-function propTree(x, z, s, parent, pine) {
+/* ===================== 🧭 배치 가드 (v1.141 맵 정돈) =====================
+   나무 · 바위 · 반복 소품이 길 · 큰길 · 선로 · 건물 · 승강장 · 포장 길 위에 서지 않게 하는 공통 판정.
+   placeOK(x, z, r) = 그 자리에 반지름 r 장식을 둬도 되는지 · placeFix = 안 되면 가까운 빈자리(최대 9m)로 옮긴 좌표 (없으면 null) */
+const PLACE_LOG = [];   // 감사용: { kind, x0, z0, x, z, src, fixed, dropped }
+let _railPts = null;
+function railDist(x, z) {
+  if (!_railPts) { const src = RAIL.x ? Array.from({ length: Math.ceil(RAIL.n / 2) }, (_, i) => [RAIL.x[i * 2] ?? RAIL.x[RAIL.n - 1], RAIL.z[i * 2] ?? RAIL.z[RAIL.n - 1]]) : (() => { const c = new T3.CatmullRomCurve3(RAIL.ctrl.map(([a, b]) => new T3.Vector3(a, 0, b)), true, "centripetal"); return c.getSpacedPoints(900).map(v => [v.x, v.z]); })();
+    _railPts = { pts: src, built: !!RAIL.x }; }
+  if (!_railPts.built && RAIL.x) { _railPts = null; return railDist(x, z); }
+  let b = 1e9; for (const [px, pz] of _railPts.pts) { const d = (px - x) ** 2 + (pz - z) ** 2; if (d < b) b = d; } return Math.sqrt(b);
+}
+let _paveRects = null, _paveN = -1;
+function paveRects() {   // 포장된 길 · 광장 띠 (얇고 좁은 바닥판) — 섬 바닥 · 넓은 마당 판은 빼요
+  if (_paveRects && _paveN === grounds.length) return _paveRects; _paveN = grounds.length; _paveRects = [];
+  const bb = new T3.Box3();
+  for (const g of grounds) { if (!g || !g.geometry || g.geometry.type !== "BoxGeometry") continue; g.updateMatrixWorld(true); bb.setFromObject(g); const w = bb.max.x - bb.min.x, d = bb.max.z - bb.min.z, hh = bb.max.y - bb.min.y;
+    if (hh > .8 || Math.min(w, d) > 9 || w * d > 600) continue; _paveRects.push([bb.min.x, bb.max.x, bb.min.z, bb.max.z]); }
+  return _paveRects;
+}
+const KEEP_CLEAR = () => [   // 입구 · 광장 · 새 시설 앞 (사람이 서야 하는 곳)
+  ...BUILDINGS.map(b => [3, 9, b.z - 2.2, b.z + 2.2]),                                   // 상점가 가게 앞
+  [STN.x0 - 8, STN.x1 + 1, STN.z0 - 2, STN.z1 + 2], [STN.rail - 6, STN.rail + 2, 20, 82],     // 어촌역 · 승강장
+  [MART.x0 - 4, MART.x0 + 2, MART.door - 4, MART.door + 4],                               // 마트 입구
+  [FMKT.door[0] - 4, FMKT.door[0] + 4, FMKT.door[1] - 4, FMKT.door[1] + 4],               // 수산시장 입구
+  [FARM.x - 10.5, FARM.x + 10.5, FARM.z - 10.5, FARM.z + 10.5],                            // 농장 울타리 안
+  [AQUA.x - AQUA.w / 2 - 2, AQUA.x + AQUA.w / 2 + 2, AQUA.z - AQUA.d / 2 - 5, AQUA.z + AQUA.d / 2 + 2],   // 수족관 앞마당
+  [TOWNP.x - 10, TOWNP.x + 10, TOWNP.z - 12, TOWNP.z + 10],                                // 전망대 마당
+  [STN2.px0 - 4, STN2.deck.x1 + 1, STN2.z0 - 3, STN2.z1 + 3],                             // 해돋이역 · 전망 데크
+];
+function placeOK(x, z, r) {
+  r = r == null ? .8 : r;
+  if (!inIsland(x, z) && !onDeck(x, z)) return false;                                     // F 바다
+  if (onDeck(x, z)) return false;                                                         // 부두 · 선착장
+  if (Math.abs(x) < 4.5 + r && z > -60 - r && z < 76 + r) return false;                    // 마을 큰길 (onMainSt + 여유)
+  if (TER.h && roadNear(x, z).d < 4.3 + r) return false;                                  // 일주도로
+  if (RAIL.ctrl && railDist(x, z) < 2.8 + r) return false;                                // 선로
+  for (const [a, b, c, d] of BLOCKS) if (x > a - r && x < b + r && z > c - r && z < d + r) return false;   // 건물 · 시설
+  for (const [a, b, c, d] of KEEP_CLEAR()) if (x > a && x < b && z > c && z < d) return false;
+  for (const P0 of STN_PLATS) { const u = (x - P0.x) * P0.tx + (z - P0.z) * P0.tz, v = (x - P0.x) * P0.nx + (z - P0.z) * P0.nz; if (Math.abs(u) < P0.L / 2 + 5 && v > -3 && v < P0.v1 + 3) return false; }
+  for (const [a, b, c, d] of paveRects()) if (x > a - r * .6 && x < b + r * .6 && z > c - r * .6 && z < d + r * .6) return false;   // 포장 길 · 광장
+  return true;
+}
+const treeSpaceOK = (x, z) => !PLACE_LOG.some(e => (e.kind === "tree") && !e.dropped && Math.hypot(e.x - x, e.z - z) < 1.6);   // 나무끼리 1.6m 띄워요 (겹침 방지)
+function placeFix(x, z, r, spaced) {
+  if (placeOK(x, z, r) && (!spaced || treeSpaceOK(x, z))) return [x, z];
+  for (let d = .75; d <= 9; d += .75) for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2 + d, nx = x + Math.cos(a) * d, nz = z + Math.sin(a) * d; if (placeOK(nx, nz, r) && (!spaced || treeSpaceOK(nx, nz))) return [nx, nz]; }
+  return null;
+}
+const plainParent = (pa) => !pa || pa === scene || (pa.position && pa.position.lengthSq() < 1e-6 && Math.abs(pa.rotation.y) < 1e-6 && (!pa.parent || pa.parent === scene));
+function propTree(x, z, s, parent, pine, src) {
   s = s || 1;
+  // v1.141 길 · 선로 · 입구 위면 가까운 빈자리로 옮기고, 땅 높이에 맞춰 심어요 (집 안 · 움직이는 무리 안은 그대로)
+  if (plainParent(parent) && !(typeof atHome === "function" && atHome() && parent)) {
+    const x0 = x, z0 = z, fx = placeFix(x, z, .9 * s, !placeOK(x, z, .9 * s)), ent = { kind: "tree", x0, z0, x, z, src: src || "propTree" }; PLACE_LOG.push(ent);
+    if (!fx) { ent.dropped = true; return null; }
+    if (fx[0] !== x || fx[1] !== z) { ent.fixed = true; x = ent.x = fx[0]; z = ent.z = fx[1]; }
+    const gy = TER.h && !inTownFlat(x, z) ? groundY(x, z) : 0; if (Math.abs(gy) > .05) { const host = new T3.Group(); host.position.y = gy - .05; (parent || scene).add(host); parent = host; ent.gy = gy; }
+  }
   cyl(.13 * s, .19 * s, 1.5 * s, 7, cmat(0x7a5a3c), x, .75 * s, z, parent);
-  if (pine) { for (let k = 0; k < 3; k++) cyl(0, (1.05 - k * .25) * s, (1.3 - k * .15) * s, 8, cmat(0x4f8a4a), x, (1.75 + k * .62) * s, z, parent); return; }
+  if (pine) { for (let k = 0; k < 3; k++) cyl(0, (1.05 - k * .25) * s, (1.3 - k * .15) * s, 8, cmat(0x4f8a4a), x, (1.75 + k * .62) * s, z, parent); return [x, z]; }
   const leaf = [0x5e9a52, 0x6fa85e, 0x4f8a4a];
   for (const [dx, dy, dz, r, c] of [[0, 2.15, 0, 1, 0], [.5, 1.85, .25, .68, 1], [-.45, 1.95, -.3, .7, 2], [.1, 2.75, -.1, .6, 1]])
     propAdd(new T3.Mesh(new T3.IcosahedronGeometry(r * s, 1), cmat(leaf[c])), x + dx * s, dy * s, z + dz * s, parent);
+  return [x, z];
 }
 /* 가로등: arm 은 등이 뻗는 쪽 [dx, dz] (길 위로 내밀기) */
 function propLamp(x, z, arm, parent) {
+  if (plainParent(parent)) PLACE_LOG.push({ kind: "lamp", x0: x, z0: z, x, z, src: "lamp" });   // v1.141 감사 기록
   const iron = cmat(0x2a2d33), [ax, az] = arm || [0, 0];
   cyl(.16, .2, .3, 8, iron, x, .15, z, parent);
   cyl(.06, .08, 3.6, 6, iron, x, 1.9, z, parent);
@@ -15949,6 +16010,7 @@ function propBollard(x, z, parent) {
 }
 /* 벤치: ry 로 앉는 쪽 방향 (0 = -z 를 봄, -π/2 = +x 를 봄) */
 function propBench(x, z, ry, parent) {
+  if (plainParent(parent)) PLACE_LOG.push({ kind: "bench", x0: x, z0: z, x, z, src: "bench" });   // v1.141 감사 기록
   const g = new T3.Group(); g.position.set(x, .1, z); g.rotation.y = ry; (parent || scene).add(g);
   const wood = cmat(0xb07a48), iron = cmat(0x2a2d33);
   for (let k = 0; k < 3; k++) box(1.6, .06, .15, wood, 0, .46, -.17 + k * .17, g);
@@ -15970,6 +16032,7 @@ function propPlanter(x, z, w, d, parent, h) {
 }
 /* 둥근 화분 (topiary = 동그랗게 다듬은 키 큰 나무) */
 function propPot(x, z, parent, topiary) {
+  if (plainParent(parent)) PLACE_LOG.push({ kind: "pot", x0: x, z0: z, x, z, src: "pot" });   // v1.141 감사 기록
   cyl(.3, .23, .5, 12, cmat(0xc2603a), x, .35, z, parent);
   cyl(.32, .32, .06, 12, cmat(0xa84e2e), x, .6, z, parent);
   if (topiary) {
