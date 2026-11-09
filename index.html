@@ -299,6 +299,9 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 @keyframes fsave{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}22%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1;transform:translate(-50%,-58%) scale(1)}100%{opacity:0;transform:translate(-50%,-75%) scale(.92)}}
 @keyframes fsaveShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-4deg)}75%{transform:translateX(4px) rotate(4deg)}}
 @keyframes fsaveSpark{0%{opacity:1;transform:rotate(var(--a)) translateX(10px)}100%{opacity:0;transform:rotate(var(--a)) translateX(90px)}}
+.cwx{margin-left:6px;font-size:15px;cursor:pointer}
+.fest-hero{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--fc) 18%,#fff),color-mix(in srgb,var(--fc) 34%,#fff));border:2px solid var(--fc);color:#2a1a10}.fest-hero b{font-size:18px;display:block}.fest-hero small{font-weight:700;opacity:.8}.fest-ico{font-size:44px}
+.fest-stamps{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.fest-stamps span{aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;border:2px dashed rgba(127,127,127,.4);color:var(--muted)}.fest-stamps span.on{border:2px solid #c8342a;background:#fff3e6;font-size:22px;transform:rotate(-8deg)}
 .tpj-hero{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:linear-gradient(135deg,#e6f3fb,#cfe6f4);border:2px solid #5aa7d8;color:#173548}.tpj-hero b{font-size:18px;display:block}.tpj-hero small{display:block;font-weight:700;color:#2f6f86;margin:2px 0 6px}
 .tpj-ico{font-size:42px;width:70px;height:70px;border-radius:18px;background:#fff;display:grid;place-items:center;flex:none;box-shadow:inset 0 0 0 3px #5aa7d8}
 .tpj-bar{position:relative;height:14px;border-radius:8px;background:rgba(23,53,72,.15);overflow:hidden;margin-bottom:4px}.tpj-bar i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#f2b630,#e2622c);transition:width .4s}.tpj-bar em{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.8)}
@@ -2220,7 +2223,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.136.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.137.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -2863,6 +2866,10 @@ const CLOTHES = [
   { id: "b-rain", slot: "bottom", name: "방수 멜빵바지", price: 1400, color: 0x2e4a6b, glb: "rain_bottom", desc: "물이 안 새는 PVC 앞판 · 우비 어부 세트" },
   { id: "s-rain", slot: "shoes", name: "노란 장화 (3D)", price: 800, color: 0xf6c637, glb: "rain_shoes", desc: "종아리까지 오는 진짜 장화 · 우비 어부 세트" },
   // 전용 지급 세트 (v1.91) — 상점에 안 뜨고(hidden) 프로필 정리 때 닉네임으로만 지급돼요
+  { id: "t-fest-spring", slot: "top", name: "벚꽃 축제 티", price: 0, hidden: true, color: 0xf2a7c3, desc: "봄 벚꽃 축제 도장 4개 · 한정" },
+  { id: "t-fest-summer", slot: "top", name: "여름밤 불꽃 셔츠", price: 0, hidden: true, color: 0x23356e, desc: "여름 불꽃 축제 도장 4개 · 한정" },
+  { id: "t-fest-autumn", slot: "top", name: "수확제 멜빵 셔츠", price: 0, hidden: true, color: 0xd4701a, desc: "가을 수확제 도장 4개 · 한정" },
+  { id: "t-fest-winter", slot: "top", name: "눈 장터 털 스웨터", price: 0, hidden: true, color: 0xc8342a, desc: "겨울 눈 장터 도장 4개 · 한정" },
   { id: "t-obs", slot: "top", name: "바람언덕 기념 티셔츠", price: 0, hidden: true, color: 0x5aa7d8, desc: "마을 사람들이 다 같이 지은 전망대 완공 기념 · 모두에게 드려요" },
   { id: "h-geto", slot: "hat", name: "올린 묶음머리", price: 0, hidden: true, color: 0x151823, glb: "geto_hat", desc: "뒤로 묶어 올리고 한 가닥만 길게 · 게토 전용" },
   { id: "t-geto", slot: "top", name: "고카라 교복 자켓", price: 0, hidden: true, color: 0x262c3f, glb: "geto_top", desc: "사선 여밈에 금 단추 하나 · 게토 전용" },
@@ -3181,6 +3188,7 @@ function normProfile(p) {
   o.scraps = clamp(Math.floor(Number(p.scraps) || 0), 0, 9999); o.seaweed = clamp(Math.floor(Number(p.seaweed) || 0), 0, 999);
   if (o.farm && p.farm && typeof p.farm === "object") { o.farm.comp = clamp(Math.floor(Number(p.farm.comp) || 0), 0, 3); o.farm.cjobs = Array.isArray(p.farm.cjobs) ? p.farm.cjobs.filter(j => j && FERTS[j.f] && Number(j.done) > 0).slice(0, 6).map(j => ({ f: j.f, done: Number(j.done) })) : []; } o.martStamp = clamp(Math.floor(Number(p.martStamp) || 0), 0, 1e6);
   o.cupBest = p.cupBest && typeof p.cupBest === "object" ? { key: str(p.cupBest.key, 10), size: clamp(Number(p.cupBest.size) || 0, 0, 1e6) } : null;   // v1.135 주말 낚시 대회
+  o.fest = p.fest && typeof p.fest === "object" ? { sid: str(p.fest.sid, 16), stamps: clamp(Math.floor(Number(p.fest.stamps) || 0), 0, 7), day: str(p.fest.day, 10), prog: clamp(Math.floor(Number(p.fest.prog) || 0), 0, 99), alt: clamp(Math.floor(Number(p.fest.alt) || 0), 0, 99), stamped: !!p.fest.stamped } : null;   // v1.137 계절 축제
   o.townDon = clamp(Math.floor(Number(p.townDon) || 0), 0, 1e9);   // v1.136 마을 공동 프로젝트 누적 기부
   o.cupDone = Array.isArray(p.cupDone) ? p.cupDone.filter(x => typeof x === "string").slice(-8) : [];
   o.localDay = p.localDay && typeof p.localDay === "object" ? { d: str(p.localDay.d, 10), n: clamp(Math.floor(Number(p.localDay.n) || 0), 0, 1e5), v: clamp(Math.floor(Number(p.localDay.v) || 0), 0, 1e7) } : null;   // v1.122: 새로고침해도 납품 한도 유지
@@ -3351,7 +3359,11 @@ const stat = (k, n) => { P.stats[k] = (P.stats[k] || 0) + (n == null ? 1 : n); }
 const dexCount = () => Object.keys(P.dex).filter(id => findFish(id) && !isShell(id)).length;
 const ACH_ICON = { "캐스팅": "🎣", "낚시": "🐟", "파이팅": "💪", "도감": "📖", "함께": "🤝", "갯벌": "🐚", "회 · 시장": "🍣", "성장": "⭐", "은행 · 복권": "💰", "초대 · 출석": "🎁", "직업": "🪪", "집": "🏠" };
 const ACH = [
-  { id: "town1", cat: "마을 함께", name: "첫 벽돌", desc: "마을 공동 프로젝트에 기부하기", stat: "townDon", goal: 1, gold: 100 },
+  { id: "festSp", cat: "마을 함께", name: "벚꽃 축제 단골", desc: "봄 벚꽃 축제 도장 7개", stat: "fest_spring", goal: 7, gold: 2000, title: "벚꽃 축제 단골" },
+  { id: "festSu", name: "불꽃 축제 단골", desc: "여름 불꽃 축제 도장 7개", stat: "fest_summer", goal: 7, gold: 2000, title: "불꽃 축제 단골" },
+  { id: "festAu", name: "수확제 일꾼", desc: "가을 수확제 도장 7개", stat: "fest_autumn", goal: 7, gold: 2000, title: "수확제 일꾼" },
+  { id: "festWi", name: "눈 장터 단골", desc: "겨울 눈 장터 도장 7개", stat: "fest_winter", goal: 7, gold: 2000, title: "눈 장터 단골" },
+  { id: "town1", name: "첫 벽돌", desc: "마을 공동 프로젝트에 기부하기", stat: "townDon", goal: 1, gold: 100 },
   { id: "town2", name: "마을 건립 공로자", desc: "마을 공동 프로젝트에 1,000만원 기부", stat: "townDon", goal: 100000, gold: 5000, title: "마을 건립 공로자" },
   { id: "cup1", name: "대회 데뷔", desc: "주말 낚시 대회에 참가하기", stat: "cupJoins", goal: 1, gold: 300 },
   { id: "cupPod", name: "시상대에 서다", desc: "주말 낚시 대회 3위 안에 들기", stat: "cupPodium", goal: 1, gold: 1000, title: "대회 입상자" },
@@ -4030,7 +4042,7 @@ const xpNeed = (lv) => XP_TABLE[clamp(Math.floor(lv) || 0, 0, LV_MAX)];
 /* ---------- 운영자 실험실 (v1.64): 이 기기에만 저장되는 테스트 설정 · 소비 지점에서 S.isOwner일 때만 적용돼요 ---------- */
 const LAB = { fish: lsGet("mn.lab.fish2", 1), xp: lsGet("mn.lab.xp", 1), move: lsGet("mn.lab.move", 1), time: lsGet("mn.lab.time", -1),
   noHeat: !!lsGet("mn.lab.noHeat", 0), noBreak: !!lsGet("mn.lab.noBreak", 0), fastBite: !!lsGet("mn.lab.fastBite", 0), perfect: !!lsGet("mn.lab.perfect", 0), tier: lsGet("mn.lab.tier", -1),
-  instant: !!lsGet("mn.lab.instant", 0), cup: lsGet("mn.lab.cup", 0), fishId: lsGet("mn.lab.fishId", ""), forceGuest: lsGet("mn.lab.forceGuest", "") };
+  instant: !!lsGet("mn.lab.instant", 0), cup: lsGet("mn.lab.cup", 0), wx: lsGet("mn.lab.wx", ""), fishId: lsGet("mn.lab.fishId", ""), forceGuest: lsGet("mn.lab.forceGuest", "") };
 const labSet = (k, v) => { LAB[k] = v; lsSet("mn.lab." + k, v); if (S.sheet === "admintools") refreshSheet(true); };
 function labRestLv(dv) {   // 실험실: 가게 등급 테스트 (비용 없이 · 내 가게에만 저장돼요)
   const v = clamp(P.rest.lv + dv, 0, REST_LV.length - 1);
@@ -4103,6 +4115,7 @@ function updateClock() {
   { const tx = clockText(), sp = tx.indexOf(" "); if (el.dataset.t !== tx) { el.dataset.t = tx; el.innerHTML = '<span class="ap">' + tx.slice(0, sp) + " </span>" + tx.slice(sp + 1); } }
   const ic = $("clockIco"); if (ic.dataset.k !== ico) { ic.dataset.k = ico; ic.innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + CLOCK_ICO[ico] + "</svg>"; }
   $("clock").title = "어촌 시각 · 실제 한국 시간과 같아요 (" + ({ dawn: "새벽", day: "낮", dusk: "저녁", night: "밤" })[k] + ")";
+  try { const w = wxNow(), wl = $("clockWx") || (() => { const e = document.createElement("span"); e.id = "clockWx"; e.className = "cwx"; e.onclick = (ev) => { ev.stopPropagation(); openSheet("fest"); }; $("clock").append(e); return e; })(); if (wl.dataset.k !== w.k) { wl.dataset.k = w.k; wl.textContent = w.ico; wl.title = "지금 날씨 · " + w.name + " (눌러서 축제 · 날씨 보기)"; } } catch {}
 }
 /* ===================== 배경음악 =====================
    a/bgm-<이름>.mp3 가 있으면 상황에 맞춰 바꿔 틀고(2초 크로스페이드), 없으면 조용히 건너뜀 */
@@ -4200,7 +4213,7 @@ function checkRecord(f, k, size) {
    게이지 100% = 포획, 0% = 놓침. 한 번도 안 놓치면 「퍼펙트」 크기 +10%.
    자동 챔질(또는 멍 모드)이면 입질을 놓쳐도 등급별 확률로 자동 포획. */
 const WAIT_MIN = 3000;   // 버프를 아무리 겹쳐도 입질까지 최소 3초
-const waitMs = () => Math.max(WAIT_MIN, (1.12 - .25 * (S.castPow || .6)) * (S.castPerfect ? .85 : 1) * (S.speed === "test" ? rnd(7000, 18000) : rnd(25000, 60000)) * (1 - buffVal("bite") / 100) * (hasTackle("spinner") ? 0.85 : 1) * (hasTackle("lamp") && isNight() ? .7 : 1) * (atSea() ? 0.75 : 1) * evMul("bite") * (S.isOwner && LAB.fastBite ? .03 : 1) * (S.isOwner && LAB.instant ? .03 : 1));
+const waitMs = () => Math.max(WAIT_MIN, (1.12 - .25 * (S.castPow || .6)) * (S.castPerfect ? .85 : 1) * (S.speed === "test" ? rnd(7000, 18000) : rnd(25000, 60000)) * (1 - buffVal("bite") / 100) * (hasTackle("spinner") ? 0.85 : 1) * (hasTackle("lamp") && isNight() ? .7 : 1) * (atSea() ? 0.75 : 1) * evMul("bite") * wxBite() * (S.isOwner && LAB.fastBite ? .03 : 1) * (S.isOwner && LAB.instant ? .03 : 1));
 const BITE_MS = 2200, CAST_MS = 900, CATCH_MS = 2600, MISS_MS = 1400;
 const AUTO_RATE = [0.9, 0.7, 0.45, 0.25, 0.12, 0.04];
 /* 스타듀밸리 BobberBar 규칙 그대로: 트랙 568, 물고기 위치 0~532, 1초에 60번 계산 */
@@ -4401,7 +4414,7 @@ function rollFish(baitId, opts) {
   const deep = atSea();
   const bait = BAITS.find(b => b.id === baitId) || BAITS[0];
   if (S.isOwner && LAB.fishId) { const want = allFish().find(f => f.id === LAB.fishId); if (want) { let kk = rollSizeK() * (1 + buffVal("size") / 100) * (deep ? 1.15 : 1); if (opts.coop) kk = 1.5 * Math.max(1, kk); return { f: want, k: Math.min(kk, SIZE_MAX), bait: baitId }; } }   // 실험실: 물고기 지정 (서식지·등급 무시, 끄기 전까지 계속)
-  let tier = weighted(luckProbs(bait.p, (deep ? 30 : 0) + (S.castPow || 0) * 6 + (S.castPerfect ? 8 : 0) + (eventOn("rare") ? 15 : 0)));
+  let tier = weighted(luckProbs(bait.p, (deep ? 30 : 0) + (S.castPow || 0) * 6 + (S.castPerfect ? 8 : 0) + (eventOn("rare") ? 15 : 0) + wxLuck()));
   { const mc = (APEX_CHANCE[baitId] || 0) * (deep ? 2 : 1) * (isNight() ? 1.5 : 1) * (eventOn("rare") ? 2 : 1); if (P.rod !== "merchant" && Math.random() < mc) tier = 9; }   // 태초 롤 · 장사꾼의 낚싯대는 태초를 노리지 않아요 (v1.103)
   if (S.isOwner && LAB.tier >= 0) { tier = LAB.tier; labSet("tier", -1); }   // 실험실: 등급 고정 (한 번 쓰면 꺼져요)
   const pool = allFish().filter(f => habitatW(f) > 0);
@@ -4414,7 +4427,7 @@ function rollFish(baitId, opts) {
   const cupF = cupOn(), w = cands.map(f => (DEEP.has(f.id) ? (deep ? 3 : 0.5) : 1) * habitatW(f) * (cupF && cupF.fish.id === f.id ? 4 : 1));   // v1.135 대회 어종은 4배 잘 물어요
   let rr = Math.random() * w.reduce((a, b) => a + b, 0), f = cands[0];
   for (let i = 0; i < cands.length; i++) { if ((rr -= w[i]) < 0) { f = cands[i]; break; } }
-  let k = rollSizeK() * (1 + buffVal("size") / 100) * (deep ? 1.15 : 1);
+  let k = rollSizeK() * (1 + buffVal("size") / 100) * (deep ? 1.15 : 1) * wxSize();
   if (opts.coop) k = 1.5 * Math.max(1, k);   // 함께 낚시: 기준 크기의 1.5배 이상부터
   return { f, k: Math.min(k, SIZE_MAX), bait: baitId, mrod: mrodHit };
 }
@@ -4435,6 +4448,7 @@ function landFish(r, perfect, auto) {
   questProgress("catch"); if (f.tier >= 2) questProgress("tier2"); if (k >= 1.6) questProgress("big"); if (perfect) questProgress("perfect"); if (r.coop) questProgress("coop");
   checkRecord(f, k, size);
   try { cupCatch(f, size, k); } catch (e) { console.warn("cup", e); }
+  try { festProgress("catch"); if (isNight()) festProgress("night"); } catch {}
   let sold = false; const sv = fishSell(item), isToday = f.id === todayFish();
   if (P.bag.length >= BAG_MAX) { P.gold += sv; sold = true; toast("가방이 가득 차서 바로 팔았어요 (+" + won(sv) + ")"); }
   else P.bag.unshift(item);
@@ -8676,7 +8690,7 @@ function init3D() {
   buildMart(); buildFarm();   // v1.121 농가마트 · 낭만 농장
   buildBeach();
   buildHall();
-  buildStation(); buildRail(); buildStation2(); try { buildTownSite(); } catch (e) { console.warn("town site", e); }   // v1.122 바다열차 · 해돋이역
+  buildStation(); buildRail(); buildStation2(); try { buildTownSite(); } catch (e) { console.warn("town site", e); } try { buildFestDeco(); } catch (e) { console.warn("fest deco", e); }   // v1.122 바다열차 · 해돋이역
   buildTV();
   buildUptown();
   buildFar();
@@ -11101,7 +11115,7 @@ function plotGrow(p, now) {   // 촉촉할 때만 자라요 (스프링클러 칸
   if (!p || !p.c) return p;
   now = now || Date.now(); if (!p.pt) p.pt = p.at || now;
   const wetEnd = p.spw ? now : (p.wet || 0);
-  const from = p.at || now, add = Math.max(0, Math.min(now, wetEnd) - from) * fertSpeed(fertKind(p)); p.g = (p.g || 0) + add; p.at = now;
+  const from = p.at || now, add = Math.max(0, Math.min(now, wetEnd) - from) * fertSpeed(fertKind(p)) * (typeof wxGrow === "function" && farmData().lv < 3 ? wxGrow() : 1);   // v1.137 눈 오면 노지 작물은 절반 속도 (비닐하우스 Lv.3부터는 괜찮아요) p.g = (p.g || 0) + add; p.at = now;
   if (!p.spw && fertKind(p) !== "lime" && plotStage(p) < 3 && now - Math.max(wetEnd, p.pt) > FARM_DRY_MS) p.wilt = 1;
   return p;
 }
@@ -11176,7 +11190,7 @@ function farmFert(pl, k) {   // v1.130 한 칸에 비료 하나
 function farmHarvest(pl) {
   const F = farmData(), k = plotKey(pl.r, pl.c), p = plotGrow(F.plots[k]); if (!p || plotStage(p) < 3) return;
   const c = CROP[p.c], fk = fertKind(p), special = Math.random() < fertSpecial(fk) - (p.wilt ? .1 : 0), inv = cropInv(c.id), two = fk === "kelp" && Math.random() < .4, scr = 1 + (Math.random() < .5 ? 1 : 0); inv[special ? 1 : 0] += two ? 2 : 1; P.scraps = Math.min(9999, (P.scraps || 0) + scr);
-  F.plots[k] = { till: true, tt: Date.now() }; farmAnim(pl); sfx(special ? "jingle-rare" : "jingle-catch", .4); gainXp(Math.max(2, Math.round(c.price / 8))); stat("harvests");
+  F.plots[k] = { till: true, tt: Date.now() }; farmAnim(pl); sfx(special ? "jingle-rare" : "jingle-catch", .4); gainXp(Math.max(2, Math.round(c.price / 8))); stat("harvests"); try { festProgress("harvest", two ? 2 : 1); } catch {}
   try { fxPop(ME.x, 2.4, ME.z, (special ? "⭐ 특상품 " : "") + c.name + "!", special ? "#ffd84d" : "#e8ffd0"); } catch {}
   toast([h("img", { src: cropIcon(c.id), alt: "" }), h("div", null, h("b", { text: (special ? "⭐ 특상품 " : "") + c.name + (two ? " 2개" : "") + " 수확!" + (two ? " 🌊" : "") + " · 🍂 부산물 +" + scr }), h("div", { class: "muted", style: "font-size:12px", text: "농가마트 로컬푸드 코너에 납품하면 " + won(Math.round(c.price * (special ? 1.5 : 1))) + " · 3단계 맛집 골목 요리 재료" }))], "catch", 4200);
   markDirty(); FARM3D.dirty = true;
@@ -12630,7 +12644,8 @@ function loop3D(ms) {
   if (document.hidden) return;
   const t = ms / 1000, now = Date.now();
   const hr = gameHour(now);
-  const P2 = periodFor(hr); applyPeriod(P2);
+  const P2 = wxPeriod(periodFor(hr)); applyPeriod(P2);   // v1.137 날씨가 하늘 · 빛을 바꿔요
+  try { precipTick(dt); } catch {}
   const prog = hr >= 5.6 && hr < 19.6 ? (hr - 5.6) / 14 : (((hr - 19.6) + 24) % 24) / 10;
   const ang = Math.PI * clamp(prog, 0.05, 0.95);
   sunMesh.position.set(-520, 40 + Math.sin(ang) * 200, Math.cos(ang) * 420);
@@ -15175,6 +15190,131 @@ SHEETS.rank = (body) => {
     h("button", { class: "btn sm", disabled: !S.online, onclick: () => { pushRank(true); setTimeout(() => loadRanks(true), 800); toast("내 기록을 올렸어요"); }, text: "기록 올리기" }),
     !inHall(ME.x, ME.z) ? h("button", { class: "btn sm pri", onclick: () => { closeSheet(); goHall(c.id); }, text: "동상 보러 가기" }) : null));
 };
+/* ===================== 🌦 날씨 · 🎪 계절 축제 (v1.137) =====================
+   날씨: 2시간마다 바뀌고 시계로 정해져서 모두 같아요. 비 = 입질 빠름 · 희귀 ↑ · 밭 자동 물주기 / 바람 = 큰 개체 ↑ / 눈(겨울) = 희귀 ↑ · 작물 느리게 / 흐림
+   축제: 계절마다(봄 벚꽃 · 여름 불꽃 · 가을 수확 · 겨울 눈 장터) 하루 미션 → 도장 · 4개 = 한정 옷 · 7개 = 칭호 */
+const WX = { sun: { name: "맑음", ico: "☀️" }, cloud: { name: "흐림", ico: "☁️" }, rain: { name: "비", ico: "🌧" }, wind: { name: "바람", ico: "🌬" }, snow: { name: "눈", ico: "❄️" } };
+const kstMonth = (t) => new Date((t || Date.now()) + 9 * 3600e3).getUTCMonth() + 1;
+const seasonOf = (t) => { const m = kstMonth(t); return m >= 3 && m <= 5 ? "spring" : m >= 6 && m <= 8 ? "summer" : m >= 9 && m <= 11 ? "autumn" : "winter"; };
+function wxAt(t) {
+  t = t || Date.now(); if (S.isOwner && LAB.wx) return { k: LAB.wx, ...WX[LAB.wx], until: t + 36e5 };
+  const blk = Math.floor((t / 36e5 + 9) / 2), r = mixHash("wx|" + blk) % 100, se = seasonOf(t);
+  const tbl = se === "winter" ? [["snow", 26], ["rain", 6], ["wind", 16], ["cloud", 20]] : se === "summer" ? [["rain", 24], ["wind", 12], ["cloud", 16]] : [["rain", 18], ["wind", 16], ["cloud", 20]];
+  let acc = 0, k = "sun"; for (const [id, p] of tbl) { acc += p; if (r < acc) { k = id; break; } }
+  return { k, ...WX[k], until: ((blk + 1) * 2 - 9) * 36e5 };
+}
+const wxNow = () => (S.wxC && Date.now() < S.wxC.until && S.wxC.lab === (S.isOwner && LAB.wx)) ? S.wxC : (S.wxC = { ...wxAt(), lab: S.isOwner && LAB.wx });
+const wxIs = (k) => wxNow().k === k;
+const wxLuck = () => wxIs("rain") ? 6 : wxIs("snow") ? 4 : 0;
+const wxBite = () => wxIs("rain") ? .8 : 1;
+const wxSize = () => wxIs("wind") ? 1.1 : 1;
+const wxGrow = () => wxIs("snow") ? .5 : 1;
+/* 하늘 · 빛: 흐림 · 비 · 눈이면 어둡고 회색빛 */
+function wxPeriod(P2) {
+  const w = wxNow().k; if (w === "sun" || w === "wind") return P2;
+  const dim = w === "cloud" ? .82 : w === "rain" ? .62 : .78, gray = (hx, k) => new T3.Color(hx).lerp(new T3.Color(w === "snow" ? 0xdfe6ec : 0x8a95a0), k).getHex();
+  return { ...P2, key: P2.key + "|" + w, si: P2.si * dim, hemi: P2.hemi * (dim + .12), top: gray(P2.top, .55), bot: gray(P2.bot, .45), cloud: gray(P2.cloud, .5), sea: gray(P2.sea, .3), bloom: (P2.bloom || 0) * .7 };
+}
+/* 비 · 눈 · 꽃잎 · 낙엽 알갱이 (카메라 둘레에서만) */
+const PRECIP = { pts: null, geo: null, mat: null, n: 1600, k: null };
+function precipTick(dt) {
+  if (!T3 || !scene || !camera) return;
+  const w = wxNow().k, se = seasonOf(), mode = w === "rain" ? "rain" : w === "snow" ? "snow" : se === "spring" ? "petal" : se === "autumn" ? "leaf" : null;
+  if (!PRECIP.pts) {
+    PRECIP.geo = new T3.BufferGeometry(); const pos = new Float32Array(PRECIP.n * 3), col = new Float32Array(PRECIP.n * 3);
+    for (let i = 0; i < PRECIP.n; i++) { pos[i * 3] = (Math.random() - .5) * 60; pos[i * 3 + 1] = Math.random() * 30; pos[i * 3 + 2] = (Math.random() - .5) * 60; }
+    PRECIP.geo.setAttribute("position", new T3.BufferAttribute(pos, 3)); PRECIP.geo.setAttribute("color", new T3.BufferAttribute(col, 3));
+    PRECIP.mat = new T3.PointsMaterial({ size: .12, map: sparkTex(), vertexColors: true, transparent: true, depthWrite: false, opacity: .8 });
+    PRECIP.pts = new T3.Points(PRECIP.geo, PRECIP.mat); PRECIP.pts.frustumCulled = false; scene.add(PRECIP.pts);
+  }
+  PRECIP.pts.visible = !!mode && mode !== "rain" && !atHome() && !S.title;
+  if (!PRECIP.rain) { const N = 900, pos = new Float32Array(N * 6); for (let i = 0; i < N; i++) { pos[i * 6] = pos[i * 6 + 3] = (Math.random() - .5) * 50; pos[i * 6 + 1] = Math.random() * 25; pos[i * 6 + 4] = pos[i * 6 + 1] + .7; pos[i * 6 + 2] = pos[i * 6 + 5] = (Math.random() - .5) * 50; }
+    const gg = new T3.BufferGeometry(); gg.setAttribute("position", new T3.BufferAttribute(pos, 3)); PRECIP.rain = new T3.LineSegments(gg, new T3.LineBasicMaterial({ color: 0xc8d6e6, transparent: true, opacity: .45, depthWrite: false })); PRECIP.rain.frustumCulled = false; scene.add(PRECIP.rain); }
+  PRECIP.rain.visible = mode === "rain" && !atHome() && !S.title;
+  if (PRECIP.rain.visible) { const a = PRECIP.rain.geometry.attributes.position.array, N = a.length / 6, cx = camera.position.x, cz = camera.position.z, cy = camera.position.y, wd = wxIs("wind") ? 3 : 1.2;
+    for (let i = 0; i < N; i++) { let x = a[i * 6], y = a[i * 6 + 1], z = a[i * 6 + 2]; y -= 24 * dt; x += wd * dt; if (y < cy - 12 || y < -1 || Math.abs(x - cx) > 25 || Math.abs(z - cz) > 25) { x = cx + (Math.random() - .5) * 48; z = cz + (Math.random() - .5) * 48; y = cy + 2 + Math.random() * 14; }
+      a[i * 6] = x; a[i * 6 + 1] = y; a[i * 6 + 2] = z; a[i * 6 + 3] = x - wd * .03; a[i * 6 + 4] = y + .75; a[i * 6 + 5] = z; }
+    PRECIP.rain.geometry.attributes.position.needsUpdate = true; return; }
+  if (!PRECIP.pts.visible) return;
+  if (PRECIP.k !== mode) { PRECIP.k = mode; const c = PRECIP.geo.attributes.color.array, pal = { rain: [[.75, .82, .92]], snow: [[1, 1, 1]], petal: [[1, .76, .86], [1, .88, .93]], leaf: [[.92, .48, .18], [.86, .66, .2], [.75, .3, .15]] }[mode];
+    for (let i = 0; i < PRECIP.n; i++) { const q = pal[i % pal.length]; c[i * 3] = q[0]; c[i * 3 + 1] = q[1]; c[i * 3 + 2] = q[2]; } PRECIP.geo.attributes.color.needsUpdate = true;
+    PRECIP.mat.size = mode === "rain" ? .09 : mode === "snow" ? .2 : .26; PRECIP.mat.opacity = mode === "rain" ? .55 : .9; }
+  const a = PRECIP.geo.attributes.position.array, cx = camera.position.x, cz = camera.position.z, cy = camera.position.y, t = performance.now() / 1000;
+  const vy = mode === "rain" ? 22 : mode === "snow" ? 1.6 : 1.2, wind = wxIs("wind") ? 4 : mode === "rain" ? 1.5 : .6, live = mode === "rain" ? PRECIP.n : mode === "snow" ? PRECIP.n * .7 : 180;
+  for (let i = 0; i < PRECIP.n; i++) {
+    if (i >= live) { a[i * 3 + 1] = -999; continue; }
+    let x = a[i * 3], y = a[i * 3 + 1], z = a[i * 3 + 2];
+    y -= vy * dt; x += (wind + (mode !== "rain" ? Math.sin(t * 1.3 + i) * .8 : 0)) * dt; z += (mode !== "rain" ? Math.cos(t + i * .7) * .5 : 0) * dt;
+    if (y < cy - 14 || y < -2 || Math.abs(x - cx) > 30 || Math.abs(z - cz) > 30) { x = cx + (Math.random() - .5) * 58; z = cz + (Math.random() - .5) * 58; y = cy + 4 + Math.random() * 14; }
+    a[i * 3] = x; a[i * 3 + 1] = y; a[i * 3 + 2] = z;
+  }
+  PRECIP.geo.attributes.position.needsUpdate = true;
+}
+function wxTick() {   // 날씨가 바뀌면 알려 주고, 비가 오면 밭에 저절로 물이 들어요
+  const w = wxNow(); if (S.title) return;
+  if (S.wxAnn !== w.k) { const first = S.wxAnn == null; S.wxAnn = w.k; if (!first) toast(w.ico + " 날씨가 「" + w.name + "」(으)로 바뀌었어요 · " + ({ rain: "물고기가 잘 물고 희귀한 물고기가 늘어요 · 밭에 저절로 물이 들어요", wind: "큰 물고기가 잘 나와요 · 연 날리기 좋은 날", snow: "희귀한 물고기가 늘어요 · 작물은 천천히 자라요", cloud: "선선한 낚시 날씨예요", sun: "화창해요!" })[w.k], null, 6000); }
+  if (w.k === "rain") { try { const F = farmData(), now = Date.now(); let n = 0; for (const p of Object.values(F.plots || {})) if (p && p.c && (p.wet || 0) < now + 15 * 60e3) { plotGrow(p, now); p.wet = now + 30 * 60e3; n++; } if (n) { markDirty(); if (typeof FARM3D !== "undefined") FARM3D.dirty = true; } } catch {} }
+}
+setInterval(() => { try { wxTick(); } catch (e) { console.warn("wx", e); } }, 15000);
+/* 🎪 계절 축제 */
+const FEST = {
+  spring: { name: "벚꽃 축제", ico: "🌸", col: "#e86a9a", mission: { kind: "catch", need: 10, text: "벚꽃 아래서 물고기 10마리 낚기" }, cloth: "t-fest-spring", title: "벚꽃 축제 단골" },
+  summer: { name: "여름밤 불꽃 축제", ico: "🎆", col: "#2a4fb8", mission: { kind: "night", need: 5, text: "밤에 물고기 5마리 낚기" }, cloth: "t-fest-summer", title: "불꽃 축제 단골" },
+  autumn: { name: "가을 수확제", ico: "🍂", col: "#d4701a", mission: { kind: "harvest", need: 8, text: "밭에서 작물 8개 수확하기 (또는 물고기 15마리)" , alt: { kind: "catch", need: 15 } }, cloth: "t-fest-autumn", title: "수확제 일꾼" },
+  winter: { name: "겨울 눈 장터", ico: "⛄", col: "#2f8fb8", mission: { kind: "catch", need: 8, text: "추운 바다에서 물고기 8마리 낚기" }, cloth: "t-fest-winter", title: "눈 장터 단골" },
+};
+const festSid = () => { const se = seasonOf(), d = new Date(Date.now() + 9 * 3600e3), y = d.getUTCFullYear() - (se === "winter" && d.getUTCMonth() < 2 ? 1 : 0); return se + y; };
+function festData() {
+  const sid = festSid(); if (!P.fest || P.fest.sid !== sid) P.fest = { sid, stamps: 0, day: "", prog: 0, alt: 0, got: [] };
+  if (P.fest.day !== kstDay()) { P.fest.day = kstDay(); P.fest.prog = 0; P.fest.alt = 0; P.fest.stamped = false; }
+  return P.fest;
+}
+function festProgress(kind, n) {
+  if (S.title) return; const F = FEST[seasonOf()], d = festData(); if (d.stamped) return;
+  if (kind === F.mission.kind) d.prog = Math.min(F.mission.need, d.prog + (n || 1));
+  else if (F.mission.alt && kind === F.mission.alt.kind) d.alt = Math.min(F.mission.alt.need, (d.alt || 0) + (n || 1));
+  else return;
+  markDirty();
+  if (d.prog >= F.mission.need || (F.mission.alt && d.alt >= F.mission.alt.need)) {
+    d.stamped = true; d.stamps = Math.min(7, d.stamps + 1); P.gold += 300; stat("fest_" + seasonOf()); sfx("jingle-rare", .45);
+    let extra = ""; if (d.stamps >= 4 && !P.closet.includes(F.cloth)) { P.closet.push(F.cloth); extra = " · 🎁 한정 옷 「" + CLOTH[F.cloth].name + "」을 받았어요!"; }
+    if (d.stamps >= 7) extra += " · 🎖 칭호 「" + F.title + "」!";
+    toast([h("b", { text: F.ico + " " + F.name + " 도장 " + d.stamps + "/7 · +" + won(300) }), h("div", { class: "muted", style: "font-size:12px", text: "오늘 축제 미션 완료" + extra })], "lvup", 7000);
+  }
+}
+SHEETS.fest = (body) => {
+  const se = seasonOf(), F = FEST[se], d = festData(), w = wxNow();
+  setHead(F.ico + " " + F.name, "계절마다 열리는 마을 축제 · 하루 한 번 미션을 하면 도장을 받아요");
+  body.append(h("div", { class: "fest-hero", style: "--fc:" + F.col }, h("span", { class: "fest-ico", text: F.ico }), h("div", { class: "grow" }, h("b", { text: F.name + " 진행 중" }),
+    h("small", { text: "이번 계절 내내 열려요 · 지금 날씨 " + w.ico + " " + w.name + " (" + fmtLong(w.until - Date.now()) + " 뒤 바뀜)" }))));
+  body.append(h("div", { class: "sec", text: "도장판 · " + d.stamps + " / 7" }), h("div", { class: "fest-stamps" }, Array.from({ length: 7 }, (_, i) => h("span", { class: i < d.stamps ? "on" : "", text: i < d.stamps ? F.ico : String(i + 1) }))));
+  const m = F.mission, pr = d.stamped ? 1 : Math.max(d.prog / m.need, m.alt ? (d.alt || 0) / m.alt.need : 0);
+  body.append(h("div", { class: "sec", text: "오늘의 축제 미션" }), h("div", { class: "rme" }, h("span", { style: "font-size:28px", text: d.stamped ? "✅" : "🎯" }), h("div", { class: "grow" }, h("b", { text: m.text }),
+    h("small", { text: d.stamped ? "오늘 도장을 받았어요 · 내일 또 와요" : "진행 " + d.prog + " / " + m.need + (m.alt ? " · 물고기 " + (d.alt || 0) + " / " + m.alt.need : "") }), h("i", { class: "av-bar" }, h("i", { style: "width:" + Math.round(pr * 100) + "%" })))));
+  body.append(h("div", { class: "sec", text: "선물" }), h("div", { class: "rlist" },
+    h("div", { class: "rankrow" }, h("span", { class: "rk", text: "1" }), h("b", { class: "grow", text: "도장마다 " + won(300) }), h("small", { class: "muted", text: "매일" })),
+    h("div", { class: "rankrow" + (d.stamps >= 4 ? " mine" : "") }, h("span", { class: "rk", text: "4" }), h("b", { class: "grow", text: "한정 옷 「" + CLOTH[F.cloth].name + "」" }), h("small", { class: "muted", text: d.stamps >= 4 ? "받음" : "도장 4개" })),
+    h("div", { class: "rankrow" + (d.stamps >= 7 ? " mine" : "") }, h("span", { class: "rk", text: "7" }), h("b", { class: "grow", text: "칭호 「" + F.title + "」" }), h("small", { class: "muted", text: d.stamps >= 7 ? "받음 (도전과제에서 달아요)" : "도장 7개" }))));
+  body.append(h("div", { class: "sec", text: "날씨와 낚시 · 농사" }), h("div", { class: "muted", style: "font-size:12.5px;line-height:1.7", text: "🌧 비: 입질 20% 빠름 · 희귀 확률 ↑ · 밭에 저절로 물이 들어요  /  🌬 바람: 큰 개체 +10%  /  ❄️ 눈(겨울): 희귀 확률 ↑ · 작물이 절반 속도로 자라요  /  날씨는 2시간마다 바뀌어요" }));
+};
+/* 축제 장식: 큰길 위 아치 + 계절 소품 */
+function buildFestDeco() {
+  const se = seasonOf(), F = FEST[se], g = new T3.Group(); scene.add(g); DETAIL_GROUPS.push(g);
+  const zA = -44, col = new T3.Color(F.col).getHex(), wood = cmat(0x8a5a32);
+  for (const sx of [-1, 1]) { cyl(.22, .26, 8.6, 10, cmat(col), sx * 5.6, 4.3, zA, g); cyl(.34, .34, .3, 10, cmat(0xfff6e0), sx * 5.6, .15, zA, g); }
+  box(12.2, .5, .5, cmat(col), 0, 8.6, zA, g);
+  { const sg = makeSign(7.2, 1.3, { shape: "board", fill: { type: "grad", c: [F.col, "#1d3a5c"] }, frame: { c: "#fff6dc" }, t: { text: F.ico + " " + F.name + " " + F.ico, font: "hyeon", color: "#fff6dc", size: .55, y: .55 } }, { cw: 1000 });
+    sg.position.set(0, 9.5, zA); g.add(sg); const b2 = sg.clone(); b2.rotation.y = Math.PI; b2.position.z = zA - .02; g.add(b2); }
+  for (let k = 0; k < 9; k++) { const x = -4.8 + k * 1.2, l = new T3.Mesh(new T3.SphereGeometry(.11, 8, 6), bulbMat(k % 2 ? 0xfff4c0 : col, 0xffd27a)); l.position.set(x, 8.2 - Math.sin(k / 8 * Math.PI) * .35, zA); g.add(l); }
+  const props = (x, z) => {
+    if (se === "autumn") { box(1.4, .8, .9, cmat(0xe0b85a), x, .4, z, g); for (let k = 0; k < 3; k++) { const pk = new T3.Mesh(new T3.SphereGeometry(.38, 12, 8), cmat(0xe8761e)); pk.scale.set(1.2, .8, 1.2); pk.position.set(x - .8 + k * .8, 1.05 - (k === 1 ? 0 : .7), z + (k === 1 ? 0 : .9)); g.add(pk); cyl(.05, .05, .2, 5, cmat(0x4a6a2a), pk.position.x, pk.position.y + .32, pk.position.z, g); } }
+    else if (se === "winter") { for (const [r, y] of [[.6, .55], [.42, 1.4], [.28, 2.0]]) { const sb = new T3.Mesh(new T3.SphereGeometry(r, 14, 10), cmat(0xffffff)); sb.position.set(x, y, z); g.add(sb); } const nz = new T3.Mesh(new T3.ConeGeometry(.06, .3, 6), cmat(0xff7a2c)); nz.rotation.x = Math.PI / 2; nz.position.set(x, 2.0, z + .32); g.add(nz); box(.6, .1, .6, cmat(0xc8342a), x, 2.25, z, g); }
+    else if (se === "spring") { cyl(.14, .2, 2.4, 8, wood, x, 1.2, z, g); for (const [dx, dy, dz, r] of [[0, 2.8, 0, 1.2], [.7, 2.5, .3, .8], [-.6, 2.6, -.4, .85]]) { const c = new T3.Mesh(new T3.IcosahedronGeometry(r, 1), cmat(0xf6b8cf)); c.position.set(x + dx, dy, z + dz); g.add(c); } }
+    else { for (let k = 0; k < 4; k++) { const ln = new T3.Mesh(new T3.CylinderGeometry(.22, .22, .45, 12), bulbMat(k % 2 ? 0xe2402a : 0xfff6e0, 0xffb060)); ln.position.set(x, 2.6, z - 1.2 + k * .8); g.add(ln); } cyl(.05, .05, 3, 6, wood, x, 1.5, z - 1.6, g); cyl(.05, .05, 3, 6, wood, x, 1.5, z + 1.6, g); box(.04, .04, 3.4, wood, x, 2.95, z, g); }
+  };
+  for (const sx of [-1, 1]) props(sx * 7.6, zA + 1.6);
+}
+SHEETS.festwx = SHEETS.fest;
 /* ===================== 🏗 마을 공동 프로젝트 (v1.136) =====================
    모두 돈을 모아 「바람언덕 전망대」를 지어요. 기부는 각자 records/tdon_<id>_<uid> (필드 d<id> = 누적 기부액)에 쓰고, 합계는 모두 더해서 봐요(동시에 기부해도 안 꼬여요).
    진행도에 따라 공사 현장이 5단계로 자라고(안내판 → 기초 → 골조 → 외벽 → 완공), 완공되면 모두에게 기념 티셔츠 + 7일간 마을 버프(경험치 +10% · 판매가 +5%) */
@@ -16587,7 +16727,7 @@ SHEETS.admintools = (body) => {
     body.append(h("div", { class: "sec", text: "⭐ 경험치 배율" }), chipSet("xp", [[1, "×1"], [2, "×2"], [5, "×5"], [10, "×10"]]));
     body.append(h("div", { class: "sec", text: "🏃 이동 속도" }), chipSet("move", [[0.5, "×0.5"], [1, "×1"], [1.5, "×1.5"], [2, "×2"], [3, "×3"]]));
     body.append(h("div", { class: "sec", text: "🕐 시간 고정 (낚시 · 배경 · 시계까지)" }), chipSet("time", [[-1, "실제 시간"], [6, "아침 6시"], [12, "낮 12시"], [18, "저녁 18시"], [23, "밤 23시"], [2, "새벽 2시"]]));
-    body.append(h("div", { class: "sec", text: "🛡 파이팅 편의" }), h("div", { class: "chips" }, tg("과열 안 쌓임", "noHeat"), tg("줄 안 끊김", "noBreak"), tg("입질 즉시", "fastBite"), h("button", { "aria-pressed": String(!!(LAB.cup && LAB.cup + CUP.len > Date.now())), onclick: () => { labSet("cup", LAB.cup && LAB.cup + CUP.len > Date.now() ? 0 : Date.now()); S.cupAnn = null; toast(LAB.cup ? "🏆 테스트 대회를 지금 열었어요 (이 기기에서만 · 2시간)" : "테스트 대회를 닫았어요"); }, text: "🏆 대회 지금 열기" }), tg("항상 퍼펙트 캐스트", "perfect"), tg("⚡ 바로 낚기 (파이팅 없이 즉시)", "instant")));
+    body.append(h("div", { class: "sec", text: "🛡 파이팅 편의" }), h("div", { class: "chips" }, tg("과열 안 쌓임", "noHeat"), tg("줄 안 끊김", "noBreak"), tg("입질 즉시", "fastBite"), ...["", "sun", "cloud", "rain", "wind", "snow"].map(k => h("button", { "aria-pressed": String((LAB.wx || "") === k), onclick: () => { labSet("wx", k); S.wxC = null; S.wxAnn = null; curPeriod = null; }, text: k ? WX[k].ico + " " + WX[k].name : "🌦 실제 날씨" })), h("button", { "aria-pressed": String(!!(LAB.cup && LAB.cup + CUP.len > Date.now())), onclick: () => { labSet("cup", LAB.cup && LAB.cup + CUP.len > Date.now() ? 0 : Date.now()); S.cupAnn = null; toast(LAB.cup ? "🏆 테스트 대회를 지금 열었어요 (이 기기에서만 · 2시간)" : "테스트 대회를 닫았어요"); }, text: "🏆 대회 지금 열기" }), tg("항상 퍼펙트 캐스트", "perfect"), tg("⚡ 바로 낚기 (파이팅 없이 즉시)", "instant")));
     const fsel = h("select", { "aria-label": "지정 물고기", style: "flex:1;min-height:38px" },
       h("option", { value: "" }, "끔 — 랜덤 (평소대로)"),
       ...allFish().slice().sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name, "ko")).map(f => h("option", { value: f.id }, TIERS[f.tier].name + " · " + f.name)));
@@ -16658,6 +16798,7 @@ SHEETS.achieve = (body) => {
     row("📜", "#c98a4a", "오늘의 의뢰", qs.length ? qDone + " / " + qs.length + " 완료 · 자정에 새로 와요" : "오늘의 부탁 3개", qs.length ? qDone / qs.length : 0, questDone(), () => openSheet("quests"), qs.length && qDone >= qs.length),
     row("🎁", "#e2522c", "출석 도장", attendDone() ? "7일 모두 찍었어요" : P.attend.n + " / 7일 · " + (attendCan() ? "오늘 도장을 찍을 수 있어요" : "오늘은 찍었어요"), P.attend.n / 7, attendCan() ? 1 : 0, () => openSheet("attend"), attendDone())));
   { const c = cupWindow(); body.append(h("div", { class: "sec", text: "마을 함께" }), h("div", { class: "av-list", id: "avTown" },
+    (() => { const F = FEST[seasonOf()], d = festData(); return row(F.ico, F.col, F.name, "도장 " + d.stamps + " / 7 · " + (d.stamped ? "오늘 미션 완료" : F.mission.text), d.stamps / 7, d.stamped ? 0 : 0, () => openSheet("fest"), d.stamps >= 7); })(),
     row("🏗", "#2f6f86", "마을 공동 프로젝트", S.townP.done ? "🎉 " + TOWNP.name + " 완공" : TOWNP.name + " · " + Math.floor(Math.min(1, S.townP.total / TOWNP.goal) * 100) + "% · 다 같이 기부해 지어요", Math.min(1, S.townP.total / TOWNP.goal), 0, () => openSheet("townproj"), !!S.townP.done),
     row("🎣", "#d4701a", "주말 낚시 대회", c ? (c.on ? "🔴 진행 중 · 목표 「" + c.fish.name + "」 · " + fmtLong(c.end - Date.now()) + " 남음" : "다음 대회 " + fmtLong(c.start - Date.now()) + " 뒤 · 토 · 일 밤 8시") : "토 · 일 밤 8시", null, 0, () => openSheet("cup")))); }
   body.append(h("div", { class: "sec", text: "모아 가기" }), h("div", { class: "av-list" },
