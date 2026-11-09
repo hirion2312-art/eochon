@@ -308,6 +308,16 @@ body[data-pfx="1"] canvas{filter:sepia(.25) saturate(1.2) brightness(1.05)}body[
 .photo-prev{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.72);display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;padding:16px}.photo-prev img{max-width:min(92vw,960px);max-height:72vh;border-radius:12px;box-shadow:0 0 0 6px #fff,0 10px 40px rgba(0,0,0,.5)}
 .ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:10px}.ph-card{margin:0;padding:6px 6px 8px;background:#fff;border-radius:6px;box-shadow:0 3px 10px rgba(0,0,0,.25);transform:rotate(-.8deg);color:#222}.ph-card:nth-child(2n){transform:rotate(.9deg)}.ph-card img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:3px;cursor:zoom-in}
 .ph-card figcaption{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;margin-top:5px}.ph-like{border:0;background:#fde7ec;color:#c8342a;border-radius:999px;padding:3px 9px;font-weight:800;cursor:pointer}.ph-like.on{background:#c8342a;color:#fff}
+.tk-wallet{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,#1d3a5c,#2a78bb);color:#fff;margin-bottom:10px}.tk-wallet b{display:block;font-size:16px}.tk-wallet small{opacity:.9;font-weight:700}.tk-ico{font-size:30px}
+.tk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.tk-card{position:relative;text-align:left;border:0;cursor:pointer;padding:10px 14px 10px;border-radius:10px;background:linear-gradient(180deg,#fff6dc,#f2e2b8);color:#3a2410;box-shadow:0 3px 0 #c9a86a,0 6px 14px rgba(0,0,0,.18);font:inherit;transition:transform .12s}
+.tk-card:not(:disabled):hover{transform:translateY(-2px) rotate(-.6deg)}.tk-card:disabled{opacity:.55;cursor:not-allowed}
+.tk-card::before,.tk-card::after{content:"";position:absolute;top:50%;width:16px;height:16px;border-radius:50%;background:var(--sheet-bg,#1f2a36);transform:translateY(-50%)}.tk-card::before{left:-8px}.tk-card::after{right:-8px}
+.tk-card.pass{background:linear-gradient(180deg,#dff3fb,#b8e2f2);box-shadow:0 3px 0 #6fb0cc,0 6px 14px rgba(0,0,0,.18);color:#123040}
+.tk-top{display:flex;justify-content:space-between;font-size:10.5px;font-weight:800;letter-spacing:.06em;opacity:.7;border-bottom:1px dashed rgba(0,0,0,.25);padding-bottom:4px}
+.tk-mid{display:flex;gap:10px;align-items:center;margin:8px 0}.tk-big{font-size:30px}.tk-mid b{display:block;font-size:16px}.tk-mid small{font-size:12px;opacity:.8}
+.tk-route{display:flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;opacity:.8}.tk-route i{flex:1;height:2px;background:repeating-linear-gradient(90deg,#2a78bb 0 4px,transparent 4px 7px)}
+.tk-bot{display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px;border-top:1px dashed rgba(0,0,0,.25);padding-top:6px}.tk-price{font-size:18px;color:#c8342a}
 .auc-card{display:flex;gap:10px;align-items:center;padding:10px;border-radius:14px;background:rgba(127,127,127,.1);margin-top:8px}.auc-card.top{box-shadow:0 0 0 2px #2fae7f}.auc-card img{width:64px;height:48px;object-fit:contain}.auc-card small{display:block;font-size:12px;opacity:.8}.auc-price{font-size:15px;color:#d4701a}
 .auc-side{display:flex;flex-direction:column;align-items:flex-end;gap:4px}.auc-left{font-weight:800;color:#e2402a}
 .fh-box{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;background:rgba(127,127,127,.12);border:2px dashed rgba(127,127,127,.35)}.fh-box.on{background:linear-gradient(135deg,#f6eccf,#e8d6a0);border:2px solid #c9973f;color:#3a2410}.fh-box b{display:block}.fh-box small{display:block;opacity:.8;font-size:12px}.fh-ico{font-size:34px}
@@ -2238,7 +2248,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.142.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.143.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -3204,6 +3214,7 @@ function normProfile(p) {
   if (o.farm && p.farm && typeof p.farm === "object") { o.farm.comp = clamp(Math.floor(Number(p.farm.comp) || 0), 0, 3); o.farm.cjobs = Array.isArray(p.farm.cjobs) ? p.farm.cjobs.filter(j => j && FERTS[j.f] && Number(j.done) > 0).slice(0, 6).map(j => ({ f: j.f, done: Number(j.done) })) : []; } o.martStamp = clamp(Math.floor(Number(p.martStamp) || 0), 0, 1e6);
   o.cupBest = p.cupBest && typeof p.cupBest === "object" ? { key: str(p.cupBest.key, 10), size: clamp(Number(p.cupBest.size) || 0, 0, 1e6) } : null;   // v1.135 주말 낚시 대회
   o.fest = p.fest && typeof p.fest === "object" ? { sid: str(p.fest.sid, 16), stamps: clamp(Math.floor(Number(p.fest.stamps) || 0), 0, 7), day: str(p.fest.day, 10), prog: clamp(Math.floor(Number(p.fest.prog) || 0), 0, 99), alt: clamp(Math.floor(Number(p.fest.alt) || 0), 0, 99), stamped: !!p.fest.stamped } : null;   // v1.137 계절 축제
+  o.tix = p.tix && typeof p.tix === "object" ? { n: clamp(Math.floor(Number(p.tix.n) || 0), 0, 99), pass: Number(p.tix.pass) || 0 } : { n: 0, pass: 0 };   // v1.143 바다열차 승차권
   o.likedPhotos = Array.isArray(p.likedPhotos) ? p.likedPhotos.filter(x => typeof x === "string").slice(-200) : [];   // v1.140 사진전 좋아요
   o.aucDone = Array.isArray(p.aucDone) ? p.aucDone.filter(x => typeof x === "string").slice(-60) : [];   // v1.140 정산한 경매
   o.farmHand = p.farmHand && typeof p.farmHand === "object" ? { until: Number(p.farmHand.until) || 0, last: Number(p.farmHand.last) || 0, replant: p.farmHand.replant !== false, byeSaid: !!p.farmHand.byeSaid, log: Array.isArray(p.farmHand.log) ? p.farmHand.log.filter(l => l && typeof l.t === "string").slice(0, 12).map(l => ({ t: str(l.t, 120), at: Number(l.at) || 0 })) : [] } : null;   // v1.139 농장 알바
@@ -5053,6 +5064,8 @@ function nearestAction() {
   if (atHome()) { homeActions(consider); return best; }
   if (atRest()) { restActions(consider); return best; }
   if (STN_READY) trainActions(consider);   // v1.122 바다열차 타기
+  if (STN.clerkAt) { consider(STN.clerkAt.x, STN.clerkAt.z - 2.3, { key: "tixoffice", label: "🎫 매표소 창구 · 승차권 사기", run: () => { ME.ry = 0; presMove(true); S.tixFrom = "office"; openSheet("ticket"); } }, 2.4);
+    consider(STN.kioskAt.x, STN.kioskAt.z, { key: "tixkiosk", label: "🎫 무인 발매기", run: () => { S.tixFrom = "kiosk"; openSheet("ticket"); } }, 1.8); }
   consider(FMKT.npc.x + 1.9, FMKT.npc.z + 3.2, { key: "auction", label: "🔨 수산시장 경매 (진행 중 " + S.auc.list.filter(a => a.aucEnd > Date.now()).length + "건)", run: () => openSheet("auction") }, 2.2);
   consider(AQUA.x, AQUA.z - AQUA.d / 2 - 1.6, { key: "aquarium", label: "🐠 어촌 수족관 · 전시 보기 · 기증하기", run: () => openSheet("aquarium") }, 4.5);
   consider(TOWNP.x - 6.5, TOWNP.z - 9.6, { key: "townproj", label: "🏗 마을 공동 프로젝트 · " + TOWNP.name, run: () => openSheet("townproj") }, 3.2);   // 내 포차 안에서는 스테이션만
@@ -12693,7 +12706,7 @@ function loop3D(ms) {
   seaMat.uniforms.sunDir.value.copy(_v2); skyMat.uniforms.sunDir.value.copy(_v2);
   for (const b of buoys) { b.position.y = waveY(b.position.x, b.position.z, t) - .1; b.rotation.z = Math.sin(t + b.position.x) * .12; }
   for (const s of SWING) s.g.rotation.x = Math.sin(t * 1.4 + s.ph) * .07;
-  updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); pochaExtTick(t); npcShopTick(t, dt); townTick(t, dt); ambTick(t, dt); updateFx(t, dt); for (const fa of FACADE_ANIM) fa(t); breachTick(t, dt); tvTick(t); fwTick(t, dt); toyTick(t, dt); farmTick(t); martLeaveCheck(); goodsTick(t); marketRoofTick(t);
+  updateLife(dt, t); homeTick(t); restTick(t, dt); restProxyTick(); pochaExtTick(t); npcShopTick(t, dt); townTick(t, dt); ambTick(t, dt); updateFx(t, dt); for (const fa of FACADE_ANIM) fa(t); breachTick(t, dt); tvTick(t); fwTick(t, dt); toyTick(t, dt); farmTick(t); martLeaveCheck(); try { stationTick(t); } catch {} goodsTick(t); marketRoofTick(t);
   SWIM_T.value = t; updateTier89Auras(dt, t); updateJumps(dt, t); updateTide3D(dt); updateDust(dt);
   updateBoat3D(t, now); trainTick(Date.now());
   if (onBoat()) { const bs = SEAT[ME.seat]; ME.x = bs.x; ME.z = bs.z; ME.ry = bs.ry; }
@@ -12750,6 +12763,12 @@ function loop3D(ms) {
   camera.position.set(cam.t.x + Math.sin(cam.yaw) * Math.cos(pitch) * cd, cam.t.y + Math.sin(pitch) * cd, cam.t.z + Math.cos(cam.yaw) * Math.cos(pitch) * cd);
   if (camera.position.y < .6) camera.position.y = .6;
   { const gh = groundY(camera.position.x, camera.position.z) + 1.4; if (camera.position.y < gh) camera.position.y = gh; }   // 언덕에 카메라가 파묻히지 않게
+  if (inStation(ME.x, ME.z) && STN.g) {   // v1.143 역사 안: 카메라를 벽 · 천장 안쪽으로
+    const tx = cam.t.x, ty = cam.t.y, tz = cam.t.z, dx = camera.position.x - tx, dy = camera.position.y - ty, dz = camera.position.z - tz; let k = 1;
+    const lim = (d, t0, lo, hi) => { if (d > 0 && t0 + d > hi) k = Math.min(k, (hi - t0) / d); if (d < 0 && t0 + d < lo) k = Math.min(k, (lo - t0) / d); };
+    lim(dx, tx, STN.x0 + .45, STN.x1 - .45); lim(dz, tz, STN.z0 + .45, STN.z1 - .45); lim(dy, ty, -9, 5.2 - .4);
+    k = Math.max(.15, k); camera.position.set(tx + dx * k, ty + dy * k, tz + dz * k);
+  }
   if (inMart(ME.x, ME.z)) {   // v1.125 마트 안: 시점은 그대로, 카메라만 벽 · 천장 안쪽으로 당겨요 (예전엔 위에서 내려다보는 시점으로 바뀌었어요)
     const tx = cam.t.x, ty = cam.t.y, tz = cam.t.z, dx = camera.position.x - tx, dy = camera.position.y - ty, dz = camera.position.z - tz; let k = 1;
     const lim = (d, t0, lo, hi) => { if (d > 0 && t0 + d > hi) k = Math.min(k, (hi - t0) / d); if (d < 0 && t0 + d < lo) k = Math.min(k, (lo - t0) / d); };
@@ -15310,6 +15329,18 @@ async function photoLike(p) {
   P.likedPhotos = P.likedPhotos.concat(p.id).slice(-200); markDirty(); p.likes = (Number(p.likes) || 0) + 1; refreshSheet();
   try { await S.db.doc("records/" + p.id).update({ likes: p.likes }); } catch {}
 }
+SHEETS.ticket = (body) => {   // v1.143 매표소 창구: 종이 승차권 카드 · 내 승차권 지갑 · 다음 열차
+  const d = tixData(), office = S.tixFrom !== "kiosk", st = TRAIN.st || trainState(Date.now());
+  setHead(office ? "🎫 어촌역 매표소" : "🎫 승차권 무인 발매기", office ? "어서 오세요! 바다열차 순환선 승차권이에요 · 한 장이면 어느 역에서 타서 어디서 내려도 돼요" : "승차권을 고르고 결제해요 · 어촌역 매표소와 같은 표예요");
+  body.append(h("div", { class: "tk-wallet" }, h("span", { class: "tk-ico", text: "👛" }), h("div", { class: "grow" }, h("b", { text: "내 승차권" }), h("small", { text: tixPass() ? "🌊 하루 자유이용권 · " + fmtLong(d.pass - Date.now()) + " 남음" : d.n ? "1회 승차권 " + d.n + "장" : "가진 승차권이 없어요" }))));
+  const card = (id, ico, sub, perk) => { const t = TIX[id]; return h("button", { class: "tk-card" + (id === "day" ? " pass" : ""), disabled: P.gold < t.price, onclick: () => tixBuy(id) },
+    h("div", { class: "tk-top" }, h("span", { text: "바다열차 · SEA TRAIN" }), h("span", { class: "tk-no num", text: "No." + (1000 + (mixHash(id + kstDay()) % 9000)) })),
+    h("div", { class: "tk-mid" }, h("span", { class: "tk-big", text: ico }), h("div", null, h("b", { text: t.name }), h("small", { text: sub }))),
+    h("div", { class: "tk-route" }, h("span", { text: "어촌" }), h("i"), h("span", { text: "모래톱" }), h("i"), h("span", { text: "해돋이" }), h("i"), h("span", { text: "별빛" })),
+    h("div", { class: "tk-bot" }, h("small", { text: perk }), h("b", { class: "tk-price num", text: won(t.price) }))); };
+  body.append(h("div", { class: "tk-grid" }, card("single", "🎫", "한 번 타기 · 어느 역까지든", "가장 기본"), card("three", "🎟", "세 번 타기 · 한 장씩 써요", "2,000원 아껴요"), card("day", "🌊", "24시간 마음껏 · 몇 번이든", "여행하는 날엔 이거!")));
+  body.append(h("div", { class: "sec", text: "🚆 다음 열차" }), h("div", { class: "rlist" }, (RAIL.stops || []).map((q, k) => { const w = Math.ceil(trainWait(st, k)), here = st.phase === "dwell" && st.at === k; return h("div", { class: "rankrow" }, h("span", { class: "rk", text: "🚉" }), h("b", { class: "grow", text: q.name }), h("span", { class: "num", style: "font-weight:800;color:" + (here ? "#2fae7f" : "#d4701a"), text: here ? "정차 중" : Math.floor(w / 60) + "분 " + (w % 60) + "초 뒤" })); })));
+};
 SHEETS.photos = (body) => {
   photosLoad(); setHead("🖼 마을 사진전", "사진 모드로 찍은 마을 풍경 · 최근 24장 · 마음에 들면 ❤");
   body.append(h("button", { class: "btn pri", onclick: () => { closeSheet(); photoMode(true); }, text: "📸 사진 모드로 찍으러 가기" }));
@@ -16136,23 +16167,8 @@ function buildStation() {
   const plaza = box(W + 8, .08, L + 10, lam(0xffffff, { map: imgTex("a/pavers.jpg", 3, 4) }), cx - 1, .04, cz); grounds.push(plaza);
   const plat = box(4.2, .7, 50, cmat(0xcfc8bc), rail - 3.4, .35, cz); grounds.push(plat);
   box(.25, .02, 50, cmat(0xf2d36b), rail - 1.45, .72, cz, det);   // 노란 안전선
-  // 역사: 크림색 벽 · 아래 붉은 벽돌 띠 · 큰 창 · 빨간 박공지붕
-  box(W, H, L, cmat(0xf2ead8), cx, H / 2, cz, det);
-  box(W + .1, .9, L + .1, cmat(0xa8483a), cx, .45, cz, det);
-  const win = bulbMat(0x9fc3d6, 0xffd89a);
-  for (const z of [z0 + 2.4, z1 - 2.4]) for (const s of [-1, 1]) { const m = box(.08, 1.6, 2.2, win, s > 0 ? x1 + .02 : x0 - .02, 2.2, z); }
-  box(.12, 2.6, 2.6, phong(0x6a8aa8), x0 - .06, 1.3, cz);   // 서쪽 유리문
-  box(.12, 2.6, 2.6, phong(0x6a8aa8), x1 + .06, 1.3, cz);   // 승강장 쪽 문
-  const roof = new T3.Mesh(new T3.CylinderGeometry(.01, W * .62, 2.6, 4, 1), cmat(0xc2402a)); roof.rotation.y = Math.PI / 4; roof.scale.set(1, 1, L / W * 1.05); roof.position.set(cx, H + 1.3, cz); det.add(roof);
-  box(W + 1.4, .22, L + 1.4, cmat(0x8a2e22), cx, H + .05, cz, det);
-  // 간판 · 시계
-  const sg = makeSign(6.4, 1.3, { shape: "board", fill: { type: "grad", c: ["#1d3a5c", "#122840"] }, frame: { c: "#f2c230" }, t: { text: "어 촌 역", font: "hyeon", color: "#fff7e6", size: .58, y: .46 }, sub: { text: "EOCHON STATION", color: "#ffe08a", size: .18, y: .84 } }, { cw: 900 });
-  sg.position.set(x0 - .1, H - .4, cz); sg.rotation.y = -Math.PI / 2; scene.add(sg);
-  const clock = canvasTex(128, 128, (g) => { g.fillStyle = "#fffdf6"; g.beginPath(); g.arc(64, 64, 60, 0, 7); g.fill(); g.strokeStyle = "#1d3a5c"; g.lineWidth = 8; g.stroke(); g.lineWidth = 4; for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; g.beginPath(); g.moveTo(64 + Math.cos(a) * 46, 64 + Math.sin(a) * 46); g.lineTo(64 + Math.cos(a) * 54, 64 + Math.sin(a) * 54); g.stroke(); } g.lineWidth = 6; g.beginPath(); g.moveTo(64, 64); g.lineTo(64, 28); g.moveTo(64, 64); g.lineTo(92, 64); g.stroke(); }, 1, 1);
-  const ck = new T3.Mesh(new T3.CircleGeometry(.7, 24), new T3.MeshBasicMaterial({ map: clock })); ck.position.set(x0 - .1, H + 1.1, cz); ck.rotation.y = -Math.PI / 2; scene.add(ck);
-  // 문 위 차양 · 화분 · 벤치 · 우체통
-  const awn = box(2.2, .1, 4.2, cmat(0x2f6f86), x0 - 1, 2.9, cz, det); awn.rotation.z = -.25;
-  for (const z of [cz - 3, cz + 3]) { propPot(x0 - 1.2, z); }
+  buildStationHall();   // v1.143 들어갈 수 있는 역사 (매표소 · 대합실 · 개찰구 · 전광판)
+  for (const z of [cz - 3.6, cz + 3.6]) { propPot(x0 - 2.6, z); }
   propBench(x0 - 3.6, cz - 5.5, -Math.PI / 2); propBench(x0 - 3.6, cz + 5.5, -Math.PI / 2);
   { plain(new T3.CylinderGeometry(.28, .28, 1.1, 12), cmat(0xd8382c), x0 - 1.2, .55, z0 - 1.2, det); plain(new T3.SphereGeometry(.28, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), cmat(0xd8382c), x0 - 1.2, 1.1, z0 - 1.2, det); }
   // 승강장 지붕 (파란 차양) · 기둥 · 역 이름판
@@ -16160,11 +16176,125 @@ function buildStation() {
   const pr = box(3.6, .14, 30, cmat(0x2a78bb), rail - 3.6, 3.95, cz, det); pr.rotation.z = .12;
   { const ns = makeSign(2.6, .7, { shape: "board", fill: { type: "grad", c: ["#ffffff", "#eef3f6"] }, frame: { c: "#1d3a5c" }, t: { text: "어촌", font: "hyeon", color: "#1d3a5c", size: .5, y: .5 } }, { cw: 500 });
     ns.position.set(rail - 4.6, 2.5, cz + 9); ns.rotation.y = Math.PI / 2; scene.add(ns); const ns2 = ns.clone(); ns2.rotation.y = -Math.PI / 2; ns2.position.x = rail - 4.62; scene.add(ns2); }
-  BLOCKS.push([x0 - .3, x1 + .3, z0 - .3, z1 + .3], [rail - 1.3, rail + 3, 20, 83], [rail - 1.3, rail + 3, 87, 92]);   // v1.142 승강장 북쪽 z 83~87은 건널목 (바람언덕 공원 지름길)   // v1.122 승강장은 걸어 다니고 선로만 막아요 (선로 · 기차는 buildRail)
+  BLOCKS.push([rail - 1.3, rail + 3, 20, 83], [rail - 1.3, rail + 3, 87, 92]);   // v1.142 승강장 북쪽 z 83~87은 건널목 (바람언덕 공원 지름길)   // v1.122 승강장은 걸어 다니고 선로만 막아요 (선로 · 기차는 buildRail)
   fingerPost(24.6, 49.2, [["🚆 바다열차 타는 곳 (순환선)", "#2a78bb", 45, 53], ["🏘 상점가 거리", "#7a5a2a", 4, 30], ["🌳 상점가 뒤뜰 산책길", "#4a6a3a", 21, 0]], det);
   // 윗마을 공원 → 역 돌길
   const path = box(6.4, .05, 3.4, lam(0xffffff, { map: imgTex("a/slabs.jpg", 2, 1) }), 24.4, .03, cz); grounds.push(path);
   const pl = new T3.PointLight(0xffd8a0, 0, 24, 1.6); pl.position.set(x0 - 2, 4, cz); scene.add(pl); glow.push({ light: pl, val: 1.2 });
+}
+/* ===================== 🚉 어촌역 역사 (v1.143) =====================
+   들어갈 수 있는 역사: 서쪽 현관(기둥 포치 · 시계탑) → 대합실(타일 바닥 · 벤치 · 펜던트 등) → 북쪽 매표소(역무원 · 창구 3) · 남쪽 전광판 · 노선도 · 발매기 → 동쪽 개찰구 → 승강장.
+   안에 들어가면 지붕 · 시계탑을 숨기고, 카메라를 벽 안쪽으로 당겨요(마트와 같은 방식) */
+const inStation = (x, z) => x > STN.x0 && x < STN.x1 && z > STN.z0 && z < STN.z1;
+const TIX = { single: { n: 1, price: 50, name: "1회 승차권" }, three: { n: 3, price: 130, name: "3회 승차권" }, day: { pass: 864e5, price: 300, name: "하루 자유이용권" } };
+const tixData = () => { if (!P.tix || typeof P.tix !== "object") P.tix = { n: 0, pass: 0 }; return P.tix; };
+const tixPass = () => tixData().pass > Date.now();
+function tixBuy(id) {
+  const t = TIX[id]; if (!t) return; if (P.gold < t.price) { toast("돈이 모자라요 · " + won(t.price)); return; }
+  const d = tixData(); P.gold -= t.price; if (t.pass) d.pass = Math.max(Date.now(), d.pass) + t.pass; else d.n = Math.min(99, d.n + t.n);
+  stat("tixBought"); markDirty(); sfx("coins", .45); toast("🎫 「" + t.name + "」을 샀어요 · " + (t.pass ? "24시간 동안 마음껏 타요" : "남은 승차권 " + d.n + "장")); refreshSheet(true);
+}
+function buildStationHall() {
+  const { x0, x1, z0, z1 } = STN, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, W = x1 - x0, L = z1 - z0, H = 5.2, D = 2.8;
+  const g = new T3.Group(); scene.add(g); STILL_ROOTS.push(g); STN.g = g;
+  const roofG = new T3.Group(); scene.add(roofG); STN.roofG = roofG;
+  const tx = (k, rx, ry) => { const t = wallTex(k).clone(); t.needsUpdate = true; t.repeat.set(rx, ry); return t; };
+  const brick = phong(0xffffff, { map: tx("brick", 3, .6) }), plaster = phong(0xf4ecdc, { map: tx("plaster", 2, 1.4) }), inner = phong(0xfbf5e8, { map: tx("plaster", 2, 1.4) });
+  const trim = cmat(0xfff6e0), navy = cmat(0x1d3a5c), red = cmat(0xb8432e), wood = cmat(0x9a6a3c), woodD = cmat(0x6a4a2a), iron = cmat(0x2a2d33), gold = cmat(0xf2c230);
+  const B = (a, b, c, d) => BLOCKS.push([a, b, c, d]);
+  // 바닥: 체크 타일 (안쪽)
+  { const ft = canvasTex(256, 256, (c) => { for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) { c.fillStyle = (i + j) % 2 ? "#e9e1cf" : "#cfc3a8"; c.fillRect(i * 32, j * 32, 32, 32); } c.strokeStyle = "rgba(0,0,0,.08)"; for (let i = 0; i <= 8; i++) { c.beginPath(); c.moveTo(i * 32, 0); c.lineTo(i * 32, 256); c.stroke(); c.beginPath(); c.moveTo(0, i * 32); c.lineTo(256, i * 32); c.stroke(); } }, 3, 3.5);
+    box(W - .2, .06, L - .2, lam(0xffffff, { map: ft }), cx, .09, cz, g); }
+  // 벽 한 면 (문 틈 · 바깥 벽돌 아랫단 + 회반죽 · 안쪽 밝은 회반죽)
+  const wallSeg = (ax, az, bx, bz) => { const len = Math.hypot(bx - ax, bz - az), mx = (ax + bx) / 2, mz = (az + bz) / 2, ry = Math.atan2(bx - ax, bz - az);
+    box(.34, H, len, plaster, mx, H / 2, mz, g).rotation.y = ry; const lo = box(.42, 1.2, len, brick, mx, .6, mz, g); lo.rotation.y = ry; const cn = box(.5, .22, len + .1, trim, mx, H - .05, mz, g); cn.rotation.y = ry;
+    B(Math.min(ax, bx) - .25, Math.max(ax, bx) + .25, Math.min(az, bz) - .25, Math.max(az, bz) + .25); };
+  wallSeg(x0, z0, x0, cz - D / 2); wallSeg(x0, cz + D / 2, x0, z1);   // 서쪽 (현관)
+  wallSeg(x1, z0, x1, cz - D / 2); wallSeg(x1, cz + D / 2, x1, z1);   // 동쪽 (승강장 문)
+  wallSeg(x0, z0, x1, z0); wallSeg(x0, z1, x1, z1);                   // 남 · 북
+  for (const x of [x0, x1]) { box(.5, H - 3.1, D, plaster, x, 3.1 + (H - 3.1) / 2, cz, g); box(.56, .2, D + .3, trim, x, 3.1, cz, g); }   // 문 위 벽
+  // 아치 창 (바깥 · 남북 3개씩) + 창틀
+  for (const zz of [z0, z1]) for (const k of [-1, 0, 1]) { const wx = cx + k * 3.6, sd = zz === z0 ? -1 : 1;
+    const gl = new T3.Mesh(new T3.PlaneGeometry(1.6, 2.2), glassMat()); gl.position.set(wx, 2.6, zz + sd * .2); gl.rotation.y = sd > 0 ? 0 : Math.PI; g.add(gl);
+    const ar = new T3.Mesh(new T3.CircleGeometry(.8, 16, 0, Math.PI), glassMat()); ar.position.set(wx, 3.7, zz + sd * .2); ar.rotation.y = gl.rotation.y; g.add(ar);
+    const fr = new T3.Mesh(new T3.TorusGeometry(.82, .07, 6, 16, Math.PI), trim); fr.position.set(wx, 3.7, zz + sd * .21); fr.rotation.y = gl.rotation.y; g.add(fr);
+    box(1.8, .12, .3, trim, wx, 1.45, zz + sd * .22, g); }
+  // 서쪽 현관 포치: 기둥 2 · 박공 · 계단 · 유리문 틀
+  for (const sz of [-1, 1]) { cyl(.24, .28, 4.2, 14, trim, x0 - 2.2, 2.1, cz + sz * 2.2, g); box(.6, .2, .6, trim, x0 - 2.2, .1, cz + sz * 2.2, g); box(.66, .24, .66, trim, x0 - 2.2, 4.2, cz + sz * 2.2, g); }
+  box(2.9, .3, 5.4, trim, x0 - 1.15, 4.42, cz, g);
+  { const sh = new T3.Shape(); sh.moveTo(-2.9, 0); sh.lineTo(2.9, 0); sh.lineTo(0, 1.25); sh.lineTo(-2.9, 0);   // 현관 박공 (삼각 지붕판)
+    const pg = new T3.ExtrudeGeometry(sh, { depth: 2.8, bevelEnabled: false }); const pd = new T3.Mesh(pg, red); pd.rotation.y = Math.PI / 2; pd.position.set(x0 - .05, 4.57, cz); roofG.add(pd);
+    const tsh = new T3.Shape(); tsh.moveTo(-2.4, .12); tsh.lineTo(2.4, .12); tsh.lineTo(0, 1.0); tsh.lineTo(-2.4, .12); const tm = new T3.Mesh(new T3.ShapeGeometry(tsh), trim); tm.rotation.y = -Math.PI / 2; tm.position.set(x0 - 2.87, 4.57, cz); roofG.add(tm); }
+  box(3.2, .14, 5.8, cmat(0xd2cbbf), x0 - 1.3, .07, cz, g);
+  for (const sz of [-1, 1]) box(.12, 2.8, .14, gold, x0 - .2, 1.4, cz + sz * 1.4, g);
+  box(.14, .14, 2.94, gold, x0 - .2, 2.8, cz, g);
+  // 큰 간판 (현관 위) · 승강장 쪽 작은 간판
+  const sg = makeSign(6.4, 1.3, { shape: "board", fill: { type: "grad", c: ["#1d3a5c", "#122840"] }, frame: { c: "#f2c230" }, t: { text: "어 촌 역", font: "hyeon", color: "#fff7e6", size: .58, y: .46 }, sub: { text: "EOCHON STATION", color: "#ffe08a", size: .18, y: .84 } }, { cw: 900 });
+  sg.position.set(x0 - .3, H - .2, cz); sg.rotation.y = -Math.PI / 2; g.add(sg);
+  { const s2 = makeSign(3.6, .8, { shape: "board", fill: { type: "grad", c: ["#2a78bb", "#1d3a5c"] }, frame: { c: "#fff6dc" }, t: { text: "🚆 타는 곳 · 순환선", font: "hyeon", color: "#fff", size: .36, y: .55 } }, { cw: 700 }); s2.position.set(x1 + .3, 3.6, cz); s2.rotation.y = Math.PI / 2; g.add(s2); }
+  { const aw = box(1.8, .1, 3.6, cmat(0x2f6f86), x1 + .9, 3.2, cz, g); aw.rotation.z = .2; }
+  // 지붕 (밖에서만) · 시계탑
+  { const roof = new T3.Mesh(new T3.CylinderGeometry(.01, W * .66, 2.4, 4, 1), cmat(0xa83a26)); roof.rotation.y = Math.PI / 4; roof.scale.set(1, 1, L / W * 1.05); roof.position.set(cx, H + 1.2, cz); roofG.add(roof);
+    box(W + 1.2, .24, L + 1.2, cmat(0x7a2a1e), cx, H + .05, cz, roofG);
+    const tw = new T3.Group(); tw.position.set(x0 + 2, H, cz); roofG.add(tw);
+    box(2.4, 3.2, 2.4, plaster, 0, 1.6, 0, tw); box(2.6, .25, 2.6, trim, 0, 3.25, 0, tw); box(2.5, .6, 2.5, brick, 0, .3, 0, tw);
+    const tp = new T3.Mesh(new T3.ConeGeometry(1.95, 2.2, 4), cmat(0xa83a26)); tp.rotation.y = Math.PI / 4; tp.position.y = 4.5; tw.add(tp);
+    cyl(.04, .04, 1.4, 6, iron, 0, 6.2, 0, tw); box(.8, .45, .02, cmat(0x2a78bb), .4, 6.6, 0, tw);
+    const ctex = canvasTex(256, 256, (c) => { c.fillStyle = "#fffdf6"; c.beginPath(); c.arc(128, 128, 120, 0, 7); c.fill(); c.strokeStyle = "#1d3a5c"; c.lineWidth = 14; c.stroke(); c.lineWidth = 6; for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; c.beginPath(); c.moveTo(128 + Math.cos(a) * 92, 128 + Math.sin(a) * 92); c.lineTo(128 + Math.cos(a) * 108, 128 + Math.sin(a) * 108); c.stroke(); } }, 1, 1);
+    STN.clocks = [];
+    for (const [px, pz, ry] of [[-1.21, 0, -Math.PI / 2], [1.21, 0, Math.PI / 2], [0, -1.21, Math.PI], [0, 1.21, 0]]) { const cg = new T3.Group(); cg.position.set(px, 1.9, pz); cg.rotation.y = ry; tw.add(cg);
+      const face = new T3.Mesh(new T3.CircleGeometry(.85, 32), new T3.MeshBasicMaterial({ map: ctex })); cg.add(face); const rim = new T3.Mesh(new T3.TorusGeometry(.87, .06, 6, 32), gold); cg.add(rim);
+      const hh = new T3.Mesh(new T3.BoxGeometry(.07, .45, .02), new T3.MeshBasicMaterial({ color: 0x1d3a5c })); hh.geometry.translate(0, .2, .02); cg.add(hh); const mh = new T3.Mesh(new T3.BoxGeometry(.05, .65, .02), new T3.MeshBasicMaterial({ color: 0x1d3a5c })); mh.geometry.translate(0, .3, .03); cg.add(mh); STN.clocks.push([hh, mh]); } }
+  // ── 안: 매표소 (북쪽 벽) ──
+  const tz = z1 - 1.3;
+  box(8.4, 1.1, .7, wood, cx, .55, tz, g); box(8.6, .08, .9, cmat(0xd8b07a), cx, 1.12, tz, g);   // 카운터
+  for (let k = 0; k <= 3; k++) box(.1, 1.7, .1, woodD, cx - 4.2 + k * 2.8, 2.0, tz, g);   // 칸막이 기둥
+  for (let k = 0; k < 3; k++) { const gp = new T3.Mesh(new T3.PlaneGeometry(2.6, 1.6), new T3.MeshPhongMaterial({ color: 0xdff4ff, transparent: true, opacity: .22, depthWrite: false })); gp.position.set(cx - 2.8 + k * 2.8, 2.0, tz - .02); g.add(gp);
+    box(.6, .25, .05, cmat(0x2a78bb), cx - 2.8 + k * 2.8, 2.9, tz - .05, g);
+    const lbl = new T3.Mesh(new T3.PlaneGeometry(.55, .22), new T3.MeshBasicMaterial({ map: txtTex(220, 88, "#2a78bb", [["창구 " + (3 - k), 52, "#fff", .55]]) })); lbl.position.set(cx - 2.8 + k * 2.8, 2.9, tz - .08); lbl.rotation.y = Math.PI; g.add(lbl); }
+  box(8.6, .5, .9, navy, cx, 3.15, tz, g);
+  { const sgn = new T3.Mesh(new T3.PlaneGeometry(4.2, .44), new T3.MeshBasicMaterial({ map: txtTex(840, 88, "#1d3a5c", [["🎫 매표소 · TICKETS", 54, "#ffe08a", .58]]) })); sgn.position.set(cx, 3.15, tz - .47); sgn.rotation.y = Math.PI; g.add(sgn); }
+  box(8.4, 2.8, .1, cmat(0xc9b28a), cx, 1.6, z1 - .4, g);   // 매표소 뒤 벽판
+  box(8.2, .5, .9, woodD, cx, .25, tz + .65, g);   // 역무원 발판 (카운터 너머로 얼굴이 보이게)
+  B(cx - 4.4, cx + 4.4, tz - .4, z1);
+  STN.clerkAt = { x: cx, z: tz + .55 };
+  // 남쪽 벽: 출발 안내 전광판 · 노선도 · 발매기 · 시계
+  STN.board = { cv: document.createElement("canvas") }; STN.board.cv.width = 1024; STN.board.cv.height = 320; STN.board.tex = new T3.CanvasTexture(STN.board.cv);
+  { const bd = new T3.Mesh(new T3.PlaneGeometry(5.2, 1.62), new T3.MeshBasicMaterial({ map: STN.board.tex })); bd.position.set(cx + 1.4, 3.4, z0 + .3); g.add(bd); box(5.4, 1.8, .12, iron, cx + 1.4, 3.4, z0 + .2, g); }
+  { const mp = canvasTex(512, 384, (c) => { c.fillStyle = "#fffdf6"; c.fillRect(0, 0, 512, 384); c.fillStyle = "#1d3a5c"; c.font = "700 30px sans-serif"; c.fillText("바다열차 순환선 노선도", 24, 46);
+      c.strokeStyle = "#2a78bb"; c.lineWidth = 14; c.beginPath(); c.ellipse(256, 220, 190, 120, 0, 0, 7); c.stroke();
+      [["어촌역", 66, 220], ["모래톱역", 256, 340], ["해돋이역", 446, 220], ["별빛역", 256, 100]].forEach(([n, x, y]) => { c.fillStyle = "#fff"; c.strokeStyle = "#1d3a5c"; c.lineWidth = 6; c.beginPath(); c.arc(x, y, 16, 0, 7); c.fill(); c.stroke(); c.fillStyle = "#1d3a5c"; c.font = "700 24px sans-serif"; c.textAlign = "center"; c.fillText(n, x, y + (y > 300 ? -24 : y < 120 ? 42 : 44)); });
+      c.fillStyle = "#e2402a"; c.beginPath(); c.moveTo(150, 330); c.lineTo(176, 318); c.lineTo(176, 342); c.fill(); c.font = "600 18px sans-serif"; c.textAlign = "left"; c.fillStyle = "#555"; c.fillText("→ 한 방향으로 돌아요 · 역마다 20초", 24, 372); }, 1, 1);
+    const pm = new T3.Mesh(new T3.PlaneGeometry(2.4, 1.8), new T3.MeshBasicMaterial({ map: mp })); pm.position.set(x0 + 1.9, 2.4, z0 + .27); g.add(pm); box(2.6, 2, .08, woodD, x0 + 1.9, 2.4, z0 + .2, g); }
+  // 무인 발매기 2대
+  for (const k of [0, 1]) { const mx = x1 - 1.2 - k * 1.1; box(.9, 1.7, .6, cmat(0x2f6f86), mx, .85, z0 + .6, g); const sc = new T3.Mesh(new T3.PlaneGeometry(.6, .45), bulbMat(0x9fe0ff, 0xbff0ff)); sc.position.set(mx, 1.25, z0 + .91); g.add(sc); box(.5, .08, .1, gold, mx, .7, z0 + .9, g); }
+  B(x1 - 2.8, x1 - .2, z0, z0 + 1);
+  STN.kioskAt = { x: x1 - 1.7, z: z0 + 1.8 };
+  // 대합실 벤치 (등 맞댄 2줄)
+  for (const zz of [cz - 1.6, cz + 1.4]) for (const [xx, ry] of [[cx - 1.4, Math.PI], [cx - 1.4, 0]]) { const bg = new T3.Group(); bg.position.set(xx, 0, zz + (ry ? -.35 : .35)); bg.rotation.y = ry; g.add(bg); box(3.2, .1, .55, wood, 0, .5, 0, bg); box(3.2, .55, .08, wood, 0, .85, -.26, bg); for (const ex of [-1.4, 1.4]) box(.08, .5, .5, iron, ex, .25, 0, bg); }
+  for (const zz of [cz - 1.6, cz + 1.4]) B(cx - 3.1, cx + .3, zz - .75, zz + .75);
+  // 개찰구 (동쪽 문 앞) · 화살표 불빛
+  for (let k = 0; k < 4; k++) { const gz = cz - 2.1 + k * 1.4, gx = x1 - 1.6; box(1.2, 1.0, .22, cmat(0xdfe4ea), gx, .5, gz, g); box(1.22, .06, .24, iron, gx, 1.02, gz, g); const lt = new T3.Mesh(new T3.PlaneGeometry(.2, .14), bulbMat(0x4cff7a, 0x4cff7a)); lt.position.set(gx - .62, .9, gz); lt.rotation.y = -Math.PI / 2; g.add(lt); B(gx - .6, gx + .6, gz - .14, gz + .14); }
+  // 펜던트 등 · 화분 · 시계 · 휴지통
+  for (const [px, pz] of [[cx - 3, cz - 3], [cx + 1, cz - 3], [cx - 3, cz + 3], [cx + 1, cz + 3]]) { cyl(.015, .015, 1.4, 4, iron, px, H - .7, pz, g); const sh = new T3.Mesh(new T3.ConeGeometry(.42, .4, 16, 1, true), cmat(0x2f6f86)); sh.position.set(px, H - 1.55, pz); g.add(sh); const bl = new T3.Mesh(new T3.SphereGeometry(.16, 10, 8), bulbMat(0xfff4d8, 0xffd27a)); bl.position.set(px, H - 1.72, pz); g.add(bl); }
+  for (const [px, pz] of [[x0 + .9, z0 + .9], [x0 + .9, z1 - 2.4], [x1 - .9, z1 - 2.4]]) propPot(px, pz, g, true);
+  { const wc = new T3.Mesh(new T3.CircleGeometry(.45, 24), new T3.MeshBasicMaterial({ map: txtTex(128, 128, "#fffdf6", [["🕘", 90, "#1d3a5c", .55]]) })); wc.position.set(x0 + .22, 3.4, cz - 2.6); wc.rotation.y = Math.PI / 2; g.add(wc); }
+  cyl(.25, .22, .8, 12, cmat(0x5a7a5a), x1 - .7, .4, cz + 3.2, g);
+  STN.light = new T3.PointLight(0xffe2b0, 0, 18, 1.4); STN.light.position.set(cx, H - 1.2, cz); scene.add(STN.light);
+  // 역무원 (모자 · 남색 조끼)
+  STN.clerk = null;
+}
+function stationTick(t) {   // 안에 들어가면 지붕 숨김 · 불빛 · 시계바늘 · 전광판 · 역무원
+  if (!STN.g) return; const inside = inStation(ME.x, ME.z) && !atHome(), near = Math.hypot(ME.x - (STN.x0 + STN.x1) / 2, ME.z - (STN.z0 + STN.z1) / 2) < 45;
+  if (STN.roofG) STN.roofG.visible = !inside;
+  if (STN.light) { const want = inside ? 1.1 : isNight() ? 1.3 : 0; STN.light.intensity += (want - STN.light.intensity) * .08; }
+  if (STN.clocks && near) { const hh = gameHour(), m = (hh % 1) * 60; for (const [h0, m0] of STN.clocks) { h0.rotation.z = -(hh % 12) / 12 * Math.PI * 2; m0.rotation.z = -m / 60 * Math.PI * 2; } }
+  if (near && !STN.clerk && GEO.body) { try { const B = makeBody(); applyOutfit(B, normWear({ hat: "h-cap", top: "t-vest" }), "#1d3a5c"); B.faceMat.map = faceTexture("npc"); B.faceMat.needsUpdate = true; B.g.position.set(STN.clerkAt.x, .55, STN.clerkAt.z); B.g.rotation.y = Math.PI; scene.add(B.g); STN.clerk = B; } catch (e) { STN.clerk = true; } }
+  if (near && STN.board && RAIL.stops && (!STN.board.at || performance.now() - STN.board.at > 1000)) { STN.board.at = performance.now(); const c = STN.board.cv.getContext("2d"), st = TRAIN.st || trainState(Date.now());
+    c.fillStyle = "#0d1a26"; c.fillRect(0, 0, 1024, 320); c.fillStyle = "#ffb84d"; c.font = "700 40px monospace"; c.fillText("🚆 바다열차 순환선 · 출발 안내", 30, 56); c.fillStyle = "#7fd0ff"; c.font = "600 28px monospace"; c.fillText("현재 " + clockText(), 760, 56);
+    RAIL.stops.forEach((q, k) => { const w = Math.ceil(trainWait(st, k)), y = 116 + k * 50, here = st.phase === "dwell" && st.at === k; c.fillStyle = k % 2 ? "#13263a" : "#0f2131"; c.fillRect(20, y - 36, 984, 46);
+      c.fillStyle = "#ffffff"; c.font = "700 32px monospace"; c.fillText(q.name, 40, y); c.fillStyle = here ? "#4cff7a" : "#ffd84d"; c.fillText(here ? "정차 중 · " + Math.ceil(st.left) + "초 뒤 출발" : Math.floor(w / 60) + "분 " + (w % 60) + "초 뒤 도착", 440, y); });
+    STN.board.tex.needsUpdate = true; }
 }
 /* ===================== 바다열차 (v1.122) =====================
    어촌역(서쪽 마을) ↔ 해돋이역(섬 반대편 동쪽 바닷가)을 선로 위로 진짜 달려요 (순간이동 아님).
@@ -16395,12 +16525,14 @@ function trainActions(consider) {
     const pp = stopPlat(k, ME.x, ME.z); if (!pp) continue; const [px, pz] = pp;
     if (Math.abs(ME.x - px) > 3 || Math.abs(ME.z - pz) > 3) continue;
     const here = st.phase === "dwell" && st.at === k, nx = stopName((k + 1) % RAIL.stops.length), sec = Math.ceil(trainWait(st, k));
-    const label = here ? "🚆 바다열차 타기 · 순환선 (다음 " + nx + " · " + Math.ceil(st.left) + "초 뒤 출발)" : "🚆 바다열차 순환선 · " + sec + "초 뒤 도착";
-    consider(px, pz, { key: "train:" + k + ":" + label, label, run: () => here ? trainBoard(k) : toast("🚆 기차가 " + sec + "초 뒤에 들어와요 · 승강장에서 기다려 주세요") }, 2.8);
+    const has = tixPass() || tixData().n > 0, tk = tixPass() ? " · 🎫 자유이용권" : has ? " · 🎫 " + tixData().n + "장" : " · 🎫 표 없음";
+    const label = !has ? "🎫 무인 발매기 · 승차권 사기 (기차 " + (here ? "정차 중" : sec + "초 뒤") + ")" : here ? "🚆 바다열차 타기 · 순환선 (다음 " + nx + " · " + Math.ceil(st.left) + "초 뒤 출발)" + tk : "🚆 바다열차 순환선 · " + sec + "초 뒤 도착" + tk;
+    consider(px, pz, { key: "train:" + k + ":" + label, label, run: () => !has ? (S.tixFrom = "kiosk", openSheet("ticket")) : here ? trainBoard(k) : toast("🚆 기차가 " + sec + "초 뒤에 들어와요 · 승강장에서 기다려 주세요") }, 2.8);
   }
 }
 function trainBoard(k) {
   const st = trainState(Date.now());
+  if (!tixPass() && tixData().n <= 0) { toast([h("b", { text: "🎫 승차권이 없어요" }), h("div", { class: "muted", style: "font-size:12px", text: "어촌역 매표소나 승강장 무인 발매기에서 사요 (1회 5,000원)" }), h("button", { class: "btn sm", style: "margin-top:6px", onclick: () => { S.tixFrom = "kiosk"; openSheet("ticket"); }, text: "🎫 발매기 열기" })], null, 6000); return; }
   if (st.phase !== "dwell" || st.at !== k) { toast("기차가 아직 안 들어왔어요"); return; }
   if (st.left < 1.5) { toast("문이 닫히고 있어요 · 다음 기차를 타요"); return; }
   const taken = new Set(otherPeers().map(q => q.ride).filter(v => v != null));
@@ -16408,6 +16540,7 @@ function trainBoard(k) {
   for (let i = 0; i < 16; i++) { if (taken.has(i)) continue; const q = trainSeat(i), d = Math.hypot(q.x - ME.x, q.z - ME.z); if (d < bd) { bd = d; best = i; } }
   if (best < 0) { toast("자리가 꽉 찼어요 · 다음 기차를 타요"); return; }
   leaveSpot(true); ME.target = null; ME.onArrive = null; ME.moving = false;
+  if (!tixPass()) { tixData().n--; markDirty(); }   // v1.143 승차권 1장 사용 (자유이용권이면 그대로)
   S.ride = { seat: best, from: k, dest: (k + 1) % RAIL.stops.length, moved: false, annAt: -1 }; ME.st = "sit";
   const q = trainSeat(best); ME.x = q.x; ME.z = q.z; ME.ry = q.ry; cam.yawGoal = q.ry + Math.PI;
   pushPresence({ ride: best }); presMove(true); sfx("ui-confirmation", .4);
