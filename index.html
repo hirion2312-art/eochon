@@ -299,6 +299,8 @@ body.mung .hud, body.mung .hint, body.mung .actbtn, body.mung .pop, body.mung .b
 @keyframes fsave{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}22%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1;transform:translate(-50%,-58%) scale(1)}100%{opacity:0;transform:translate(-50%,-75%) scale(.92)}}
 @keyframes fsaveShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-4deg)}75%{transform:translateX(4px) rotate(4deg)}}
 @keyframes fsaveSpark{0%{opacity:1;transform:rotate(var(--a)) translateX(10px)}100%{opacity:0;transform:rotate(var(--a)) translateX(90px)}}
+.aq-hero{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:linear-gradient(135deg,#dff3fb,#b8e2f2);border:2px solid #2f8fb8;color:#123040}.aq-hero b{font-size:18px;display:block}.aq-hero small{display:block;font-weight:700;color:#2f6f86;margin:2px 0 6px}.aq-ico{font-size:44px}
+.aq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}.aq-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border-radius:14px;background:linear-gradient(180deg,#e6f6fd,#c6e7f5);color:#123040;text-align:center}.aq-card img{width:84px;height:60px;object-fit:contain}.aq-card b{font-size:13px}.aq-card small{font-size:11px;opacity:.8}.aq-card.t5,.aq-card.t6,.aq-card.t7,.aq-card.t8,.aq-card.t9{box-shadow:0 0 0 2px #f2c230}
 .cwx{margin-left:6px;font-size:15px;cursor:pointer}
 .fest-hero{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--fc) 18%,#fff),color-mix(in srgb,var(--fc) 34%,#fff));border:2px solid var(--fc);color:#2a1a10}.fest-hero b{font-size:18px;display:block}.fest-hero small{font-weight:700;opacity:.8}.fest-ico{font-size:44px}
 .fest-stamps{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.fest-stamps span{aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;border:2px dashed rgba(127,127,127,.4);color:var(--muted)}.fest-stamps span.on{border:2px solid #c8342a;background:#fff3e6;font-size:22px;transform:rotate(-8deg)}
@@ -2223,7 +2225,7 @@ button.fm-crop{cursor:pointer}button.fm-crop:not(:disabled):hover{border-color:#
 (() => {
 "use strict";
 /* ===================== 데이터 정의 ===================== */
-const GAME_VER = "1.137.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
+const GAME_VER = "1.138.0";   // 업데이트마다 올리고 CHANGELOG.md에 기록
 const TIERS = [   // v1.69: 10등급 (일반·고급·희귀·정예·영웅·전설·환상·신화·초월·태초) · base = ×1배 개체 기준가(U)
   { name: "일반", base: 25 }, { name: "고급", base: 75 }, { name: "희귀", base: 300 }, { name: "정예", base: 700 }, { name: "영웅", base: 1400 },
   { name: "전설", base: 6000 }, { name: "환상", base: 12000 }, { name: "신화", base: 22000 }, { name: "초월", base: 45000 }, { name: "태초", base: 90000 },
@@ -3189,6 +3191,7 @@ function normProfile(p) {
   if (o.farm && p.farm && typeof p.farm === "object") { o.farm.comp = clamp(Math.floor(Number(p.farm.comp) || 0), 0, 3); o.farm.cjobs = Array.isArray(p.farm.cjobs) ? p.farm.cjobs.filter(j => j && FERTS[j.f] && Number(j.done) > 0).slice(0, 6).map(j => ({ f: j.f, done: Number(j.done) })) : []; } o.martStamp = clamp(Math.floor(Number(p.martStamp) || 0), 0, 1e6);
   o.cupBest = p.cupBest && typeof p.cupBest === "object" ? { key: str(p.cupBest.key, 10), size: clamp(Number(p.cupBest.size) || 0, 0, 1e6) } : null;   // v1.135 주말 낚시 대회
   o.fest = p.fest && typeof p.fest === "object" ? { sid: str(p.fest.sid, 16), stamps: clamp(Math.floor(Number(p.fest.stamps) || 0), 0, 7), day: str(p.fest.day, 10), prog: clamp(Math.floor(Number(p.fest.prog) || 0), 0, 99), alt: clamp(Math.floor(Number(p.fest.alt) || 0), 0, 99), stamped: !!p.fest.stamped } : null;   // v1.137 계절 축제
+  o.aquaLocal = Array.isArray(p.aquaLocal) ? p.aquaLocal.filter(r => r && typeof r.fishId === "string").slice(0, 260) : [];   // v1.138 혼자 모드 수족관
   o.townDon = clamp(Math.floor(Number(p.townDon) || 0), 0, 1e9);   // v1.136 마을 공동 프로젝트 누적 기부
   o.cupDone = Array.isArray(p.cupDone) ? p.cupDone.filter(x => typeof x === "string").slice(-8) : [];
   o.localDay = p.localDay && typeof p.localDay === "object" ? { d: str(p.localDay.d, 10), n: clamp(Math.floor(Number(p.localDay.n) || 0), 0, 1e5), v: clamp(Math.floor(Number(p.localDay.v) || 0), 0, 1e7) } : null;   // v1.122: 새로고침해도 납품 한도 유지
@@ -3359,7 +3362,9 @@ const stat = (k, n) => { P.stats[k] = (P.stats[k] || 0) + (n == null ? 1 : n); }
 const dexCount = () => Object.keys(P.dex).filter(id => findFish(id) && !isShell(id)).length;
 const ACH_ICON = { "캐스팅": "🎣", "낚시": "🐟", "파이팅": "💪", "도감": "📖", "함께": "🤝", "갯벌": "🐚", "회 · 시장": "🍣", "성장": "⭐", "은행 · 복권": "💰", "초대 · 출석": "🎁", "직업": "🪪", "집": "🏠" };
 const ACH = [
-  { id: "festSp", cat: "마을 함께", name: "벚꽃 축제 단골", desc: "봄 벚꽃 축제 도장 7개", stat: "fest_spring", goal: 7, gold: 2000, title: "벚꽃 축제 단골" },
+  { id: "aqua1", cat: "마을 함께", name: "첫 기증", desc: "수족관에 물고기 기증하기", stat: "aquaDon", goal: 1, gold: 200 },
+  { id: "aqua10", name: "수족관의 친구", desc: "처음 전시되는 종 10가지 기증", stat: "aquaNew", goal: 10, gold: 3000, title: "수족관 후원자" },
+  { id: "festSp", name: "벚꽃 축제 단골", desc: "봄 벚꽃 축제 도장 7개", stat: "fest_spring", goal: 7, gold: 2000, title: "벚꽃 축제 단골" },
   { id: "festSu", name: "불꽃 축제 단골", desc: "여름 불꽃 축제 도장 7개", stat: "fest_summer", goal: 7, gold: 2000, title: "불꽃 축제 단골" },
   { id: "festAu", name: "수확제 일꾼", desc: "가을 수확제 도장 7개", stat: "fest_autumn", goal: 7, gold: 2000, title: "수확제 일꾼" },
   { id: "festWi", name: "눈 장터 단골", desc: "겨울 눈 장터 도장 7개", stat: "fest_winter", goal: 7, gold: 2000, title: "눈 장터 단골" },
@@ -5032,6 +5037,7 @@ function nearestAction() {
   if (atHome()) { homeActions(consider); return best; }
   if (atRest()) { restActions(consider); return best; }
   if (STN_READY) trainActions(consider);   // v1.122 바다열차 타기
+  consider(AQUA.x, AQUA.z - AQUA.d / 2 - 1.6, { key: "aquarium", label: "🐠 어촌 수족관 · 전시 보기 · 기증하기", run: () => openSheet("aquarium") }, 4.5);
   consider(TOWNP.x - 6.5, TOWNP.z - 9.6, { key: "townproj", label: "🏗 마을 공동 프로젝트 · " + TOWNP.name, run: () => openSheet("townproj") }, 3.2);   // 내 포차 안에서는 스테이션만
   if (SEAT.b0) {
     const docked = S.fleet.filter(b => b.status === "docked"), free = docked.reduce((a, b) => a + (BOAT.max - b.seats.length), 0), sig = S.fleet.map(b => b.status + b.seats.length).join("|");
@@ -8690,7 +8696,7 @@ function init3D() {
   buildMart(); buildFarm();   // v1.121 농가마트 · 낭만 농장
   buildBeach();
   buildHall();
-  buildStation(); buildRail(); buildStation2(); try { buildTownSite(); } catch (e) { console.warn("town site", e); } try { buildFestDeco(); } catch (e) { console.warn("fest deco", e); }   // v1.122 바다열차 · 해돋이역
+  buildStation(); buildRail(); buildStation2(); try { buildTownSite(); } catch (e) { console.warn("town site", e); } try { buildFestDeco(); } catch (e) { console.warn("fest deco", e); } try { buildAquarium(); } catch (e) { console.warn("aquarium", e); }   // v1.122 바다열차 · 해돋이역
   buildTV();
   buildUptown();
   buildFar();
@@ -11096,7 +11102,8 @@ const inFarm = (x, z) => Math.abs(x - FARM.x) < 9.5 && Math.abs(z - FARM.z) < 9.
 /* 평평한 땅 (지형 생성에 섞어요 · 경계는 부드럽게) */
 const TER_PADS = [
   { x0: 46, x1: 76, z0: -30, z1: -4, m: 8, y: () => 0 },
-  { x0: 70, x1: 90, z0: 82, z1: 102, m: 10, y: () => 4 },   // v1.136 바람언덕 전망대 마당
+  { x0: 70, x1: 90, z0: 82, z1: 102, m: 10, y: () => 4 },
+  { x0: 59, x1: 83, z0: 55, z1: 69, m: 8, y: () => 2 },   // v1.138 어촌 수족관   // v1.136 바람언덕 전망대 마당
   { x0: 50, x1: 95, z0: -4, z1: 31, m: 9, y: () => FARM.y },   // v1.125 낭만 농장 (마트 북쪽)
 ];
 function terPad(x, z, nat) {
@@ -15190,6 +15197,99 @@ SHEETS.rank = (body) => {
     h("button", { class: "btn sm", disabled: !S.online, onclick: () => { pushRank(true); setTimeout(() => loadRanks(true), 800); toast("내 기록을 올렸어요"); }, text: "기록 올리기" }),
     !inHall(ME.x, ME.z) ? h("button", { class: "btn sm pri", onclick: () => { closeSheet(); goHall(c.id); }, text: "동상 보러 가기" }) : null));
 };
+/* ===================== 🐠 마을 수족관 (v1.138) =====================
+   잡은 물고기를 기증하면 종마다 「가장 큰 한 마리」가 수족관에 전시돼요(더 큰 걸 기증하면 바뀌어요). 기록 records/aq_<fishId> (필드 aqs = 크기 cm).
+   어촌역 동쪽 「어촌 수족관」 유리 전시관 수조 3개에 가장 귀한 전시 9마리가 헤엄쳐요. 기증하면 판매가의 1.5배를 사례금으로 받아요 */
+const AQUA = { x: 71, z: 62, w: 22, d: 11 };
+S.aqua = { list: [], at: 0, map: new Map() };
+async function aquaLoad(force) {
+  if (!force && Date.now() - S.aqua.at < 60000) return; S.aqua.at = Date.now();
+  if (S.online && S.db) { try { const q = await S.db.collection("records").orderBy("aqs", "desc").limit(260).get();
+    S.aqua.list = q.docs.map(d => d.data()).filter(r => r && r.aqf && findFish(r.aqf)).map(r => ({ fishId: r.aqf, size: Number(r.aqs) || 0, k: Number(r.k) || 1, nick: str(r.nick, 16), uid: r.uid, ts: Number(r.ts) || 0 })); } catch (e) { console.warn("aqua", e); } }
+  else S.aqua.list = (P.aquaLocal || []).slice();
+  S.aqua.map = new Map(S.aqua.list.map(r => [r.fishId, r]));
+  aquaTanks(); if (S.sheet === "aquarium") refreshSheet();
+}
+setInterval(() => { if (!S.title) { aquaLoad(); try { aquaTanks(); } catch {} } }, 30000);
+const aquaCan = (it) => { const ex = S.aqua.map.get(it.fishId); return !ex || it.size > ex.size; };
+async function aquaDonate(id) {
+  const i = P.bag.findIndex(x => x.id === id); if (i < 0) return; const it = P.bag[i], f = findFish(it.fishId); if (!f) return;
+  if (!aquaCan(it)) { toast("이미 더 큰 " + f.name + "이(가) 전시 중이에요"); return; }
+  const prev = S.aqua.map.get(it.fishId), reward = Math.round(fishSell(it) * 1.5);
+  P.bag.splice(i, 1); P.gold += reward; stat("aquaDon"); if (!prev) stat("aquaNew"); markDirty(); sfx("jingle-rare", .45);
+  const row = { fishId: it.fishId, size: it.size, k: it.k || 1, nick: P.nick, uid: S.uid || "me", ts: Date.now() };
+  S.aqua.map.set(it.fishId, row); S.aqua.list = [...S.aqua.map.values()].sort((a, b) => b.size - a.size);
+  if (S.online && S.db) S.db.doc("records/aq_" + it.fishId).set({ aqf: it.fishId, aqs: it.size, k: it.k || 1, nick: P.nick, uid: S.uid, ts: Date.now() }).catch((e) => console.warn("aqua don", e));
+  else { P.aquaLocal = S.aqua.list.slice(0, 260); }
+  toast([h("b", { text: "🐠 " + f.name + " " + fmtSize(it.size) + "을(를) 수족관에 기증했어요! +" + won(reward) }), h("div", { class: "muted", style: "font-size:12px", text: prev ? "예전 전시(" + fmtSize(prev.size) + " · " + prev.nick + ")보다 커서 바꿔 걸었어요" : "수족관에 처음 전시되는 물고기예요 · 명판에 내 이름이 남아요" })], "lvup", 6000);
+  if (!prev || f.tier >= 4) postSys("🐠 " + P.nick + "님이 수족관에 " + TIERS[f.tier].name + " 「" + f.name + "」 " + fmtSize(it.size) + "를 기증했어요");
+  aquaTanks(); refreshSheet(true);
+}
+SHEETS.aquarium = (body) => {
+  aquaLoad(); S.aquaTab = S.aquaTab || "show";
+  const L = S.aqua.list, total = allFish().filter(f => !f.user).length;
+  setHead("🐠 어촌 수족관", "잡은 물고기를 기증하면 종마다 가장 큰 한 마리가 전시돼요 · 마을 사람 모두의 도감");
+  body.append(h("div", { class: "aq-hero" }, h("span", { class: "aq-ico", text: "🐠" }), h("div", { class: "grow" }, h("b", { text: "마을 도감 " + L.length + " / " + total + "종" }),
+    h("small", { text: "전시관은 어촌역 동쪽 · 가장 귀한 9마리가 수조에서 헤엄쳐요" }), h("i", { class: "av-bar" }, h("i", { style: "width:" + Math.round(L.length / Math.max(1, total) * 100) + "%" })))));
+  body.append(h("div", { class: "tabs", role: "tablist" }, [["show", "🐟 전시 중"], ["give", "🎁 기증하기"]].map(([id, l]) => h("button", { role: "tab", "aria-selected": String(S.aquaTab === id), onclick: () => { S.aquaTab = id; refreshSheet(true); }, text: l }))));
+  if (S.aquaTab === "show") {
+    if (!L.length) { body.append(h("div", { class: "empty-note", text: "아직 전시된 물고기가 없어요. 첫 기증자가 되어 보세요!" })); return; }
+    const grid = h("div", { class: "aq-grid" });
+    for (const r of L.slice().sort((a, b) => findFish(b.fishId).tier - findFish(a.fishId).tier || b.size - a.size)) { const f = findFish(r.fishId); grid.append(h("div", { class: "aq-card t" + f.tier }, h("img", { src: fishArt(f).src, alt: "" }), tierBadge(f.tier, 52), h("b", { text: f.name }), h("span", { class: "num", text: fmtSize(r.size) }), h("small", { text: "🏷 " + r.nick + (r.uid === S.uid ? " (나)" : "") }))); }
+    body.append(grid);
+  } else {
+    const can = P.bag.filter(it => findFish(it.fishId) && !findFish(it.fishId).user && aquaCan(it)).sort((a, b) => b.tier - a.tier || b.size - a.size);
+    body.append(h("div", { class: "muted", style: "font-size:12.5px;line-height:1.6", text: "가방에서 아직 전시 안 된 종이거나 전시 중인 것보다 큰 물고기만 보여요. 기증하면 판매가의 1.5배를 사례금으로 드려요." }));
+    if (!can.length) body.append(h("div", { class: "empty-note", text: "지금 기증할 수 있는 물고기가 없어요. 새로운 종이나 더 큰 개체를 낚아 와요!" }));
+    else body.append(h("div", { class: "rlist" }, can.slice(0, 40).map(it => { const f = findFish(it.fishId), ex = S.aqua.map.get(it.fishId);
+      return h("div", { class: "rankrow" }, h("img", { src: fishArt(f).src, alt: "", style: "width:44px;height:44px;object-fit:contain" }), h("div", { class: "grow" }, h("b", { text: f.name + " · " + fmtSize(it.size) }), h("small", { class: "muted", text: (ex ? "지금 전시 " + fmtSize(ex.size) + " (" + ex.nick + ") → 바꿔 걸어요" : "✨ 처음 전시되는 종") })),
+        h("button", { class: "btn sm pri", onclick: () => aquaDonate(it.id), text: "기증 +" + won(Math.round(fishSell(it) * 1.5)) })); })));
+  }
+};
+/* 전시관 3D: 화강암 받침 · 타일 벽 · 앞면 큰 유리 · 물결 지붕 · 수조 3개(파란 물 · 모래 · 수초) · 물고기는 수조 안을 맴돌아요 */
+let AQ3D = null;
+function buildAquarium() {
+  const { x, z, w, d } = AQUA, g = new T3.Group(); g.position.set(x, 0, z); scene.add(g); const gy = TER.h ? terH(x, z) : 0; g.position.y = gy;
+  const tile = phong(0xffffff, { map: (() => { const t = wallTex("tile").clone(); t.needsUpdate = true; t.repeat.set(5, 2); return t; })() });
+  const granite = phong(0xffffff, { map: (() => { const t = wallTex("granite").clone(); t.needsUpdate = true; t.repeat.set(6, .5); return t; })() });
+  box(w + 1.2, .5, d + 1.2, granite, 0, .25, 0, g);
+  box(w, 5, .3, tile, 0, 3, d / 2, g);                                   // 뒷벽
+  for (const sx of [-1, 1]) box(.3, 5, d, tile, sx * w / 2, 3, 0, g);   // 옆벽
+  { const gl = box(w - .4, 4.2, .1, new T3.MeshPhongMaterial({ color: 0xdff4ff, transparent: true, opacity: .16, shininess: 120, depthWrite: false }), 0, 2.85, -d / 2, g); }     // 앞 유리 (맑게)
+  box(w - .6, 4.4, .1, cmat(0x1d4a66), 0, 2.9, d / 2 - .2, g);   // 안쪽 뒷벽 (짙은 바다색)
+  for (let k = 0; k <= 6; k++) box(.14, 4.6, .16, cmat(0x2a4a5a), -w / 2 + k * w / 6, 2.8, -d / 2, g);
+  box(w + .4, .3, .5, cmat(0x2a4a5a), 0, 5.3, -d / 2, g);
+  // 물결 지붕 (사인 곡선 판)
+  { const seg = 24, geo = new T3.PlaneGeometry(w + 2, d + 2, seg, 1), pa = geo.attributes.position; for (let i = 0; i < pa.count; i++) { const px = pa.getX(i); pa.setZ(i, Math.sin(px / (w + 2) * Math.PI * 3) * .45); } geo.computeVertexNormals();
+    const rf = new T3.Mesh(geo, phong(0x2f8fb8, { side: T3.DoubleSide })); rf.rotation.x = -Math.PI / 2; rf.position.y = 5.9; g.add(rf); }
+  { const sg = makeSign(7, 1.3, { shape: "board", fill: { type: "grad", c: ["#2f8fb8", "#1d3a5c"] }, frame: { c: "#ffe08a" }, t: { text: "🐠 어촌 수족관", font: "hyeon", color: "#fff6dc", size: .55, y: .48 }, sub: { text: "모두가 기증한 물고기 전시관", color: "#cfe8f6", size: .2, y: .84 } }, { cw: 1000 });
+    sg.position.set(0, 6.9, -d / 2 - .1); sg.rotation.y = Math.PI; g.add(sg); }
+  const tanks = [];
+  for (let k = 0; k < 3; k++) { const tx = -w / 3 + k * w / 3, tg = new T3.Group(); tg.position.set(tx, .5, .6); g.add(tg);
+    box(6.2, .6, 4.4, cmat(0x2a4a5a), 0, .3, 0, tg);
+    const water = new T3.Mesh(new T3.BoxGeometry(6, 3, 4.2), new T3.MeshPhongMaterial({ color: 0x5cc8f0, emissive: 0x1a6a9a, transparent: true, opacity: .32, shininess: 90, depthWrite: false })); water.position.y = 2.1; water.renderOrder = 2; tg.add(water);
+    const back = new T3.Mesh(new T3.PlaneGeometry(6, 3), new T3.MeshBasicMaterial({ color: 0x2f9fd0 })); back.position.set(0, 2.1, 2.08); back.rotation.y = Math.PI; tg.add(back);
+    box(6, .25, 4.2, cmat(0xe8d6a8), 0, .72, 0, tg);
+    for (let q = 0; q < 4; q++) { const sw = new T3.Mesh(new T3.ConeGeometry(.18, 1.6 + q * .2, 5), cmat(0x3f9a4f)); sw.position.set(-2.4 + q * 1.5, 1.6, 1.4 - (q % 2) * 2.4); tg.add(sw); }
+    box(6.1, .12, 4.3, cmat(0x2a4a5a), 0, 3.66, 0, tg);
+    tanks.push(tg); }
+  const lt = new T3.PointLight(0x9fdcff, 0, 22, 1.6); lt.position.set(0, 4, -1); g.add(lt); glow.push({ light: lt, val: 1.3 });
+  for (const sx of [-1, 1]) propPot(sx * (w / 2 + 1.2), -d / 2 - 1.2, g, true);
+  for (const sx of [-1, 1]) propBench(sx * 5, -d / 2 - 3, Math.PI, g);
+  BLOCKS.push([x - w / 2 - .4, x + w / 2 + .4, z - d / 2 - .3, z + d / 2 + .4]);
+  AQ3D = { g, tanks, fish: [], key: "" };
+  aquaTanks();
+}
+function aquaTanks() {
+  if (!AQ3D || !FISH3D.size) return;
+  const top = S.aqua.list.filter(r => FISH3D.has(r.fishId)).sort((a, b) => findFish(b.fishId).tier - findFish(a.fishId).tier || b.size - a.size).slice(0, 9), key = top.map(r => r.fishId).join(",");
+  if (key === AQ3D.key) return; AQ3D.key = key;
+  for (const m of AQ3D.fish) m.parent && m.parent.remove(m); AQ3D.fish = [];
+  top.forEach((r, i) => { const m = fishMesh(r.fishId); if (!m) return; const tg = AQ3D.tanks[i % 3], f = findFish(r.fishId);
+    m.scale.setScalar(clamp(1.3 + f.tier * .15, 1.3, 2.6)); const ph = i * 1.7, rr = 1.2 + (i % 2) * .5, y0 = 1.5 + (Math.floor(i / 3)) * .65;
+    m.onBeforeRender = () => { const t = performance.now() / 1000 * (.35 + (i % 3) * .07) + ph; m.position.set(Math.cos(t) * rr * 1.6, y0 + Math.sin(t * 1.7) * .15, Math.sin(t) * rr * .9); m.rotation.y = -t + Math.PI; };
+    m.frustumCulled = false; tg.add(m); AQ3D.fish.push(m); });
+}
 /* ===================== 🌦 날씨 · 🎪 계절 축제 (v1.137) =====================
    날씨: 2시간마다 바뀌고 시계로 정해져서 모두 같아요. 비 = 입질 빠름 · 희귀 ↑ · 밭 자동 물주기 / 바람 = 큰 개체 ↑ / 눈(겨울) = 희귀 ↑ · 작물 느리게 / 흐림
    축제: 계절마다(봄 벚꽃 · 여름 불꽃 · 가을 수확 · 겨울 눈 장터) 하루 미션 → 도장 · 4개 = 한정 옷 · 7개 = 칭호 */
@@ -16799,6 +16899,7 @@ SHEETS.achieve = (body) => {
     row("🎁", "#e2522c", "출석 도장", attendDone() ? "7일 모두 찍었어요" : P.attend.n + " / 7일 · " + (attendCan() ? "오늘 도장을 찍을 수 있어요" : "오늘은 찍었어요"), P.attend.n / 7, attendCan() ? 1 : 0, () => openSheet("attend"), attendDone())));
   { const c = cupWindow(); body.append(h("div", { class: "sec", text: "마을 함께" }), h("div", { class: "av-list", id: "avTown" },
     (() => { const F = FEST[seasonOf()], d = festData(); return row(F.ico, F.col, F.name, "도장 " + d.stamps + " / 7 · " + (d.stamped ? "오늘 미션 완료" : F.mission.text), d.stamps / 7, d.stamped ? 0 : 0, () => openSheet("fest"), d.stamps >= 7); })(),
+    row("🐠", "#2f8fb8", "어촌 수족관", "마을 도감 " + S.aqua.list.length + "종 전시 중 · 잡은 물고기 기증하기", null, 0, () => openSheet("aquarium")),
     row("🏗", "#2f6f86", "마을 공동 프로젝트", S.townP.done ? "🎉 " + TOWNP.name + " 완공" : TOWNP.name + " · " + Math.floor(Math.min(1, S.townP.total / TOWNP.goal) * 100) + "% · 다 같이 기부해 지어요", Math.min(1, S.townP.total / TOWNP.goal), 0, () => openSheet("townproj"), !!S.townP.done),
     row("🎣", "#d4701a", "주말 낚시 대회", c ? (c.on ? "🔴 진행 중 · 목표 「" + c.fish.name + "」 · " + fmtLong(c.end - Date.now()) + " 남음" : "다음 대회 " + fmtLong(c.start - Date.now()) + " 뒤 · 토 · 일 밤 8시") : "토 · 일 밤 8시", null, 0, () => openSheet("cup")))); }
   body.append(h("div", { class: "sec", text: "모아 가기" }), h("div", { class: "av-list" },
@@ -18260,6 +18361,7 @@ function renderStudio(body) {
   ensureStudioCanvas();
   $("sheetTitle").textContent = "방류소";
   $("sheetSub").textContent = "직접 그린 물고기를 바다에 풀면 모든 낚시꾼이 낚을 수 있어요";
+  body.append(h("button", { class: "btn pri", style: "margin-bottom:8px", onclick: () => openSheet("aquarium"), text: "🐠 방류소 별관 · 어촌 수족관 (잡은 물고기 기증 · 전시)" }));   // v1.138
   // ① 위: 살아 있는 수조 — 그리는 물고기가 바로 헤엄쳐요
   const tank = h("div", { class: "rs-tank", id: "fprev" });
   // ② 왼쪽: 이젤 위 스케치북 — 세로 도구 막대 · 물감 통
