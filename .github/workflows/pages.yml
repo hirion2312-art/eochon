@@ -1,0 +1,44 @@
+# main 브랜치에 게임이 올라오면 GitHub Pages에도 같은 웹판을 배포해요.
+# Firebase Hosting 전송량 한도(무료 10GB/월) 회피용 보조 호스팅이에요.
+# 저장소 Settings → Pages → Source 를 "GitHub Actions" 로 켜야 동작해요.
+name: GitHub Pages 배포
+
+on:
+  push:
+    branches: [main]
+    paths: ["index.html", "a/**", "fish/**", "web/**", "tools/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 웹판 만들기 (게임 + Firebase 연결)
+        run: python3 tools/build_web.py
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/public
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
